@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOBALAB · Berkeley Operations and Behavioral Analytics Lab</title>
+<meta name="description" content="BOBALAB, the Berkeley Operations and Behavioral Analytics Lab at the Haas School of Business, UC Berkeley. Prototype A of the home hero figure (Fig. 1).">
+<meta name="color-scheme" content="light dark">
+<script>(function(){var h=document.documentElement;h.className+=" js";try{var q=/[?&]theme=(light|dark)/.exec(location.search),t=q?q[1]:localStorage.getItem("bobalab-proto-theme");if(t==="light"||t==="dark")h.setAttribute("data-theme",t);if(localStorage.getItem("bobalab-motion")==="reduce")h.setAttribute("data-motion","reduce");var r=location.hash;if((!r||r.slice(0,2)!=="#/"||r==="#/")&&!sessionStorage.getItem("bobalab-intro")){h.setAttribute("data-intro","");sessionStorage.setItem("bobalab-intro","1");setTimeout(function(){h.removeAttribute("data-intro")},1000)}}catch(e){}})();</script>
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/fraunces@5.3.0/files/fraunces-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5.3.0/files/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fontsource/ibm-plex-mono@5.3.0/files/ibm-plex-mono-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>@font-face{font-family:"Fraunces";src:url(https://cdn.jsdelivr.net/npm/@fontsource-variable/fraunces@5.3.0/files/fraunces-latin-wght-normal.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Inter";src:url(https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5.3.0/files/inter-latin-wght-normal.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"IBM Plex Mono";src:url(https://cdn.jsdelivr.net/npm/@fontsource/ibm-plex-mono@5.3.0/files/ibm-plex-mono-latin-500-normal.woff2) format("woff2");font-weight:500;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Fraunces Soft";src:url(https://cdn.jsdelivr.net/npm/@fontsource-variable/fraunces@5.3.0/files/fraunces-latin-soft-normal.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+
+:root{--paper:#FCFAF6;--surface:#FFFFFF;--paper-alt:#F4F0EA;--plate:#F7F1E8;--ink:#1F1712;--ink-muted:#5C4F45;--accent:#8A4515;--accent-strong:#6B3410;--rule:#857463;--hairline:#D8CAB6;--pearl:#2B1D15;--pearl-hi:#3A281D;--pearl-lo:#1A110C;--pearl-rim:transparent;--pearl-index:#F7F1E8;--milk:247 241 232;--focus:var(--ink);--on-accent:#FCFAF6;--tick:#C2B29C;color-scheme:light;
+--fs-mono:.8125rem;--fs-sm:.875rem;--fs-base:1.0625rem;--fs-lg:1.25rem;--fs-xl:1.5625rem;--fs-2xl:clamp(1.75rem,1.35rem + 1.6vw,2.25rem);--fs-3xl:clamp(2.25rem,1.6rem + 2.6vw,3.25rem);
+--s-1:.25rem;--s-2:.5rem;--s-3:.75rem;--s-4:1rem;--s-5:1.5rem;--s-6:2rem;--s-7:3rem;--s-8:4rem;--s-9:6rem;--r-xs:2px;--r-md:10px;
+--dur-press:100ms;--dur-fast:160ms;--dur-base:200ms;--dur-caption:180ms;--dur-page-exit:150ms;--dur-page-enter:210ms;--dur-morph:420ms;--dur-intro:480ms;--stagger-intro:40ms;
+--ease-out:cubic-bezier(.2,.8,.2,1);--ease-emph:cubic-bezier(.2,0,0,1);--ease-settle:cubic-bezier(.22,1,.36,1);--ease-in:cubic-bezier(.4,0,1,1);
+--gutter:16px;--maxw:80rem;
+--serif:"Fraunces",ui-serif,Georgia,"Times New Roman",serif;--sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+[data-dir]{--dir-ink:var(--deep);--dir-seed:var(--seed-l);--dir-band:var(--tint)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#17110E;--surface:#221A15;--paper-alt:#1C1511;--plate:#1E1713;--ink:#F3ECE2;--ink-muted:#BFB2A5;--accent:#E0A46B;--accent-strong:#EDBD8F;--rule:#8A7766;--hairline:#3D3129;--pearl:#3A2C22;--pearl-hi:#4A372A;--pearl-lo:#2A1F18;--pearl-rim:#A47E62;--pearl-index:#F3ECE2;--focus:var(--accent);--on-accent:#17110E;--tick:#5A4A3E;color-scheme:dark}:root:not([data-theme="light"]) [data-dir]{--dir-ink:var(--light);--dir-seed:var(--seed-d);--dir-band:var(--head-d)}}
+:root[data-theme="dark"]{--paper:#17110E;--surface:#221A15;--paper-alt:#1C1511;--plate:#1E1713;--ink:#F3ECE2;--ink-muted:#BFB2A5;--accent:#E0A46B;--accent-strong:#EDBD8F;--rule:#8A7766;--hairline:#3D3129;--pearl:#3A2C22;--pearl-hi:#4A372A;--pearl-lo:#2A1F18;--pearl-rim:#A47E62;--pearl-index:#F3ECE2;--focus:var(--accent);--on-accent:#17110E;--tick:#5A4A3E;color-scheme:dark}
+:root[data-theme="dark"] [data-dir]{--dir-ink:var(--light);--dir-seed:var(--seed-d);--dir-band:var(--head-d)}
+@media (min-width:40rem){:root{--gutter:24px}}
+@media (min-width:64.0625rem){:root{--gutter:32px}}
+
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--paper);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 var(--fs-base)/1.6 var(--sans);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-wrap:break-word}
+h1,h2,h3{font-family:var(--serif);font-weight:600;font-variation-settings:"SOFT" 0,"WONK" 0;line-height:1.2;margin:0;letter-spacing:-.005em}
+p{margin:0}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:.18em}
+a:hover{color:var(--accent-strong)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+[tabindex="-1"]:focus{outline:none}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.wrap{max-width:var(--maxw);margin-inline:auto;padding-inline:var(--gutter)}
+.skip{position:absolute;left:var(--gutter);top:-100px;z-index:10;background:var(--ink);color:var(--paper);padding:.6rem .9rem;border-radius:var(--r-xs);font-weight:600;text-decoration:none}
+.skip:focus{top:8px;color:var(--paper)}
+.view[hidden]{display:none}
+html:not(.js) .view:target{display:block}
+html:not(.js) main:has(.view:target) .view-home{display:none}
+
+/* ---------- wordmark (typographic, pearl-O; brief C8) ---------- */
+.wm{display:inline-flex;align-items:baseline;line-height:1;color:var(--ink);white-space:nowrap}
+.wm-boba{font-family:"Fraunces Soft",var(--serif);font-weight:680;font-variation-settings:"SOFT" 100;letter-spacing:-.01em}
+.wm-lab{font-family:var(--mono);font-weight:500;letter-spacing:.08em;margin-left:.06em}
+.wm-o{display:inline-block;width:.715em;height:.715em;margin:0 .035em;border-radius:50%;vertical-align:-.012em;position:relative;
+  background:radial-gradient(circle at 46% 40%,color-mix(in srgb,var(--ink) 82%,var(--paper)) 0,var(--ink) 58%)}
+.wm-o{overflow:hidden}
+.wm-o::before{content:"";position:absolute;left:-2%;top:22%;width:46%;height:18%;border-radius:50%;transform:rotate(-60deg);
+  background:radial-gradient(closest-side,rgb(var(--milk)/.24),rgb(var(--milk)/.08) 55%,rgb(var(--milk)/0))}
+.wm-sm .wm-o::before{display:none} /* highlight dropped below 24px */
+
+/* ---------- header / footer ---------- */
+.site-header{border-bottom:1px solid var(--hairline);background:var(--paper)}
+.site-header .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s-1) var(--s-6);padding-block:var(--s-3)}
+.brand{display:inline-flex;align-items:center;min-height:44px;text-decoration:none;color:var(--ink);font-size:1.375rem}
+.site-nav ul{list-style:none;display:flex;flex-wrap:wrap;gap:0 var(--s-3);margin:0;padding:0}
+@media (min-width:40rem){.site-nav ul{gap:0 var(--s-5)}}
+.site-nav a{display:inline-flex;align-items:center;min-height:44px;color:var(--ink);text-decoration:none;font-weight:500;font-size:.9375rem}
+.site-nav a:hover{text-decoration:underline;color:var(--ink)}
+.site-nav a[aria-current="page"]{text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underline-offset:.4em}
+.meniscus{display:block;width:100%;height:8px;color:var(--hairline)}
+.site-footer{background:var(--paper-alt);color:var(--ink-muted);font-size:var(--fs-sm);line-height:1.45}
+.foot{display:flex;flex-wrap:wrap;gap:var(--s-4) var(--s-7);justify-content:space-between;align-items:center;padding-block:var(--s-6)}
+.foot strong{color:var(--ink);font-weight:600}
+.proto{border-top:1px solid var(--hairline);display:flex;flex-wrap:wrap;gap:var(--s-3) var(--s-5);align-items:center;padding-block:var(--s-4) var(--s-6)}
+.proto-k{font:500 var(--fs-mono)/1.4 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)}
+.tgroup{display:inline-flex;gap:var(--s-1);align-items:center}
+.tbtn{font:500 var(--fs-sm)/1 var(--sans);color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-xs);padding:.55rem .75rem;min-height:36px;cursor:pointer}
+.tbtn:hover{border-color:var(--ink)}
+.tbtn[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* ---------- hero ---------- */
+.hero{display:grid;gap:var(--s-6);padding-block:var(--s-6) var(--s-8)}
+@media (min-width:78rem){.hero{grid-template-columns:minmax(0,1fr) 46.5rem;column-gap:var(--s-7);padding-block:var(--s-7) var(--s-8)}}
+.hero-id{container-type:inline-size;padding-top:var(--s-1)}
+.hero-lead{container-type:inline-size}
+@media (min-width:48rem) and (max-width:77.99rem){.hero-id{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);grid-template-rows:auto 1fr;column-gap:var(--s-7);align-items:start}.hero-h1,.affil{grid-column:1}.hero-lead{grid-column:2;grid-row:1/span 2}.hero-lead .mission{margin-top:0}}
+.hero-h1{display:flex;flex-direction:column;align-items:flex-start;gap:var(--s-3);font:inherit}
+.hero-h1 .wm{font-size:clamp(2.75rem,2.2rem + 3cqi,3.75rem)}
+.descriptor{font:500 1rem/1.4 var(--sans);letter-spacing:.04em;color:var(--ink-muted);text-wrap:balance}
+.affil{margin-top:var(--s-4);padding-top:var(--s-4);border-top:1px solid var(--hairline);font-size:var(--fs-sm);line-height:1.45;color:var(--ink-muted);max-width:34ch}
+.mission{font-family:var(--serif);font-weight:580;font-variation-settings:"SOFT" 0,"WONK" 0;font-size:clamp(2.5rem,1.7rem + 3.4cqi,3.75rem);line-height:1.05;letter-spacing:-.018em;margin:var(--s-7) 0 var(--s-6);max-width:17ch;text-wrap:balance}
+.cta{display:inline-flex;align-items:center;min-height:48px;padding:0 1.25rem;background:var(--accent);color:var(--on-accent);border-radius:var(--r-xs);font:600 1rem/1 var(--sans);text-decoration:none}
+.cta:hover{background:var(--accent-strong);color:var(--on-accent)}
+.hero-figure{container:hero/inline-size;font-size:1rem}
+.hero-figure>h2{font-size:var(--fs-2xl);margin:0 0 var(--s-4)}
+
+/* ---------- Fig. 1 plate ---------- */
+.plate{position:relative;margin:0;background:var(--plate);border:1px solid var(--hairline);border-radius:var(--r-md);padding:var(--s-4) var(--s-4) var(--s-4)}
+.plate::before{content:"";position:absolute;inset:7px;pointer-events:none;
+  background:linear-gradient(var(--tick),var(--tick)) 0 0/9px 1px,linear-gradient(var(--tick),var(--tick)) 0 0/1px 9px,
+  linear-gradient(var(--tick),var(--tick)) 100% 0/9px 1px,linear-gradient(var(--tick),var(--tick)) 100% 0/1px 9px,
+  linear-gradient(var(--tick),var(--tick)) 0 100%/9px 1px,linear-gradient(var(--tick),var(--tick)) 0 100%/1px 9px,
+  linear-gradient(var(--tick),var(--tick)) 100% 100%/9px 1px,linear-gradient(var(--tick),var(--tick)) 100% 100%/1px 9px;background-repeat:no-repeat}
+.fig-caption{display:grid;font-size:var(--fs-sm);line-height:1.45;margin:0 0 var(--s-3);position:relative}
+.cap-state{grid-area:1/1;min-width:0}
+.cap-dir,.lg-fig{display:none}
+.fig-no{font:500 var(--fs-mono)/1 var(--mono);letter-spacing:.06em;color:var(--ink)}
+.cap-legend p{color:var(--ink-muted);max-width:60ch}
+.cap-title{display:flex;gap:.55em;align-items:baseline;font-weight:600;font-size:var(--fs-base);line-height:1.3}
+.cap-title .ci{font:500 var(--fs-mono)/1 var(--mono);letter-spacing:.06em;color:var(--dir-ink)}
+.cap-sum{margin:.2em 0 .3em;max-width:62ch;color:var(--ink)}
+.cap-meta{font:500 var(--fs-mono)/1.4 var(--mono);letter-spacing:.06em;color:var(--ink-muted)}
+.fig-note{margin-top:var(--s-3);padding-top:var(--s-3);border-top:1px solid var(--hairline);font-size:var(--fs-sm);line-height:1.45;color:var(--ink-muted)}
+.fig-note b{font-weight:600;color:var(--ink)}
+
+/* list mode (default; container < 46em) */
+.fig-list{--D:44px;list-style:none;margin:0;padding:0}
+.fig-list>li{position:relative}
+.fig-list>li+li{border-top:1px solid var(--hairline)}
+.fig-list a{display:grid;grid-template-columns:var(--D) minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:var(--s-4);align-items:center;min-height:64px;padding:var(--s-2) var(--s-2) var(--s-2) var(--s-1);color:var(--ink);text-decoration:none;border-radius:var(--r-xs)}
+.fig-list a::after{content:"";grid-column:3;grid-row:1/span 2;width:.5rem;height:.5rem;margin-right:var(--s-2);border-top:2px solid var(--ink-muted);border-right:2px solid var(--ink-muted);transform:rotate(45deg)}
+.pearl-group{position:relative;display:block;grid-row:1/span 2;width:var(--D);height:var(--D)}
+.pearl-group>.pearl{position:absolute;left:50%;top:50%;margin:calc(var(--D)/-2) 0 0 calc(var(--D)/-2)}
+.seeds{display:none}
+.label{grid-column:2;grid-row:1;align-self:end;font:600 var(--fs-base)/1.3 var(--sans)}
+.arr{display:none;color:var(--accent);font-weight:500}
+.count{grid-column:2;grid-row:2;align-self:start;font:500 var(--fs-mono)/1.5 var(--mono);letter-spacing:.06em;color:var(--ink-muted)}
+.fig-list a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.fig-list a:focus-visible .lt,.fig-list li.is-active .lt{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.22em}
+@media (hover:hover){.fig-list a:hover .lt{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.22em}}
+
+/* figure mode (container >= 46em) */
+@container hero (width >= 46em){
+  .plate{padding:var(--s-5) var(--s-6) var(--s-4)}
+  .lg-fig{display:inline}.lg-list{display:none}
+  .fig-caption{margin-bottom:var(--s-2)}
+  .fig-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));--D:clamp(5rem,14cqi,7.5rem);padding:var(--s-4) 0 var(--s-3)}
+  .fig-list>li+li{border-top:0}
+  .fig-list>li{display:flex;justify-content:center;align-items:flex-start;translate:calc(var(--dx)*var(--D)) calc(var(--dy)*var(--D))}
+  .plate[data-template="t4"] .fig-list>li[data-slot="1"]{grid-area:1/1/2/3}
+  .plate[data-template="t4"] .fig-list>li[data-slot="2"]{grid-area:1/3/2/5}
+  .plate[data-template="t4"] .fig-list>li[data-slot="3"]{grid-area:2/2/3/4;margin-top:calc(var(--D)*-.25)}
+  .plate[data-template="t4"] .fig-list>li[data-slot="4"]{grid-area:2/4/3/6;margin-top:calc(var(--D)*-.25)}
+  .fig-list a{display:flex;flex-direction:column;align-items:center;text-align:center;min-height:0;max-width:100%;padding:0 var(--s-2) var(--s-2)}
+  .fig-list a::after{display:none}
+  .pearl-group{width:calc(var(--D)*1.4);height:calc(var(--D)*1.4)}
+  .seeds{display:block;position:absolute;inset:0}
+  .label{margin-top:var(--s-1);align-self:center}
+  .arr{display:inline}
+  .count{margin-top:.1rem;align-self:center}
+  .fig-list a:focus-visible{outline:none}
+  .fig-list a:focus-visible .pearl{outline:2px solid var(--focus);outline-offset:3px}
+}
+/* live caption: figure mode on wide viewports only (brief E6: tablets keep the legend) */
+@media (min-width:64rem){@container hero (width >= 46em){
+  .cap-dir{display:block}
+  .cap-state{visibility:hidden}
+  .cap-state.is-on{visibility:visible}
+}}
+
+/* pearls (brief E2 material) */
+.pearl{--D:44px;display:grid;place-items:center;position:relative;width:var(--D);height:var(--D);border-radius:50%;color:var(--pearl-index);
+  background:radial-gradient(circle at 46% 40%,var(--pearl-hi) 0,var(--pearl) 52%,var(--pearl-lo) 100%);
+  background:radial-gradient(78% 46% at 50% 100%,color-mix(in srgb,var(--deep) 45%,transparent) 0,transparent 100%),radial-gradient(circle at 46% 40%,var(--pearl-hi) 0,var(--pearl) 52%,var(--pearl-lo) 100%);
+  box-shadow:inset 0 0 0 1px var(--pearl-rim)}
+.pearl-group>.pearl{--D:inherit}
+.pearl{overflow:hidden}
+/* matte sheen: one diffuse highlight at 10 o'clock, peak alpha .14 (brief C9: <= .25, only when D >= 32px) */
+.pearl::before{content:"";position:absolute;left:-4%;top:13%;width:50%;height:34%;border-radius:50%;transform:rotate(-60deg);
+  background:radial-gradient(closest-side,rgb(var(--milk)/.14),rgb(var(--milk)/.05) 60%,rgb(var(--milk)/0));pointer-events:none}
+.idx{position:relative;font:500 var(--fs-mono)/1 var(--mono);letter-spacing:.06em;padding-left:.06em}
+.seed{position:absolute;left:var(--x);top:var(--y);width:max(6px,calc(var(--D)*.12));height:max(6px,calc(var(--D)*.12));translate:-50% -50%;border-radius:50%;background:var(--dir-seed)}
+.seed[data-k="1"]{--x:50.00%;--y:4.29%}
+.seed[data-k="2"]{--x:72.86%;--y:10.41%}
+.seed[data-k="3"]{--x:27.14%;--y:10.41%}
+.seed[data-k="4"]{--x:89.59%;--y:27.14%}
+.seed[data-k="5"]{--x:10.41%;--y:27.14%}
+.seed[data-k="6"]{--x:95.71%;--y:50.00%}
+.seed[data-k="7"]{--x:4.29%;--y:50.00%}
+.seed[data-k="8"]{--x:89.59%;--y:72.86%}
+.seed[data-k="9"]{--x:10.41%;--y:72.86%}
+.seed[data-k="10"]{--x:72.86%;--y:89.59%}
+.seed[data-k="11"]{--x:27.14%;--y:89.59%}
+.seed[data-k="12"]{--x:50.00%;--y:95.71%}
+
+/* hover / focus: dim other groups' graphics; text never dims (brief E3) */
+.pearl-group{transition:opacity var(--dur-fast) var(--ease-out)}
+.plate[data-active] .fig-list>li:not(.is-active) .pearl-group{opacity:.55;transition-duration:var(--dur-base)}
+@media (prefers-reduced-motion:no-preference){
+  :root:not([data-motion="reduce"]) .fig-list .pearl{transition:transform var(--dur-fast) var(--ease-out)}
+  :root:not([data-motion="reduce"]) .fig-list>li.is-active .pearl{transform:translateY(-3px) scale(1.06);transition-duration:var(--dur-base)}
+  @media (hover:none){:root:not([data-motion="reduce"]) .fig-list a:active .pearl{transform:scale(.98);transition-duration:var(--dur-press)}}
+  :root:not([data-motion="reduce"])[data-intro] .fig-list .pearl-group{animation:settle var(--dur-intro) var(--ease-settle) backwards;animation-delay:calc((var(--slot) - 1)*var(--stagger-intro))}
+  :root:not([data-motion="reduce"]) .cap-state.is-on{animation:cap-in var(--dur-caption) var(--ease-out)}
+}
+@media (prefers-reduced-motion:reduce){
+  .fig-list>li.is-active .pearl{outline:2px solid var(--focus);outline-offset:3px}
+  .cap-state.is-on{animation:cap-fade var(--dur-caption) linear}
+}
+:root[data-motion="reduce"] .fig-list>li.is-active .pearl{outline:2px solid var(--focus);outline-offset:3px}
+:root[data-motion="reduce"] .cap-state.is-on{animation:cap-fade var(--dur-caption) linear}
+@keyframes settle{0%{opacity:0;transform:translateY(-14px)}65%{opacity:1;transform:translateY(2px)}100%{transform:none}}
+@keyframes cap-in{from{opacity:0;transform:translateY(4px)}}
+@keyframes cap-fade{from{opacity:0}}
+
+/* ---------- direction page (fake, for the morph) ---------- */
+.dir-band{background:var(--dir-band);border-bottom:1px solid var(--hairline)}
+.dir-head{padding-block:var(--s-3) var(--s-8)}
+.dir-back{margin:0}
+.back{display:inline-flex;align-items:center;gap:.45em;min-height:44px;color:var(--ink);text-decoration:none;font-weight:500;font-size:.9375rem}
+.back:hover{color:var(--ink)}
+.back:hover .bt{text-decoration:underline;text-underline-offset:.2em}
+.dir-hero{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--s-5) var(--s-7);align-items:center;margin-top:var(--s-5)}
+.pearl-xl{--D:clamp(7.5rem,4.5rem + 6vw,10rem)}
+.pearl-sm{--D:40px;flex:none}
+.crumb{font:500 var(--fs-mono)/1.4 var(--mono);letter-spacing:.06em;color:var(--ink-muted);margin-bottom:var(--s-2)}
+.dir-h1{font-size:var(--fs-3xl);line-height:1.1;max-width:22ch;text-wrap:balance}
+.dir-q{font:500 var(--fs-lg)/1.45 var(--sans);margin-top:var(--s-4);max-width:48ch}
+.dir-stats{font:500 var(--fs-mono)/1.4 var(--mono);letter-spacing:.06em;color:var(--ink-muted);margin-top:var(--s-4)}
+@media (max-width:40rem){.dir-hero{grid-template-columns:1fr}.pearl-xl{--D:7.5rem}}
+.dir-body{display:grid;gap:var(--s-7);padding-block:var(--s-7) var(--s-8)}
+@media (min-width:64rem){.dir-body{grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);column-gap:var(--s-8)}.updated{grid-column:1/-1}}
+.dir-main,.dir-side{display:grid;gap:var(--s-7);align-content:start}
+.dir-body h2{font-size:var(--fs-xl);margin-bottom:var(--s-3)}
+.h-count{font:500 var(--fs-mono)/1 var(--mono);letter-spacing:.06em;color:var(--ink-muted);vertical-align:.2em;margin-left:.3em}
+.prose{max-width:66ch}
+.papers,.projects,.rail ol,.stub-list{list-style:none;margin:0;padding:0}
+.papers li{padding-block:var(--s-3);border-top:1px solid var(--hairline);display:grid;gap:.15rem}
+.paper-t{color:var(--ink);font-weight:600;text-decoration-color:var(--rule)}
+.paper-t:hover{color:var(--accent-strong);text-decoration-color:currentColor}
+.paper-m,.paper-s{font-size:var(--fs-sm);line-height:1.45;color:var(--ink-muted)}
+.paper-s{font-style:italic}
+.projects li{display:grid;grid-template-columns:10px minmax(0,1fr);column-gap:var(--s-3);padding-block:var(--s-2)}
+.projects li::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--dir-ink);margin-top:.55em;grid-row:1/span 2}
+.pj-t{font-weight:600}
+.pj-s{grid-column:2;font-size:var(--fs-sm);color:var(--ink-muted);line-height:1.45}
+.rail h2{font-size:var(--fs-xl)}
+.rail ol{display:grid;gap:var(--s-1)}
+.rail a{display:flex;align-items:center;gap:var(--s-3);min-height:52px;color:var(--ink);text-decoration:none;font-weight:600}
+.rail a:hover .rail-l{text-decoration:underline;text-underline-offset:.2em}
+.updated{font-size:var(--fs-sm);color:var(--ink-muted)}
+.stub{padding-block:var(--s-5) var(--s-9);display:grid;gap:var(--s-4)}
+.stub h1{font-size:var(--fs-3xl)}
+.stub-list a{display:inline-flex;align-items:center;gap:var(--s-3);min-height:44px;font-weight:600}
+.tag{width:10px;height:10px;border-radius:50%;background:var(--dir-ink);flex:none}
+
+/* ---------- view transitions (brief E5) ---------- */
+::view-transition{pointer-events:none}
+@media (prefers-reduced-motion:no-preference){
+  :root:not([data-motion="reduce"])::view-transition-group(pearl-algorithmic-advice),::view-transition-group(pearl-ai-at-work),::view-transition-group(pearl-learning-on-the-job),::view-transition-group(pearl-platform-work){animation-duration:var(--dur-morph);animation-timing-function:var(--ease-emph)}
+  :root:not([data-motion="reduce"])::view-transition-image-pair(pearl-algorithmic-advice),::view-transition-image-pair(pearl-ai-at-work),::view-transition-image-pair(pearl-learning-on-the-job),::view-transition-image-pair(pearl-platform-work){animation:via-blur var(--dur-morph) var(--ease-emph) both}
+  :root:not([data-motion="reduce"])[data-vt="open"]::view-transition-old(root),:root:not([data-motion="reduce"])[data-vt="close"]::view-transition-old(root){animation:vt-out var(--dur-page-exit) var(--ease-in) both}
+  :root:not([data-motion="reduce"])[data-vt="open"]::view-transition-new(root),:root:not([data-motion="reduce"])[data-vt="close"]::view-transition-new(root){animation:vt-in var(--dur-page-enter) var(--ease-out) var(--dur-page-exit) both}
+  :root:not([data-motion="reduce"])[data-vt="fwd"]::view-transition-old(root){animation:vt-out-l var(--dur-page-exit) var(--ease-in) both}
+  :root:not([data-motion="reduce"])[data-vt="fwd"]::view-transition-new(root){animation:vt-in-r var(--dur-page-enter) var(--ease-out) var(--dur-page-exit) both}
+  :root:not([data-motion="reduce"])[data-vt="back"]::view-transition-old(root){animation:vt-out-r var(--dur-page-exit) var(--ease-in) both}
+  :root:not([data-motion="reduce"])[data-vt="back"]::view-transition-new(root){animation:vt-in-l var(--dur-page-enter) var(--ease-out) var(--dur-page-exit) both}
+}
+:root[data-vt="reduce"]::view-transition-old(root),:root[data-vt="reduce"]::view-transition-new(root){animation-duration:120ms}
+:root[data-vt="reduce"]::view-transition-group(*){animation-duration:120ms}
+@keyframes via-blur{30%{filter:blur(3px)}}
+@keyframes vt-out{to{opacity:0;transform:translateY(8px)}}
+@keyframes vt-in{from{opacity:0;transform:translateY(8px)}}
+@keyframes vt-out-l{to{opacity:0;transform:translateX(-60px)}}
+@keyframes vt-in-r{from{opacity:0;transform:translateX(60px)}}
+@keyframes vt-out-r{to{opacity:0;transform:translateX(60px)}}
+@keyframes vt-in-l{from{opacity:0;transform:translateX(-60px)}}
+
+/* ---------- forced colours (brief E7) ---------- */
+@media (forced-colors:active){
+  .pearl{border:2px solid CanvasText;background:Canvas;color:CanvasText;box-shadow:none}
+  .pearl::before,.wm-o::before,.plate::before{display:none}
+  .wm-o{forced-color-adjust:none;background:CanvasText}
+  .seed,.tag,.projects li::before{forced-color-adjust:none;background:CanvasText}
+  a:focus-visible .pearl{outline:2px solid Highlight;outline-offset:3px}
+  .fig-list>li.is-active .pearl{outline:2px solid Highlight;outline-offset:3px}
+  .plate[data-active] .fig-list>li:not(.is-active) .pearl-group{opacity:1}
+  .fig-list a::after{border-color:CanvasText}
+  .cta{border:2px solid LinkText}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#/"><span class="sr-only">BOBALAB home</span><span class="wm wm-sm" aria-hidden="true"><span class="wm-boba">B<span class="wm-o"></span>BA</span><span class="wm-lab">LAB</span></span></a>
+    <nav class="site-nav" aria-label="Main">
+      <ul role="list">
+        <li><a href="#/research">Research</a></li>
+        <li><a href="#/publications">Publications</a></li>
+        <li><a href="#/people">People</a></li>
+        <li><a href="#/news">News</a></li>
+        <li><a href="#/join">Join</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main" tabindex="-1">
+  <div class="view view-home" data-title="BOBALAB · Berkeley Operations and Behavioral Analytics Lab">
+    <div class="wrap hero">
+      <div class="hero-id">
+        <h1 class="hero-h1" tabindex="-1"><span class="sr-only">BOBALAB, </span><span class="wm wm-lg" aria-hidden="true"><span class="wm-boba">B<span class="wm-o"></span>BA</span><span class="wm-lab">LAB</span></span><span class="descriptor">Berkeley Operations and Behavioral Analytics Lab</span></h1>
+        <p class="affil">Haas School of Business, University of California, Berkeley</p>
+        <div class="hero-lead">
+          <p class="mission">Improving how people and AI work together, for the future of work.</p>
+          <p><a class="cta" href="#/research">Explore our research<span aria-hidden="true">&nbsp;→</span></a></p>
+        </div>
+      </div>
+      <section class="hero-figure" aria-labelledby="dirs-h">
+        <h2 id="dirs-h">Research directions</h2>
+        <figure class="plate" aria-label="Fig. 1, research directions of BOBALAB" data-n="4" data-template="t4">
+          <figcaption class="fig-caption" aria-live="off">
+            <div class="cap-state cap-legend is-on" data-cap="legend">
+              <p><span class="fig-no">Fig. 1.</span> Research directions of BOBALAB. <span class="lg-fig">Each pearl is a direction; small dots are its papers.</span><span class="lg-list">Each row is a direction, with its number of papers.</span></p>
+            </div>
+            <div class="cap-state cap-dir" data-cap="algorithmic-advice" data-dir style="--deep:#2F519B;--tint:#DFE6F5;--light:#A9C0F2;--seed-l:#A7B1C9;--seed-d:#4F5261;--head-d:#262325">
+              <p class="cap-title"><span class="ci">01</span> <span>Algorithmic Advice</span></p>
+              <p class="cap-sum">Designing algorithmic advice that people actually take up, that helps in the moment, and that still leaves them better decision-makers.</p>
+              <p class="cap-meta">5 projects · 4 papers · since 2021</p>
+            </div>
+            <div class="cap-state cap-dir" data-cap="ai-at-work" data-dir style="--deep:#993452;--tint:#F5DFE5;--light:#F0A5BC;--seed-l:#D1A5AC;--seed-d:#68494E;--head-d:#2D201F">
+              <p class="cap-title"><span class="ci">02</span> <span>AI at Work</span></p>
+              <p class="cap-sum">What professionals really ask of generative AI, how it reshapes the tasks they take on, and when an AI agent should act on its own.</p>
+              <p class="cap-meta">5 projects · 5 papers · since 2024</p>
+            </div>
+            <div class="cap-state cap-dir" data-cap="learning-on-the-job" data-dir style="--deep:#3E6A2F;--tint:#E3ECD8;--light:#A9CF8F;--seed-l:#ADBB9E;--seed-d:#4F573E;--head-d:#26241B">
+              <p class="cap-title"><span class="ci">03</span> <span>Learning on the Job</span></p>
+              <p class="cap-sum">How workers get better with experience on algorithm-run platforms, and how job offers can be designed to grow skill, not just meet today’s demand.</p>
+              <p class="cap-meta">4 projects · 4 papers · since 2025</p>
+            </div>
+            <div class="cap-state cap-dir" data-cap="platform-work" data-dir style="--deep:#7A5913;--tint:#F1E8CC;--light:#E3C26E;--seed-l:#C5B493;--seed-d:#635333;--head-d:#2B2318">
+              <p class="cap-title"><span class="ci">04</span> <span>Platform Work</span></p>
+              <p class="cap-sum">Why flexible workers log on when they do, and how platforms can pay, motivate and staff them when drivers split their time across rival apps.</p>
+              <p class="cap-meta">5 projects · 6 papers · since 2021</p>
+            </div>
+          </figcaption>
+          <nav aria-label="Research directions">
+            <ol class="fig-list" role="list">
+              <li data-slot="1" data-slug="algorithmic-advice" data-dir style="--deep:#2F519B;--tint:#DFE6F5;--light:#A9C0F2;--seed-l:#A7B1C9;--seed-d:#4F5261;--head-d:#262325;--slot:1;--dx:0;--dy:0">
+                <a href="#/research/algorithmic-advice" aria-describedby="d-algorithmic-advice">
+                  <span class="pearl-group" aria-hidden="true"><span class="pearl" data-pearl="algorithmic-advice"><span class="idx">01</span></span><span class="seeds"><i class="seed" data-k="1"></i><i class="seed" data-k="2"></i><i class="seed" data-k="3"></i><i class="seed" data-k="4"></i></span></span>
+                  <span class="label"><span class="lt">Algorithmic Advice</span><span class="arr" aria-hidden="true">&nbsp;→</span></span> <span class="count">4 papers</span>
+                </a>
+                <p id="d-algorithmic-advice" hidden>Designing algorithmic advice that people actually take up, that helps in the moment, and that still leaves them better decision-makers.</p>
+              </li>
+              <li data-slot="2" data-slug="ai-at-work" data-dir style="--deep:#993452;--tint:#F5DFE5;--light:#F0A5BC;--seed-l:#D1A5AC;--seed-d:#68494E;--head-d:#2D201F;--slot:2;--dx:0.06;--dy:0.08">
+                <a href="#/research/ai-at-work" aria-describedby="d-ai-at-work">
+                  <span class="pearl-group" aria-hidden="true"><span class="pearl" data-pearl="ai-at-work"><span class="idx">02</span></span><span class="seeds"><i class="seed" data-k="1"></i><i class="seed" data-k="2"></i><i class="seed" data-k="3"></i><i class="seed" data-k="4"></i><i class="seed" data-k="5"></i></span></span>
+                  <span class="label"><span class="lt">AI at Work</span><span class="arr" aria-hidden="true">&nbsp;→</span></span> <span class="count">5 papers</span>
+                </a>
+                <p id="d-ai-at-work" hidden>What professionals really ask of generative AI, how it reshapes the tasks they take on, and when an AI agent should act on its own.</p>
+              </li>
+              <li data-slot="3" data-slug="learning-on-the-job" data-dir style="--deep:#3E6A2F;--tint:#E3ECD8;--light:#A9CF8F;--seed-l:#ADBB9E;--seed-d:#4F573E;--head-d:#26241B;--slot:3;--dx:-0.04;--dy:-0.05">
+                <a href="#/research/learning-on-the-job" aria-describedby="d-learning-on-the-job">
+                  <span class="pearl-group" aria-hidden="true"><span class="pearl" data-pearl="learning-on-the-job"><span class="idx">03</span></span><span class="seeds"><i class="seed" data-k="1"></i><i class="seed" data-k="2"></i><i class="seed" data-k="3"></i><i class="seed" data-k="4"></i></span></span>
+                  <span class="label"><span class="lt">Learning on the Job</span><span class="arr" aria-hidden="true">&nbsp;→</span></span> <span class="count">4 papers</span>
+                </a>
+                <p id="d-learning-on-the-job" hidden>How workers get better with experience on algorithm-run platforms, and how job offers can be designed to grow skill, not just meet today’s demand.</p>
+              </li>
+              <li data-slot="4" data-slug="platform-work" data-dir style="--deep:#7A5913;--tint:#F1E8CC;--light:#E3C26E;--seed-l:#C5B493;--seed-d:#635333;--head-d:#2B2318;--slot:4;--dx:0.03;--dy:0.1">
+                <a href="#/research/platform-work" aria-describedby="d-platform-work">
+                  <span class="pearl-group" aria-hidden="true"><span class="pearl" data-pearl="platform-work"><span class="idx">04</span></span><span class="seeds"><i class="seed" data-k="1"></i><i class="seed" data-k="2"></i><i class="seed" data-k="3"></i><i class="seed" data-k="4"></i><i class="seed" data-k="5"></i><i class="seed" data-k="6"></i></span></span>
+                  <span class="label"><span class="lt">Platform Work</span><span class="arr" aria-hidden="true">&nbsp;→</span></span> <span class="count">6 papers</span>
+                </a>
+                <p id="d-platform-work" hidden>Why flexible workers log on when they do, and how platforms can pay, motivate and staff them when drivers split their time across rival apps.</p>
+              </li>
+            </ol>
+          </nav>
+          <p class="fig-note"><b>Note.</b> A paper counts once it has a public version (DOI, SSRN, arXiv, PDF or a documented conference talk); papers in two directions count in both. Data as of Oct 20, 2026.</p>
+        </figure>
+      </section>
+    </div>
+    <svg class="meniscus" viewBox="0 0 1000 8" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 1.5 C 10 7, 22 7.5, 40 7.5 L 960 7.5 C 978 7.5, 990 7, 1000 1.5" fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke"/></svg>
+  </div>
+      <article class="view view-dir" id="/research/algorithmic-advice" data-slug="algorithmic-advice" data-title="Algorithmic Advice &amp; Human Decisions, BOBALAB research" data-dir style="--deep:#2F519B;--tint:#DFE6F5;--light:#A9C0F2;--seed-l:#A7B1C9;--seed-d:#4F5261;--head-d:#262325" hidden>
+        <div class="dir-band">
+          <div class="wrap dir-head">
+            <p class="dir-back"><a class="back" href="#/"><span aria-hidden="true">←</span> <span class="bt">All directions</span></a></p>
+            <div class="dir-hero">
+              <span class="pearl pearl-xl" data-pearl="algorithmic-advice" aria-hidden="true"><span class="idx">01</span></span>
+              <div class="dir-text">
+                <p class="crumb">Research / 01</p>
+                <h1 class="dir-h1" tabindex="-1">Algorithmic Advice &amp; Human Decisions</h1>
+                <p class="dir-q">Can an algorithm learn from how people make step-by-step decisions and turn their costliest habit into one short tip they will use?</p>
+                <p class="dir-stats">5 projects · 4 papers · since 2021</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="wrap dir-body">
+          <div class="dir-main">
+            <section aria-labelledby="ib-algorithmic-advice">
+              <h2 id="ib-algorithmic-advice">In brief</h2>
+              <p class="prose">Algorithms can often compute the best next move, yet people ignore or misapply the advice. This direction asks how advice should be framed, as a precise instruction or a broader rule, so that it is adopted, improves decisions now, and still teaches something once the advice is gone.</p>
+            </section>
+            <section aria-labelledby="pp-algorithmic-advice">
+              <h2 id="pp-algorithmic-advice">Papers with a public version <span class="h-count">4</span></h2>
+              <ol class="papers" role="list">
+              <li>
+                <a class="paper-t" href="https://doi.org/10.1287/mnsc.2022.02455">Improving Human Sequential Decision Making with Reinforcement Learning</a>
+                <span class="paper-m">Management Science, 2026</span>
+              </li>
+              <li>
+                <a class="paper-t" href="https://www.hbs.edu/about/research/msom-conference-2026/program">Managing Human Agents with Compliance-Aware Reinforcement Learning</a>
+                <span class="paper-m">Work in progress; presented at the 2026 INFORMS MSOM Conference</span>
+              </li>
+              <li>
+                <a class="paper-t" href="https://www.dropbox.com/scl/fi/ehetta55hl48yberpqmao/Precise-or-Broad-2026.pdf?rlkey=76belsk6wovmd5p8f7skel9tz&amp;dl=0">Precise or Broad? The Reward-Learning Frontier in Algorithmic Advice Design</a>
+                <span class="paper-m">Working paper, 2026</span>
+                <span class="paper-s">Major revision at Manufacturing &amp; Service Operations Management (as reported by the PI, April 2026)</span>
+              </li>
+              <li>
+                <a class="paper-t" href="https://arxiv.org/abs/2603.02055">Strategic Advice in the Age of Personal AI</a>
+                <span class="paper-m">Preprint (arXiv), 2026</span>
+              </li>
+              </ol>
+            </section>
+          </div>
+          <div class="dir-side">
+            <section aria-labelledby="pj-algorithmic-advice">
+              <h2 id="pj-algorithmic-advice">Projects <span class="h-count">5</span></h2>
+              <ul class="projects" role="list">
+                <li><span class="pj-t">Turning Decision Data into Tips</span><span class="pj-s">Flagship paper published (Management Science, 2026); follow-up working paper</span></li>
+                <li><span class="pj-t">Precise or Broad Advice</span><span class="pj-s">Under major revision at M&amp;SOM (PI-reported)</span></li>
+                <li><span class="pj-t">Compliance-Aware Reinforcement Learning</span><span class="pj-s">Work in progress; presented at MSOM 2026</span></li>
+                <li><span class="pj-t">Advisors and Personal AI</span><span class="pj-s">Preprint; presented at MSOM 2026</span></li>
+                <li><span class="pj-t">Authority Design for AI Agents</span><span class="pj-s">Submitted (PI's CV)</span></li>
+              </ul>
+            </section>
+            <nav class="rail" aria-label="More directions">
+              <h2>More directions</h2>
+              <ol role="list">
+              <li data-dir style="--deep:#993452;--tint:#F5DFE5;--light:#F0A5BC;--seed-l:#D1A5AC;--seed-d:#68494E;--head-d:#2D201F"><a href="#/research/ai-at-work"><span class="pearl pearl-sm" data-pearl="ai-at-work" aria-hidden="true"><span class="idx">02</span></span><span class="rail-l">AI at Work</span></a></li>
+              <li data-dir style="--deep:#3E6A2F;--tint:#E3ECD8;--light:#A9CF8F;--seed-l:#ADBB9E;--seed-d:#4F573E;--head-d:#26241B"><a href="#/research/learning-on-the-job"><span class="pearl pearl-sm" data-pearl="learning-on-the-job" aria-hidden="true"><span class="idx">03</span></span><span class="rail-l">Learning on the Job</span></a></li>
+              <li data-dir style="--deep:#7A5913;--tint:#F1E8CC;--light:#E3C26E;--seed-l:#C5B493;--seed-d:#635333;--head-d:#2B2318"><a href="#/research/platform-work"><span class="pearl pearl-sm" data-pearl="platform-work" aria-hidden="true"><span class="idx">04</span></span><span class="rail-l">Platform Work</span></a></li>
+              </ol>
+            </nav>
+          </div>
+          <p class="updated">Draft text for review. Data as of Oct 20, 2026.</p>
+        </div>
+      </article>
+      <article class="view view-dir" id="/research/ai-at-work" data-slug="ai-at-work" data-title="Generative &amp; Agentic AI at Work, BOBALAB research" data-dir style="--deep:#993452;--tint:#F5DFE5;--light:#F0A5BC;--seed-l:#D1A5AC;--seed-d:#68494E;--head-d:#2D201F" hidden>
+        <div class="dir-band">
+          <div class="wrap dir-head">
+            <p class="dir-back"><a class="back" href="#/"><span aria-hidden="true">←</span> <span class="bt">All directions</span></a></p>
+            <div class="dir-hero">
+              <span class="pearl pearl-xl" data-pearl="ai-at-work" aria-hidden="true"><span class="idx">02</span></span>
+              <div class="dir-text">
+                <p class="crumb">Research / 02</p>
+                <h1 class="dir-h1" tabindex="-1">Generative &amp; Agentic AI at Work</h1>
+                <p class="dir-q">Does generative AI make professionals faster at familiar tasks, or does it change which tasks are worth doing at all?</p>
+                <p class="dir-stats">5 projects · 5 papers · since 2024</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="wrap dir-body">
+          <div class="dir-main">
+            <section aria-labelledby="ib-ai-at-work">
+              <h2 id="ib-ai-at-work">In brief</h2>
+              <p class="prose">Field data from teachers and other professionals show how generative AI is used in practice. The work asks whether AI mainly speeds up familiar tasks or shifts what people choose to work on, and how advisors and AI agents should share decisions.</p>
+            </section>
+            <section aria-labelledby="pp-ai-at-work">
+              <h2 id="pp-ai-at-work">Papers with a public version <span class="h-count">5</span></h2>
+              <ol class="papers" role="list">
+              <li>
+                <a class="paper-t" href="https://www.hbs.edu/about/research/msom-conference-2026/program">Planning vs. Execution: How AI Changes Task Portfolio Choice</a>
+                <span class="paper-m">Work in progress; presented at the 2026 INFORMS MSOM Conference</span>
+              </li>
+              <li>
+                <a class="paper-t" href="https://arxiv.org/abs/2610.10265">Stale, Misattributed, or Late: Where Personal Memory Fails Before Generation</a>
+                <span class="paper-m">Preprint (arXiv), 2026</span>
+              </li>
+              <li>
+                <a class="paper-t" href="https://arxiv.org/abs/2603.02055">Strategic Advice in the Age of Personal AI</a>
+                <span class="paper-m">Preprint (arXiv), 2026</span>
+              </li>
+              <li>
+                <a class="paper-t" href="https://doi.org/10.2139/ssrn.4924786">The Teacher's Knapsack: Generative AI and Teacher Productivity</a>
+                <span class="paper-m">Working paper (SSRN), 2026</span>
+              </li>
+              <li>
+                <a class="paper-t" href="https://doi.org/10.1145/3711026">Making ChatGPT Work for Me</a>
+                <span class="paper-m">Proceedings of the ACM on Human-Computer Interaction (CSCW 2025), 2025</span>
+              </li>
+              </ol>
+            </section>
+          </div>
+          <div class="dir-side">
+            <section aria-labelledby="pj-ai-at-work">
+              <h2 id="pj-ai-at-work">Projects <span class="h-count">5</span></h2>
+              <ul class="projects" role="list">
+                <li><span class="pj-t">Generative AI and Teachers' Work</span><span class="pj-s">One paper published (CSCW 2025); working paper; work in progress</span></li>
+                <li><span class="pj-t">Advisors and Personal AI</span><span class="pj-s">Preprint; presented at MSOM 2026</span></li>
+                <li><span class="pj-t">Authority Design for AI Agents</span><span class="pj-s">Submitted (PI's CV)</span></li>
+                <li><span class="pj-t">Personal Memory in AI Assistants</span><span class="pj-s">Preprint (Oct 2026)</span></li>
+                <li><span class="pj-t">Generative-AI Simulation for Pricing</span><span class="pj-s">Submitted (PI's CV)</span></li>
+              </ul>
+            </section>
+            <nav class="rail" aria-label="More directions">
+              <h2>More directions</h2>
+              <ol role="list">
+              <li data-dir style="--deep:#2F519B;--tint:#DFE6F5;--light:#A9C0F2;--seed-l:#A7B1C9;--seed-d:#4F5261;--head-d:#262325"><a href="#/research/algorithmic-advice"><span class="pearl pearl-sm" data-pearl="algorithmic-advice" aria-hidden="true"><span class="idx">01</span></span><span class="rail-l">Algorithmic Advice</span></a></li>
+              <li data-dir style="--deep:#3E6A2F;--tint:#E3ECD8;--light:#A9CF8F;--seed-l:#ADBB9E;--seed-d:#4F573E;--head-d:#26241B"><a href="#/research/learning-on-the-job"><span class="pearl pearl-sm" data-pearl="learning-on-the-job" aria-hidden="true"><span class="idx">03</span></span><span class="rail-l">Learning on the Job</span></a></li>
+              <li data-dir style="--deep:#7A5913;--tint:#F1E8CC;--light:#E3C26E;--seed-l:#C5B493;--seed-d:#635333;--head-d:#2B2318"><a href="#/research/platform-work"><span class="pearl pearl-sm" data-pearl="platform-work" aria-hidden="true"><span class="idx">04</span></span><span class="rail-l">Platform Work</span></a></li>
+              </ol>
+            </nav>
+          </div>
+          <p class="updated">Draft text for review. Data as of Oct 20, 2026.</p>
+        </div>
+      </article>
+      <article class="view view-dir" id="/research/learning-on-the-job" data-slug="learning-on-the-job" data-title="Learning on the Job with Algorithms, BOBALAB research" data-dir style="--deep:#3E6A2F;--tint:#E3ECD8;--light:#A9CF8F;--seed-l:#ADBB9E;--seed-d:#4F573E;--head-d:#26241B" hidden>
+        <div class="dir-band">
+          <div class="wrap dir-head">
+            <p class="dir-back"><a class="back" href="#/"><span aria-hidden="true">←</span> <span class="bt">All directions</span></a></p>
+            <div class="dir-hero">
+              <span class="pearl pearl-xl" data-pearl="learning-on-the-job" aria-hidden="true"><span class="idx">03</span></span>
+              <div class="dir-text">
+                <p class="crumb">Research / 03</p>
+                <h1 class="dir-h1" tabindex="-1">Learning on the Job with Algorithms</h1>
+                <p class="dir-q">Do gig workers get faster and more reliable with experience, and do they rely on the app’s suggestions more or less as they learn?</p>
+                <p class="dir-stats">4 projects · 4 papers · since 2025</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="wrap dir-body">
+          <div class="dir-main">
+            <section aria-labelledby="ib-learning-on-the-job">
+              <h2 id="ib-learning-on-the-job">In brief</h2>
+              <p class="prose">On a platform, the algorithm decides which jobs a worker sees, so it also shapes what they learn. This direction studies how skill builds up on the job and how dispatch and recommendation rules can develop a workforce when workers are free to turn offers down.</p>
+            </section>
+            <section aria-labelledby="pp-learning-on-the-job">
+              <h2 id="pp-learning-on-the-job">Papers with a public version <span class="h-count">4</span></h2>
+              <ol class="papers" role="list">
+              <li>
+                <a class="paper-t" href="https://doi.org/10.2139/ssrn.7151739">Dispatching to Develop: Worker Agency and Workforce Development in Gig Platforms</a>
+                <span class="paper-m">Working paper (SSRN), 2026</span>
+              </li>
+              <li>
+                <a class="paper-t" href="https://www.dropbox.com/scl/fi/ehetta55hl48yberpqmao/Precise-or-Broad-2026.pdf?rlkey=76belsk6wovmd5p8f7skel9tz&amp;dl=0">Precise or Broad? The Reward-Learning Frontier in Algorithmic Advice Design</a>
+                <span class="paper-m">Working paper, 2026</span>
+                <span class="paper-s">Major revision at Manufacturing &amp; Service Operations Management (as reported by the PI, April 2026)</span>
+              </li>
+              <li>
+                <a class="paper-t" href="https://doi.org/10.1145/3757621">Learning on the Go: Understanding How Gig Economy Workers Learn with Recommendation Algorithms</a>
+                <span class="paper-m">Proceedings of the ACM on Human-Computer Interaction (CSCW 2025), 2025</span>
+              </li>
+              <li>
+                <a class="paper-t" href="https://doi.org/10.2139/ssrn.5387320">Learning to Gig: Workforce Development under Worker Agency</a>
+                <span class="paper-m">Working paper (SSRN), 2025</span>
+                <span class="paper-s">Major revision at Manufacturing &amp; Service Operations Management (as reported by the PI, May 2026)</span>
+              </li>
+              </ol>
+            </section>
+          </div>
+          <div class="dir-side">
+            <section aria-labelledby="pj-learning-on-the-job">
+              <h2 id="pj-learning-on-the-job">Projects <span class="h-count">4</span></h2>
+              <ul class="projects" role="list">
+                <li><span class="pj-t">Precise or Broad Advice</span><span class="pj-s">Under major revision at M&amp;SOM (PI-reported)</span></li>
+                <li><span class="pj-t">How Gig Workers Learn</span><span class="pj-s">Published (PACM HCI / CSCW 2025)</span></li>
+                <li><span class="pj-t">Dispatching for Worker Development</span><span class="pj-s">Major revision at M&amp;SOM (PI-reported); related SSRN paper posted Aug 2026</span></li>
+                <li><span class="pj-t">Learning Across Jobs</span><span class="pj-s">Work in progress</span></li>
+              </ul>
+            </section>
+            <nav class="rail" aria-label="More directions">
+              <h2>More directions</h2>
+              <ol role="list">
+              <li data-dir style="--deep:#2F519B;--tint:#DFE6F5;--light:#A9C0F2;--seed-l:#A7B1C9;--seed-d:#4F5261;--head-d:#262325"><a href="#/research/algorithmic-advice"><span class="pearl pearl-sm" data-pearl="algorithmic-advice" aria-hidden="true"><span class="idx">01</span></span><span class="rail-l">Algorithmic Advice</span></a></li>
+              <li data-dir style="--deep:#993452;--tint:#F5DFE5;--light:#F0A5BC;--seed-l:#D1A5AC;--seed-d:#68494E;--head-d:#2D201F"><a href="#/research/ai-at-work"><span class="pearl pearl-sm" data-pearl="ai-at-work" aria-hidden="true"><span class="idx">02</span></span><span class="rail-l">AI at Work</span></a></li>
+              <li data-dir style="--deep:#7A5913;--tint:#F1E8CC;--light:#E3C26E;--seed-l:#C5B493;--seed-d:#635333;--head-d:#2B2318"><a href="#/research/platform-work"><span class="pearl pearl-sm" data-pearl="platform-work" aria-hidden="true"><span class="idx">04</span></span><span class="rail-l">Platform Work</span></a></li>
+              </ol>
+            </nav>
+          </div>
+          <p class="updated">Draft text for review. Data as of Oct 20, 2026.</p>
+        </div>
+      </article>
+      <article class="view view-dir" id="/research/platform-work" data-slug="platform-work" data-title="Gig &amp; Platform Work Design, BOBALAB research" data-dir style="--deep:#7A5913;--tint:#F1E8CC;--light:#E3C26E;--seed-l:#C5B493;--seed-d:#635333;--head-d:#2B2318" hidden>
+        <div class="dir-band">
+          <div class="wrap dir-head">
+            <p class="dir-back"><a class="back" href="#/"><span aria-hidden="true">←</span> <span class="bt">All directions</span></a></p>
+            <div class="dir-hero">
+              <span class="pearl pearl-xl" data-pearl="platform-work" aria-hidden="true"><span class="idx">04</span></span>
+              <div class="dir-text">
+                <p class="crumb">Research / 04</p>
+                <h1 class="dir-h1" tabindex="-1">Gig &amp; Platform Work Design</h1>
+                <p class="dir-q">What gets a ride-hail driver to start or stop a shift: the pay rate, an earnings goal, or the momentum of hours already worked?</p>
+                <p class="dir-stats">5 projects · 6 papers · since 2021</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="wrap dir-body">
+          <div class="dir-main">
+            <section aria-labelledby="ib-platform-work">
+              <h2 id="ib-platform-work">In brief</h2>
+              <p class="prose">Gig workers choose when, where and for which platform to work. Using large-scale platform data, this direction studies what drives those choices and which pay designs (guarantees, streak bonuses, wage floors) change how much people work and how often they switch apps.</p>
+            </section>
+            <section aria-labelledby="pp-platform-work">
+              <h2 id="pp-platform-work">Papers with a public version <span class="h-count">6</span></h2>
+              <ol class="papers" role="list">
+              <li>
+                <a class="paper-t" href="https://doi.org/10.2139/ssrn.7151739">Dispatching to Develop: Worker Agency and Workforce Development in Gig Platforms</a>
+                <span class="paper-m">Working paper (SSRN), 2026</span>
+              </li>
+              <li>
+                <a class="paper-t" href="https://doi.org/10.2139/ssrn.4502968">Managing Multihoming Workers in the Gig Economy</a>
+                <span class="paper-m">Working paper (SSRN), 2026</span>
+                <span class="paper-s">Revise and resubmit at Operations Research (as reported in the PI's CV, Aug 2026)</span>
+              </li>
+              <li>
+                <a class="paper-t" href="https://doi.org/10.1145/3757621">Learning on the Go: Understanding How Gig Economy Workers Learn with Recommendation Algorithms</a>
+                <span class="paper-m">Proceedings of the ACM on Human-Computer Interaction (CSCW 2025), 2025</span>
+              </li>
+              <li>
+                <a class="paper-t" href="https://doi.org/10.2139/ssrn.5387320">Learning to Gig: Workforce Development under Worker Agency</a>
+                <span class="paper-m">Working paper (SSRN), 2025</span>
+                <span class="paper-s">Major revision at Manufacturing &amp; Service Operations Management (as reported by the PI, May 2026)</span>
+              </li>
+              <li>
+                <a class="paper-t" href="https://doi.org/10.1287/msom.2023.1191">The Impact of Behavioral and Economic Drivers on Gig Economy Workers</a>
+                <span class="paper-m">Manufacturing &amp; Service Operations Management, 2023</span>
+              </li>
+              <li>
+                <a class="paper-t" href="https://repository.upenn.edu/edissertations/4013">Managing the Gig Economy via Behavioral and Operational Lenses</a>
+                <span class="paper-m">Ph.D. dissertation, University of Pennsylvania, 2021</span>
+              </li>
+              </ol>
+            </section>
+          </div>
+          <div class="dir-side">
+            <section aria-labelledby="pj-platform-work">
+              <h2 id="pj-platform-work">Projects <span class="h-count">5</span></h2>
+              <ul class="projects" role="list">
+                <li><span class="pj-t">How Gig Workers Learn</span><span class="pj-s">Published (PACM HCI / CSCW 2025)</span></li>
+                <li><span class="pj-t">Dispatching for Worker Development</span><span class="pj-s">Major revision at M&amp;SOM (PI-reported); related SSRN paper posted Aug 2026</span></li>
+                <li><span class="pj-t">Ride-Hail Driver Behavior &amp; Pay Design</span><span class="pj-s">One paper published (M&amp;SOM 2023); one under review (PI-reported)</span></li>
+                <li><span class="pj-t">Sequencing Incentives for Platform Workers</span><span class="pj-s">Work in progress</span></li>
+                <li><span class="pj-t">Staffing Fluid Teams</span><span class="pj-s">Work in progress</span></li>
+              </ul>
+            </section>
+            <nav class="rail" aria-label="More directions">
+              <h2>More directions</h2>
+              <ol role="list">
+              <li data-dir style="--deep:#2F519B;--tint:#DFE6F5;--light:#A9C0F2;--seed-l:#A7B1C9;--seed-d:#4F5261;--head-d:#262325"><a href="#/research/algorithmic-advice"><span class="pearl pearl-sm" data-pearl="algorithmic-advice" aria-hidden="true"><span class="idx">01</span></span><span class="rail-l">Algorithmic Advice</span></a></li>
+              <li data-dir style="--deep:#993452;--tint:#F5DFE5;--light:#F0A5BC;--seed-l:#D1A5AC;--seed-d:#68494E;--head-d:#2D201F"><a href="#/research/ai-at-work"><span class="pearl pearl-sm" data-pearl="ai-at-work" aria-hidden="true"><span class="idx">02</span></span><span class="rail-l">AI at Work</span></a></li>
+              <li data-dir style="--deep:#3E6A2F;--tint:#E3ECD8;--light:#A9CF8F;--seed-l:#ADBB9E;--seed-d:#4F573E;--head-d:#26241B"><a href="#/research/learning-on-the-job"><span class="pearl pearl-sm" data-pearl="learning-on-the-job" aria-hidden="true"><span class="idx">03</span></span><span class="rail-l">Learning on the Job</span></a></li>
+              </ol>
+            </nav>
+          </div>
+          <p class="updated">Draft text for review. Data as of Oct 20, 2026.</p>
+        </div>
+      </article>
+      <section class="view view-stub" id="/research" data-title="Research, BOBALAB" hidden>
+        <div class="wrap stub">
+          <p class="dir-back"><a class="back" href="#/"><span aria-hidden="true">←</span> <span class="bt">Home</span></a></p>
+          <h1 tabindex="-1">Research</h1>
+          <p class="prose">The research index (direction cards plus every project) is outside this prototype. The four directions are listed here.</p>
+          <ul class="stub-list" role="list">
+            <li data-dir style="--deep:#2F519B;--tint:#DFE6F5;--light:#A9C0F2;--seed-l:#A7B1C9;--seed-d:#4F5261;--head-d:#262325"><a href="#/research/algorithmic-advice"><span class="tag" aria-hidden="true"></span>Algorithmic Advice &amp; Human Decisions</a></li>
+            <li data-dir style="--deep:#993452;--tint:#F5DFE5;--light:#F0A5BC;--seed-l:#D1A5AC;--seed-d:#68494E;--head-d:#2D201F"><a href="#/research/ai-at-work"><span class="tag" aria-hidden="true"></span>Generative &amp; Agentic AI at Work</a></li>
+            <li data-dir style="--deep:#3E6A2F;--tint:#E3ECD8;--light:#A9CF8F;--seed-l:#ADBB9E;--seed-d:#4F573E;--head-d:#26241B"><a href="#/research/learning-on-the-job"><span class="tag" aria-hidden="true"></span>Learning on the Job with Algorithms</a></li>
+            <li data-dir style="--deep:#7A5913;--tint:#F1E8CC;--light:#E3C26E;--seed-l:#C5B493;--seed-d:#635333;--head-d:#2B2318"><a href="#/research/platform-work"><span class="tag" aria-hidden="true"></span>Gig &amp; Platform Work Design</a></li>
+          </ul>
+        </div>
+      </section>
+      <section class="view view-stub" id="/publications" data-title="Publications, BOBALAB" hidden>
+        <div class="wrap stub">
+          <p class="dir-back"><a class="back" href="#/"><span aria-hidden="true">←</span> <span class="bt">Home</span></a></p>
+          <h1 tabindex="-1">Publications</h1>
+          <p class="prose">The filterable publications index is outside this prototype.</p>
+        </div>
+      </section>
+      <section class="view view-stub" id="/people" data-title="People, BOBALAB" hidden>
+        <div class="wrap stub">
+          <p class="dir-back"><a class="back" href="#/"><span aria-hidden="true">←</span> <span class="bt">Home</span></a></p>
+          <h1 tabindex="-1">People</h1>
+          <p class="prose">The people page is outside this prototype.</p>
+        </div>
+      </section>
+      <section class="view view-stub" id="/news" data-title="News, BOBALAB" hidden>
+        <div class="wrap stub">
+          <p class="dir-back"><a class="back" href="#/"><span aria-hidden="true">←</span> <span class="bt">Home</span></a></p>
+          <h1 tabindex="-1">News</h1>
+          <p class="prose">The news page is outside this prototype.</p>
+        </div>
+      </section>
+      <section class="view view-stub" id="/join" data-title="Join, BOBALAB" hidden>
+        <div class="wrap stub">
+          <p class="dir-back"><a class="back" href="#/"><span aria-hidden="true">←</span> <span class="bt">Home</span></a></p>
+          <h1 tabindex="-1">Join</h1>
+          <p class="prose">The join page is outside this prototype.</p>
+        </div>
+      </section>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot">
+    <p><strong>BOBALAB</strong> · Haas School of Business, University of California, Berkeley</p>
+    <button type="button" class="tbtn" id="motion-toggle" aria-pressed="false">Reduce motion</button>
+  </div>
+  <div class="wrap proto" aria-label="Prototype controls" role="group">
+    <span class="proto-k">Prototype A · calm specimen · draft copy</span>
+    <span class="tgroup" role="group" aria-label="Colour theme"><button type="button" class="tbtn" data-theme-set="auto" aria-pressed="true">Auto</button><button type="button" class="tbtn" data-theme-set="light" aria-pressed="false">Light</button><button type="button" class="tbtn" data-theme-set="dark" aria-pressed="false">Dark</button></span>
+    <button type="button" class="tbtn" id="replay">Replay intro</button>
+  </div>
+</footer>
+<p class="sr-only" id="announcer" aria-live="polite" aria-atomic="true"></p>
+<script>(function(){
+"use strict";
+var d=document,html=d.documentElement,W=window;
+var rm=W.matchMedia("(prefers-reduced-motion: reduce)"),hv=W.matchMedia("(hover: hover)");
+function reduced(){return rm.matches||html.getAttribute("data-motion")==="reduce";}
+function $$(s,r){return Array.prototype.slice.call((r||d).querySelectorAll(s));}
+try{history.scrollRestoration="manual";}catch(e){}
+
+/* ---- Fig. 1: live caption + lift/dim state ---- */
+var fig=d.querySelector(".plate"),resetFig=function(){};
+if(fig){
+  var items=$$(".fig-list>li",fig),caps={},capKey="legend",hoverT=0,capT=0,hov=null,esc=false;
+  $$("[data-cap]",fig).forEach(function(c){caps[c.getAttribute("data-cap")]=c;});
+  var setCap=function(k){if(k===capKey)return;caps[capKey].classList.remove("is-on");caps[k].classList.add("is-on");capKey=k;};
+  var setGfx=function(li){items.forEach(function(x){x.classList.toggle("is-active",x===li);});if(li)fig.setAttribute("data-active",li.getAttribute("data-slug"));else fig.removeAttribute("data-active");};
+  var focused=function(){var a=d.activeElement;return a&&fig.contains(a)&&a.matches(":focus-visible")?a.closest("li"):null;};
+  var sync=function(){var li=esc?null:(hov||focused());clearTimeout(capT);
+    if(li){setGfx(li);setCap(li.getAttribute("data-slug"));}
+    else{setGfx(null);capT=setTimeout(function(){setCap("legend");},300);}};
+  items.forEach(function(li){var a=li.querySelector("a");
+    a.addEventListener("pointerenter",function(e){if(e.pointerType==="touch"||!hv.matches)return;clearTimeout(hoverT);hoverT=setTimeout(function(){hov=li;esc=false;sync();},80);});
+    a.addEventListener("pointerleave",function(){clearTimeout(hoverT);if(hov===li)hov=null;sync();});
+    a.addEventListener("focus",function(){esc=false;sync();});
+    a.addEventListener("blur",sync);});
+  fig.addEventListener("keydown",function(e){if(e.key==="Escape"||e.key==="Esc"){esc=true;hov=null;clearTimeout(capT);setGfx(null);setCap("legend");}});
+  resetFig=function(){clearTimeout(hoverT);clearTimeout(capT);hov=null;esc=false;setGfx(null);setCap("legend");};
+}
+
+/* ---- hash router + pearl morph (View Transitions) ---- */
+var main=d.getElementById("main"),views=$$(".view",main),home=d.querySelector(".view-home"),header=d.querySelector(".site-header");
+var homeTitle=d.title,ann=d.getElementById("announcer"),homeY=0,token=0,named=[];
+function viewFor(h){if(!h||h==="#"||h==="#/")return home;if(h.slice(0,2)!=="#/")return null;
+  var el=d.getElementById(decodeURIComponent(h.slice(1)));return el&&el.classList.contains("view")?el:home;}
+function show(v){views.forEach(function(x){x.hidden=x!==v;});d.title=v.getAttribute("data-title")||homeTitle;
+  $$(".site-nav a").forEach(function(a){var on=v!==home&&(a.getAttribute("href")==="#/research"?v.classList.contains("view-dir")||v.id==="/research":a.getAttribute("href")==="#"+v.id);if(on)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current");});}
+function name(el,n){if(!el)return;el.style.viewTransitionName=n;named.push(el);}
+function unname(){named.forEach(function(el){el.style.viewTransitionName="";});named=[];}
+var cur=viewFor(location.hash)||home;
+show(cur);if(cur!==home)W.scrollTo(0,0);
+
+function go(next){
+  var prev=cur;if(next===prev)return;cur=next;
+  var slug=next.getAttribute("data-slug")||prev.getAttribute("data-slug");
+  var src=slug&&prev.querySelector('[data-pearl="'+slug+'"]'),dst=slug&&next.querySelector('[data-pearl="'+slug+'"]');
+  if(prev===home)homeY=W.scrollY;
+  var y=next===home?homeY:0,my=++token,red=reduced();
+  var kind=red?"reduce":prev.classList.contains("view-dir")&&next.classList.contains("view-dir")?(+next.querySelector(".idx").textContent>+prev.querySelector(".idx").textContent?"fwd":"back"):next===home?"close":"open";
+  var update=function(){show(next);if(next===home)resetFig();W.scrollTo(0,y);
+    if(src&&dst&&!red)name(dst,"pearl-"+slug);
+    var h=next.querySelector('h1[tabindex="-1"]');if(h)h.focus({preventScroll:true});};
+  var done=function(){if(ann){ann.textContent="";setTimeout(function(){ann.textContent=d.title;},60);}};
+  if(!d.startViewTransition){update();done();return;}
+  unname();
+  if(src&&dst&&!red)name(src,"pearl-"+slug);
+  name(header,W.scrollY<2&&y<2?"site-header":"none");
+  html.setAttribute("data-vt",kind);
+  var t;try{t=d.startViewTransition({update:update,types:[kind]});}catch(e){t=d.startViewTransition(update);}
+  t.finished.then(done,done).then(function(){if(my!==token)return;unname();html.removeAttribute("data-vt");});
+}
+W.addEventListener("hashchange",function(){var v=viewFor(location.hash);if(v)go(v);});
+var skip=d.querySelector(".skip");if(skip)skip.addEventListener("click",function(e){e.preventDefault();main.focus();});
+
+/* ---- footer: reduce-motion toggle (site) + prototype controls ---- */
+var mb=d.getElementById("motion-toggle");
+function syncM(){if(mb)mb.setAttribute("aria-pressed",String(html.getAttribute("data-motion")==="reduce"));}
+if(mb)mb.addEventListener("click",function(){var on=html.getAttribute("data-motion")!=="reduce";
+  if(on)html.setAttribute("data-motion","reduce");else html.removeAttribute("data-motion");
+  try{if(on)localStorage.setItem("bobalab-motion","reduce");else localStorage.removeItem("bobalab-motion");}catch(e){}syncM();});
+syncM();
+var tb=$$("[data-theme-set]");
+function syncT(){var t=html.getAttribute("data-theme")||"auto";tb.forEach(function(b){b.setAttribute("aria-pressed",String(b.getAttribute("data-theme-set")===t));});}
+tb.forEach(function(b){b.addEventListener("click",function(){var t=b.getAttribute("data-theme-set");
+  if(t==="auto")html.removeAttribute("data-theme");else html.setAttribute("data-theme",t);
+  try{if(t==="auto")localStorage.removeItem("bobalab-proto-theme");else localStorage.setItem("bobalab-proto-theme",t);}catch(e){}syncT();});});
+syncT();
+var rp=d.getElementById("replay");
+if(rp)rp.addEventListener("click",function(){var play=function(){html.removeAttribute("data-intro");void html.offsetWidth;html.setAttribute("data-intro","");setTimeout(function(){html.removeAttribute("data-intro");},1000);};
+  if(cur!==home){location.hash="#/";setTimeout(play,650);}else{W.scrollTo(0,0);play();}});
+})();</script>
+</body>
+</html>

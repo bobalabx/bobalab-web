@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOBALAB, Berkeley Operations and Behavioral Analytics Lab</title>
+<meta name="description" content="Prototype b-living: the BOBALAB home hero and Fig. 1, the Pearl Figure.">
+<meta name="color-scheme" content="light dark">
+<script>
+/* Pre-paint: motion preference + first-visit intro flag (brief E3, D-02). */
+(function(){var r=document.documentElement;r.classList.add('js');try{if(localStorage.getItem('bobalab-motion')==='reduce')r.setAttribute('data-motion','reduce')}catch(e){}try{var f=/[?&]intro\b/.test(location.search);if(location.hash.indexOf('#/research/')!==0&&(f||!sessionStorage.getItem('bobalab-intro'))){sessionStorage.setItem('bobalab-intro','1');r.setAttribute('data-intro','');setTimeout(function(){r.removeAttribute('data-intro')},1000)}}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,500..700,0..100&family=IBM+Plex+Mono:wght@500&family=Inter:wght@400..600&display=swap">
+<style>
+/* ---------- C2 tokens ---------- */
+:root{
+  color-scheme:light dark;
+  --paper:#FCFAF6;--surface:#FFFFFF;--paper-alt:#F4F0EA;--plate:#F7F1E8;
+  --ink:#1F1712;--ink-muted:#5C4F45;--accent:#8A4515;--accent-strong:#6B3410;
+  --rule:#857463;--hairline:#D8CAB6;--focus:#1F1712;--on-accent:#FCFAF6;
+  --pearl-index:#F7F1E8;--pearl-rim:transparent;
+  --pearl-body:radial-gradient(circle at 46% 40%,#3A281D 0,#2B1D15 52%,#1A110C 100%);
+  --pearl-core:rgb(0 0 0 / .26);--spec:rgb(255 246 235 / .22);
+  --f-display:"Fraunces",Georgia,"Times New Roman",serif;
+  --f-text:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --fs-mono:.8125rem;--fs-sm:.875rem;--fs-base:1.0625rem;--fs-lg:1.25rem;--fs-xl:1.5625rem;
+  --fs-2xl:clamp(1.75rem,1.35rem + 1.6vw,2.25rem);--fs-3xl:clamp(2.25rem,1.6rem + 2.6vw,3.25rem);
+  --s-1:.25rem;--s-2:.5rem;--s-3:.75rem;--s-4:1rem;--s-5:1.5rem;--s-6:2rem;--s-7:3rem;--s-8:4rem;--s-9:6rem;
+  --r-xs:2px;--r-md:10px;--r-pill:9999px;
+  --dur-press:100ms;--dur-fast:160ms;--dur-base:200ms;--dur-caption:180ms;--dur-morph:420ms;--dur-intro:480ms;--stagger-intro:40ms;
+  --ease-out:cubic-bezier(.2,.8,.2,1);--ease-emph:cubic-bezier(.2,0,0,1);--ease-settle:cubic-bezier(.22,1,.36,1);--ease-in:cubic-bezier(.4,0,1,1);
+  --gutter:16px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --paper:#17110E;--surface:#221A15;--paper-alt:#1C1511;--plate:#1E1713;
+  --ink:#F3ECE2;--ink-muted:#BFB2A5;--accent:#E0A46B;--accent-strong:#EDBD8F;
+  --rule:#8A7766;--hairline:#3D3129;--focus:#E0A46B;--on-accent:#17110E;
+  --pearl-index:#F3ECE2;--pearl-rim:#A47E62;
+  --pearl-body:radial-gradient(circle at 46% 40%,#4A372A 0,#3A2C22 52%,#2A1F18 100%);
+  --pearl-core:rgb(0 0 0 / .22);--spec:rgb(255 246 235 / .10);
+}}
+@media (min-width:40rem){:root{--gutter:24px}}
+@media (min-width:64rem){:root{--gutter:32px}}
+
+/* C3 direction swatches: deep / tint / light, seed = deep 40% over plate (light) or light 35% over dark plate */
+.c-bp{--dir-deep:#2F519B;--dir-tint:#DFE6F5;--dir-ink:#2F519B;--dir-seed:#A7B1C9;--dir-glow:rgb(47 81 155 / .45);--dir-band:#DFE6F5}
+.c-ly{--dir-deep:#993452;--dir-tint:#F5DFE5;--dir-ink:#993452;--dir-seed:#D1A5AC;--dir-glow:rgb(153 52 82 / .45);--dir-band:#F5DFE5}
+.c-ma{--dir-deep:#3E6A2F;--dir-tint:#E3ECD8;--dir-ink:#3E6A2F;--dir-seed:#ADBB9E;--dir-glow:rgb(62 106 47 / .45);--dir-band:#E3ECD8}
+.c-oo{--dir-deep:#7A5913;--dir-tint:#F1E8CC;--dir-ink:#7A5913;--dir-seed:#C5B493;--dir-glow:rgb(122 89 19 / .45);--dir-band:#F1E8CC}
+@media (prefers-color-scheme:dark){
+  .c-bp{--dir-ink:#A9C0F2;--dir-seed:#4F5261;--dir-glow:rgb(169 192 242 / .26);--dir-band:#262325}
+  .c-ly{--dir-ink:#F0A5BC;--dir-seed:#68494E;--dir-glow:rgb(240 165 188 / .26);--dir-band:#2D201F}
+  .c-ma{--dir-ink:#A9CF8F;--dir-seed:#4F573E;--dir-glow:rgb(169 207 143 / .26);--dir-band:#26241B}
+  .c-oo{--dir-ink:#E3C26E;--dir-seed:#635333;--dir-glow:rgb(227 194 110 / .26);--dir-band:#2B2318}
+}
+
+/* ---------- base ---------- */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 var(--fs-base)/1.6 var(--f-text);font-optical-sizing:auto;-webkit-font-smoothing:antialiased;overflow-wrap:break-word}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;font-variation-settings:"SOFT" 0;margin:0;line-height:1.2;text-wrap:balance}
+p{margin:0}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:.18em}
+a:hover{color:var(--accent-strong)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+[tabindex="-1"]:focus{outline:none}
+.wrap{max-width:calc(72rem + 2 * var(--gutter));margin-inline:auto;padding-inline:var(--gutter)}
+.vh{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.mono{font:500 var(--fs-mono)/1.4 var(--f-mono);letter-spacing:.06em}
+.skip{position:absolute;left:var(--gutter);top:-4rem;background:var(--ink);color:var(--paper);padding:var(--s-2) var(--s-3);border-radius:var(--r-xs);z-index:10}
+.skip:focus{top:var(--s-2)}
+[hidden]{display:none!important}
+
+/* ---------- site header ---------- */
+.site-head{border-bottom:1px solid var(--hairline);view-transition-name:site-head}
+.site-head .wrap{display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);min-height:56px;flex-wrap:wrap;padding-block:var(--s-2)}
+.home-link{display:inline-flex;align-items:center;gap:.5rem;color:var(--ink);text-decoration:none;font:500 .9375rem/1 var(--f-mono);letter-spacing:.08em}
+.home-link .dot{width:.8rem;height:.8rem;border-radius:50%;background:var(--pearl-body);box-shadow:inset 0 0 0 1px var(--pearl-rim)}
+.site-nav ul{display:flex;flex-wrap:wrap;gap:var(--s-1) clamp(.9rem,2vw,1.5rem);list-style:none;margin:0;padding:0}
+.site-nav a{color:var(--ink);text-decoration:none;font-size:.9375rem;font-weight:500}
+.site-nav a:hover{text-decoration:underline}
+.preview-tag{display:none;font:500 .75rem/1 var(--f-mono);letter-spacing:.06em;color:var(--ink-muted);border:1px solid var(--rule);border-radius:var(--r-pill);padding:.3rem .55rem;white-space:nowrap}
+@media (min-width:40rem){.preview-tag{display:inline-block}}
+
+/* ---------- hero identity ---------- */
+.hero{padding-block:var(--s-6) var(--s-8)}
+.hero-grid{display:grid;gap:var(--s-7)}
+.wm{display:inline-flex;align-items:baseline;font-family:var(--f-display);font-weight:680;font-variation-settings:"SOFT" 100,"opsz" 144;font-size:clamp(2.75rem,2.1rem + 2.2vw,3.5rem);line-height:1;letter-spacing:-.01em;color:var(--ink)}
+.wm-o{display:inline-block;width:.735em;height:.735em;margin:0 .035em 0 .04em;vertical-align:-.012em;border-radius:50%;position:relative;align-self:baseline;transform:translateY(.012em);
+  background:var(--pearl-body);box-shadow:inset 0 0 0 1px var(--pearl-rim),inset 0 -.04em .08em var(--pearl-core)}
+.wm-o::before{content:"";position:absolute;inset:14% 48% 50% 15%;border-radius:50%;background:radial-gradient(closest-side,rgb(255 246 235 / .24),transparent);transform:rotate(-38deg)}
+.wm-lab{font-family:var(--f-mono);font-weight:500;font-variation-settings:normal;font-size:.952em;letter-spacing:.08em;margin-left:.1em}
+.descriptor{display:block;margin-top:var(--s-4);font:500 1rem/1.45 var(--f-text);letter-spacing:.04em;color:var(--ink);max-width:24ch}
+.affil{margin-top:var(--s-2);font-size:.9375rem;line-height:1.5;color:var(--ink-muted);max-width:30ch}
+.mission{font-family:var(--f-display);font-weight:560;font-variation-settings:"SOFT" 0;font-size:clamp(2rem,1.2rem + 1.6vw,2.75rem);line-height:1.12;letter-spacing:-.012em;text-wrap:balance;max-width:16ch}
+.mission-draft{display:block;margin-top:var(--s-3);color:var(--ink-muted)}
+.cta{display:inline-flex;align-items:center;gap:.55rem;margin-top:var(--s-5);background:var(--accent);color:var(--on-accent);text-decoration:none;border:1px solid transparent;font:600 .9375rem/1 var(--f-text);padding:.9rem 1.15rem;border-radius:var(--r-xs);min-height:44px}
+.cta:hover{background:var(--accent-strong);color:var(--on-accent)}
+.cta .arr{transition:transform var(--dur-fast) var(--ease-out)}
+.id-mission{margin-top:var(--s-6)}
+@media (min-width:48rem){
+  .hero-id{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);column-gap:var(--s-7);align-items:end}
+  .id-mission{margin-top:0}
+}
+@media (min-width:75rem){
+  .hero-grid{grid-template-columns:minmax(min(19rem,100%),1fr) minmax(min(46rem,100%),2fr);column-gap:var(--s-7);align-items:start}
+  .hero-id{display:block;padding-top:var(--s-7)}
+  .id-mission{margin-top:var(--s-7);padding-top:var(--s-6);border-top:1px solid var(--hairline)}
+}
+
+/* ---------- Fig. 1 ---------- */
+/* em in a container query resolves against the container's own font size; pin it to 1rem so 46em = 736px at default settings and still grows with text zoom */
+.hero-figure{container:hero / inline-size;font-size:1rem}
+.dirs-head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s-4);flex-wrap:wrap;margin-bottom:var(--s-3)}
+.dirs-head h2{font-size:var(--fs-xl);line-height:1.3}
+.dirs-head .mono{color:var(--ink-muted)}
+.fig{--mode:list;--pd:44px;position:relative;margin:0;background:var(--plate);border:1px solid var(--hairline);border-radius:var(--r-md);padding:var(--s-5) var(--s-4) var(--s-4)}
+/* registration ticks: decorative plate corners */
+.fig::before,.fig::after{content:"";position:absolute;width:10px;height:10px;pointer-events:none;border-color:var(--rule);opacity:.55}
+.fig::before{left:8px;bottom:8px;border-left:1px solid;border-bottom:1px solid}
+.fig::after{right:8px;bottom:8px;border-right:1px solid;border-bottom:1px solid}
+
+/* live caption: all states share one grid cell, so the plate never changes height */
+.cap{display:grid;max-width:38rem}
+.cap-layer{grid-area:1/1;align-self:start;padding-left:var(--s-3);border-left:2px solid var(--hairline);opacity:0;visibility:hidden;transition:opacity 90ms linear,visibility 0s linear 90ms}
+/* the outgoing state is gone (90ms) before the incoming one starts (70ms delay), so two captions never overlap */
+.cap-layer.is-on{opacity:1;visibility:visible;transition:opacity var(--dur-caption) var(--ease-out) 70ms,visibility 0s}
+.cap-layer[data-cap]:not([data-cap="legend"]){border-left-color:var(--dir-ink)}
+.cap-t{font:600 .9375rem/1.4 var(--f-text);color:var(--ink)}
+.cap-t .mono{color:var(--ink-muted);margin-right:.5em;font-weight:500}
+.cap-layer:not([data-cap="legend"]) .cap-t .mono{color:var(--dir-ink)}
+.cap-b{font-size:var(--fs-sm);line-height:1.45;color:var(--ink-muted);margin-top:2px;max-width:60ch}
+.cap-m{color:var(--ink-muted);margin-top:var(--s-1)}
+html:not(.js) .cap-layer[data-cap="legend"]{opacity:1;visibility:visible}
+/* list mode (E6): the caption is the legend only, so it never reserves space for summaries */
+@container hero (width < 46em){
+  .cap-layer:not([data-cap="legend"]){display:none}
+  :root .fig .cap-layer[data-cap="legend"]{opacity:1;visibility:visible;transform:none}
+}
+
+.motion-btn{display:none;align-items:center;gap:.45rem;font:500 var(--fs-mono)/1 var(--f-mono);letter-spacing:.04em;color:var(--ink);background:var(--plate);border:1px solid var(--rule);border-radius:var(--r-pill);padding:.45rem .8rem .45rem .6rem;min-height:32px;cursor:pointer}
+.motion-btn:hover{background:var(--surface)}
+.motion-btn svg{width:14px;height:14px}
+.motion-btn .i-play,.motion-btn[data-state="paused"] .i-pause{display:none}
+.motion-btn[data-state="paused"] .i-play{display:block}
+
+.fig ol{list-style:none;margin:var(--s-4) 0 0;padding:0}
+.fig li{border-top:1px solid var(--hairline)}
+.fig a{display:grid;grid-template-columns:var(--pd) minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:var(--s-4);align-items:center;min-height:64px;padding-block:var(--s-2);color:var(--ink);text-decoration:none;-webkit-tap-highlight-color:transparent}
+.fig a:focus-visible{outline:none}
+.pearl-group{grid-row:1/span 2;position:relative;display:grid;place-items:center;width:var(--pd);height:var(--pd)}
+.float,.buoy{display:grid;place-items:center;grid-area:1/1;width:100%;height:100%;position:relative}
+.label{grid-column:2;align-self:end;font:600 var(--fs-base)/1.3 var(--f-text);text-decoration:underline;text-decoration-color:transparent;text-decoration-thickness:2px;text-underline-offset:.22em;transition:text-decoration-color var(--dur-fast) linear}
+.count{grid-column:2;align-self:start;font:500 var(--fs-mono)/1.4 var(--f-mono);letter-spacing:.06em;color:var(--ink-muted)}
+.chev{grid-column:3;grid-row:1/span 2;width:20px;height:20px;color:var(--ink-muted)}
+.seeds{display:none}
+.fig a:hover .label,.fig a:focus-visible .label,.fig li.is-on .label{text-decoration-color:var(--dir-ink)}
+.fig a:focus-visible .pearl{outline:2px solid var(--focus);outline-offset:3px}
+
+/* the pearl (E2 material: matte, glow in direction deep, highlight <= .25 alpha, rim in dark mode) */
+.pearl{position:relative;display:grid;place-items:center;width:var(--pd);height:var(--pd);border-radius:50%;color:var(--pearl-index);
+  background:radial-gradient(circle at 50% 88%,var(--dir-glow,transparent) 0,transparent 62%),var(--pearl-body);
+  box-shadow:inset 0 0 0 1px var(--pearl-rim),inset 0 calc(var(--pd) * -.05) calc(var(--pd) * .12) var(--pearl-core)}
+/* matte crescent sheen at 10 o'clock (alpha <= .25), drawn as an inset light so it reads as satin, not gloss */
+.pearl::before{content:"";position:absolute;inset:4%;border-radius:50%;box-shadow:inset calc(var(--pd) * .04) calc(var(--pd) * .055) calc(var(--pd) * .07) calc(var(--pd) * -.03) var(--spec)}
+.idx{position:relative;font:500 var(--fs-mono)/1 var(--f-mono);letter-spacing:.06em}
+
+/* seeds: 12 fixed ring slots, flat dots, fill order 12,1,11,2,10,3,... (E2) */
+/* orbit: the ring the seeds sit on (decorative hairline) */
+.orbit{position:absolute;left:50%;top:50%;width:calc(var(--ring) * 2);height:calc(var(--ring) * 2);margin:calc(var(--ring) * -1) 0 0 calc(var(--ring) * -1);border-radius:50%;border:1px solid var(--hairline)}
+.seed{position:absolute;left:50%;top:50%;width:var(--sd);height:var(--sd);margin:calc(var(--sd) / -2) 0 0 calc(var(--sd) / -2);border-radius:50%;background:var(--dir-seed);
+  transform:rotate(var(--a)) translateY(calc(var(--ring) * -1))}
+
+/* ---- figure mode (container >= 46em), template t4: 5 columns, slots (1,1)(1,3)/(2,2)(2,4) ---- */
+@container hero (width >= 46em){
+  .fig{--mode:fig;--D:clamp(5rem,14cqi,7.5rem);--pd:var(--D);--ring:calc(var(--D) * .64);--sd:max(6px,calc(var(--D) * .12));padding:var(--s-5) var(--s-5) var(--s-5)}
+  .cap{max-width:calc(100% - 10.5rem)}
+  .motion-btn{position:absolute;top:var(--s-5);right:var(--s-5)}
+  html.js .motion-btn{display:inline-flex}
+  .fig ol{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin-top:var(--s-3);max-width:46rem;margin-inline:auto}
+  .fig li{border:0;grid-row:1;translate:calc(var(--nx) * var(--D)) calc(var(--ny) * var(--D))}
+  .fig li:nth-child(1){grid-column:1/span 2}
+  .fig li:nth-child(2){grid-column:3/span 2}
+  .fig li:nth-child(3){grid-row:2;grid-column:2/span 2;margin-top:calc(var(--D) * -.25)}
+  .fig li:nth-child(4){grid-row:2;grid-column:4/span 2;margin-top:calc(var(--D) * -.25)}
+  .fig a{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 var(--s-2) var(--s-3);min-height:0}
+  /* rows overlap by .25D, so cell boxes overlap: only the pearl, label and count take the pointer (each >= 44px tall together) */
+  .fig li,.fig a{pointer-events:none}
+  .fig .pearl,.fig .label,.fig .count{pointer-events:auto}
+  .fig .label{padding-top:var(--s-1)}
+  .pearl-group{width:calc(var(--D) * 1.42);height:calc(var(--D) * 1.42)}
+  .seeds{display:block;position:absolute;inset:0}
+  .label{margin-top:var(--s-1);align-self:center}
+  .count{margin-top:2px;align-self:center}
+  .chev{display:none}
+  .fig li:not(:first-child) .label{max-width:18ch}
+  .float{transition:opacity var(--dur-base) linear}
+  .fig[data-active] li:not(.is-on) .float{opacity:.55}
+}
+.fig-note{margin-top:var(--s-3);font-size:var(--fs-sm);line-height:1.45;color:var(--ink-muted);max-width:68ch}
+
+/* ---------- motion (motion-last gate, C6 + D-02) ---------- */
+@media (prefers-reduced-motion:no-preference){
+  :root:not([data-motion="reduce"]) .pearl{transition:transform var(--dur-fast) var(--ease-out)}
+  :root:not([data-motion="reduce"]) .fig li.is-on .pearl{transform:translateY(-3px) scale(1.06);transition-duration:var(--dur-base)}
+  :root:not([data-motion="reduce"]) .fig a:active .pearl{transform:scale(.98);transition-duration:var(--dur-press)}
+  :root:not([data-motion="reduce"]) .cap-layer{transform:translateY(4px);transition:opacity 90ms linear,transform 0s linear 90ms,visibility 0s linear 90ms}
+  :root:not([data-motion="reduce"]) .cap-layer.is-on{transform:none;transition:opacity var(--dur-caption) var(--ease-out) 70ms,transform var(--dur-caption) var(--ease-out) 70ms,visibility 0s}
+  :root:not([data-motion="reduce"]) .cta:hover .arr{transform:translateX(3px)}
+  @container hero (width >= 46em){
+    /* seed bloom: ring radius +13 %, 20 ms stagger, settles back with the same stagger */
+    :root:not([data-motion="reduce"]) .seed{transition:transform 320ms var(--ease-out) calc(var(--k) * 20ms)}
+    :root:not([data-motion="reduce"]) .fig li.is-on .seed{transform:rotate(var(--a)) translateY(calc(var(--ring) * -1.13))}
+    :root:not([data-motion="reduce"]) .orbit{transition:transform 320ms var(--ease-out)}
+    :root:not([data-motion="reduce"]) .fig li.is-on .orbit{transform:scale(1.13)}
+    /* idle float: transform-only keyframes on 4 wrappers; desynchronised periods; JS-only so the pause control always exists */
+    html.js .float{animation:bob var(--bp) ease-in-out var(--bd) infinite}
+    :root[data-motion="reduce"] .float,.fig[data-offscreen] .float,:root[data-hidden] .float{animation-play-state:paused}
+    /* pointer buoyancy: JS writes `translate`, CSS eases it (no rAF loop while the pointer is still) */
+    :root:not([data-motion="reduce"]) .buoy{transition:translate 900ms var(--ease-out)}
+    /* intro settle, first home view per session */
+    :root[data-intro]:not([data-motion="reduce"]) .pearl-group{animation:settle var(--dur-intro) var(--ease-settle) calc(var(--i) * var(--stagger-intro)) both}
+  }
+  :root:not([data-motion="reduce"]) .view-dir.is-arriving .hero-seeds .seed{animation:seed-in 360ms var(--ease-out) calc(220ms + var(--k) * 20ms) both}
+}
+@keyframes bob{0%,100%{transform:translateY(calc(var(--ba) * -1))}50%{transform:translateY(var(--ba))}}
+@keyframes settle{0%{transform:translateY(-14px);opacity:0}72%{transform:translateY(2px);opacity:1}100%{transform:none;opacity:1}}
+@keyframes seed-in{from{opacity:0;transform:rotate(var(--a)) translateY(calc(var(--ring) * -.82))}}
+/* reduced: hover/focus = 2px outline + label underline */
+@media (prefers-reduced-motion:reduce){.fig li.is-on .pearl{outline:2px solid var(--focus);outline-offset:3px}}
+:root[data-motion="reduce"] .fig li.is-on .pearl{outline:2px solid var(--focus);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.motion-btn{display:none!important}}
+
+/* no-JS fallback for hover/focus emphasis */
+html:not(.js) .fig li:is(:hover,:focus-within) .label{text-decoration-color:var(--dir-ink)}
+
+/* ---------- view transitions (E5) ---------- */
+::view-transition{pointer-events:none}
+::view-transition-group(site-head),::view-transition-old(site-head),::view-transition-new(site-head){animation:none}
+::view-transition-old(site-head){display:none}
+::view-transition-old(root),::view-transition-new(root){animation-duration:120ms}
+@media (prefers-reduced-motion:no-preference){
+  :root:not([data-motion="reduce"])::view-transition-old(root){animation:150ms var(--ease-in) both vt-out}
+  :root:not([data-motion="reduce"])::view-transition-new(root){animation:210ms var(--ease-out) 150ms both vt-in}
+  :root:not([data-motion="reduce"]):active-view-transition-type(pearl-close)::view-transition-old(root){animation-name:vt-out-up}
+}
+::view-transition-group(.pearl-morph){animation-duration:var(--dur-morph);animation-timing-function:var(--ease-emph)}
+::view-transition-image-pair(.pearl-morph){animation:vt-blur var(--dur-morph) var(--ease-emph)}
+::view-transition-old(.pearl-morph),::view-transition-new(.pearl-morph){animation-duration:var(--dur-morph);animation-timing-function:var(--ease-emph);height:100%}
+@keyframes vt-out{to{opacity:0;transform:translateY(8px)}}
+@keyframes vt-out-up{to{opacity:0;transform:translateY(-8px)}}
+@keyframes vt-in{from{opacity:0}}
+@keyframes vt-blur{40%{filter:blur(3px)}}
+
+/* ---------- home: recent publications ---------- */
+.meniscus{height:5px;border:1px solid var(--hairline);border-top:0;border-radius:0 0 14px 14px / 0 0 5px 5px}
+.recent{padding-block:var(--s-7) var(--s-8)}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s-4);flex-wrap:wrap;margin-bottom:var(--s-5)}
+.sec-head h2{font-size:var(--fs-2xl)}
+.pubs{list-style:none;margin:0;padding:0;border-top:1px solid var(--hairline)}
+.pubs>li{display:grid;grid-template-columns:4.5rem minmax(0,1fr);gap:var(--s-1) var(--s-5);padding-block:var(--s-4);border-bottom:1px solid var(--hairline)}
+.pubs .yr{color:var(--ink-muted);padding-top:.2rem}
+.p-title{font-weight:500;line-height:1.45}
+.p-title a{color:var(--ink);text-decoration-color:var(--rule)}
+.p-title a:hover{text-decoration-color:currentColor}
+.p-meta{font-size:var(--fs-sm);color:var(--ink-muted);margin-top:2px}
+.type{font:500 .75rem/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted);border:1px solid var(--rule);border-radius:var(--r-pill);padding:.2rem .45rem;margin-right:.5rem;display:inline-block;vertical-align:.08em}
+.tags{display:flex;flex-wrap:wrap;gap:var(--s-1) var(--s-4);margin-top:var(--s-2);list-style:none;padding:0}
+.tag{display:inline-flex;align-items:center;gap:.4rem;font-size:var(--fs-sm);color:var(--ink)}
+.tag::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--dir-deep)}
+@media (prefers-color-scheme:dark){.tag::before{background:var(--dir-ink)}}
+@media (max-width:40rem){.pubs>li{grid-template-columns:1fr}}
+
+/* ---------- footer ---------- */
+.site-foot{border-top:1px solid var(--hairline);background:var(--paper-alt);padding-block:var(--s-6)}
+.site-foot .wrap{display:flex;flex-wrap:wrap;gap:var(--s-4) var(--s-6);justify-content:space-between;align-items:center}
+.site-foot p{font-size:var(--fs-sm);color:var(--ink-muted);max-width:60ch}
+.tgl{display:inline-flex;align-items:center;gap:.6rem;font:500 var(--fs-sm)/1 var(--f-text);color:var(--ink);background:transparent;border:1px solid var(--rule);border-radius:var(--r-pill);padding:.55rem .85rem;min-height:40px;cursor:pointer}
+.tgl::before{content:"";width:28px;height:16px;border-radius:9px;border:1px solid var(--rule);background:radial-gradient(circle at 8px 50%,var(--ink-muted) 0 5px,transparent 5.5px)}
+.tgl[aria-pressed="true"]::before{background:radial-gradient(circle at 19px 50%,var(--accent) 0 5px,transparent 5.5px)}
+
+/* ---------- direction page (prototype of D5) ---------- */
+.band{background:var(--dir-band);border-bottom:1px solid var(--hairline);padding-block:var(--s-5) var(--s-7)}
+.crumbs{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s-4);flex-wrap:wrap}
+.crumbs a{font-weight:500;font-size:.9375rem}
+.crumbs .mono{color:var(--ink-muted)}
+.dir-hero{display:grid;gap:var(--s-5);margin-top:var(--s-6);align-items:center}
+.hero-pearl{--pd:clamp(7.5rem,6rem + 6vw,10rem);--ring:calc(var(--pd) * .64);--sd:max(8px,calc(var(--pd) * .085));position:relative;width:calc(var(--pd) * 1.5);height:calc(var(--pd) * 1.5);display:grid;place-items:center}
+.hero-pearl .idx{font-size:1rem}
+.hero-seeds{position:absolute;inset:0}
+.badge{display:inline-block;font:500 .75rem/1 var(--f-mono);letter-spacing:.06em;color:var(--ink-muted);border:1px solid var(--rule);border-radius:var(--r-pill);padding:.3rem .55rem}
+.dir-hero h1{font-size:var(--fs-3xl);line-height:1.1;margin-top:var(--s-3);max-width:20ch}
+.dir-q-l{margin-top:var(--s-5);color:var(--dir-ink)}
+.dir-q{font-size:var(--fs-lg);line-height:1.45;max-width:46ch;margin-top:var(--s-1)}
+.dir-status{margin-top:var(--s-4);color:var(--ink-muted)}
+@media (min-width:48rem){.dir-hero{grid-template-columns:auto minmax(0,1fr);gap:var(--s-7)}}
+.dir-body{display:grid;gap:var(--s-7);padding-block:var(--s-7) var(--s-8)}
+@media (min-width:64rem){.dir-body{grid-template-columns:minmax(0,7fr) minmax(0,4fr);gap:var(--s-8)}}
+.dir-body h2{font-size:var(--fs-xl);margin-bottom:var(--s-3)}
+.prose{max-width:66ch}
+.papers{list-style:none;margin:var(--s-3) 0 0;padding:0}
+.papers li{display:grid;grid-template-columns:10px minmax(0,1fr);gap:var(--s-3);padding-block:var(--s-3);border-top:1px solid var(--hairline)}
+.papers li::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--dir-deep);margin-top:.5rem}
+@media (prefers-color-scheme:dark){.papers li::before{background:var(--dir-ink)}}
+.see-all{margin-top:var(--s-4);font-size:.9375rem}
+.rail h2{font-size:var(--fs-lg);font-family:var(--f-text);font-weight:600}
+.rail ul{list-style:none;margin:var(--s-3) 0 0;padding:0}
+.rail a{display:flex;align-items:center;gap:var(--s-3);min-height:56px;color:var(--ink);text-decoration:none;font-weight:500;border-top:1px solid var(--hairline)}
+.rail a:hover span.t{text-decoration:underline}
+.rail .pearl{--pd:40px}
+.updated{margin-top:var(--s-6);color:var(--ink-muted)}
+
+/* no-JS: pure CSS routing with :target */
+html:not(.js) .view-dir:target{display:block!important}
+html:not(.js) body:has(.view-dir:target) .view-home{display:none}
+
+/* ---------- forced colours (E7) ---------- */
+@media (forced-colors:active){
+  .pearl,.wm-o,.home-link .dot{forced-color-adjust:none;background:Canvas;border:2px solid CanvasText;box-shadow:none;color:CanvasText}
+  .pearl::before,.wm-o::before{display:none}
+  .seed,.tag::before,.papers li::before{forced-color-adjust:none;background:CanvasText}
+  .fig a:focus-visible .pearl{outline:2px solid Highlight;outline-offset:3px}
+  .fig li.is-on .pearl{outline:2px solid Highlight;outline-offset:3px}
+  .fig[data-active] li:not(.is-on) .float{opacity:1}
+  .cap-layer,.fig,.motion-btn,.tgl{border-color:CanvasText}
+  .orbit{forced-color-adjust:none;border-color:GrayText}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="home-link" href="#/"><span class="dot" aria-hidden="true"></span>BOBALAB</a>
+    <nav class="site-nav" aria-label="Site">
+      <ul>
+        <li><a href="#research-directions">Research</a></li>
+        <li><a href="#recent">Publications</a></li>
+        <li><a href="#site-foot">People</a></li>
+        <li><a href="#site-foot">News</a></li>
+        <li><a href="#site-foot">Join</a></li>
+      </ul>
+    </nav>
+    <span class="preview-tag">Preview · drafts</span>
+  </div>
+</header>
+
+<main id="main">
+<div class="view view-home">
+  <div class="hero wrap">
+    <div class="hero-grid">
+      <section class="hero-id" aria-labelledby="site-title">
+        <div class="id-lockup">
+          <h1 id="site-title">
+            <span class="vh">BOBALAB, </span>
+            <span class="wm" aria-hidden="true">B<span class="wm-o"></span>BA<span class="wm-lab">LAB</span></span>
+            <span class="descriptor">Berkeley Operations and Behavioral Analytics Lab</span>
+          </h1>
+          <p class="affil">Haas School of Business, University of California, Berkeley</p>
+        </div>
+        <div class="id-mission">
+          <p class="mission">Improving how people and AI work together, as work itself changes.</p>
+          <a class="cta" href="#research-directions">Explore our research <span class="arr" aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section class="hero-figure" id="research-directions" aria-labelledby="dirs-h">
+        <div class="dirs-head">
+          <h2 id="dirs-h">Research directions</h2>
+          <p class="mono"><span class="vh">Totals: </span>4 directions · 13 papers</p>
+        </div>
+        <figure class="fig" aria-label="Fig. 1, research directions of BOBALAB" data-n="4" data-template="t4">
+          <figcaption class="cap" aria-live="off">
+            <div class="cap-layer is-on" data-cap="legend">
+              <p class="cap-t"><span class="mono">Fig. 1</span>Research directions of BOBALAB.</p>
+              <p class="cap-b">Each pearl is a direction; small dots are its papers.</p>
+            </div>
+            <div class="cap-layer c-bp" data-cap="algorithmic-advice">
+              <p class="cap-t"><span class="mono" aria-hidden="true">01</span>Algorithmic Advice</p>
+              <p class="cap-b">When people take an algorithm’s advice, and how to design advice that helps today and still leaves people better decision-makers on their own.</p>
+              <p class="cap-m mono">5 projects · 4 papers</p>
+            </div>
+            <div class="cap-layer c-ly" data-cap="ai-at-work">
+              <p class="cap-t"><span class="mono" aria-hidden="true">02</span>AI at Work</p>
+              <p class="cap-b">How teachers, advisors and service teams actually use generative and agentic AI, and how much an AI agent should decide by itself.</p>
+              <p class="cap-m mono">5 projects · 5 papers</p>
+            </div>
+            <div class="cap-layer c-ma" data-cap="learning-on-the-job">
+              <p class="cap-t"><span class="mono" aria-hidden="true">03</span>Learning on the Job</p>
+              <p class="cap-b">How gig workers learn alongside recommendation apps, and how platforms can assign work so people build skill rather than only cover demand.</p>
+              <p class="cap-m mono">4 projects · 4 papers</p>
+            </div>
+            <div class="cap-layer c-oo" data-cap="platform-work">
+              <p class="cap-t"><span class="mono" aria-hidden="true">04</span>Platform Work</p>
+              <p class="cap-b">What drives when and where flexible workers choose to work, and how pay and incentives shape those choices across competing apps.</p>
+              <p class="cap-m mono">5 projects · 5 papers</p>
+            </div>
+          </figcaption>
+          <button type="button" class="motion-btn" data-motion-toggle data-state="playing">
+            <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 6v12M15 6v12"/></svg>
+            <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M8 5.5v13l10.5-6.5z"/></svg>
+            <span>Pause motion</span>
+          </button>
+          <nav aria-label="Research directions">
+            <ol role="list">
+              <li class="c-bp" data-slug="algorithmic-advice" style="--i:0;--nx:0;--ny:0;--bp:8.6s;--bd:-2.1s;--ba:2.6px">
+                <a href="#/research/algorithmic-advice/" aria-describedby="d-algorithmic-advice">
+                  <span class="pearl-group" aria-hidden="true"><span class="float"><span class="buoy">
+                    <span class="pearl" data-vt="algorithmic-advice"><span class="idx">01</span></span>
+                    <span class="seeds"><i class="orbit"></i><i class="seed" style="--a:0deg;--k:0"></i><i class="seed" style="--a:30deg;--k:1"></i><i class="seed" style="--a:330deg;--k:2"></i><i class="seed" style="--a:60deg;--k:3"></i></span>
+                  </span></span></span>
+                  <span class="label">Algorithmic Advice<span aria-hidden="true">&nbsp;→</span></span>
+                  <span class="count">4 papers</span>
+                  <svg class="chev" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 6 6 6-6 6"/></svg>
+                </a>
+                <p id="d-algorithmic-advice" hidden>When people take an algorithm’s advice, and how to design advice that helps today and still leaves people better decision-makers on their own.</p>
+              </li>
+              <li class="c-ly" data-slug="ai-at-work" style="--i:1;--nx:.06;--ny:.08;--bp:10.4s;--bd:-6.4s;--ba:3px">
+                <a href="#/research/ai-at-work/" aria-describedby="d-ai-at-work">
+                  <span class="pearl-group" aria-hidden="true"><span class="float"><span class="buoy">
+                    <span class="pearl" data-vt="ai-at-work"><span class="idx">02</span></span>
+                    <span class="seeds"><i class="orbit"></i><i class="seed" style="--a:0deg;--k:0"></i><i class="seed" style="--a:30deg;--k:1"></i><i class="seed" style="--a:330deg;--k:2"></i><i class="seed" style="--a:60deg;--k:3"></i><i class="seed" style="--a:300deg;--k:4"></i></span>
+                  </span></span></span>
+                  <span class="label">AI at Work<span aria-hidden="true">&nbsp;→</span></span>
+                  <span class="count">5 papers</span>
+                  <svg class="chev" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 6 6 6-6 6"/></svg>
+                </a>
+                <p id="d-ai-at-work" hidden>How teachers, advisors and service teams actually use generative and agentic AI, and how much an AI agent should decide by itself.</p>
+              </li>
+              <li class="c-ma" data-slug="learning-on-the-job" style="--i:2;--nx:-.04;--ny:-.05;--bp:7.4s;--bd:-0.9s;--ba:2.2px">
+                <a href="#/research/learning-on-the-job/" aria-describedby="d-learning-on-the-job">
+                  <span class="pearl-group" aria-hidden="true"><span class="float"><span class="buoy">
+                    <span class="pearl" data-vt="learning-on-the-job"><span class="idx">03</span></span>
+                    <span class="seeds"><i class="orbit"></i><i class="seed" style="--a:0deg;--k:0"></i><i class="seed" style="--a:30deg;--k:1"></i><i class="seed" style="--a:330deg;--k:2"></i><i class="seed" style="--a:60deg;--k:3"></i></span>
+                  </span></span></span>
+                  <span class="label">Learning on the Job<span aria-hidden="true">&nbsp;→</span></span>
+                  <span class="count">4 papers</span>
+                  <svg class="chev" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 6 6 6-6 6"/></svg>
+                </a>
+                <p id="d-learning-on-the-job" hidden>How gig workers learn alongside recommendation apps, and how platforms can assign work so people build skill rather than only cover demand.</p>
+              </li>
+              <li class="c-oo" data-slug="platform-work" style="--i:3;--nx:.03;--ny:.10;--bp:9.4s;--bd:-4.3s;--ba:2.8px">
+                <a href="#/research/platform-work/" aria-describedby="d-platform-work">
+                  <span class="pearl-group" aria-hidden="true"><span class="float"><span class="buoy">
+                    <span class="pearl" data-vt="platform-work"><span class="idx">04</span></span>
+                    <span class="seeds"><i class="orbit"></i><i class="seed" style="--a:0deg;--k:0"></i><i class="seed" style="--a:30deg;--k:1"></i><i class="seed" style="--a:330deg;--k:2"></i><i class="seed" style="--a:60deg;--k:3"></i><i class="seed" style="--a:300deg;--k:4"></i></span>
+                  </span></span></span>
+                  <span class="label">Platform Work<span aria-hidden="true">&nbsp;→</span></span>
+                  <span class="count">5 papers</span>
+                  <svg class="chev" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 6 6 6-6 6"/></svg>
+                </a>
+                <p id="d-platform-work" hidden>What drives when and where flexible workers choose to work, and how pay and incentives shape those choices across competing apps.</p>
+              </li>
+            </ol>
+          </nav>
+        </figure>
+        <p class="fig-note">Dots count papers with a public version (DOI, SSRN, arXiv or PDF) or a documented conference talk; a paper in two directions appears in both. Draft groupings from public sources, 20 Oct 2026, pending lab review.</p>
+      </section>
+    </div>
+  </div>
+
+  <div class="wrap" aria-hidden="true"><div class="meniscus"></div></div>
+
+  <section class="recent wrap" id="recent" aria-labelledby="recent-h">
+    <div class="sec-head">
+      <h2 id="recent-h">Recent publications</h2>
+      <a href="#recent">All publications <span aria-hidden="true">→</span></a>
+    </div>
+    <ul class="pubs" role="list">
+      <li>
+        <span class="yr mono">2026</span>
+        <div>
+          <p class="p-title"><a href="https://doi.org/10.48550/arXiv.2610.10265">Stale, Misattributed, or Late: Where Personal Memory Fails Before Generation</a></p>
+          <p class="p-meta"><span class="type">Preprint</span>arXiv, October 2026</p>
+          <ul class="tags" role="list"><li class="tag c-ly">AI at Work</li></ul>
+        </div>
+      </li>
+      <li>
+        <span class="yr mono">2026</span>
+        <div>
+          <p class="p-title"><a href="https://doi.org/10.1287/mnsc.2022.02455">Improving Human Sequential Decision Making with Reinforcement Learning</a></p>
+          <p class="p-meta"><span class="type">Journal</span>Management Science</p>
+          <ul class="tags" role="list"><li class="tag c-bp">Algorithmic Advice</li></ul>
+        </div>
+      </li>
+      <li>
+        <span class="yr mono">2025</span>
+        <div>
+          <p class="p-title"><a href="https://doi.org/10.1145/3757621">Learning on the Go: Understanding How Gig Economy Workers Learn with Recommendation Algorithms</a></p>
+          <p class="p-meta"><span class="type">Journal</span>Proceedings of the ACM on Human-Computer Interaction (CSCW 2025)</p>
+          <ul class="tags" role="list"><li class="tag c-ma">Learning on the Job</li><li class="tag c-oo">Platform Work</li></ul>
+        </div>
+      </li>
+    </ul>
+  </section>
+</div>
+
+<!-- ======== Direction pages (prototype of D5; statically rendered, shown by hash route) ======== -->
+<article class="view view-dir c-bp" id="/research/algorithmic-advice/" data-slug="algorithmic-advice" data-title="Algorithmic Advice &amp; Human Decisions" aria-labelledby="h1-algorithmic-advice" hidden>
+  <header class="band">
+    <div class="wrap">
+      <p class="crumbs"><a href="#/"><span aria-hidden="true">← </span>All directions</a><span class="mono">Research / <span aria-hidden="true">01</span></span></p>
+      <div class="dir-hero">
+        <div class="hero-pearl" aria-hidden="true">
+          <span class="pearl" data-vt="algorithmic-advice"><span class="idx">01</span></span>
+          <span class="hero-seeds"><i class="orbit"></i><i class="seed" style="--a:0deg;--k:0"></i><i class="seed" style="--a:30deg;--k:1"></i><i class="seed" style="--a:330deg;--k:2"></i><i class="seed" style="--a:60deg;--k:3"></i></span>
+        </div>
+        <div>
+          <span class="badge">Draft · pending lab review</span>
+          <h1 id="h1-algorithmic-advice" tabindex="-1">Algorithmic Advice &amp; Human Decisions</h1>
+          <p class="dir-q-l mono">Guiding question</p>
+          <p class="dir-q">When should advice name the exact next move, and when should it teach a broader rule that people can carry into new situations?</p>
+          <p class="dir-status mono">5 projects · 4 papers</p>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="wrap dir-body">
+    <div>
+      <section aria-labelledby="w-aa"><h2 id="w-aa">Why it matters</h2>
+        <p class="prose">Algorithms can often work out a better course of action than people find on their own, but advice only helps if people act on it. This direction asks how advice should be shaped and how precise it should be, so that it improves decisions in the moment and still leaves people more capable once the algorithm steps away.</p>
+      </section>
+      <section aria-labelledby="p-aa" style="margin-top:var(--s-7)"><h2 id="p-aa">Papers</h2>
+        <ul class="papers" role="list">
+          <li><div><p class="p-title">Improving Human Sequential Decision Making with Reinforcement Learning</p><p class="p-meta"><span class="type">Journal</span>Management Science · 2026</p></div></li>
+          <li><div><p class="p-title">Precise or Broad? The Reward-Learning Frontier in Algorithmic Advice Design</p><p class="p-meta"><span class="type">Working paper</span>2026 · in revision at M&amp;SOM (PI-reported, Apr 2026)</p></div></li>
+          <li><div><p class="p-title">Strategic Advice in the Age of Personal AI</p><p class="p-meta"><span class="type">Preprint</span>arXiv · 2026</p></div></li>
+          <li><div><p class="p-title">Managing Human Agents with Compliance-Aware Reinforcement Learning</p><p class="p-meta"><span class="type">Talk</span>INFORMS MSOM Conference · 2026</p></div></li>
+        </ul>
+        <p class="see-all"><a href="#recent">See all in Publications <span aria-hidden="true">→</span></a></p>
+      </section>
+    </div>
+    <aside>
+      <nav class="rail" aria-label="More directions"><h2>More directions</h2>
+        <ul role="list">
+          <li class="c-ly"><a href="#/research/ai-at-work/"><span class="pearl" data-vt="ai-at-work" aria-hidden="true"><span class="idx">02</span></span><span class="t">AI at Work</span></a></li>
+          <li class="c-ma"><a href="#/research/learning-on-the-job/"><span class="pearl" data-vt="learning-on-the-job" aria-hidden="true"><span class="idx">03</span></span><span class="t">Learning on the Job</span></a></li>
+          <li class="c-oo"><a href="#/research/platform-work/"><span class="pearl" data-vt="platform-work" aria-hidden="true"><span class="idx">04</span></span><span class="t">Platform Work</span></a></li>
+        </ul>
+      </nav>
+      <p class="updated mono">Last updated 20 Oct 2026</p>
+    </aside>
+  </div>
+</article>
+
+<article class="view view-dir c-ly" id="/research/ai-at-work/" data-slug="ai-at-work" data-title="Generative &amp; Agentic AI at Work" aria-labelledby="h1-ai-at-work" hidden>
+  <header class="band">
+    <div class="wrap">
+      <p class="crumbs"><a href="#/"><span aria-hidden="true">← </span>All directions</a><span class="mono">Research / <span aria-hidden="true">02</span></span></p>
+      <div class="dir-hero">
+        <div class="hero-pearl" aria-hidden="true">
+          <span class="pearl" data-vt="ai-at-work"><span class="idx">02</span></span>
+          <span class="hero-seeds"><i class="orbit"></i><i class="seed" style="--a:0deg;--k:0"></i><i class="seed" style="--a:30deg;--k:1"></i><i class="seed" style="--a:330deg;--k:2"></i><i class="seed" style="--a:60deg;--k:3"></i><i class="seed" style="--a:300deg;--k:4"></i></span>
+        </div>
+        <div>
+          <span class="badge">Draft · pending lab review</span>
+          <h1 id="h1-ai-at-work" tabindex="-1">Generative &amp; Agentic AI at Work</h1>
+          <p class="dir-q-l mono">Guiding question</p>
+          <p class="dir-q">Does generative AI raise productivity by speeding up familiar tasks, or by changing which tasks are worth taking on?</p>
+          <p class="dir-status mono">5 projects · 5 papers</p>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="wrap dir-body">
+    <div>
+      <section aria-labelledby="w-ai"><h2 id="w-ai">Why it matters</h2>
+        <p class="prose">Generative AI and AI agents are entering everyday professional work, from lesson planning to service workflows. This direction looks at how people actually use these tools on real tasks, what that changes about their work, and how much authority an AI agent should be given.</p>
+      </section>
+      <section aria-labelledby="p-ai" style="margin-top:var(--s-7)"><h2 id="p-ai">Papers</h2>
+        <ul class="papers" role="list">
+          <li><div><p class="p-title">Stale, Misattributed, or Late: Where Personal Memory Fails Before Generation</p><p class="p-meta"><span class="type">Preprint</span>arXiv · 2026</p></div></li>
+          <li><div><p class="p-title">Strategic Advice in the Age of Personal AI</p><p class="p-meta"><span class="type">Preprint</span>arXiv · 2026</p></div></li>
+          <li><div><p class="p-title">The Teacher’s Knapsack: Generative AI and Teacher Productivity</p><p class="p-meta"><span class="type">Working paper</span>SSRN · 2026</p></div></li>
+          <li><div><p class="p-title">Planning vs. Execution: How AI Changes Task Portfolio Choice</p><p class="p-meta"><span class="type">Talk</span>INFORMS MSOM Conference · 2026</p></div></li>
+          <li><div><p class="p-title">Making ChatGPT Work for Me</p><p class="p-meta"><span class="type">Journal</span>PACM HCI (CSCW 2025) · 2025</p></div></li>
+        </ul>
+        <p class="see-all"><a href="#recent">See all in Publications <span aria-hidden="true">→</span></a></p>
+      </section>
+    </div>
+    <aside>
+      <nav class="rail" aria-label="More directions"><h2>More directions</h2>
+        <ul role="list">
+          <li class="c-bp"><a href="#/research/algorithmic-advice/"><span class="pearl" data-vt="algorithmic-advice" aria-hidden="true"><span class="idx">01</span></span><span class="t">Algorithmic Advice</span></a></li>
+          <li class="c-ma"><a href="#/research/learning-on-the-job/"><span class="pearl" data-vt="learning-on-the-job" aria-hidden="true"><span class="idx">03</span></span><span class="t">Learning on the Job</span></a></li>
+          <li class="c-oo"><a href="#/research/platform-work/"><span class="pearl" data-vt="platform-work" aria-hidden="true"><span class="idx">04</span></span><span class="t">Platform Work</span></a></li>
+        </ul>
+      </nav>
+      <p class="updated mono">Last updated 20 Oct 2026</p>
+    </aside>
+  </div>
+</article>
+
+<article class="view view-dir c-ma" id="/research/learning-on-the-job/" data-slug="learning-on-the-job" data-title="Learning on the Job with Algorithms" aria-labelledby="h1-learning-on-the-job" hidden>
+  <header class="band">
+    <div class="wrap">
+      <p class="crumbs"><a href="#/"><span aria-hidden="true">← </span>All directions</a><span class="mono">Research / <span aria-hidden="true">03</span></span></p>
+      <div class="dir-hero">
+        <div class="hero-pearl" aria-hidden="true">
+          <span class="pearl" data-vt="learning-on-the-job"><span class="idx">03</span></span>
+          <span class="hero-seeds"><i class="orbit"></i><i class="seed" style="--a:0deg;--k:0"></i><i class="seed" style="--a:30deg;--k:1"></i><i class="seed" style="--a:330deg;--k:2"></i><i class="seed" style="--a:60deg;--k:3"></i></span>
+        </div>
+        <div>
+          <span class="badge">Draft · pending lab review</span>
+          <h1 id="h1-learning-on-the-job" tabindex="-1">Learning on the Job with Algorithms</h1>
+          <p class="dir-q-l mono">Guiding question</p>
+          <p class="dir-q">Do gig workers get better with experience, and do they rely on the app’s recommendations more or less as they learn?</p>
+          <p class="dir-status mono">4 projects · 4 papers</p>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="wrap dir-body">
+    <div>
+      <section aria-labelledby="w-lj"><h2 id="w-lj">Why it matters</h2>
+        <p class="prose">On work platforms, the app often decides what job a person sees next, so recommendation and dispatch systems shape how workers learn. This direction studies how skill builds alongside algorithms, and how platforms could assign work so that people improve rather than only cover today’s demand.</p>
+      </section>
+      <section aria-labelledby="p-lj" style="margin-top:var(--s-7)"><h2 id="p-lj">Papers</h2>
+        <ul class="papers" role="list">
+          <li><div><p class="p-title">Dispatching to Develop: Worker Agency and Workforce Development in Gig Platforms</p><p class="p-meta"><span class="type">Working paper</span>SSRN · 2026</p></div></li>
+          <li><div><p class="p-title">Precise or Broad? The Reward-Learning Frontier in Algorithmic Advice Design</p><p class="p-meta"><span class="type">Working paper</span>2026 · in revision at M&amp;SOM (PI-reported, Apr 2026)</p></div></li>
+          <li><div><p class="p-title">Learning to Gig: Workforce Development under Worker Agency</p><p class="p-meta"><span class="type">Working paper</span>SSRN · 2025 · in revision at M&amp;SOM (PI-reported, May 2026)</p></div></li>
+          <li><div><p class="p-title">Learning on the Go: Understanding How Gig Economy Workers Learn with Recommendation Algorithms</p><p class="p-meta"><span class="type">Journal</span>PACM HCI (CSCW 2025) · 2025</p></div></li>
+        </ul>
+        <p class="see-all"><a href="#recent">See all in Publications <span aria-hidden="true">→</span></a></p>
+      </section>
+    </div>
+    <aside>
+      <nav class="rail" aria-label="More directions"><h2>More directions</h2>
+        <ul role="list">
+          <li class="c-bp"><a href="#/research/algorithmic-advice/"><span class="pearl" data-vt="algorithmic-advice" aria-hidden="true"><span class="idx">01</span></span><span class="t">Algorithmic Advice</span></a></li>
+          <li class="c-ly"><a href="#/research/ai-at-work/"><span class="pearl" data-vt="ai-at-work" aria-hidden="true"><span class="idx">02</span></span><span class="t">AI at Work</span></a></li>
+          <li class="c-oo"><a href="#/research/platform-work/"><span class="pearl" data-vt="platform-work" aria-hidden="true"><span class="idx">04</span></span><span class="t">Platform Work</span></a></li>
+        </ul>
+      </nav>
+      <p class="updated mono">Last updated 20 Oct 2026</p>
+    </aside>
+  </div>
+</article>
+
+<article class="view view-dir c-oo" id="/research/platform-work/" data-slug="platform-work" data-title="Gig &amp; Platform Work Design" aria-labelledby="h1-platform-work" hidden>
+  <header class="band">
+    <div class="wrap">
+      <p class="crumbs"><a href="#/"><span aria-hidden="true">← </span>All directions</a><span class="mono">Research / <span aria-hidden="true">04</span></span></p>
+      <div class="dir-hero">
+        <div class="hero-pearl" aria-hidden="true">
+          <span class="pearl" data-vt="platform-work"><span class="idx">04</span></span>
+          <span class="hero-seeds"><i class="orbit"></i><i class="seed" style="--a:0deg;--k:0"></i><i class="seed" style="--a:30deg;--k:1"></i><i class="seed" style="--a:330deg;--k:2"></i><i class="seed" style="--a:60deg;--k:3"></i><i class="seed" style="--a:300deg;--k:4"></i></span>
+        </div>
+        <div>
+          <span class="badge">Draft · pending lab review</span>
+          <h1 id="h1-platform-work" tabindex="-1">Gig &amp; Platform Work Design</h1>
+          <p class="dir-q-l mono">Guiding question</p>
+          <p class="dir-q">When drivers split their hours across rival apps, which pay designs change how much they drive and how often they switch?</p>
+          <p class="dir-status mono">5 projects · 5 papers</p>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="wrap dir-body">
+    <div>
+      <section aria-labelledby="w-pw"><h2 id="w-pw">Why it matters</h2>
+        <p class="prose">Flexible platform work lets people decide when and where to work, which puts their choices at the centre of how platforms run. This direction studies what drives those choices, and how pay, incentives and staffing can be designed for workers who always have other options.</p>
+      </section>
+      <section aria-labelledby="p-pw" style="margin-top:var(--s-7)"><h2 id="p-pw">Papers</h2>
+        <ul class="papers" role="list">
+          <li><div><p class="p-title">Managing Multihoming Workers in the Gig Economy</p><p class="p-meta"><span class="type">Working paper</span>SSRN · 2026 · revise and resubmit at Operations Research (PI-reported, Aug 2026)</p></div></li>
+          <li><div><p class="p-title">Dispatching to Develop: Worker Agency and Workforce Development in Gig Platforms</p><p class="p-meta"><span class="type">Working paper</span>SSRN · 2026</p></div></li>
+          <li><div><p class="p-title">Learning to Gig: Workforce Development under Worker Agency</p><p class="p-meta"><span class="type">Working paper</span>SSRN · 2025</p></div></li>
+          <li><div><p class="p-title">Learning on the Go: Understanding How Gig Economy Workers Learn with Recommendation Algorithms</p><p class="p-meta"><span class="type">Journal</span>PACM HCI (CSCW 2025) · 2025</p></div></li>
+          <li><div><p class="p-title">The Impact of Behavioral and Economic Drivers on Gig Economy Workers</p><p class="p-meta"><span class="type">Journal</span>Manufacturing &amp; Service Operations Management · 2023</p></div></li>
+        </ul>
+        <p class="see-all"><a href="#recent">See all in Publications <span aria-hidden="true">→</span></a></p>
+      </section>
+    </div>
+    <aside>
+      <nav class="rail" aria-label="More directions"><h2>More directions</h2>
+        <ul role="list">
+          <li class="c-bp"><a href="#/research/algorithmic-advice/"><span class="pearl" data-vt="algorithmic-advice" aria-hidden="true"><span class="idx">01</span></span><span class="t">Algorithmic Advice</span></a></li>
+          <li class="c-ly"><a href="#/research/ai-at-work/"><span class="pearl" data-vt="ai-at-work" aria-hidden="true"><span class="idx">02</span></span><span class="t">AI at Work</span></a></li>
+          <li class="c-ma"><a href="#/research/learning-on-the-job/"><span class="pearl" data-vt="learning-on-the-job" aria-hidden="true"><span class="idx">03</span></span><span class="t">Learning on the Job</span></a></li>
+        </ul>
+      </nav>
+      <p class="updated mono">Last updated 20 Oct 2026</p>
+    </aside>
+  </div>
+</article>
+</main>
+
+<footer class="site-foot" id="site-foot">
+  <div class="wrap">
+    <p>BOBALAB, Berkeley Operations and Behavioral Analytics Lab · Haas School of Business, University of California, Berkeley. Prototype <span class="mono">b-living</span>: only Fig. 1 and the four direction pages are built; all content is a draft pending lab review.</p>
+    <button type="button" class="tgl" data-motion-toggle aria-pressed="false">Reduce motion</button>
+  </div>
+</footer>
+
+<script>
+/* Fig. 1 enhancement (production candidate): motion preference, live caption, idle-float pausing, pointer buoyancy. */
+(()=>{
+const d=document,R=d.documentElement,mqR=matchMedia('(prefers-reduced-motion: reduce)'),mqF=matchMedia('(hover: hover) and (pointer: fine)');
+const ok=()=>!mqR.matches&&R.dataset.motion!=='reduce';
+const fig=d.querySelector('.fig'),tg=d.querySelectorAll('[data-motion-toggle]');
+let rest=()=>{};
+const sync=()=>{const off=R.dataset.motion==='reduce';tg.forEach(b=>{if(b.hasAttribute('aria-pressed'))b.setAttribute('aria-pressed',off);else{b.dataset.state=off?'paused':'playing';b.lastElementChild.textContent=off?'Play motion':'Pause motion'}})};
+tg.forEach(b=>b.addEventListener('click',()=>{const off=R.dataset.motion!=='reduce';if(off)R.dataset.motion='reduce';else delete R.dataset.motion;try{localStorage.setItem('bobalab-motion',off?'reduce':'full')}catch(e){}sync();rest()}));
+sync();
+d.addEventListener('visibilitychange',()=>R.toggleAttribute('data-hidden',d.hidden));
+if(!fig)return;
+if(window.IntersectionObserver)new IntersectionObserver(e=>fig.toggleAttribute('data-offscreen',!e[e.length-1].isIntersecting)).observe(fig);
+/* live caption (E4): 80 ms hover intent, focus immediate, 300 ms return, Esc resets */
+const L={},items=[...fig.querySelectorAll('li[data-slug]')];
+fig.querySelectorAll('[data-cap]').forEach(l=>L[l.dataset.cap]=l);
+let cur='legend',t=0;
+const show=k=>{clearTimeout(t);if(k===cur)return;L[cur].classList.remove('is-on');L[k].classList.add('is-on');cur=k;fig.toggleAttribute('data-active',k!=='legend');items.forEach(li=>li.classList.toggle('is-on',li.dataset.slug===k))};
+const later=(k,ms)=>{clearTimeout(t);t=setTimeout(()=>show(k),ms)};
+const focused=()=>{const a=d.activeElement,li=a&&fig.contains(a)&&a.closest('li[data-slug]');return li?li.dataset.slug:'legend'};
+items.forEach(li=>{const a=li.querySelector('a'),k=li.dataset.slug;
+  a.addEventListener('pointerenter',e=>{if(e.pointerType!=='touch')later(k,80)});
+  a.addEventListener('pointerleave',e=>{if(e.pointerType!=='touch')later(focused(),300)});
+  a.addEventListener('focus',()=>show(k));
+  a.addEventListener('blur',()=>later('legend',300))});
+fig.addEventListener('keydown',e=>{if(e.key==='Escape')show('legend')});
+/* pointer buoyancy (D-02.3): fine pointers only, <=4px lean toward the pointer, one rAF per move, CSS eases */
+const B=items.map(li=>li.querySelector('.buoy'));
+let raf=0,px=0,py=0,C=null,live=false;
+rest=()=>{cancelAnimationFrame(raf);raf=0;C=null;B.forEach(b=>b.style.translate='')};
+const step=()=>{raf=0;const r=fig.getBoundingClientRect();
+  if(!C)C=B.map(b=>{const q=b.getBoundingClientRect();return[q.left+q.width/2-r.left,q.top+q.height/2-r.top,q.width]});
+  C.forEach(([x,y,w],i)=>{const dx=px-r.left-x,dy=py-r.top-y,s=Math.hypot(dx,dy)||1,k=Math.max(0,1-s/(w*2.2)),m=4*k*k*Math.min(1,s/24);
+    B[i].style.translate=(dx/s*m).toFixed(2)+'px '+(dy/s*m).toFixed(2)+'px'})};
+fig.addEventListener('pointerenter',()=>{C=null;live=mqF.matches&&ok()&&getComputedStyle(fig).getPropertyValue('--mode').trim()==='fig'});
+fig.addEventListener('pointermove',e=>{if(!live||e.pointerType!=='mouse'||!ok())return;px=e.clientX;py=e.clientY;if(!raf)raf=requestAnimationFrame(step)});
+fig.addEventListener('pointerleave',rest);
+})();
+</script>
+<script>
+/* Prototype-only router: fake direction pages + the pearl morph via document.startViewTransition (stands in for next/link + React <ViewTransition>). */
+(()=>{
+const d=document,R=d.documentElement,home=d.querySelector('.view-home'),V={},T0=d.title;
+d.querySelectorAll('.view-dir').forEach(v=>V[v.dataset.slug]=v);
+const parse=h=>{const m=/^#\/research\/([a-z-]+)\/?$/.exec(h||'');return m&&V[m[1]]?m[1]:null};
+const ok=()=>!matchMedia('(prefers-reduced-motion: reduce)').matches&&R.dataset.motion!=='reduce';
+const typed=window.ViewTransition&&'types' in ViewTransition.prototype;
+const show=s=>{home.hidden=!!s;for(const k in V)V[k].hidden=k!==s;d.title=s?V[s].dataset.title+', BOBALAB research':T0};
+const name=(el,n)=>{if(!el)return;el.style.viewTransitionName=n||'';n?el.style.setProperty('view-transition-class','pearl-morph'):el.style.removeProperty('view-transition-class')};
+let cur=parse(location.hash),homeY=0;
+if(cur)show(cur);
+if('scrollRestoration' in history)history.scrollRestoration='manual';
+function go(to,push,src){
+  const from=cur;if(to===from)return;
+  const p=to||from,oldV=from?V[from]:home,newV=to?V[to]:home,n='pearl-'+p;
+  const a=src||oldV.querySelector('[data-vt="'+p+'"]'),b=newV.querySelector('[data-vt="'+p+'"]');
+  const morph=!!(d.startViewTransition&&ok()&&a&&b);
+  if(!from)homeY=scrollY;
+  const update=()=>{if(push)history.pushState(null,'',to?'#/research/'+to+'/':'#/');
+    show(to);cur=to;scrollTo(0,to?0:homeY);
+    newV.classList.toggle('is-arriving',!!to&&morph);
+    if(morph){name(a);name(b,n)}};
+  const focus=()=>{const f=to?newV.querySelector('h1'):home.querySelector('li[data-slug="'+p+'"] a');if(f)f.focus({preventScroll:true})};
+  if(!d.startViewTransition){update();focus();return}
+  if(morph)name(a,n);
+  const ty=[to?'pearl-open':'pearl-close'],vt=typed?d.startViewTransition({update,types:ty}):d.startViewTransition(update);
+  vt.updateCallbackDone.then(focus,focus);
+  vt.finished.finally(()=>{name(a);name(b)});
+}
+d.addEventListener('click',e=>{
+  const l=e.target.closest('a[href^="#/"]');
+  if(!l||e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+  const h=l.getAttribute('href'),to=parse(h);
+  if(!to&&h!=='#/')return;
+  e.preventDefault();go(to,true,l.querySelector('[data-vt]'));
+});
+addEventListener('popstate',()=>go(parse(location.hash),false));
+})();
+</script>
+</body>
+</html>
