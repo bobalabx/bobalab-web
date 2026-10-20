@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+coverage
+test-results
+playwright-report
+public/admin/decap-cms.js
+package-lock.json
+src/components/brand/wordmark-geometry.ts
+tests/fixtures/content/**/*.md
+docs/research/
+docs/DECISIONS.md
+AGENTS.md
+CLAUDE.md
+tests/fixtures/content/

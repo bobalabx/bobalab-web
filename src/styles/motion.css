@@ -1,0 +1,237 @@
+/*
+ * Motion tokens and every view-transition rule (brief §C6, §E3, §E5, §E7;
+ * DECISIONS D-02). The figure package (WP1) owns figure-specific motion
+ * (hover lift, idle float, buoyancy, seed bloom) but must use these tokens
+ * and the motion-last gate below.
+ *
+ * Motion-last gate — every transform animation sits inside:
+ *   @media (prefers-reduced-motion: no-preference) { :root:not([data-motion="reduce"]) … }
+ * <html data-motion="reduce"> is set pre-paint from localStorage "bobalab-motion"
+ * (PrePaintScript) and by the footer MotionToggle.
+ */
+
+:root {
+  --dur-press: 100ms;
+  --dur-fast: 160ms;
+  --dur-base: 200ms;
+  --dur-caption: 180ms;
+  --dur-page-exit: 150ms;
+  --dur-page-enter: 210ms;
+  --dur-morph: 420ms;
+  --dur-intro: 480ms;
+  --stagger-intro: 40ms;
+  --dur-slide: 400ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-emph: cubic-bezier(0.2, 0, 0, 1);
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --lift-max: 3px;
+  --scale-max: 1.06;
+  --slide-distance: 60px;
+  /* D-02 idle float limits (used by WP1) */
+  --float-amp: 3px;
+  --float-min: 7s;
+  --float-max: 11s;
+  --lean-max: 4px;
+}
+
+/* ---------------------------------------------------------------------------
+ * View transitions (§E5). React <ViewTransition> assigns view-transition-class
+ * from `share`/`enter`/`exit` props; these rules style those classes.
+ * ------------------------------------------------------------------------- */
+
+/* Never swallow clicks during a transition (Next VT guide). */
+::view-transition {
+  pointer-events: none;
+}
+
+/* Pearl → direction header morph: <ViewTransition name="pearl-{slug}" share="pearl-morph" default="none"> */
+::view-transition-group(.pearl-morph) {
+  animation-duration: var(--dur-morph);
+  animation-timing-function: var(--ease-emph);
+}
+::view-transition-image-pair(.pearl-morph) {
+  animation-name: bl-via-blur;
+  animation-duration: var(--dur-morph);
+}
+@keyframes bl-via-blur {
+  30% {
+    filter: blur(3px);
+  }
+}
+
+/* Page swap for the root snapshot: old out 150 ms, new in 210 ms after 150 ms. */
+::view-transition-old(root) {
+  animation: var(--dur-page-exit) var(--ease-in) both bl-page-out;
+}
+::view-transition-new(root) {
+  animation: var(--dur-page-enter) var(--ease-out) var(--dur-page-exit) both bl-page-in;
+}
+@keyframes bl-page-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes bl-page-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Page-level wrappers (WP1/WP2 put <ViewTransition enter/exit={{'pearl-open': 'page-swap', ...}}> in page.tsx). */
+::view-transition-old(.page-swap) {
+  animation: var(--dur-page-exit) var(--ease-in) both bl-page-out;
+}
+::view-transition-new(.page-swap) {
+  animation: var(--dur-page-enter) var(--ease-out) var(--dur-page-exit) both bl-page-in;
+}
+
+/* Direction header band crossfades to the direction tint: <ViewTransition name="dir-band" share="band-fade"> */
+::view-transition-group(.band-fade) {
+  animation-duration: var(--dur-morph);
+  animation-timing-function: var(--ease-emph);
+}
+::view-transition-old(.band-fade),
+::view-transition-new(.band-fade) {
+  animation-duration: var(--dur-morph);
+  animation-timing-function: var(--ease-emph);
+}
+
+/* Sibling rail: directional slides, 60 px (Next VT guide timings). */
+::view-transition-old(.nav-forward) {
+  --slide-offset: calc(-1 * var(--slide-distance));
+  animation:
+    var(--dur-page-exit) var(--ease-in) both bl-fade reverse,
+    var(--dur-slide) ease-in-out both bl-slide reverse;
+}
+::view-transition-new(.nav-forward) {
+  --slide-offset: var(--slide-distance);
+  animation:
+    var(--dur-page-enter) ease-out var(--dur-page-exit) both bl-fade,
+    var(--dur-slide) ease-in-out both bl-slide;
+}
+::view-transition-old(.nav-back) {
+  --slide-offset: var(--slide-distance);
+  animation:
+    var(--dur-page-exit) var(--ease-in) both bl-fade reverse,
+    var(--dur-slide) ease-in-out both bl-slide reverse;
+}
+::view-transition-new(.nav-back) {
+  --slide-offset: calc(-1 * var(--slide-distance));
+  animation:
+    var(--dur-page-enter) ease-out var(--dur-page-exit) both bl-fade,
+    var(--dur-slide) ease-in-out both bl-slide;
+}
+@keyframes bl-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes bl-slide {
+  from {
+    translate: var(--slide-offset);
+  }
+  to {
+    translate: 0;
+  }
+}
+
+/* Anchor the site header during transitions (SiteHeader sets view-transition-name: site-header). */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * Intro "settle" (§E3, D-02 #1): first home view per session only.
+ * PrePaintScript sets <html data-intro> and removes it after 1 s.
+ * Figure groups set style="--i: <slot index 0..7>".
+ * ------------------------------------------------------------------------- */
+@keyframes bl-settle {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-intro]:not([data-motion="reduce"]) .pearl-group {
+    animation: bl-settle var(--dur-intro) var(--ease-settle) both;
+    animation-delay: calc(var(--i, 0) * var(--stagger-intro));
+  }
+
+  /* Generic press feedback for controls that opt in. */
+  :root:not([data-motion="reduce"]) .press:active {
+    transform: scale(0.98);
+    transition: transform var(--dur-press) var(--ease-out);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Reduced motion (§E7): OS setting OR the footer toggle.
+ * View transitions collapse to a ≤120 ms opacity-only crossfade; nothing moves.
+ * ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-image-pair(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+  ::view-transition-old(root) {
+    animation: 120ms linear both bl-fade reverse !important;
+  }
+  ::view-transition-new(root) {
+    animation: 120ms linear both bl-fade !important;
+  }
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}
+
+:root[data-motion="reduce"]::view-transition-group(*),
+:root[data-motion="reduce"]::view-transition-old(*),
+:root[data-motion="reduce"]::view-transition-new(*),
+:root[data-motion="reduce"]::view-transition-image-pair(*) {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+}
+:root[data-motion="reduce"]::view-transition-old(root) {
+  animation: 120ms linear both bl-fade reverse !important;
+}
+:root[data-motion="reduce"]::view-transition-new(root) {
+  animation: 120ms linear both bl-fade !important;
+}
+:root[data-motion="reduce"] *,
+:root[data-motion="reduce"] *::before,
+:root[data-motion="reduce"] *::after {
+  scroll-behavior: auto !important;
+}

@@ -1,0 +1,80 @@
+/* Layout helpers for the component kit page only. */
+.kit {
+  padding-block: var(--s-7);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--s-8);
+}
+.kit-head {
+  display: grid;
+  gap: var(--s-3);
+}
+.kit-section {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--s-5);
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--hairline);
+}
+.kit-h3 {
+  font-size: var(--fs-lg);
+}
+.kit-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-4);
+  align-items: flex-start;
+}
+.kit-row--center {
+  align-items: center;
+}
+.kit-fig {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-2);
+  margin: 0;
+}
+.kit-swatches,
+.kit-dirswatches,
+.kit-icons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-3);
+}
+.kit-swatches {
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+}
+.kit-swatches li,
+.kit-dirswatches li {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+.kit-chip {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--r-xs);
+  border: 1px solid var(--rule);
+  flex: none;
+}
+.kit-icons {
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+}
+.kit-icons li {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.kit-icons .bl-icon {
+  width: 24px;
+  height: 24px;
+}
+.kit-grid {
+  display: grid;
+  gap: var(--s-5);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+}

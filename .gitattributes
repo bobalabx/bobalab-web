@@ -4,6 +4,8 @@
 *.jpeg binary
 *.webp binary
 *.avif binary
+*.gif binary
 *.pdf binary
+*.woff binary
 *.woff2 binary
 *.ico binary

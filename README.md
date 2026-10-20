@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BOBALAB website
 
-## Getting Started
+Website of BOBALAB, the Berkeley Operations and Behavioral Analytics Lab (Haas School of Business, UC Berkeley). Static Next.js site, content in Markdown/YAML edited through Decap CMS, hosted on GitHub Pages.
 
-First, run the development server:
+- Spec: `docs/research/research-brief.md` · Decisions (binding): `docs/DECISIONS.md`
+- How it fits together: `docs/ARCHITECTURE.md` · Dataset → schema: `docs/CONTENT-MAPPING.md` · JS baseline: `docs/PERF-BASELINE.md`
+- Changing a file another package owns: `docs/change-requests/README.md`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Requirements
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Node **24.x** (`.nvmrc`; `engines` `>=24.15 <25`, `engine-strict`), npm 11. Dependencies are pinned exactly (`.npmrc save-exact`). Use `npm ci`; expect exactly three `ERESOLVE overriding peer dependency` warnings (ESLint 10 vs eslint-config-next). Do not use `--legacy-peer-deps`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+For browser tests: `npx playwright install chromium` (CI also installs webkit).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+| Script                                | What it does                                                                                                                                                            |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`                         | `next dev` on port 3100. Includes drafts (preview ribbon). `CONTENT_DIR=tests/fixtures/content/n4 npm run dev` uses a fixture set. `NEXT_PUBLIC_KIT=1` enables `/kit/`. |
+| `npm run build`                       | Production static export to `out/` (drafts excluded), via `scripts/build.mjs`; on Windows it then runs `scripts/fix-win-export.mjs` if present (D-07).                  |
+| `npm run build:preview`               | Same with `INCLUDE_DRAFTS=1` (drafts + ribbon). Never deploy it.                                                                                                        |
+| `npm run start` / `npm run serve:out` | Serve `out/` locally → `scripts/serve-out.mjs` (**WP8, not yet written**)                                                                                               |
+| `npm run lint` / `npm run typecheck`  | ESLint 10 flat config / `tsc --noEmit`                                                                                                                                  |
+| `npm run test`                        | Vitest unit tests (`tests/unit/**`)                                                                                                                                     |
+| `npm run validate`                    | Content validation over `CONTENT_DIR` (default `./content`) + rule fixtures (`tests/content/**`); CI job `validate-content`                                             |
+| `npm run e2e`                         | Playwright (`tests/e2e/**`), `BASE_URL` default `http://localhost:3100`                                                                                                 |
+| `npm run media`                       | `scripts/media/build-images.mjs` (**WP7, not yet written**)                                                                                                             |
+| `npm run cms:local`                   | `scripts/cms/local.mjs` (**WP6, not yet written**)                                                                                                                      |
+| `npm run perf`                        | `scripts/perf/js-budget.mjs` (**WP8, not yet written**)                                                                                                                 |
+| `npm run slugs:record`                | Write `content/.published-slugs.json` (D-05 redirect check)                                                                                                             |
+| `npm run brand:wordmark`              | Regenerate the outlined wordmark (Python 3 + fontTools)                                                                                                                 |
+| `npm run format` / `format:check`     | Prettier                                                                                                                                                                |
 
-To learn more about Next.js, take a look at the following resources:
+Scripts marked "not yet written" point at files owned by other work packages; they fail until those packages land.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Content
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Files live in `content/` (created by WP7). Every item has `draft`; production builds exclude drafts. See `docs/ARCHITECTURE.md` §3 for the schema, derived data and every validator rule.
 
-## Deploy on Vercel
+## Licences
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Fonts in `src/fonts/` and the outlined wordmark glyphs: SIL Open Font License 1.1 (`src/fonts/OFL.txt`).

@@ -1,0 +1,80 @@
+/* Windows contrast themes / forced colours (brief §E7, §G1).
+   Gradients and shadows are dropped by the UA; restore shape with system colours. */
+
+@media (forced-colors: active) {
+  .bl-pearl,
+  .pearl {
+    border: 2px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    forced-color-adjust: none;
+  }
+  .bl-pearl--gloss::before {
+    display: none;
+  }
+  .bl-dot,
+  .seed {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+  a:focus-visible .bl-pearl,
+  a:focus-visible .pearl {
+    outline: 2px solid Highlight;
+    outline-offset: 3px;
+  }
+  .bl-badge,
+  .bl-chip,
+  .bl-materials a,
+  .bl-card,
+  .bl-switch__track {
+    border-color: CanvasText;
+  }
+  .bl-badge--solid {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    forced-color-adjust: none;
+  }
+  .bl-chip[aria-pressed="true"] {
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+    forced-color-adjust: none;
+  }
+  .bl-switch__thumb {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+  .bl-switch[aria-checked="true"] .bl-switch__track {
+    background: Highlight;
+    border-color: Highlight;
+    forced-color-adjust: none;
+  }
+  .bl-switch[aria-checked="true"] .bl-switch__thumb {
+    background: HighlightText;
+  }
+  .bl-evidence__glyph {
+    border-color: CanvasText;
+  }
+  .bl-evidence--published .bl-evidence__glyph {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+  .bl-wordmark,
+  .bl-wordmark__pearl {
+    fill: CanvasText;
+    color: CanvasText;
+  }
+  .bl-wordmark__hl {
+    display: none;
+  }
+  .bl-preview {
+    background: Canvas;
+    color: CanvasText;
+    border-bottom: 1px solid CanvasText;
+    forced-color-adjust: none;
+  }
+  :focus-visible {
+    outline: 2px solid Highlight;
+  }
+}

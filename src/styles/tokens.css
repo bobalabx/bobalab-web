@@ -1,0 +1,204 @@
+/*
+ * BOBALAB design tokens (brief §C1–§C6).
+ * Hex values must match src/lib/content/palette.ts (unit-tested).
+ * Light/dark switch on prefers-color-scheme only (no manual theme toggle in v1).
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* §C2 core palette, light */
+  --paper: #fcfaf6;
+  --surface: #ffffff;
+  --paper-alt: #f4f0ea;
+  --plate: #f7f1e8;
+  --ink: #1f1712;
+  --ink-muted: #5c4f45;
+  --accent: #8a4515;
+  --accent-strong: #6b3410;
+  --rule: #857463;
+  --hairline: #d8cab6;
+  --pearl: #2b1d15;
+  --pearl-rim: transparent;
+  --pearl-index: #f7f1e8;
+  --on-accent: #fcfaf6;
+  --focus-ring: var(--ink);
+  --preview-bg: #1f1712;
+  --preview-ink: #f7f1e8;
+
+  /* Pearl material (§E2) */
+  --pearl-hi: #3a281d;
+  --pearl-lo: #1a110c;
+  --pearl-gloss: rgb(247 241 232 / 0.22);
+
+  /* §C4 type */
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-text: var(--font-inter), system-ui, "Segoe UI", Arial, sans-serif;
+  --font-data: var(--font-plex-mono), ui-monospace, Consolas, monospace;
+  --fs-mono: 0.8125rem;
+  --fs-sm: 0.875rem;
+  --fs-base: 1.0625rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.5625rem;
+  --fs-2xl: clamp(1.75rem, 1.35rem + 1.6vw, 2.25rem);
+  --fs-3xl: clamp(2.25rem, 1.6rem + 2.6vw, 3.25rem);
+  --fs-display: clamp(2.5rem, 1.7rem + 3.4vw, 3.75rem);
+  --lh-mono: 1.4;
+  --lh-sm: 1.45;
+  --lh-base: 1.6;
+  --lh-lg: 1.45;
+  --lh-xl: 1.3;
+  --lh-2xl: 1.2;
+  --lh-3xl: 1.1;
+  --lh-display: 1.05;
+  --tracking-mono: 0.06em;
+
+  /* §C5 spacing (4 px base) */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+  --s-9: 6rem;
+
+  /* §C5 layout */
+  --gutter: 16px;
+  --content-max: 72rem;
+  --prose-max: 66ch;
+  --header-h: 4rem;
+
+  /* §C5 radius */
+  --r-xs: 2px;
+  --r-md: 10px;
+  --r-pill: 9999px;
+
+  /* Direction scope defaults (overridden by [data-swatch]) */
+  --dir-deep: var(--ink-muted);
+  --dir-tint: var(--paper-alt);
+  --dir-light: var(--ink-muted);
+  --dir-seed: var(--hairline);
+  --dir-band: var(--dir-tint);
+  --dir-dot: var(--dir-deep);
+  --dir-text: var(--dir-deep);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --gutter: 24px;
+  }
+}
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 32px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #17110e;
+    --surface: #221a15;
+    --paper-alt: #1c1511;
+    --plate: #1e1713;
+    --ink: #f3ece2;
+    --ink-muted: #bfb2a5;
+    --accent: #e0a46b;
+    --accent-strong: #edbd8f;
+    --rule: #8a7766;
+    --hairline: #3d3129;
+    --pearl: #3a2c22;
+    --pearl-rim: #a47e62;
+    --pearl-index: #f3ece2;
+    --on-accent: #17110e;
+    --focus-ring: var(--accent);
+    --preview-bg: #e0a46b;
+    --preview-ink: #17110e;
+    --pearl-hi: #4a3829;
+    --pearl-lo: #2a1e16;
+    --pearl-gloss: rgb(243 236 226 / 0.18);
+  }
+}
+
+/* §C3 direction swatches: deep / tint / light, seeds and dark band */
+[data-swatch="butterfly-pea"] {
+  --dir-deep: #2f519b;
+  --dir-tint: #dfe6f5;
+  --dir-light: #a9c0f2;
+  --dir-seed-l: #a7b1c9;
+  --dir-seed-d: #4f5261;
+  --dir-band-d: #262325;
+}
+[data-swatch="oolong"] {
+  --dir-deep: #7a5913;
+  --dir-tint: #f1e8cc;
+  --dir-light: #e3c26e;
+  --dir-seed-l: #c5b493;
+  --dir-seed-d: #635333;
+  --dir-band-d: #2b2318;
+}
+[data-swatch="lychee"] {
+  --dir-deep: #993452;
+  --dir-tint: #f5dfe5;
+  --dir-light: #f0a5bc;
+  --dir-seed-l: #d1a5ac;
+  --dir-seed-d: #68494e;
+  --dir-band-d: #2d201f;
+}
+[data-swatch="matcha"] {
+  --dir-deep: #3e6a2f;
+  --dir-tint: #e3ecd8;
+  --dir-light: #a9cf8f;
+  --dir-seed-l: #adbb9e;
+  --dir-seed-d: #4f573e;
+  --dir-band-d: #26241b;
+}
+[data-swatch="jasmine"] {
+  --dir-deep: #1e6660;
+  --dir-tint: #d8ebe8;
+  --dir-light: #8fd3c9;
+  --dir-seed-l: #a0b9b2;
+  --dir-seed-d: #465953;
+  --dir-band-d: #232421;
+}
+[data-swatch="black-sesame"] {
+  --dir-deep: #45413c;
+  --dir-tint: #e6e2dc;
+  --dir-light: #cfc8c0;
+  --dir-seed-l: #b0aba3;
+  --dir-seed-d: #5c5550;
+  --dir-band-d: #292320;
+}
+[data-swatch="taro"] {
+  --dir-deep: #5e4391;
+  --dir-tint: #ece5f4;
+  --dir-light: #c6b3eb;
+  --dir-seed-l: #baabc5;
+  --dir-seed-d: #594e5f;
+  --dir-band-d: #282124;
+}
+[data-swatch="thai-tea"] {
+  --dir-deep: #a0461c;
+  --dir-tint: #f7e3d3;
+  --dir-light: #f2a57a;
+  --dir-seed-l: #d4ad96;
+  --dir-seed-d: #684937;
+  --dir-band-d: #2d2019;
+}
+
+/* Mode-dependent roles derived from the swatch */
+[data-swatch] {
+  --dir-seed: var(--dir-seed-l);
+  --dir-band: var(--dir-tint);
+  --dir-dot: var(--dir-deep);
+  --dir-text: var(--dir-deep);
+}
+@media (prefers-color-scheme: dark) {
+  [data-swatch] {
+    --dir-seed: var(--dir-seed-d);
+    --dir-band: var(--dir-band-d);
+    --dir-dot: var(--dir-light);
+    --dir-text: var(--dir-light);
+  }
+}

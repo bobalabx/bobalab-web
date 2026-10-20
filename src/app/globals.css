@@ -1,26 +1,54 @@
+/*
+ * Global stylesheet. Order matters:
+ *   tokens + base -> @layer base, primitives -> @layer components, so Tailwind
+ *   utilities (written by page packages) can still override them;
+ *   motion + forced colours stay unlayered so they always win.
+ */
 @import "tailwindcss";
+@import "../styles/tokens.css" layer(base);
+@import "../styles/base.css" layer(base);
+@import "../styles/prose.css" layer(components);
+@import "../styles/components.css" layer(components);
+@import "../styles/motion.css";
+@import "../styles/forced-colors.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* Expose design tokens to Tailwind (bg-paper, text-ink, font-display, …). */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-paper-alt: var(--paper-alt);
+  --color-plate: var(--plate);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-rule: var(--rule);
+  --color-hairline: var(--hairline);
+  --color-pearl: var(--pearl);
+  --color-dir-deep: var(--dir-deep);
+  --color-dir-tint: var(--dir-tint);
+  --color-dir-light: var(--dir-light);
+  --color-dir-seed: var(--dir-seed);
+  --color-dir-band: var(--dir-band);
+  --color-dir-text: var(--dir-text);
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), system-ui, "Segoe UI", Arial, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, Consolas, monospace;
+  --text-mono: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5625rem;
+  --text-2xl: clamp(1.75rem, 1.35rem + 1.6vw, 2.25rem);
+  --text-3xl: clamp(2.25rem, 1.6rem + 2.6vw, 3.25rem);
+  --text-display: clamp(2.5rem, 1.7rem + 3.4vw, 3.75rem);
+  --radius-xs: 2px;
+  --radius-md: 10px;
+  --radius-pill: 9999px;
+  --container-content: 72rem;
+  --container-prose: 66ch;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-emph: cubic-bezier(0.2, 0, 0, 1);
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
 }
