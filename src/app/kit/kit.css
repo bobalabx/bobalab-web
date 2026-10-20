@@ -45,7 +45,7 @@
   gap: var(--s-3);
 }
 .kit-swatches {
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
 }
 .kit-swatches li,
 .kit-dirswatches li {

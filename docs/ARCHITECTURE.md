@@ -25,18 +25,37 @@ content/  ──read.ts──► RawContent ──validate.ts──► issues (n
 
 ## 3. Content layer (`src/lib/content/**`)
 
-| File            | Role                                                                                                                                                           |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `schema.ts`     | zod schemas (brief §F3 + D-03…D-06). Structural only; strict objects (unknown keys fail). Exports enums, `COLLECTION_ROUTES`, `SLUG_PATTERNS`, types.          |
-| `read.ts`       | Disk → virtual files → parsed entries (`parseContentFiles` is pure, used by tests). YAML 1.2 core schema: dates stay strings.                                  |
-| `load.ts`       | `getContent()` (memoised except in `next dev`), `isPreview()`, `buildContent()`. Throws `ContentError` on YAML/schema errors so a broken file fails the build. |
-| `validate.ts`   | Publish-readiness rules; every code below.                                                                                                                     |
-| `relations.ts`  | Relation map; D-05 counting (`hasPublicVersion`, `countsAsPublication`); `isLabWork`.                                                                          |
-| `directions.ts` | D-04 ordering from `site.direction_order`.                                                                                                                     |
-| `people.ts`     | Alumni derivation, consent gating (`toPublicPerson`), role order/labels, grouping.                                                                             |
-| `dates.ts`      | Formatting ("Oct 20, 2026") without locale/TZ dependence; "today" in America/Los_Angeles; `BUILD_DATE` env pins it.                                            |
-| `markdoc.ts`    | Markdown → React/HTML; raw HTML escaped, h1 demoted, external `rel`.                                                                                           |
-| `palette.ts`    | Colour tokens + swatches + WCAG maths (mirror of `tokens.css`, unit-tested).                                                                                   |
+| File            | Role                                                                                                                                                                                                                                                                                                                          |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `schema.ts`     | zod schemas (brief §F3 + D-03…D-06). Structural only; strict objects (unknown keys fail). Exports enums, `COLLECTION_ROUTES`, `SLUG_PATTERNS`, types.                                                                                                                                                                         |
+| `read.ts`       | Disk → virtual files → parsed entries (`parseContentFiles` is pure, used by tests). YAML 1.2 core schema: dates stay strings.                                                                                                                                                                                                 |
+| `load.ts`       | `getContent()` (memoised except in `next dev`), `isPreview()`, `buildContent()`. Throws `ContentError` on YAML/schema errors so a broken file fails the build.                                                                                                                                                                |
+| `validate.ts`   | Publish-readiness rules; every code below.                                                                                                                                                                                                                                                                                    |
+| `relations.ts`  | Relation map; D-05 counting (`hasPublicVersion`, `countsAsPublication`); `isLabWork`.                                                                                                                                                                                                                                         |
+| `directions.ts` | D-04 ordering from `site.direction_order`.                                                                                                                                                                                                                                                                                    |
+| `people.ts`     | Alumni derivation, consent gating (`toPublicPerson`), role order/labels, grouping.                                                                                                                                                                                                                                            |
+| `dates.ts`      | Formatting ("Oct 20, 2026") without locale/TZ dependence; "today" in America/Los_Angeles; `BUILD_DATE` env pins it.                                                                                                                                                                                                           |
+| `markdoc.ts`    | Markdown → React/HTML; raw HTML escaped, h1 demoted, external `rel`.                                                                                                                                                                                                                                                          |
+| `palette.ts`    | Colour tokens + swatches + WCAG maths (mirror of `tokens.css`, unit-tested).                                                                                                                                                                                                                                                  |
+| `queries.ts`    | Page-level queries over `Content`: `directionDetail`, `projectDetail`, `publicationDetail`, `personDetail`, `newsDetail` (prev/next), `featuredFindings`/`resolveFindings`, `currentPeople`, `openOpportunities`, `upcomingNews`, `groupByYear`, `directionsOf`, and `staticParams`/`staticSlugs` for `generateStaticParams`. |
+
+### Dynamic routes: never return `[]` from `generateStaticParams` (MEASURED)
+
+With `output: "export"`, Next 16.4.2 **fails the build** when `generateStaticParams()` returns an empty array ("at least one route must be generated"; probed 2026-10-20). The production build currently has **0 non-draft directions** (D-03/D-04), so `/research/[direction]/` would break `npm run build`. Every dynamic route must therefore use:
+
+```ts
+export const dynamicParams = false;
+export function generateStaticParams() {
+  return staticParams("direction", staticSlugs.directions(getContent()));
+}
+// page: const d = directionDetail(getContent(), slug); if (!d) notFound();
+```
+
+`staticParams` emits the placeholder `EMPTY_PARAM` (`"_none"`, never a valid content slug) when the list is empty; the `*Detail` queries return `undefined` for it, so the page calls `notFound()` and the export writes a noindex not-found page at e.g. `out/research/_none/`. WP8: keep `_none` paths out of the sitemap and the link check.
+
+### Redirect stubs (D-05)
+
+`scripts/content/write-redirects.mjs` runs inside `npm run build` / `build:preview` after `next build`: for each `site.yml → redirects[] {from, to}` it writes `out/<from>/index.html` (meta refresh, `rel=canonical`, `noindex`, plain link), base-path aware, never overwriting an exported page. `content/.published-slugs.json` is **not** updated by the build (a build should not modify tracked content); run `npm run slugs:record` when publishing.
 
 ### Modes (D-03)
 

@@ -30,6 +30,14 @@ console.log(
 const r = spawnSync(process.execPath, [nextBin, "build"], { cwd: root, env, stdio: "inherit" });
 if (r.status !== 0) process.exit(r.status ?? 1);
 
+// D-05: static redirect stubs from site.yml → redirects[].
+const redirects = spawnSync(
+  process.execPath,
+  [path.join(root, "scripts", "content", "write-redirects.mjs")],
+  { cwd: root, env, stdio: "inherit" },
+);
+if (redirects.status !== 0) process.exit(redirects.status ?? 1);
+
 const fixer = path.join(root, "scripts", "fix-win-export.mjs");
 if (process.platform === "win32") {
   if (existsSync(fixer)) {

@@ -11,6 +11,7 @@ import { Pearl } from "./Pearl";
 import { Img } from "./Img";
 import { DraftBadge } from "./Badge";
 import { PearlTagList } from "./PearlTag";
+import { isExternalUrl, withBasePath } from "@/lib/site/paths";
 
 const LINK_LABELS: Record<string, string> = {
   website: "Website",
@@ -71,7 +72,10 @@ export function PersonCard({
           <ul className="bl-person__links" aria-label={`Links for ${person.name}`}>
             {links.map(([k, href]) => (
               <li key={k}>
-                <a href={href} rel="noopener noreferrer">
+                <a
+                  href={isExternalUrl(href) ? href : withBasePath(href)}
+                  rel={isExternalUrl(href) ? "noopener noreferrer" : undefined}
+                >
                   {LINK_LABELS[k] ?? k}
                   <span className="vh"> of {person.name}</span>
                 </a>

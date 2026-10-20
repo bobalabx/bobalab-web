@@ -28,12 +28,16 @@ awards:
     under_title: "Learning Best Practices: Can Machine Learning Improve Human Decision-Making?"
   - name: INFORMS TIMES Section Best Working Paper
     year: 2021
+    under_title: "Learning Best Practices: Can Machine Learning Improve Human Decision-Making?"
   - name: INFORMS SAS Data Mining Best Paper Award, Winner (General Paper Track)
     year: 2022
+    under_title: Improving Human Decision-Making with Machine Learning
   - name: INFORMS Service Science Section Best Paper Competition, Finalist
     year: 2022
+    under_title: Improving Human Decision-Making with Machine Learning
   - name: POMS College of Operational Excellence Best Junior Scholar Paper, Runner-up
     year: 2023
+    under_title: Improving Human Decision-Making with Machine Learning
   - name: WISE (Workshop on Information Systems and Economics) Best Conference Paper
     year: 2022
   - name: POMS College of Behavioral Operations Junior Scholar Paper Competition, 2nd place

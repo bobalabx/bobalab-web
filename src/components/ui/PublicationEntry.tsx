@@ -106,6 +106,9 @@ export function PublicationEntry({
               <Badge tone="strong">
                 {a.name}, {a.year}
               </Badge>
+              {a.under_title && (
+                <span className="t-sm t-muted"> (as &ldquo;{a.under_title}&rdquo;)</span>
+              )}
             </li>
           ))}
         </ul>

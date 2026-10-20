@@ -18,6 +18,8 @@
     "validate": "vitest run --config vitest.content.config.ts",
     "e2e": "playwright test",
     "media": "node scripts/media/build-images.mjs",
+    "media:check": "node scripts/media/build-images.mjs --check",
+    "import:content": "node scripts/import/import-dataset.mjs",
     "cms:local": "node scripts/cms/local.mjs",
     "perf": "node scripts/perf/js-budget.mjs",
     "format": "prettier --write .",

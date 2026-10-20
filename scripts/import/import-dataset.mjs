@@ -348,6 +348,24 @@ for (const { p, st, slug, published } of pubRows) {
       const full = (p.priorTitles ?? []).find((t) => t.startsWith(prefix));
       under_title = full ? full.replace(/\s*\([^)]*\)\s*$/, "") : m[1];
     }
+    // R2 §3/§7.3: awards won under an earlier title say so. The dataset's
+    // priorTitles name the award records each title was used for, e.g.
+    // "(…; 2021 INFORMS award records)" or "(…; 2022-2023 award records)".
+    // Only DOCUMENTED awards are matched (PI-reported ones are not attributed).
+    if (!under_title && !/PI-reported only/i.test(a.label ?? "")) {
+      for (const t of p.priorTitles ?? []) {
+        const paren = /\(([^)]*)\)\s*$/.exec(t)?.[1] ?? "";
+        const informs = /(\d{4}) INFORMS award records/.exec(paren);
+        const range = /(\d{4})-(\d{4}) award records/.exec(paren);
+        const hit =
+          (informs && Number(informs[1]) === a.year && /^INFORMS/.test(a.name)) ||
+          (range && a.year >= Number(range[1]) && a.year <= Number(range[2]));
+        if (hit) {
+          under_title = t.replace(/\s*\([^)]*\)\s*$/, "");
+          break;
+        }
+      }
+    }
     if (/PI-reported only/i.test(a.label ?? ""))
       note(`${where}: award "${a.name}" (${a.year}) is PI-reported only (CV).`);
     return compact({ name: a.name, year: a.year, under_title });

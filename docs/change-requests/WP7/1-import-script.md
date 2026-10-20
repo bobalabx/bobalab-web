@@ -10,3 +10,5 @@
   Usage: `npm run import:content -- --dataset <path> --write`. `media:check` is suitable for CI (exits 1 if an upload over 10 MB exists or the manifest/variants are out of date). The existing `"media"` script already points at `scripts/media/build-images.mjs`.
 - Blocking? no (the scripts run with `node …` directly).
 - Test that proves it: `npm run media:check` exits 0 on the current tree; `npm run import:content` without arguments prints the usage line and exits 2.
+
+Applied in the WP0/WP7 review commit ("review: …", 2026-10-20).
