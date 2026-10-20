@@ -1,0 +1,28 @@
+title: Privacy
+intro: This site does not track you.
+body: |
+  ## What we collect
+
+  Nothing. The site sets no cookies, runs no analytics and loads no third-party scripts, fonts or embeds.
+
+  ## What your browser keeps
+
+  Two small settings stay in your own browser and are never sent anywhere:
+
+  - your "Reduce motion" choice, kept in `localStorage` under the key `bobalab-motion`;
+  - a note that the opening animation has already played in this session, kept in `sessionStorage` under the key `bobalab-intro` and cleared when you close the tab.
+
+  You can remove both by clearing this site's data in your browser settings.
+
+  ## Hosting
+
+  The site is a set of static pages served by GitHub Pages. Like any web host, GitHub may record technical details such as IP addresses in its server logs; see the [GitHub General Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement). The lab does not receive those logs.
+
+  ## Lab editors
+
+  Lab members who edit the site sign in to the content editor with GitHub. The sign-in token is stored only in that editor's own browser.
+
+  ## Questions
+
+  Email [bobalab@berkeley.edu](mailto:bobalab@berkeley.edu).
+draft: true

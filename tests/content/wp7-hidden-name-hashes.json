@@ -1,0 +1,22 @@
+{
+  "about": "Salted SHA-256 hashes of the names on the PI site's commented-out ('hidden') roster cards that appear nowhere else (brief WP7 #6 as amended by the critic). Names are never stored in the repo. Hash = sha256(salt + ':' + normalized name); normalized = NFKD, diacritics removed, lower-case, letters only, single spaces. Variants per name: full name without a parenthetical nickname, first + last, and (if present) the form with the nickname and nickname + last. The scanner checks 2- to 4-word windows (2-word windows also reversed) in the raw text and in the text with parentheticals removed.",
+  "salt": "8d6fe851d5a32018166769fb82b9e4a0",
+  "count": 12,
+  "hashes": [
+    "04666a8faabcab767094d14e1be1a811eb3c54228b106cec82e0bae4c2b980c4",
+    "0dcd084a55ca21bf42215aa62771ad80fbbc63941a022d0a88f2cb61c6d5b749",
+    "1304503e9a49bc403e94bd7159615ac8dc5e6b364c99fc5964815b1ba25382ee",
+    "28daeeef44bd2042be3e03525abb4494e33942650e86218314dc0ec8fdac4d88",
+    "2d45eef04ce0170fceb17aad60494748ce28a65f42151eaf9b1fc8e84b0dd555",
+    "2dd411b768ae1b1243798150bf6e5c4bbdfd38dcd04a03582a2c094d4b7420d3",
+    "31d28345516635a572739e9dcfa179c15aa90519822fa79a1c382cf55e423339",
+    "5f6658b9daac00952c1ae7f27dda0bd6459d9d5424452ef3eec2330a0bb87e9c",
+    "8c43eccc72b989fab1dfb2246bc92e0a82fabfff695420f3b41a53048d8ff1e3",
+    "97e51d7ed11c8525d25503710976c52264d7e1603ae401d2fda28416162cdc54",
+    "987be1a63d35be2ff7feadfdfe6d6c5b752e031060f20afd3e7e995c87854c58",
+    "b2fa08b1d652caa835e4a6d6c4426b7c6b5ce0f0a4bf968e29bfff9005249469",
+    "ceca3342f96ccc068aac1a0749e96952837d9fe12e72278d3b5e1decdea7ff8b",
+    "d0318f33045fa95f75803bbf4c8a53673d229f975903212bf78969c4e9f7cbc8",
+    "d3cee49a10819d05e87d9152090d802a2b304b054dff2fb368f07da873ffe42d"
+  ]
+}
