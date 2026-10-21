@@ -1,7 +1,7 @@
 ---
 name: Aaron Tu
 role: undergrad
-program: math
+program: Math
 links:
   linkedin: https://www.linkedin.com/in/aarontu2006
 directions: []

@@ -1,7 +1,7 @@
 ---
 name: Austin Zhu
 role: undergrad
-program: econ
+program: Econ
 end: "2025"
 now_at: Economics PhD, University of Michigan
 links:

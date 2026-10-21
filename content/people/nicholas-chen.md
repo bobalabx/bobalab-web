@@ -1,7 +1,7 @@
 ---
 name: Nicholas Chen
 role: undergrad
-program: eecs
+program: EECS
 links:
   website: https://www.nicholaschen.dev
 directions: []

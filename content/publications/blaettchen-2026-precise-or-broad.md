@@ -19,7 +19,7 @@ presentations:
     url: https://aireasoning.media.mit.edu/
   - event: EC 2025 Workshop on Human-AI Collaboration
     year: 2025
-  - event: 2026 talks incl. INSEAD, Michigan, POMS, BDRM, INFORMS RMP, YinzOR (CMU)
+  - event: 2026 talks incl. INSEAD, University of Michigan, POMS, Behavioral Decision Research in Management Conference, INFORMS Revenue Management & Pricing Conference, YinzOR at Carnegie Mellon University
     year: 2026
 press: []
 awards: []

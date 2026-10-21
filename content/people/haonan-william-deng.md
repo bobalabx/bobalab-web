@@ -1,7 +1,7 @@
 ---
 name: Haonan (William) Deng
 role: masters
-program: ieor ms
+program: IEOR
 links:
   linkedin: https://www.linkedin.com/in/williamdhn
 directions: []

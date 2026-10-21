@@ -24,7 +24,7 @@ presentations:
   - event: 2025 Platform Strategy Research Symposium, Boston University
     year: 2025
     url: https://questromworld.bu.edu/platformstrategy/
-  - event: 2023 MSOM Service Management SIG; 2022 INFORMS RMP spotlight
+  - event: 2023 MSOM Service Management SIG; 2022 INFORMS Revenue Management & Pricing Conference (spotlight)
 press: []
 awards:
   - name: INFORMS TIMES Section Best Working Paper, Runner-Up

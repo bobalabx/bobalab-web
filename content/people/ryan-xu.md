@@ -1,7 +1,7 @@
 ---
 name: Ryan Xu
 role: undergrad
-program: ds/applied math
+program: DS/Applied Math
 links:
   linkedin: https://www.linkedin.com/in/ryan-xu-y/
 directions: []

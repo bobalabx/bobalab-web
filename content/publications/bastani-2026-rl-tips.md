@@ -40,8 +40,10 @@ awards:
     under_title: Improving Human Decision-Making with Machine Learning
   - name: WISE (Workshop on Information Systems and Economics) Best Conference Paper
     year: 2022
+    source: self-reported
   - name: POMS College of Behavioral Operations Junior Scholar Paper Competition, 2nd place
     year: 2021
+    source: self-reported
 directions:
   - algorithmic-advice
 in_brief: An algorithm learns from logs of people's multi-step decisions and turns the biggest gap between their play and an optimal policy into one short tip. In virtual-kitchen experiments the tips raised performance, and people combined them with their own strategies.

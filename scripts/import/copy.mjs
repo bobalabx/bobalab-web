@@ -68,21 +68,19 @@ This direction studies when flexible workers choose to work and how platforms pa
 
 A published study uses ride-hailing data to model drivers' decisions to start and stop working, looking at pay alongside habits such as earnings targets and the momentum of a long shift. A working paper combines one platform's records with public New York City trip data to estimate how drivers split their time between competing apps, and uses the estimates to compare pay designs such as hourly guarantees, streak bonuses and wage floors.
 
-Two works in progress are listed by title only: one on designing and sequencing incentives for platform workers, and one on staffing fluid teams in a fragmented labor market. The PI's doctoral dissertation on managing the gig economy is also filed here.
+Two works in progress are listed by title only: one on designing and sequencing incentives for platform workers, and one on staffing fluid teams in a fragmented labor market. Park Sinchaisri's doctoral dissertation on managing the gig economy is also filed here.
 `,
+  // Archived directions: the template's "Archived" badge and notice already say
+  // so, so the body starts with the research itself (VIS-13).
   "pricing-experimentation": `
-Archived direction. This page keeps the lab's earlier pricing work in one place.
-
-A working paper models shoppers who read a higher price as a sign of higher quality and who react to the size of a discount compared with what they expected. It builds this behavior into a retailer's markdown plan and calibrates the model with a consumer study. The paper grew out of the PI's 2016 MIT master's thesis on pricing with quality perception, which pairs a model with an experiment.
+A working paper models shoppers who read a higher price as a sign of higher quality and who react to the size of a discount compared with what they expected. It builds this behavior into a retailer's markdown plan and calibrates the model with a consumer study. The paper grew out of Park Sinchaisri's 2016 MIT master's thesis on pricing with quality perception, which pairs a model with an experiment.
 
 Two further items are listed by title only, since no public drafts exist yet: a submitted paper on generative-AI simulation for pricing operations, guided by economic mechanisms, and work in progress titled Experimentation without Experiments.
 `,
   "cities-communities": `
-Archived direction. This page keeps one earlier study in a stable place on the site.
+A paper published in PLOS ONE in 2021 uses block-party permits issued in Philadelphia to build two measures of neighborhood vibrancy: how many gatherings a neighborhood holds, and what share of them are spontaneous. It then relates these measures to crime across the city's neighborhoods over time.
 
-The paper, published in PLOS ONE in 2021, uses block-party permits issued in Philadelphia to build two measures of neighborhood vibrancy: how many gatherings a neighborhood holds, and what share of them are spontaneous. It then relates these measures to crime across the city's neighborhoods over time.
-
-The study predates the lab; it was carried out during the PI's doctoral studies at the University of Pennsylvania. It is filed here so that the paper has a home on the site. New work in this area, if the lab takes it up again, would be listed on this page.
+The study predates the lab; it was carried out during Park Sinchaisri's doctoral studies at the University of Pennsylvania. It is filed here so that the paper has a home on the site. New work in this area, if the lab takes it up again, would be listed on this page.
 `,
 };
 
@@ -113,21 +111,16 @@ The lab studies how people learn, decide and get work done alongside algorithms 
 
 ## Principal investigator
 
-Park Sinchaisri is an Assistant Professor of Operations and Information Technology Management in the Operations & Information Technology Management (OITM) group at Berkeley Haas, where he has been on the faculty since 2021.
-
-- [Haas faculty profile](https://haas.berkeley.edu/faculty/park-sinchaisri/)
-- [Personal website](https://parksinchaisri.github.io/)
-
-## Contact
-
-- Email: ${MAILTO}
-- Mail: Haas School of Business, 2220 Piedmont Avenue, Berkeley, CA 94720
+Park Sinchaisri is an Assistant Professor in the Operations & Information Technology Management (OITM) group at Berkeley Haas, where he has been on the faculty since 2021.
 `,
+  // WP5 request 3: the PI links and the contact list are not repeated here; the
+  // About fact sheet renders them from site.yml and the PI's person record.
   draft: true,
 };
 
 export const JOIN = {
-  intro: `BOBALAB works with Berkeley students, with academic and industry collaborators, and with journalists. One address reaches the lab: ${MAILTO}.`,
+  // CON-14: no claim of work with journalists or industry partners (none is documented).
+  intro: `BOBALAB welcomes Berkeley students, research collaborators and press inquiries. One address reaches the lab: ${MAILTO}.`,
   students: `
 Undergraduates join through UC Berkeley's [Undergraduate Research Apprentice Program (URAP)](${URAP_LIST}). The lab offers four tracks:
 
@@ -138,8 +131,9 @@ Undergraduates join through UC Berkeley's [Undergraduate Research Apprentice Pro
 
 Apprentices commit about 9–11 hours a week, and remote work is possible.
 
-**Status:** applications for Fall 2026 are closed (as of October 20, 2026). Check the [URAP listing](${URAP_LIST}) for the next term, or email ${MAILTO}.
+Check the [URAP listing](${URAP_LIST}) for the current term, or email ${MAILTO}.
 `,
+  // WP5 request 4: the open/closed status lives in opportunities/urap.md only.
   partners: `The lab welcomes academic and industry collaborators. To talk about a project, email ${MAILTO}.`,
   press: `For media requests, email ${MAILTO}.`,
   draft: true,
@@ -158,12 +152,12 @@ This site aims to conform to the Web Content Accessibility Guidelines (WCAG) 2.2
 - Every page works without JavaScript and with a keyboard alone.
 - The research figure on the home page has a plain list alternative with the same information.
 - Motion is gentle and optional. The site follows your device's reduced-motion setting, and the "Reduce motion" control in the footer, or the pause button on the figure, turns animation off.
-- Colour is never the only way information is shown, and text meets contrast requirements in light and dark mode.
+- Color is never the only way information is shown, and text meets contrast requirements in light and dark mode.
 - Images have text alternatives.
 
 ## Known limits
 
-- Many papers link to PDFs hosted by publishers, preprint servers or the PI's personal website. We do not control those files and cannot promise they are accessible. Where we can, we also link the publisher's web version.
+- Many papers link to PDFs hosted by publishers, preprint servers or Park Sinchaisri's personal website. We do not control those files and cannot promise they are accessible. Where we can, we also link the publisher's web version.
 - The content editor that lab members use is third-party software and has not been fully reviewed for accessibility.
 - The site has not yet had an independent accessibility audit.
 

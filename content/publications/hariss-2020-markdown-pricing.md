@@ -24,6 +24,7 @@ press: []
 awards:
   - name: MIT Operations Research Center Best Student Paper, Honorable Mention
     year: 2017
+    source: self-reported
 directions:
   - pricing-experimentation
 in_brief: Models shoppers who see higher prices as a sign of higher quality and are disappointed by smaller-than-expected discounts, builds this into a retailer's markdown plan calibrated with a consumer study, and finds that announcing markdowns in advance can pay off.

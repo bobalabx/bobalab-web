@@ -1,7 +1,7 @@
 ---
 name: Ryan Jesubalan
 role: undergrad
-program: applied math/ds
+program: Applied Math/DS
 links:
   linkedin: https://www.linkedin.com/in/ryanjesubalan
 directions: []

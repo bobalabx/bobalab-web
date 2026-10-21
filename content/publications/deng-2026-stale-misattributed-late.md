@@ -3,7 +3,7 @@ title: "Stale, Misattributed, or Late: Where Personal Memory Fails Before Genera
 authors:
   - name: Haonan Deng
     person: haonan-william-deng
-  - name: Park Sinchaisri
+  - name: Wichinpong Park Sinchaisri
     person: park-sinchaisri
 type: working-paper
 venue: arXiv preprint

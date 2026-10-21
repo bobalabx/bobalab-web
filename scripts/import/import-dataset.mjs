@@ -23,6 +23,12 @@ import {
   chooseQuestion,
   cleanDate,
   compact,
+  enDashRanges,
+  expandEventNames,
+  fullNameFirst,
+  humanDates,
+  namePI,
+  programLabel,
   frontMatterFile,
   newsSlug,
   presentationHasEvidence,
@@ -70,6 +76,14 @@ if (!datasetPath) {
   process.exit(2);
 }
 const ds = JSON.parse(fs.readFileSync(path.resolve(datasetPath), "utf8"));
+
+/** Public name forms of the PI (dataset settings, DOCUMENTED). */
+const PI_NAME = ds.settings.piName; // "Park Sinchaisri": public copy (CON-08)
+const PI_GIVEN = PI_NAME.split(/\s+/)[0]; // "Park"
+const PI_CITATION = ds.settings.piCitationName; // "Wichinpong Park Sinchaisri": author lists (CON-07)
+const PI_SLUG = ds.people.find((p) => p.role === "pi")?.slug;
+/** Public copy: "the PI" → the PI's name. */
+const publicCopy = (s) => (typeof s === "string" ? namePI(s, PI_NAME) : s);
 
 // ---------------------------------------------------------------------------
 // Report
@@ -164,6 +178,8 @@ for (const p of ds.people) {
 
   const L = p.links ?? {};
   const links = compact({
+    // WP5 request 1/2: the Haas faculty profile renders first on /about/ and the PI page.
+    haas: https(L.haas, `${where} links.haas`),
     website: https(L.homepage ?? L.website ?? L.profile, `${where} links.website`),
     scholar: https(L.scholar, `${where} links.scholar`),
     linkedin: https(L.linkedin, `${where} links.linkedin`),
@@ -184,7 +200,8 @@ for (const p of ds.people) {
     name: p.name,
     role,
     title: role === "pi" ? p.title : undefined,
-    program: p.program ?? undefined,
+    // CON-04: the roster's lower-case tags in display casing; no word is expanded.
+    program: programLabel(p.program, role),
     end,
     now_at: isAlumni ? (p.placement ?? undefined) : undefined,
     links,
@@ -216,7 +233,12 @@ const cleanAffiliation = (a) =>
 // ---------------------------------------------------------------------------
 // Publications (CONTENT-MAPPING §3)
 
-/** §3.2, as amended by WP7 rule: every non-published item is status_source self-reported (brief WP7 #3). */
+/**
+ * §3.2 status map. `status_source` is self-reported unless the entry says
+ * `documented`: the four items whose state anyone can check on a public
+ * posting (SSRN / arXiv), as CONTENT-MAPPING §3.2 says (WP3 request 4 item 2,
+ * which reversed the earlier WP7 rule "every non-published item is self-reported").
+ */
 const STATUS = {
   "precise-or-broad": {
     status: "major-revision",
@@ -238,8 +260,13 @@ const STATUS = {
     status_note: "at Manufacturing & Service Operations Management",
     as_of: "2026-05",
   },
-  "teachers-knapsack": { status: "working-paper", as_of: CHECKED_ON },
-  "strategic-advice-personal-ai": { status: "preprint", status_note: "v2", as_of: "2026-09" },
+  "teachers-knapsack": { status: "working-paper", as_of: CHECKED_ON, source: "documented" },
+  "strategic-advice-personal-ai": {
+    status: "preprint",
+    status_note: "v2",
+    as_of: "2026-09",
+    source: "documented",
+  },
   "non-adoption-algorithmic-advice": { status: "working-paper", as_of: CHECKED_ON },
   "compliance-aware-rl": { status: "in-progress", as_of: CHECKED_ON },
   "planning-vs-execution": { status: "in-progress", as_of: CHECKED_ON },
@@ -258,8 +285,34 @@ const STATUS = {
     status_note: "to Production and Operations Management",
     as_of: "2026-08",
   },
-  "dispatching-to-develop": { status: "working-paper", as_of: "2026-08" },
-  "stale-misattributed-late": { status: "preprint", status_note: "v1", as_of: "2026-10" },
+  "dispatching-to-develop": { status: "working-paper", as_of: "2026-08", source: "documented" },
+  "stale-misattributed-late": {
+    status: "preprint",
+    status_note: "v1",
+    as_of: "2026-10",
+    source: "documented",
+  },
+};
+
+/**
+ * Venue corrections (WP3 request 4 item 1; R2 §3 P4/P5, §1.2 DOCUMENTED): the
+ * two PACM HCI papers carry "(CSCW 2025)" in the journal name in the dataset.
+ * The journal is Proceedings of the ACM on HCI; CSCW 2025 in Bergen is where
+ * they were presented (programme page below), so it becomes a presentation.
+ */
+const CSCW_2025 = {
+  event: "CSCW 2025, Bergen",
+  source: "https://cscw.acm.org/2025/index.php/program-overview-3/",
+};
+const VENUE_FIXES = {
+  "learning-on-the-go-2025": {
+    venue: "Proceedings of the ACM on Human-Computer Interaction",
+    presentation: CSCW_2025,
+  },
+  "making-chatgpt-work-2025": {
+    venue: "Proceedings of the ACM on Human-Computer Interaction",
+    presentation: CSCW_2025,
+  },
 };
 const SLUG_OVERRIDES = { "cancer-recognition-foundation-models": "cancer-recognition" };
 
@@ -276,6 +329,7 @@ for (const p of ds.publications) {
 }
 
 const pubDirections = new Map(); // new slug → directions
+const pubDraft = new Map(); // new slug → draft
 for (const { p, st, slug, published } of pubRows) {
   const where = `publications/${slug}`;
   let type = p.type;
@@ -284,6 +338,9 @@ for (const { p, st, slug, published } of pubRows) {
     fail(`${where}: unmapped type ${p.type}`);
 
   const authors = p.authors.map((a) => {
+    // CON-07: the PI is cited by the documented citation name on every paper,
+    // whatever form the source listing used (arXiv lists "Park Sinchaisri").
+    if (a.personSlug === PI_SLUG) return { name: PI_CITATION, person: a.personSlug };
     if (personSlugs.has(a.personSlug)) return { name: a.name, person: a.personSlug };
     if (!collaborators.has(a.personSlug))
       unmapped(`${where}: author ${a.name} has no people row (name only)`);
@@ -322,13 +379,26 @@ for (const { p, st, slug, published } of pubRows) {
     );
   }
 
+  const fix = VENUE_FIXES[p.slug];
+  // Presentation text: dates as the site writes them (WP3 request 4 item 4) and
+  // conference names as the CV spells them out (CON-13). Formatting only.
   const presentations = (p.presentations ?? []).map((x) =>
     compact({
-      event: x.event,
+      event: expandEventNames(humanDates(x.event)),
       year: singleYear(x.event) ?? undefined,
       url: presentationHasEvidence(x.label) ? https(x.source, `${where} presentation`) : undefined,
     }),
   );
+  for (const x of presentations)
+    if (x.event.length > 200) fail(`${where}: presentation event > 200 chars: ${x.event}`);
+  if (fix?.presentation)
+    presentations.push(
+      compact({
+        event: fix.presentation.event,
+        year: singleYear(fix.presentation.event) ?? undefined,
+        url: https(fix.presentation.source, `${where} presentation`),
+      }),
+    );
 
   const press = [];
   for (const x of p.press ?? []) {
@@ -366,9 +436,14 @@ for (const { p, st, slug, published } of pubRows) {
         }
       }
     }
-    if (/PI-reported only/i.test(a.label ?? ""))
-      note(`${where}: award "${a.name}" (${a.year}) is PI-reported only (CV).`);
-    return compact({ name: a.name, year: a.year, under_title });
+    const selfReported = /PI-reported only/i.test(a.label ?? "");
+    if (selfReported) note(`${where}: award "${a.name}" (${a.year}) is PI-reported only (CV).`);
+    return compact({
+      name: a.name,
+      year: a.year,
+      under_title,
+      source: selfReported ? "self-reported" : undefined,
+    });
   });
 
   let in_brief;
@@ -377,7 +452,7 @@ for (const { p, st, slug, published } of pubRows) {
       `${where}: no in_brief (the drafted summary was inferred from the title). Write 1–3 plain sentences.`,
     );
   } else if (p.summary) {
-    in_brief = scrub(p.summary);
+    in_brief = publicCopy(scrub(p.summary)); // WP3 request 4 item 5: no "The PI's"
     if (in_brief.length > 400) fail(`${where}: in_brief > 400 chars`);
     if (sentenceCount(in_brief) > 3) note(`${where}: in_brief has more than 3 sentences`);
   }
@@ -385,12 +460,13 @@ for (const { p, st, slug, published } of pubRows) {
   const draft = p.review?.status !== "verified";
   const directions = [...(p.directions ?? [])];
   pubDirections.set(slug, directions);
+  pubDraft.set(slug, draft);
 
   const data = compact({
     title: scrub(p.title),
     authors,
     type,
-    venue: p.venue ?? undefined,
+    venue: fix?.venue ?? p.venue ?? undefined,
     year: p.year ?? undefined,
     date_online: date_online ?? undefined,
     volume: C.volume ?? undefined,
@@ -399,7 +475,7 @@ for (const { p, st, slug, published } of pubRows) {
     doi: p.doi ?? undefined,
     status: published ? "published" : st.status,
     status_note: st?.status_note,
-    status_source: published ? undefined : "self-reported",
+    status_source: published ? undefined : (st.source ?? "self-reported"),
     as_of: published ? undefined : st.as_of,
     links: compact(links),
     presentations,
@@ -503,6 +579,46 @@ for (const pr of ds.projects) {
 // ---------------------------------------------------------------------------
 // News (CONTENT-MAPPING §6)
 
+/**
+ * Talk dates and places (WP5 request 8 item 4), taken from each item's own
+ * summary (flagged for confirmation in CONTENT-QUESTIONS F5). Multi-day events
+ * use the day of the lab's talk where the programme gives it: all three MSOM
+ * 2026 talks were on Jul 14 (sessions TB8/TD10, R2 §4; CON-09), CSCW 2025 on
+ * Oct 20–21 (first day).
+ */
+const NEWS_EVENTS = {
+  "2023-08-nasa-symposium": { event_date: "2023-09-22", location: "NASA Ames Research Center" },
+  "2023-10-mit-ide-seminar": {
+    event_date: "2023-11-15",
+    location: "MIT Initiative on the Digital Economy",
+  },
+  "2023-12-stanford-seminar": {
+    event_date: "2024-03-06",
+    location: "Stanford Graduate School of Business",
+  },
+  "2025-10-cscw-bergen": { event_date: "2025-10-20", location: "CSCW 2025, Bergen, Norway" },
+  "2026-05-msom-three-papers": { event_date: "2026-07-14", location: "Harvard Business School" },
+};
+
+/**
+ * Summary rewordings that keep the facts and match the sources' tense (CON-09):
+ * the only source for the Tuck talk is the PI site's forward-looking "I will be
+ * presenting", so it is worded like its sibling items ("was announced to present").
+ */
+const reword = (slug, from, to) => (s) =>
+  from.test(s)
+    ? s.replace(from, to)
+    : fail(`news ${slug}: rewording no longer matches the dataset`);
+const NEWS_SUMMARY = {
+  "2024-11-tuck-seminar": reword(
+    "2024-11-tuck-seminar",
+    /^Park presented\b/,
+    "Park was announced to present",
+  ),
+};
+
+const isPiReported = (label) => /PI-reported/i.test(label ?? "");
+
 for (const n of ds.news) {
   const slug = newsSlug(n.slug, n.date);
   const where = `news/${slug}`;
@@ -512,15 +628,47 @@ for (const n of ds.news) {
     (s) => pubSlug.get(s) ?? fail(`${where}: unknown related ${s}`),
   );
   const directions = [...new Set(publications.flatMap((s) => pubDirections.get(s) ?? []))].sort();
-  if (n.body && n.body.length > 280) fail(`${where}: summary > 280`);
+
+  // Public wording: the PI by full name on first mention (CON-08), number ranges
+  // with an en dash, and the item-specific rewordings above.
+  const title = fullNameFirst(scrub(n.title), PI_GIVEN, PI_NAME);
+  let summary = scrub(n.body);
+  if (summary) {
+    summary = NEWS_SUMMARY[n.slug]?.(summary) ?? summary;
+    summary = enDashRanges(fullNameFirst(summary, PI_GIVEN, PI_NAME));
+    if (summary.length > 280) fail(`${where}: summary > 280`);
+  }
+
+  // CON-02: a publication item reports the paper's status. It stays a draft
+  // while every paper it is about is a draft, or when the status is only the
+  // lab's own report (label "PI-reported": the journal decision is not
+  // publicly verifiable, R2 §1.3/§7.4). Nothing is published until the lab flips it.
+  let draft = n.review?.status !== "verified";
+  if (
+    !draft &&
+    n.category === "publication" &&
+    (isPiReported(n.review?.label) ||
+      (publications.length > 0 && publications.every((s) => pubDraft.get(s))))
+  ) {
+    draft = true;
+    const why = isPiReported(n.review?.label)
+      ? "it states a journal decision that only the lab reports (not publicly verifiable)"
+      : "every paper it is about is still a draft";
+    note(`${where}: held as draft because ${why}.`);
+    ask(
+      `${where}: held as draft because ${why}. Publish it together with the paper, or reword it as the lab's own report with a date.`,
+    );
+  }
+
   const data = compact({
     date: n.date,
     type: n.category,
-    title: scrub(n.title),
-    summary: scrub(n.body),
+    title,
+    ...(NEWS_EVENTS[n.slug] ?? {}),
+    summary,
     directions,
     publications,
-    draft: n.review?.status !== "verified",
+    draft,
   });
   put(`news/${slug}.md`, frontMatterFile(data));
 }
@@ -529,7 +677,14 @@ for (const n of ds.news) {
 // Opportunities (CONTENT-MAPPING §7)
 
 const OPP = [
-  { match: /URAP\)$/, slug: "urap", audience: "students", status: "closed" },
+  {
+    match: /URAP\)$/,
+    slug: "urap",
+    audience: "students",
+    status: "closed",
+    // WP5 request 8 item 3: the ASCII " - " separator wrapped to a line starting "- apply".
+    route: (r) => r.replace(/ Program - apply to\b/, " Program. Apply to"),
+  },
   {
     match: /^Research assistants/,
     slug: "research-assistants",
@@ -552,12 +707,16 @@ for (const o of ds.opportunities) {
     continue;
   }
   const where = `opportunities/${m.slug}`;
-  if (o.route && o.route.length > 300) fail(`${where}: route > 300`);
-  if (!o.route) ask(`${where}: no route or statement exists; what should the site say?`);
+  // Public wording: the PI by name (CON-08), en-dash number ranges.
+  const route = o.route
+    ? enDashRanges(publicCopy(m.route ? m.route(o.route) : o.route))
+    : undefined;
+  if (route && route.length > 300) fail(`${where}: route > 300`);
+  if (!route) ask(`${where}: no route or statement exists; what should the site say?`);
   const data = compact({
     title: o.title,
     audience: m.audience,
-    route: o.route ?? undefined,
+    route,
     url: https(o.url, `${where} url`),
     apply_url: https(o.applyUrl, `${where} apply_url`),
     email: o.email ?? undefined,
@@ -620,17 +779,18 @@ const siteData = {
   address: "2220 Piedmont Avenue, Berkeley, CA 94720",
   social: {},
   figure_mode: "cluster",
-  editors_note: `Imported from the research dataset on ${DRAFTED_ON} (WP7). Everything marked draft is pending lab review; open items are listed in docs/CONTENT-QUESTIONS.md.`,
+  // CNT-01: the flags live in this field (shown in the CMS and kept on save),
+  // not in YAML comments, which the first CMS save of Settings deletes.
+  editors_note:
+    `Imported from the research dataset on ${DRAFTED_ON} (WP7). Everything marked draft is pending lab review; open items are listed in docs/CONTENT-QUESTIONS.md.\n\n` +
+    `FLAGGED: the long name is the H-12 default (option A), pending the PI (CONTENT-QUESTIONS A1).\n` +
+    `FLAGGED: the email ${S.email} is printed on the PI site but not confirmed as a monitored mailbox (CONTENT-QUESTIONS A2).\n\n` +
+    `Direction order lists the live directions only; archived directions are left out (DECISIONS D-04).\n`,
   launched: false,
   direction_order: CORE_ORDER,
   redirects: [],
 };
-const siteHeader =
-  "# BOBALAB site settings (DECISIONS D-03, D-04).\n" +
-  "# FLAGGED: long_name is the H-12 default (option A), pending the PI.\n" +
-  "# FLAGGED: email bobalab@berkeley.edu is printed on the PI site but not confirmed as a monitored mailbox.\n" +
-  "# direction_order lists the live directions (archived ones are left out).\n";
-put("site.yml", siteHeader + toYaml(siteData));
+put("site.yml", toYaml(siteData));
 
 const pageFile = (name, data) =>
   put(
@@ -673,6 +833,11 @@ Everything with \`draft: true\` is excluded from production builds (DECISIONS D-
       fail(`${rel}: contains ${hits.length} hidden-only roster name window(s); refusing to write`);
   }
 }
+
+// Public copy never calls the PI "the PI" (CON-08; WP3 request 4 item 5).
+for (const [rel, text] of files)
+  if (rel !== "site.yml" && rel !== "README.md" && /\b[Tt]he PI\b/.test(text))
+    fail(`${rel}: public copy says "the PI"; name ${PI_NAME} instead`);
 
 // ---------------------------------------------------------------------------
 // Format with the repo's Prettier config (so format:check stays clean), then diff/write.

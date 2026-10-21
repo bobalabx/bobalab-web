@@ -1,7 +1,7 @@
 ---
 name: Eddie Zhang
 role: undergrad
-program: applied math
+program: Applied Math
 links:
   linkedin: https://www.linkedin.com/in/ezhang345
 directions: []

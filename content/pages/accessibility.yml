@@ -10,12 +10,12 @@ body: |
   - Every page works without JavaScript and with a keyboard alone.
   - The research figure on the home page has a plain list alternative with the same information.
   - Motion is gentle and optional. The site follows your device's reduced-motion setting, and the "Reduce motion" control in the footer, or the pause button on the figure, turns animation off.
-  - Colour is never the only way information is shown, and text meets contrast requirements in light and dark mode.
+  - Color is never the only way information is shown, and text meets contrast requirements in light and dark mode.
   - Images have text alternatives.
 
   ## Known limits
 
-  - Many papers link to PDFs hosted by publishers, preprint servers or the PI's personal website. We do not control those files and cannot promise they are accessible. Where we can, we also link the publisher's web version.
+  - Many papers link to PDFs hosted by publishers, preprint servers or Park Sinchaisri's personal website. We do not control those files and cannot promise they are accessible. Where we can, we also link the publisher's web version.
   - The content editor that lab members use is third-party software and has not been fully reviewed for accessibility.
   - The site has not yet had an independent accessibility audit.
 

@@ -10,8 +10,6 @@ findings: []
 draft: true
 ---
 
-Archived direction. This page keeps the lab's earlier pricing work in one place.
-
-A working paper models shoppers who read a higher price as a sign of higher quality and who react to the size of a discount compared with what they expected. It builds this behavior into a retailer's markdown plan and calibrates the model with a consumer study. The paper grew out of the PI's 2016 MIT master's thesis on pricing with quality perception, which pairs a model with an experiment.
+A working paper models shoppers who read a higher price as a sign of higher quality and who react to the size of a discount compared with what they expected. It builds this behavior into a retailer's markdown plan and calibrates the model with a consumer study. The paper grew out of Park Sinchaisri's 2016 MIT master's thesis on pricing with quality perception, which pairs a model with an experiment.
 
 Two further items are listed by title only, since no public drafts exist yet: a submitted paper on generative-AI simulation for pricing operations, guided by economic mechanisms, and work in progress titled Experimentation without Experiments.

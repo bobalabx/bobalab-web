@@ -1,7 +1,7 @@
 ---
 name: Clinton Nguyen
 role: undergrad
-program: statistics
+program: Statistics
 links:
   website: https://minticlinti.github.io/
 directions: []

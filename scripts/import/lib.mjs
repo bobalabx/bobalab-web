@@ -129,6 +129,98 @@ export function chooseQuestion(
   return null;
 }
 
+// ---------------------------------------------------------------------------
+// Display wording (formatting only: these helpers never add a fact).
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** ISO dates inside running text, written the way the site writes dates: "2026-07-14" → "Jul 14, 2026". */
+export function humanDates(text) {
+  return String(text).replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, (all, y, m, d) => {
+    const mi = Number(m) - 1;
+    return MONTHS[mi] ? `${MONTHS[mi]} ${Number(d)}, ${y}` : all;
+  });
+}
+
+/** Number ranges with an en dash ("9-11 hours", "July 13-14" → "9–11", "13–14"). */
+export function enDashRanges(text) {
+  return String(text).replace(/(\d)-(?=\d)/g, "$1–");
+}
+
+/**
+ * Conference names the PI's CV spells out (CV "Invited Conference/Workshop
+ * Presentations" and the paper list). Applied to presentation `event` text so
+ * visitors do not meet lab-internal abbreviations. Order matters.
+ */
+export const EVENT_NAME_EXPANSIONS = [
+  [/\bBOC\b/g, "Behavioral Operations Conference"],
+  [/\bINFORMS RMP spotlight\b/g, "INFORMS Revenue Management & Pricing Conference (spotlight)"],
+  [/\bINFORMS RMP Conference\b/g, "INFORMS Revenue Management & Pricing Conference"],
+  [/\bINFORMS RMP\b/g, "INFORMS Revenue Management & Pricing Conference"],
+  [/\bBDRM\b/g, "Behavioral Decision Research in Management Conference"],
+  [/\bYinzOR \(CMU\)/g, "YinzOR at Carnegie Mellon University"],
+  [/(?<!University of )\bMichigan\b/g, "University of Michigan"],
+  // POMS stays: the CV and the field use the acronym as the society's name.
+];
+
+export function expandEventNames(text) {
+  let s = String(text);
+  for (const [re, to] of EVENT_NAME_EXPANSIONS) s = s.replace(re, to);
+  return s;
+}
+
+/** Program tokens that are acronyms (the PI roster writes them in lower case). */
+const PROGRAM_ACRONYMS = {
+  ieor: "IEOR",
+  eecs: "EECS",
+  isf: "ISF",
+  cs: "CS",
+  ds: "DS",
+  ms: "MS",
+  phd: "PhD",
+  mba: "MBA",
+};
+/** A trailing degree token the role already states ("Master's student · IEOR", not "· ieor ms"). */
+const ROLE_DEGREE = { masters: /\s+(ms|ma|meng|mba)$/i, phd: /\s+phd$/i };
+
+/**
+ * Display casing for a person's `program` (CON-04): acronyms upper case, other
+ * words capitalised, and a trailing degree that repeats the role dropped.
+ * No word is expanded or added, so no new fact is introduced.
+ */
+export function programLabel(program, role) {
+  if (program == null) return undefined;
+  let s = String(program).trim();
+  if (!s) return undefined;
+  const deg = ROLE_DEGREE[role];
+  if (deg && deg.test(s) && s.replace(deg, "").trim()) s = s.replace(deg, "").trim();
+  return s.replace(/[A-Za-z]+/g, (w) => {
+    const acr = PROGRAM_ACRONYMS[w.toLowerCase()];
+    if (acr) return acr;
+    return w === w.toLowerCase() ? w[0].toUpperCase() + w.slice(1) : w;
+  });
+}
+
+/**
+ * Public copy names the PI instead of the lab jargon "the PI" (CON-08):
+ * "the PI's" → "Park Sinchaisri's", "with the PI as" → "with Park Sinchaisri as".
+ */
+export function namePI(text, piName) {
+  return String(text)
+    .replace(/\b[Tt]he PI's\b/g, `${piName}'s`)
+    .replace(/\b[Tt]he PI\b/g, piName);
+}
+
+/**
+ * First mention of the PI by full name (CON-08): the first bare "Park" in a
+ * news title or summary becomes "Park Sinchaisri"; later mentions are kept.
+ */
+export function fullNameFirst(text, given, full) {
+  const s = String(text);
+  if (s.includes(full)) return s;
+  return s.replace(new RegExp(`\\b${given}\\b`), full);
+}
+
 /** Word count, same rule as the validator's W_BODY_LENGTH. */
 export function wordCount(s) {
   return String(s)

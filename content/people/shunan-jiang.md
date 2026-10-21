@@ -1,7 +1,7 @@
 ---
 name: Shunan Jiang
 role: phd
-program: IEOR PhD
+program: IEOR
 end: "2025"
 now_at: Google Research
 links:

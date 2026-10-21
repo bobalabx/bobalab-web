@@ -34,6 +34,7 @@ awards:
     year: 2019
   - name: POMS College of Behavioral Operations Junior Scholar Paper Competition, Finalist
     year: 2020
+    source: self-reported
 directions:
   - platform-work
 in_brief: Uses ride-hailing data to model when on-demand drivers start and stop working. Pay matters, but so do habits such as quitting after reaching an earnings goal and staying on once a shift has momentum; incentives that account for both can add capacity without extra cost.

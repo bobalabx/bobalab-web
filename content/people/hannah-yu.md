@@ -1,7 +1,7 @@
 ---
 name: Hannah Yu
 role: undergrad
-program: applied math/cs
+program: Applied Math/CS
 links:
   linkedin: https://www.linkedin.com/in/hannah-k-yu
 directions: []

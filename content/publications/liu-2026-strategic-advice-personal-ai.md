@@ -19,7 +19,7 @@ presentations:
   - event: 2026 INFORMS MSOM Conference, HBS Boston, session TD10, Jul 14, 2026
     year: 2026
     url: https://www.hbs.edu/about/research/msom-conference-2026/program
-  - event: 2026 INFORMS RMP Conference
+  - event: 2026 INFORMS Revenue Management & Pricing Conference
     year: 2026
 press: []
 awards: []

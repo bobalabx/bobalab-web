@@ -1,7 +1,7 @@
 ---
 name: Chelsea Kawamura
 role: undergrad
-program: isf
+program: ISF
 end: "2025"
 now_at: University of Edinburgh
 links:
