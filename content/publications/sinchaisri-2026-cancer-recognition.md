@@ -12,5 +12,5 @@ press: []
 awards: []
 directions: []
 featured: false
-draft: true
+draft: false
 ---

@@ -840,6 +840,23 @@ for (const [rel, text] of files)
     fail(`${rel}: public copy says "the PI"; name ${PI_NAME} instead`);
 
 // ---------------------------------------------------------------------------
+// Owner decision 2026-10-20 (DECISIONS D-10): publish every imported entry.
+// The per-entry draft logic above is kept so the review reasons stay visible in
+// the notes. Consent flags (listed, photo_consent, email_public, now_at_public)
+// are separate from draft and still apply.
+// Exception: a project with no research direction stays a draft (E_DIRECTIONS_EMPTY);
+// assigning one would invent a lab fact. The lab tags it in the CMS, then publishes it.
+const PUBLISH_ALL = true;
+if (PUBLISH_ALL)
+  for (const [rel, text] of files) {
+    if (rel.startsWith("projects/") && /^directions: \[\]$/m.test(text)) {
+      note(`${rel}: kept as draft under D-10 (no research direction to place it under).`);
+      continue;
+    }
+    files.set(rel, text.replace(/^draft: true$/m, "draft: false"));
+  }
+
+// ---------------------------------------------------------------------------
 // Format with the repo's Prettier config (so format:check stays clean), then diff/write.
 
 for (const [rel, text] of files) {

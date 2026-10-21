@@ -7,5 +7,5 @@ directions:
   - ai-at-work
 publications:
   - deng-2026-stale-misattributed-late
-draft: true
+draft: false
 ---

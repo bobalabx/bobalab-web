@@ -33,5 +33,5 @@ directions:
   - platform-work
 in_brief: "Combines one ride-hailing platform's data with public New York City trip data to estimate how drivers split time between competing apps, then tests pay designs: guaranteed hourly pay can raise supply at fixed cost, streak bonuses curb switching, and wage floors need limits on congestion."
 featured: false
-draft: true
+draft: false
 ---

@@ -7,7 +7,7 @@ color: black-sesame
 status: archived
 archived_on: "2026-10"
 findings: []
-draft: true
+draft: false
 ---
 
 A paper published in PLOS ONE in 2021 uses block-party permits issued in Philadelphia to build two measures of neighborhood vibrancy: how many gatherings a neighborhood holds, and what share of them are spontaneous. It then relates these measures to crime across the city's neighborhoods over time.

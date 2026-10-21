@@ -16,5 +16,5 @@ publications:
 funding:
   - name: BAIR Commons grant (2021)
   - name: Center for Growth Markets grant (2022)
-draft: true
+draft: false
 ---

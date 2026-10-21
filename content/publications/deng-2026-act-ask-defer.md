@@ -17,5 +17,5 @@ directions:
   - ai-at-work
   - algorithmic-advice
 featured: false
-draft: true
+draft: false
 ---

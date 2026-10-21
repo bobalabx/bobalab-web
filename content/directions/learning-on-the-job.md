@@ -6,7 +6,7 @@ summary: How workers build skill alongside app recommendations, and how platform
 color: matcha
 status: active
 findings: []
-draft: true
+draft: false
 ---
 
 This direction asks how people build skill while they work alongside algorithms, so far mostly on gig and delivery platforms.

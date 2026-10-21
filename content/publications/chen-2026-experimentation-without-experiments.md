@@ -17,5 +17,5 @@ awards: []
 directions:
   - pricing-experimentation
 featured: false
-draft: true
+draft: false
 ---

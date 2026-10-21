@@ -22,4 +22,4 @@ body: |
   ## Report a barrier
 
   If something on this site does not work for you, email [bobalab@berkeley.edu](mailto:bobalab@berkeley.edu). Please include the page address and a short description of the problem, and tell us if you need the content in another format.
-draft: true
+draft: false

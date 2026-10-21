@@ -28,5 +28,5 @@ directions:
   - learning-on-the-job
 in_brief: "Compares two ways of turning an optimal policy into advice in EV-charging route experiments: an exact action versus a broader rule of thumb. Exact advice performs best while it is visible; broader advice can leave people better able to act alone in similar settings once advice is removed."
 featured: false
-draft: true
+draft: false
 ---

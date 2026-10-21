@@ -21,5 +21,5 @@ directions:
   - learning-on-the-job
   - platform-work
 featured: false
-draft: true
+draft: false
 ---

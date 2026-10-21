@@ -12,5 +12,5 @@ directions:
 publications:
   - jiang-2025-learning-on-the-go
   - keppler-2025-making-chatgpt-work
-draft: true
+draft: false
 ---

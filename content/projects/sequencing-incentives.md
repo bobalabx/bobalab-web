@@ -9,5 +9,5 @@ collaborators: []
 publications:
   - sinchaisri-2026-sequencing-incentives
 funding: []
-draft: true
+draft: false
 ---

@@ -13,5 +13,5 @@ collaborators:
 publications:
   - sinchaisri-2021-community-vibrancy
 funding: []
-draft: true
+draft: false
 ---

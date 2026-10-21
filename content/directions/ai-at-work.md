@@ -6,7 +6,7 @@ summary: How professionals actually use generative AI and AI assistants, what it
 color: lychee
 status: active
 findings: []
-draft: true
+draft: false
 ---
 
 This direction collects studies of generative and agentic AI in professional work.

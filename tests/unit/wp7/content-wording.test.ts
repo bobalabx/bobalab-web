@@ -36,16 +36,27 @@ describe.skipIf(!has)("content/ wording and status rules", () => {
     expect([...names]).toEqual(["Wichinpong Park Sinchaisri"]);
   });
 
-  it("CON-02: publication news stating a PI-reported journal decision is held as draft", () => {
-    for (const n of E.news) {
-      if (n.type !== "publication") continue;
-      const pubs = n.publications.map((s) => E.publications.find((p) => p.slug === s));
-      if (pubs.length && pubs.every((p) => p?.draft))
-        expect(n.draft, `${n.slug} is about draft papers only`).toBe(true);
-    }
-    for (const s of ["2026-05-11-learning-to-gig-revision", "2026-04-16-precise-or-broad-revision"])
-      expect(E.news.find((n) => n.slug === s)?.draft, s).toBe(true);
-  });
+  // D-10 (owner decision 2026-10-20): the importer publishes every entry, which
+  // supersedes the CON-02 hold. The rule applies again if PUBLISH_ALL is turned off.
+  const publishAll = /^const PUBLISH_ALL = true;$/m.test(
+    fs.readFileSync(path.resolve(process.cwd(), "scripts/import/import-dataset.mjs"), "utf8"),
+  );
+  it.skipIf(publishAll)(
+    "CON-02: publication news stating a PI-reported journal decision is held as draft",
+    () => {
+      for (const n of E.news) {
+        if (n.type !== "publication") continue;
+        const pubs = n.publications.map((s) => E.publications.find((p) => p.slug === s));
+        if (pubs.length && pubs.every((p) => p?.draft))
+          expect(n.draft, `${n.slug} is about draft papers only`).toBe(true);
+      }
+      for (const s of [
+        "2026-05-11-learning-to-gig-revision",
+        "2026-04-16-precise-or-broad-revision",
+      ])
+        expect(E.news.find((n) => n.slug === s)?.draft, s).toBe(true);
+    },
+  );
 
   it("CON-08/CON-09: news names the PI in full on first mention and keeps the sources' tense", () => {
     for (const n of E.news) {

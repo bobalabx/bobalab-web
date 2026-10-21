@@ -27,5 +27,5 @@ directions:
   - platform-work
 in_brief: Asks how a platform should offer jobs when workers may decline and improve at different, unknown rates. Proposes a tractable benchmark and learning algorithms, including a variant that caps the risk of market failure, and tests them on delivery-platform data.
 featured: false
-draft: true
+draft: false
 ---

@@ -74,3 +74,9 @@ Labels: DOCUMENTED (primary source), MEASURED (we ran it), HYPOTHESIS, UNKNOWN.
 - **Known limit:** saving an entry whose body the editor actually changed rewrites the body in the widget's Markdown style (`*` list markers, loose lists). `docs/EDITING.md` §12 explains it.
 - **Re-check at every Decap bump:** if richtext stops normalising on load, delete `cms-widgets.js` and its line in `cms/admin.html`.
 - **Rollback (option B):** `widget: "markdown"` in `cms/source.mjs`, `npm run cms:config`, update the body-widget assertion in `tests/unit/cms/config.test.ts`; `cms-widgets.js` can then go.
+
+## D-10 Publish every imported entry (owner decision, 2026-10-20)
+- **Decision:** the owner chose "Publish everything" for the live site (https://bobalabx.github.io/bobalab-web/). This supersedes D-03/D-04's default of importing unverified content as `draft: true`. `scripts/import/import-dataset.mjs` sets `PUBLISH_ALL = true`, so every imported entry is written with `draft: false`. That includes the 4 pearl directions, the 2 archived directions, every publication, project, news item, opportunity, page, and the roster.
+- **Still protected (consent, not draft):** `listed: false` people (the 4 "Others") never render. No photos, emails or "now at" lines are shown (`photo_consent`, `email_public` and `now_at_public` stay false). `site.yml launched` stays false, because `true` blocks deploys until the CMS sign-in `base_url` is configured.
+- **Why:** the owner judged the lab-drafted wording acceptable to show while Park reviews it. Open questions remain in `docs/CONTENT-QUESTIONS.md`, and corrections go through the CMS.
+- **Rollback:** set `PUBLISH_ALL = false` and re-run the importer with `--write`. Alternatively, set `draft: true` on individual entries in the CMS.

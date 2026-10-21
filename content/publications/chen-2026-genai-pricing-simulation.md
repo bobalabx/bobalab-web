@@ -19,5 +19,5 @@ directions:
   - pricing-experimentation
   - ai-at-work
 featured: false
-draft: true
+draft: false
 ---

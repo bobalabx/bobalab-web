@@ -12,5 +12,5 @@ email_public: false
 now_at_public: false
 listed: true
 profile_page: false
-draft: true
+draft: false
 ---

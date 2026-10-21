@@ -24,5 +24,5 @@ funding:
   - name: Mack Institute (2020)
   - name: Fishman Davidson Center (2019)
   - name: Russell Ackoff Fellowship (2019)
-draft: true
+draft: false
 ---

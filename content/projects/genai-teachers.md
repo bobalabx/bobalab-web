@@ -19,5 +19,5 @@ publications:
   - keppler-2026-teachers-knapsack
   - snyder-2026-planning-vs-execution
 funding: []
-draft: true
+draft: false
 ---

@@ -22,5 +22,5 @@ awards: []
 directions:
   - ai-at-work
 featured: false
-draft: true
+draft: false
 ---

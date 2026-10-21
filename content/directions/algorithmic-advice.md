@@ -6,7 +6,7 @@ summary: How algorithms should advise people through multi-step decisions so the
 color: butterfly-pea
 status: active
 findings: []
-draft: true
+draft: false
 ---
 
 This direction gathers the lab's work on how algorithms should advise people who make a series of connected decisions.

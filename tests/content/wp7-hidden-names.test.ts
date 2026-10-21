@@ -91,5 +91,6 @@ describe("WP7: hidden-only roster names never enter the repo", () => {
         offenders.push(`${rel} (${hits.length} match(es) at token ${hits.join(", ")})`);
     }
     expect(offenders).toEqual([]);
-  });
+    // Reads every text file in the repo; on OneDrive this can exceed the 5 s default.
+  }, 60_000);
 });

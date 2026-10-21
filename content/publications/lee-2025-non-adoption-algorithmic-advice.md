@@ -19,5 +19,5 @@ directions:
   - algorithmic-advice
 in_brief: Looks at why people in the virtual-kitchen task pass over algorithm-generated tips, finding they interpret tips differently and face barriers beyond trust, such as how hard a tip is to apply and features of the task setting.
 featured: false
-draft: true
+draft: false
 ---

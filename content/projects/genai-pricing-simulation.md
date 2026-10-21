@@ -18,5 +18,5 @@ collaborators:
 publications:
   - chen-2026-genai-pricing-simulation
 funding: []
-draft: true
+draft: false
 ---

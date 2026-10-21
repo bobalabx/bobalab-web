@@ -6,7 +6,7 @@ summary: When and where flexible workers choose to work, and how platforms can p
 color: oolong
 status: active
 findings: []
-draft: true
+draft: false
 ---
 
 This direction studies when flexible workers choose to work and how platforms pay, motivate and staff them.

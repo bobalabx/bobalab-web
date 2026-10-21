@@ -17,5 +17,5 @@ awards: []
 directions:
   - learning-on-the-job
 featured: false
-draft: true
+draft: false
 ---

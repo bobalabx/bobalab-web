@@ -14,5 +14,5 @@ collaborators:
 publications:
   - liu-2026-strategic-advice-personal-ai
 funding: []
-draft: true
+draft: false
 ---

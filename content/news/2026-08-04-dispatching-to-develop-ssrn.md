@@ -8,5 +8,5 @@ directions:
   - platform-work
 publications:
   - deng-2026-dispatching-to-develop
-draft: true
+draft: false
 ---

@@ -7,7 +7,7 @@ color: jasmine
 status: archived
 archived_on: "2026-10"
 findings: []
-draft: true
+draft: false
 ---
 
 A working paper models shoppers who read a higher price as a sign of higher quality and who react to the size of a discount compared with what they expected. It builds this behavior into a retailer's markdown plan and calibrates the model with a consumer study. The paper grew out of Park Sinchaisri's 2016 MIT master's thesis on pricing with quality perception, which pairs a model with an experiment.

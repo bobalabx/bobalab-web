@@ -8,5 +8,5 @@ directions:
   - algorithmic-advice
 publications:
   - liu-2026-strategic-advice-personal-ai
-draft: true
+draft: false
 ---
