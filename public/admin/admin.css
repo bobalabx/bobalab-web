@@ -1,0 +1,88 @@
+/*
+ * Colour-contrast fixes for Decap CMS 3.17.1's own editor UI (WCAG 1.4.3; WP6).
+ * MEASURED 2026-10-20 with axe: Decap's grey text (#798291 / #7b8290) is 3.4–3.9:1
+ * on its white and #eff0f4 backgrounds, the "Unsaved changes" red 3.95:1, and
+ * white on the teal Publish button 3.04:1.
+ *
+ * Selectors match the labels in Decap's generated class names (stable for the
+ * pinned 3.17.1 bundle). "html body" lifts them above Decap's single-class rules
+ * but keeps them below its two-class active/hover states (e.g. the selected
+ * sidebar item stays blue).
+ */
+html body [class*="AppHeaderButton"],
+html body [class*="AppHeaderLink"],
+html body [class*="SidebarNavLink"],
+html body [class*="cardTopDescription"],
+html body [class*="ToolbarToggleLabel"],
+html body [class*="ButtonText"],
+html body [class*="CardText"],
+html
+  body
+  [class*="StyledDropdownButton"]:not([class*="PublishButton"]):not([class*="QuickNewButton"]) {
+  color: #4f5765; /* 6.9:1 on white, 6.1:1 on #eff0f4 */
+}
+
+/* Links inside the rich-text editor (#798291, 3.9:1). Still underlined by Decap. */
+html body .slate-editor .slate-a {
+  color: #4f5765; /* 6.9:1 on white */
+}
+
+html body [class*="textBadgeDanger"] {
+  color: #b80029; /* 6.5:1 on white */
+}
+
+html body [class*="PublishButton"] {
+  color: #ffffff;
+  background-color: #0f6e7d; /* 5.9:1 */
+}
+
+/*
+ * Narrow screens (WCAG 1.4.10 Reflow; WP6 review). Decap 3.17.1 gives the editor
+ * and its top bar a fixed min-width of 800px, so on a phone the page scrolled
+ * sideways and the account menu sat off-screen. Below 800px the editor shows the
+ * form at full width and no preview pane (a phone has no room for both; the
+ * preview toggle and scroll-sync buttons are hidden with it).
+ */
+@media (max-width: 799px) {
+  html body [class*="EditorContainer"],
+  html body [class*="ToolbarContainer"] {
+    min-width: 0;
+  }
+  html body [class*="StyledSplitPane"] > .Pane1 {
+    width: 100% !important;
+  }
+  html body [class*="StyledSplitPane"] > .Resizer,
+  html body [class*="StyledSplitPane"] > .Pane2,
+  html body [class*="ViewControls"] {
+    display: none;
+  }
+  html body [class*="ToolbarSectionMeta"] [class*="AppHeaderSiteLink"] {
+    display: none;
+  }
+  /* "Check for preview": GitHub Pages builds no previews of drafts anyway (brief §F4). */
+  html body [class*="ToolbarSubSectionLast"] {
+    display: none;
+  }
+  html body [class*="ToolbarSectionMain"] {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  html body [class*="ToolbarSectionBackLink"],
+  html body [class*="ToolbarSectionMain"],
+  html body [class*="ToolbarSectionMeta"] {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+@media (max-width: 479px) {
+  /* "Writing in News collection": kept for screen readers, hidden so the status fits. */
+  html body [class*="ToolbarSectionBackLink"] [class*="BackCollection"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}

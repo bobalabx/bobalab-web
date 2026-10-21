@@ -1,0 +1,122 @@
+/*
+ * Preview-only rules, appended to the site's own tokens, base, prose and
+ * component styles when scripts/cms/build-config.mjs writes public/admin/preview.css.
+ * The preview pane is an iframe; these rules frame the page-like preview.
+ */
+body {
+  min-height: 100%;
+}
+.cms-preview {
+  /* Right padding clears Decap's round "toggle preview" / "sync scroll" buttons. */
+  padding: var(--s-6) calc(var(--gutter) + 3rem) var(--s-6) var(--gutter);
+  max-width: 48rem;
+  margin-inline: auto;
+}
+.cms-preview > * + * {
+  margin-top: var(--s-5);
+}
+.cms-preview__note {
+  font-family: var(--font-text);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-sm);
+  color: var(--ink-muted);
+  border-left: 3px solid var(--hairline);
+  padding-left: var(--s-3);
+}
+.cms-preview__note strong {
+  color: var(--ink);
+}
+.cms-preview__warn {
+  border-left-color: var(--accent);
+}
+.cms-preview__section > * + * {
+  margin-top: var(--s-3);
+}
+.cms-preview__section h2 {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+.cms-preview__figure img {
+  border-radius: var(--r-md);
+  display: block;
+}
+.cms-preview__figure figcaption {
+  margin-top: var(--s-2);
+}
+.cms-preview__list {
+  list-style: none;
+  padding: 0;
+  margin-inline: 0;
+  margin-bottom: 0;
+}
+.cms-preview__list > li + li {
+  margin-top: var(--s-2);
+}
+.cms-preview__empty {
+  color: var(--ink-muted);
+  font-style: italic;
+}
+/* Page header (About, Accessibility, Privacy, Join). */
+.cms-preview__head > * + * {
+  margin-top: var(--s-3);
+}
+.cms-preview__head h1 {
+  max-width: 24ch;
+}
+.cms-preview__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-sm);
+  color: var(--ink-muted);
+}
+.cms-preview__findings > li + li {
+  margin-top: var(--s-5);
+}
+.cms-preview__findings > li > * + * {
+  margin-top: var(--s-2);
+}
+/*
+ * Markdown fields: Decap renders them inside its own wrapper
+ * (div.WidgetPreviewContainer > style + div > p, ul, …), so the site's
+ * ".prose > * + *" spacing needs the extra levels here.
+ */
+.cms-preview__prose [class*="WidgetPreviewContainer"] > div > * + * {
+  margin-top: var(--s-4);
+}
+/* Decap's injected preview styles add their own blockquote margin and grey code tint. */
+.cms-preview .prose blockquote {
+  margin-bottom: 0;
+}
+.cms-preview .t-lead .prose {
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+}
+/* Research direction header: the swatch band, as on the direction page. */
+.cms-preview__band {
+  background: var(--dir-band);
+  border-radius: var(--r-md);
+  padding: var(--s-5);
+}
+.cms-preview__band > * + * {
+  margin-top: var(--s-3);
+}
+.cms-preview__band-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+.cms-preview__band h1 {
+  font-size: var(--fs-2xl);
+  line-height: var(--lh-2xl);
+}
+.cms-preview__label {
+  color: var(--dir-text);
+}
+/* Decap's default preview (collections without a template): give it page margins. */
+body > div > div:not(.cms-preview):not(:has(.cms-preview)) {
+  padding: var(--s-6) calc(var(--gutter) + 3rem) var(--s-6) var(--gutter);
+}
