@@ -12,6 +12,7 @@ import { Badge, DraftBadge } from "./Badge";
 import { PearlTagList } from "./PearlTag";
 import { MaterialsRow, materialsFromPublication } from "./MaterialsRow";
 import { PUBLICATION_STATUS_LABELS, PUBLICATION_TYPE_LABELS } from "./labels";
+import { SELF_REPORTED_WORDING, isSelfReportedAward } from "@/lib/publications/provenance";
 
 type Heading = "h2" | "h3" | "h4";
 
@@ -127,6 +128,9 @@ export function PublicationEntry({
               </Badge>
               {a.under_title && (
                 <span className="t-sm t-muted"> (as &ldquo;{a.under_title}&rdquo;)</span>
+              )}
+              {isSelfReportedAward(a) && (
+                <span className="t-sm t-muted"> · {SELF_REPORTED_WORDING}</span>
               )}
             </li>
           ))}

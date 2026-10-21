@@ -474,6 +474,17 @@ a.pub-author--lab {
 a.pub-author--lab:hover {
   color: var(--accent-strong);
 }
+/* External coauthors' web pages: a quiet link, so lab members (bold, accent
+   underline) still stand out. */
+a.pub-author--ext {
+  color: var(--ink);
+  text-decoration-color: var(--ink-muted);
+  text-decoration-thickness: 1px;
+}
+a.pub-author--ext:hover {
+  color: var(--accent-strong);
+  text-decoration-color: currentColor;
+}
 .pub-venue {
   color: var(--ink-muted);
 }
@@ -507,11 +518,16 @@ a.pub-author--lab:hover {
   display: grid;
   gap: var(--s-7);
   min-width: 0;
+  /* One right edge for every block in the main column (VIS-14): In brief,
+     awards, Cite this paper, project cards and related papers all fill the
+     column, capped at the header's measure. Running text keeps its own
+     reading measure below (.pub-brief, Prose); its rag hides that box edge. */
+  max-width: 54rem;
 }
 .pub-main {
   display: grid;
   gap: var(--s-7);
-  max-width: var(--prose-max);
+  min-width: 0;
 }
 @media (min-width: 64rem) {
   .pub-layout--split {
@@ -570,6 +586,7 @@ a.pub-author--lab:hover {
   line-height: var(--lh-xl);
 }
 .pub-brief {
+  max-width: var(--prose-max);
   font-size: var(--fs-lg);
   line-height: 1.55;
   text-wrap: pretty;
@@ -608,7 +625,9 @@ a.pub-author--lab:hover {
 .pub-award__name {
   font-weight: 500;
 }
-.pub-award__under {
+.pub-award__under,
+.pub-award__src,
+.pub-talks__src {
   font-size: var(--fs-sm);
   color: var(--ink-muted);
 }
@@ -639,7 +658,6 @@ a.pub-author--lab:hover {
 
 /* Cite this paper */
 .pub-cite {
-  max-width: 52rem;
   padding: var(--s-4);
   background: var(--paper-alt);
   border: 1px solid var(--hairline);

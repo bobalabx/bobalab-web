@@ -257,24 +257,66 @@ test("statuses show the lab's claim with 'as of' and the self-reported wording",
   await expect(page.locator(".pub-status__meta")).toContainText(/^As of .+ · reported by the lab$/);
 });
 
-test("lab members are highlighted and linked only when listed; external authors are plain text", async ({
+test("lab members are highlighted and linked only when listed; external authors link to their web page", async ({
   page,
 }) => {
   await open(page, `/publications/${MS_PAPER}/`);
   const c = await contentFor(page);
   const p = c.getPublication(MS_PAPER)!;
   const authors = page.locator(".pub-authors");
+  // The fixture paper must exercise both branches (a profile link and an external page).
+  expect(p.authorList.some((a) => !a.isLab && a.url)).toBe(true);
   for (const a of p.authorList) {
     if (a.isLab && a.person?.hasProfile) {
       await expect(authors.getByRole("link", { name: a.name })).toHaveAttribute(
         "href",
         `/people/${a.person.slug}/`,
       );
+    } else if (!a.isLab && a.url) {
+      // PUB-01: the "Web page" entered for an external coauthor is shown as a link.
+      const link = authors.getByRole("link", { name: a.name });
+      await expect(link).toHaveAttribute("href", a.url);
+      await expect(link).toHaveAttribute("rel", "noopener noreferrer");
+      await expect(link).toHaveClass(/pub-author--ext/);
     } else {
       await expect(authors.getByRole("link", { name: a.name })).toHaveCount(0);
       await expect(authors).toContainText(a.name);
     }
   }
+});
+
+test("talks known only from the PI's CV say 'reported by the lab' (CON-03)", async ({ page }) => {
+  const slug = "lee-2025-non-adoption-algorithmic-advice";
+  await page.goto("/");
+  const c = await contentFor(page);
+  const p = c.getPublication(slug);
+  test.skip(!p, "draft paper not in this build");
+  await open(page, `/publications/${slug}/`);
+  const talks = page.locator('section[aria-labelledby="talks-h"]');
+  await expect(talks.locator(".pub-talks li")).toHaveCount(p!.presentations.length);
+  await expect(talks.locator(".pub-talks__src")).toHaveText(
+    p!.presentations.every((t) => !t.url)
+      ? "Reported by the lab."
+      : "Talks without a link are reported by the lab.",
+  );
+});
+
+test("awards known only from the PI's CV say 'Reported by the lab' (CON-03)", async ({ page }) => {
+  await page.goto("/");
+  const c = await contentFor(page);
+  const p = c.getPublication(MS_PAPER);
+  test.skip(!p, "paper not in this build");
+  const self = p!.awards.filter((a) => a.source === "self-reported");
+  expect(self.length, "the tips paper has PI-reported awards").toBeGreaterThan(0);
+  await open(page, `/publications/${MS_PAPER}/`);
+  const awards = page.locator('section[aria-labelledby="awards-h"] .pub-award');
+  await expect(awards).toHaveCount(p!.awards.length);
+  for (const a of p!.awards) {
+    const row = awards.filter({ has: page.getByText(a.name, { exact: true }) });
+    await expect(row).toHaveCount(1);
+    await expect(row.locator(".pub-award__src")).toHaveCount(a.source === "self-reported" ? 1 : 0);
+  }
+  await expect(page.locator(".pub-award__src").first()).toHaveText("Reported by the lab");
 });
 
 // ---------------------------------------------------------------------------

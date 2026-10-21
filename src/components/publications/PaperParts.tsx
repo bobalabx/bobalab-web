@@ -1,7 +1,9 @@
 /**
  * Small server pieces of the paper page (brief §D8): author list, venue line,
  * status note. Lab members are highlighted, and linked only when they are
- * listed and have a profile page; external coauthors are plain text (D-05).
+ * listed and have a profile page. External coauthors are not people (D-05):
+ * their name links to the web page entered for them (brief critic table:
+ * "author names with an external link only"), or is plain text without one.
  */
 import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
@@ -30,6 +32,12 @@ export function AuthorList({ authors }: { authors: AuthorView[] }) {
             </Link>
           ) : (
             <strong className="pub-author pub-author--lab">{a.name}</strong>
+          );
+        } else if (a.url) {
+          name = (
+            <a href={a.url} rel="noopener noreferrer" className="pub-author pub-author--ext">
+              {a.name}
+            </a>
           );
         }
         return (

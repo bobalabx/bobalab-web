@@ -3,7 +3,8 @@
  *
  * Title, authors (lab members highlighted), venue line, the lab's own status
  * claim with "as of", tags, materials, "In brief" (only when content has it),
- * awards (with the title they were given under), presentations, citations
+ * awards (with the title they were given under), presentations (both marked
+ * "reported by the lab" when only the PI's CV or site says so; CON-03), citations
  * (APA + copyable BibTeX from citation-js), related projects / papers / news.
  * Google Scholar citation_* meta and ScholarlyArticle JSON-LD for papers that
  * count under D-05.
@@ -15,6 +16,12 @@ import { getContent } from "@/lib/content/load";
 import { publicationDetail, staticParams, staticSlugs } from "@/lib/content/queries";
 import { clipDescription, pageMetadata } from "@/lib/seo/metadata";
 import { paperJsonLd } from "@/lib/publications/jsonld";
+import {
+  SELF_REPORTED_LABEL,
+  SELF_REPORTED_WORDING,
+  isSelfReportedAward,
+  isSelfReportedTalk,
+} from "@/lib/publications/provenance";
 import {
   paperFallbackDescription,
   paperScholarMeta,
@@ -173,6 +180,9 @@ export default async function PublicationPage({ params }: Props) {
                                 Awarded under the earlier title &ldquo;{a.under_title}&rdquo;
                               </span>
                             )}
+                            {isSelfReportedAward(a) && (
+                              <span className="pub-award__src">{SELF_REPORTED_LABEL}</span>
+                            )}
                           </span>
                         </li>
                       ))}
@@ -197,6 +207,13 @@ export default async function PublicationPage({ params }: Props) {
                       </li>
                     ))}
                   </ul>
+                  {p.presentations.some(isSelfReportedTalk) && (
+                    <p className="pub-talks__src">
+                      {p.presentations.every(isSelfReportedTalk)
+                        ? `${SELF_REPORTED_LABEL}.`
+                        : `Talks without a link are ${SELF_REPORTED_WORDING}.`}
+                    </p>
+                  )}
                 </section>
               )}
               {p.body.trim() && (
