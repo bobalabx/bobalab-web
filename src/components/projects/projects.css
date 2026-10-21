@@ -71,6 +71,14 @@
   color: var(--ink-muted);
 }
 
+/* Cards in a row share its height (equal-height grid). A card without a
+   summary used to end in ~150–200 px of blank card under its tags (VIS-11);
+   the direction tags now sit on the card's bottom edge, a consistent footer
+   line across the row, so the space reads as the card's body. */
+.rs-grid--projects .bl-card > .bl-tags {
+  margin-top: auto;
+}
+
 /* ---------- Project page head (§D6.1–2) -------------------------------- */
 .pj-head {
   border-bottom: 1px solid var(--hairline);
@@ -96,8 +104,11 @@
   gap: 0.6em;
   margin-top: var(--s-2);
 }
+/* A long single word must break at 320 px with WCAG 1.4.12 text spacing
+   instead of widening the page (A11Y-04; see .dr-title). */
 .pj-title {
   max-width: 28ch;
+  overflow-wrap: anywhere;
 }
 .pj-summary {
   max-width: 46rem;
@@ -159,6 +170,14 @@
 }
 .pj-member__name a {
   color: var(--ink);
+}
+/* A member without a public record (CON-11): name only, no avatar. Indented
+   by the rail pearl (40 px) + gap so the names line up down the list. */
+.pj-member--plain {
+  padding-left: calc(40px + var(--s-3));
+}
+.pj-member--plain > :first-child {
+  margin-top: 0;
 }
 .pj-team__group {
   display: grid;

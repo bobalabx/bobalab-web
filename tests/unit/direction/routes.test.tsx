@@ -181,3 +181,56 @@ describe("index pages: empty states and archived directions", () => {
     for (const a of c.archivedDirections) expect(grid).not.toContain(`/research/${a.slug}/`);
   });
 });
+
+describe("project <title> is unique (WCAG 2.4.2; verify A11Y-03)", () => {
+  beforeEach(() => vi.resetModules());
+
+  it("qualifies the project title so it never equals its paper's page title", async () => {
+    useFixture("n4");
+    const { getContent } = await import("@/lib/content/load");
+    const c = getContent();
+    const page = await import("@/app/projects/[slug]/page");
+    const titles = new Set<string>();
+    for (const p of c.projects) {
+      const meta = await page.generateMetadata({ params: Promise.resolve({ slug: p.slug }) });
+      const t = meta.title as { absolute: string };
+      expect(t.absolute).toBe(`${p.title}, ${c.site.name} project`);
+      titles.add(t.absolute);
+    }
+    expect(titles.size).toBe(c.projects.length);
+  });
+});
+
+describe("project Team credits paper authors in production (verify CON-11)", () => {
+  beforeEach(() => vi.resetModules());
+
+  it("every team member who authors one of the project's papers is named in Team (real content)", async () => {
+    process.env.CONTENT_DIR = fileURLToPath(new URL("../../../content/", import.meta.url));
+    process.env.INCLUDE_DRAFTS = "0";
+    const { getContent } = await import("@/lib/content/load");
+    const c = getContent();
+    const page = await import("@/app/projects/[slug]/page");
+    for (const p of c.projects) {
+      const out = await html(page.default({ params: Promise.resolve({ slug: p.slug }) }));
+      const team = /<section[^>]*aria-labelledby="team"[\s\S]*?<\/section>/.exec(out)?.[0] ?? "";
+      let named = 0;
+      for (const slug of p.team) {
+        const listed = c.getPerson(slug);
+        if (listed) {
+          expect(team).toContain(listed.name);
+          continue;
+        }
+        // Not public in this build (draft or unlisted): named only as a paper author here.
+        const author = p.publicationRefs.flatMap((x) => x.authors).find((a) => a.person === slug);
+        if (author) {
+          expect(team, `${p.slug} team should name ${slug}`).toContain(author.name);
+          named++;
+        }
+      }
+      if (p.slug === "learning-on-the-go" && !c.getPerson("shunan-jiang")) expect(named).toBe(1);
+      // Hidden members get no link, avatar or role: only listed people link to /people/.
+      const links = [...team.matchAll(/href="\/people\/([a-z0-9-]+)\/"/g)].map((m) => m[1]);
+      for (const s of links) expect(c.getPerson(s!)).toBeTruthy();
+    }
+  });
+});

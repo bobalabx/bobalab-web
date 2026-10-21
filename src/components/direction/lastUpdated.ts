@@ -5,6 +5,8 @@
  * built from (the direction itself, its projects and its papers). One `git log`
  * call per page, memoised. Without git (a tarball build) or with no history for
  * those files, it falls back to the site-wide date from build-info.
+ * The page prints it only when it differs from the footer's site-wide date
+ * (directionUpdatedDate in ./model.ts).
  */
 import { execFileSync } from "node:child_process";
 import path from "node:path";

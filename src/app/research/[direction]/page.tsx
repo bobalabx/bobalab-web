@@ -27,8 +27,10 @@ import { KeyFigure } from "@/components/direction/KeyFigure";
 import { Section } from "@/components/direction/Section";
 import { WorkWithUs } from "@/components/direction/WorkWithUs";
 import { contentLastUpdated } from "@/components/direction/lastUpdated";
+import { lastUpdated as siteLastUpdated } from "@/lib/site/build-info";
 import {
   DIRECTION_PUBLICATION_LIMIT,
+  directionUpdatedDate,
   plural,
   publicationsHref,
   workWithUs,
@@ -70,12 +72,16 @@ export default async function DirectionPage({ params }: Props) {
   const work = workWithUs(c, d);
   const shownPubs = detail.publications.slice(0, DIRECTION_PUBLICATION_LIMIT);
   const archived = d.status === "archived" || d.index == null;
-  const updated = contentLastUpdated(c.dir, [
-    d.file,
-    ...detail.projects.map((p) => p.file),
-    ...detail.publications.map((p) => p.file),
-    ...detail.inProgress.map((p) => p.file),
-  ]);
+  // Shown only when it differs from the footer's site-wide date (VIS-12).
+  const updated = directionUpdatedDate(
+    contentLastUpdated(c.dir, [
+      d.file,
+      ...detail.projects.map((p) => p.file),
+      ...detail.publications.map((p) => p.file),
+      ...detail.inProgress.map((p) => p.file),
+    ]),
+    siteLastUpdated(),
+  );
   const hasPublications = detail.publications.length > 0 || detail.inProgress.length > 0;
 
   return (
@@ -199,9 +205,11 @@ export default async function DirectionPage({ params }: Props) {
 
           <DirectionRail current={d} siblings={detail.siblings} />
 
-          <p className="dr-updated t-sm t-muted">
-            Last updated <DateText value={updated} />
-          </p>
+          {updated && (
+            <p className="dr-updated t-sm t-muted">
+              This direction was last updated <DateText value={updated} />
+            </p>
+          )}
         </div>
       </div>
     </ViewTransition>

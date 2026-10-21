@@ -1,38 +1,55 @@
 /**
- * Project team (§D6.6): listed lab members only (linked when they have a
- * profile page), external collaborators only with consent: true, partners only
- * with public: true. The loader already filtered all three.
+ * Project team (§D6.6): listed lab members (linked when they have a profile
+ * page), external collaborators only with consent: true, partners only with
+ * public: true. The loader already filtered all three. Team members without a
+ * public record in this build are named as plain text only when they author
+ * one of the project's papers (projectTeamRows; verify CON-11, D-06).
  */
 import Link from "next/link";
 import type { ProjectView } from "@/lib/content/load";
 import { ROLE_LABELS, initials } from "@/lib/content/people";
 import { Pearl } from "@/components/ui/Pearl";
 import { DraftBadge } from "@/components/ui/Badge";
+import { projectTeamRows } from "./model";
 
 export function hasTeam(p: ProjectView): boolean {
-  return p.teamRefs.length + p.visibleCollaborators.length + p.visiblePartners.length > 0;
+  return projectTeamRows(p).length + p.visibleCollaborators.length + p.visiblePartners.length > 0;
 }
 
 export function TeamList({ project: p }: { project: ProjectView }) {
+  const rows = projectTeamRows(p);
   return (
     <div className="pj-team">
-      {p.teamRefs.length > 0 && (
+      {rows.length > 0 && (
         <ul className="pj-team__members" role="list" aria-label="Lab members">
-          {p.teamRefs.map((m) => (
-            <li key={m.slug} className="pj-member">
-              <Pearl size="rail" initials={initials(m.name)} swatch={p.primaryDirection?.color} />
-              <span className="pj-member__text">
-                <span className="pj-member__name">
-                  {m.hasProfile ? <Link href={`/people/${m.slug}/`}>{m.name}</Link> : m.name}
+          {rows.map((row) => {
+            if (row.kind === "name") {
+              // No public record yet (D-06): the name only, as on the paper.
+              return (
+                <li key={row.slug} className="pj-member pj-member--plain">
+                  <span className="pj-member__text">
+                    <span className="pj-member__name">{row.name}</span>
+                  </span>
+                </li>
+              );
+            }
+            const m = row.person;
+            return (
+              <li key={m.slug} className="pj-member">
+                <Pearl size="rail" initials={initials(m.name)} swatch={p.primaryDirection?.color} />
+                <span className="pj-member__text">
+                  <span className="pj-member__name">
+                    {m.hasProfile ? <Link href={`/people/${m.slug}/`}>{m.name}</Link> : m.name}
+                  </span>
+                  <span className="t-sm t-muted">
+                    {m.isAlumni ? "Alumni · " : ""}
+                    {m.role === "pi" && m.title ? m.title : ROLE_LABELS[m.role].one}
+                  </span>
+                  <DraftBadge show={m.draft} />
                 </span>
-                <span className="t-sm t-muted">
-                  {m.isAlumni ? "Alumni · " : ""}
-                  {m.role === "pi" && m.title ? m.title : ROLE_LABELS[m.role].one}
-                </span>
-                <DraftBadge show={m.draft} />
-              </span>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
       {p.visibleCollaborators.length > 0 && (

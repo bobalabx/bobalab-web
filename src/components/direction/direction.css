@@ -52,6 +52,13 @@
   min-height: 44px;
   color: var(--ink);
 }
+/* The last crumb repeats the page title: let a long word break at 320 px
+   with text spacing rather than widen the page (A11Y-04). */
+.dr-crumbs li,
+.pj-crumbs li {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 
 /* ---------- Direction header band (§D5.1) ------------------------------ */
 .dr-band {
@@ -100,14 +107,44 @@
   margin-left: calc(var(--gutter) * -0.5);
   line-height: 0;
 }
+/* Light mode: the seed token (--dir-seed-l) is precomputed as deep 40% over
+   --plate, but the hero pearl sits on the direction tint, where it fell to
+   1.66–1.72:1 and the warm hairline orbit nearly vanished (verify VIS-04).
+   Mix the seeds over the band's own colour instead (deep 70% over tint:
+   2.9–3.3:1, in line with dark mode's 3.2–3.5:1) and tint the orbit from the
+   direction so ring and seeds read as one dial. Dark mode keeps figure.css. */
+@media (prefers-color-scheme: light) {
+  .dr-band .f1-dp--hero {
+    --f1-seed: color-mix(in srgb, var(--dir-deep) 70%, var(--dir-band));
+  }
+  .dr-band .f1-dp--hero .f1-ring {
+    border-color: color-mix(in srgb, var(--dir-deep) 30%, transparent);
+  }
+}
 .dr-hero__text {
   display: grid;
   gap: var(--s-3);
   min-width: 0;
   justify-items: start;
 }
+/* Long single words ("Experimentation" in Fraunces at h1 size) must break at
+   320 px with WCAG 1.4.12 text spacing instead of widening the page (A11Y-04).
+   `anywhere` (not `break-word`) also lowers the min-content width, which is
+   what the start-aligned grid items size to; it only breaks a word that
+   cannot fit a line on its own, so normal titles are unchanged. */
 .dr-title {
   max-width: 22ch;
+  overflow-wrap: anywhere;
+}
+/* Under ~345 px the h1's 2.25rem floor is too wide for a 15-letter word in
+   the 288 px column ("Experimentation" broke as "Experimentatio / n"). Scale
+   the title with the viewport there so whole words fit; from ~345 px up
+   min() resolves to --fs-3xl, so nothing changes. overflow-wrap above stays
+   the fallback for author-overridden text spacing. (No `hyphens: auto`: it
+   would also split long words that fit on their own line.) */
+.dr-title,
+.pj-title {
+  font-size: min(var(--fs-3xl), 10.4vw);
 }
 .dr-question {
   max-width: 42rem;

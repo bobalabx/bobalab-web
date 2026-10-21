@@ -44,14 +44,20 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const detail = projectDetail(getContent(), slug);
+  const c = getContent();
+  const detail = projectDetail(c, slug);
   if (!detail) return { title: "Not found", robots: { index: false } };
   const p = detail.project;
-  return pageMetadata({
-    title: p.title,
+  // A project often shares its name with its paper, so "{Title} · BOBALAB"
+  // was not unique (WCAG 2.4.2; verify A11Y-03). Qualify it the way direction
+  // pages do ("…, BOBALAB research"); the lab name comes from site.yml.
+  const title = `${p.title}, ${c.site.name} project`;
+  const meta = pageMetadata({
+    title,
     description: clipDescription(p.summary),
     path: `/projects/${p.slug}/`,
   });
+  return { ...meta, title: { absolute: title } };
 }
 
 export default async function ProjectPage({ params }: Props) {

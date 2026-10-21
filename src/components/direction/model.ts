@@ -106,5 +106,17 @@ export function workWithUs(
   };
 }
 
+/**
+ * Direction "last updated" line (§D5.11). The site footer already prints
+ * "Last updated {site date}" directly below the page, so the direction's own
+ * date is shown only when it says something the footer does not: when its
+ * content files last changed on a different (earlier) day (verify VIS-12).
+ * Returns null when the footer already carries the same date.
+ */
+export function directionUpdatedDate(directionDate: string, siteDate: string): string | null {
+  if (!directionDate || directionDate === siteDate) return null;
+  return directionDate;
+}
+
 /** Max publications listed on a direction page before "See all" carries the rest. */
 export const DIRECTION_PUBLICATION_LIMIT = 10;

@@ -12,6 +12,7 @@ import {
   outputsToMaterials,
   projectBreadcrumb,
   projectFindings,
+  projectTeamRows,
   projectYears,
   statusesPresent,
 } from "@/components/projects/model";
@@ -263,5 +264,91 @@ describe("key findings (§D6.5) and how to cite (§D6.10)", () => {
     expect(p.publicationRefs.filter((x) => !x.counted).map((x) => x.slug)).toEqual([
       "doe-2026-paper-three",
     ]);
+  });
+});
+
+describe("team rows (§D6.6, D-06; verify CON-11)", () => {
+  const TEAM_FILES: VirtualFile[] = [
+    FILES[0]!,
+    FILES[1]!,
+    {
+      path: "people/pat-pi.md",
+      text: md(`
+name: Pat Pi
+role: pi
+title: Fixture Professor
+listed: true
+profile_page: true
+draft: false
+`),
+    },
+    {
+      path: "people/sam-student.md",
+      text: md(`
+name: Sam Student
+role: phd
+listed: true
+profile_page: false
+draft: true
+`),
+    },
+    {
+      path: "people/nova-nopaper.md",
+      text: md(`
+name: Nova Nopaper
+role: masters
+listed: true
+profile_page: false
+draft: true
+`),
+    },
+    {
+      path: "publications/student-2025-paper.md",
+      text: md(`
+title: Student paper
+authors:
+  - { name: Sam Student, person: sam-student }
+  - { name: Pat Pi, person: pat-pi }
+type: journal
+venue: Fixture Journal
+year: 2025
+doi: 10.5555/student
+status: published
+directions: [alpha]
+`),
+    },
+    {
+      path: "projects/p-team.md",
+      text: md(`
+title: Team project
+directions: [alpha]
+status: completed
+team: [sam-student, pat-pi, nova-nopaper]
+publications: [student-2025-paper]
+`),
+    },
+  ];
+  const build = (preview: boolean) =>
+    buildContent(parseContentFiles(TEAM_FILES), { preview, today: "2026-10-20" });
+
+  it("production: a draft member who authors the project's paper is named as plain text, in team order", () => {
+    const rows = projectTeamRows(build(false).getProject("p-team")!);
+    expect(rows).toEqual([
+      { kind: "name", slug: "sam-student", name: "Sam Student" },
+      expect.objectContaining({
+        kind: "member",
+        person: expect.objectContaining({ slug: "pat-pi" }),
+      }),
+    ]);
+  });
+  it("production: a draft member who authors no paper here stays hidden (nothing from the person record)", () => {
+    const rows = projectTeamRows(build(false).getProject("p-team")!);
+    expect(JSON.stringify(rows)).not.toContain("Nova");
+    // The plain row carries the name only: no role, avatar or profile data.
+    expect(Object.keys(rows[0]!).sort()).toEqual(["kind", "name", "slug"]);
+  });
+  it("preview: draft members are full rows (with their draft badge in the page)", () => {
+    const rows = projectTeamRows(build(true).getProject("p-team")!);
+    expect(rows.map((r) => r.kind)).toEqual(["member", "member", "member"]);
   });
 });

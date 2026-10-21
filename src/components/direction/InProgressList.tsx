@@ -1,7 +1,7 @@
 /**
- * "In progress" (DECISIONS D-05): work without a public version is listed by
- * title only, with its self-reported status and "as of" date. It never counts
- * toward paper totals or seeds.
+ * "In progress" (DECISIONS D-05): work without a public version or a documented
+ * talk is listed by title only, with its self-reported status and "as of" date.
+ * It never counts toward paper totals or seeds.
  */
 import Link from "next/link";
 import type { PublicationView } from "@/lib/content/load";
@@ -24,7 +24,7 @@ export function InProgressList({
         In progress
       </H>
       <p className="t-sm t-muted dr-wip__note">
-        Listed by title only until a public version exists.
+        Listed by title only until a public version or a documented talk exists.
       </p>
       <ul className="dr-wip__list" role="list" aria-labelledby={headingId}>
         {items.map((p) => {
@@ -35,7 +35,7 @@ export function InProgressList({
                 {p.title}
               </Link>
               {status && <span className="t-sm t-muted dr-wip__status">{status}</span>}
-              <DraftBadge show={p.draft} />
+              <DraftBadge show={p.draft} line />
             </li>
           );
         })}

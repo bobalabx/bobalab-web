@@ -11,6 +11,7 @@ import {
   bandMinContrast,
   directionStatusLine,
   directionStatusParts,
+  directionUpdatedDate,
   plural,
   publicationsHref,
   railTransition,
@@ -114,5 +115,15 @@ describe("Work with us (§D5.9)", () => {
       open_to_collaborators: false,
     });
     expect(w.show).toBe(false);
+  });
+});
+
+describe("direction 'last updated' line (§D5.11; verify VIS-12)", () => {
+  it("is hidden when it repeats the footer's site-wide date", () => {
+    expect(directionUpdatedDate("2026-10-20", "2026-10-20")).toBeNull();
+    expect(directionUpdatedDate("", "2026-10-20")).toBeNull();
+  });
+  it("is shown when the direction's content last changed on another day", () => {
+    expect(directionUpdatedDate("2026-09-30", "2026-10-20")).toBe("2026-09-30");
   });
 });

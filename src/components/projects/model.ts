@@ -6,6 +6,7 @@ import type { Content, DirectionView, ProjectView, PublicationView } from "@/lib
 import type { FindingView } from "@/lib/content/queries";
 import type { MaterialKind, MaterialLink } from "@/components/ui/MaterialsRow";
 import type { ProjectEntry } from "@/lib/content/schema";
+import type { PublicPerson } from "@/lib/content/people";
 
 export const PROJECT_STATUS_LABELS: Record<ProjectView["status"], string> = {
   active: "Active",
@@ -127,6 +128,48 @@ export function projectBreadcrumb(p: Pick<ProjectView, "title" | "primaryDirecti
   }
   crumbs.push({ label: p.title });
   return crumbs;
+}
+
+export type TeamRow =
+  /** A listed lab person in this build: avatar, link (when they have a profile) and role. */
+  | { kind: "member"; person: PublicPerson }
+  /** A team member without a public record in this build (draft or unlisted). */
+  | { kind: "name"; slug: string; name: string };
+
+/**
+ * Project team rows in the editor's order (§D6.6; verify CON-11).
+ *
+ * The loader drops team members who are not listed in this build (in
+ * production: every draft person, D-06), so a project could credit only the
+ * PI while its paper, on the same page, names the student first author.
+ * A hidden member is still named, as plain text with no link, role or avatar,
+ * when, and only when, one of the project's papers in this build lists them
+ * as an author: the name is then already public on that paper. Nothing from
+ * their person record is used (no profile or details before consent, D-06).
+ * Hidden members who are not authors of a paper here stay hidden.
+ */
+export function projectTeamRows(
+  p: Pick<ProjectView, "team" | "teamRefs" | "publicationRefs">,
+): TeamRow[] {
+  const listed = new Map(p.teamRefs.map((m) => [m.slug, m]));
+  const authorName = (slug: string) => {
+    for (const pub of p.publicationRefs) {
+      const a = pub.authors.find((x) => x.person === slug);
+      if (a?.name.trim()) return a.name.trim();
+    }
+    return undefined;
+  };
+  const rows: TeamRow[] = [];
+  for (const slug of new Set(p.team)) {
+    const person = listed.get(slug);
+    if (person) {
+      rows.push({ kind: "member", person });
+      continue;
+    }
+    const name = authorName(slug);
+    if (name) rows.push({ kind: "name", slug, name });
+  }
+  return rows;
 }
 
 /**
