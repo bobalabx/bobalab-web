@@ -222,7 +222,7 @@ export function validateContent(raw: RawContent, opts: ValidateOptions = {}): Is
     if (p.photo && !p.photo_consent)
       warn(
         "W_CONSENT_PHOTO",
-        "photo is set but photo_consent is false; the photo will not be shown",
+        "photo is set but photo_consent is false: no page shows it, but the uploaded file is still published at its /uploads/ address; remove the photo (and the file) until the person agrees in writing",
         p.file,
         "photo_consent",
       );
@@ -379,13 +379,23 @@ export function validateContent(raw: RawContent, opts: ValidateOptions = {}): Is
   const byColour = new Map<string, string[]>();
   for (const d of colourSet) byColour.set(d.color, [...(byColour.get(d.color) ?? []), d.slug]);
   for (const [color, slugs] of byColour) {
-    if (slugs.length > 1)
-      warn(
-        "W_COLOR_DUP",
-        `colour ${color} is used by ${slugs.join(", ")}`,
-        `directions/${slugs[1]}.md`,
-        "color",
-      );
+    if (slugs.length > 1) {
+      // Each pearl needs its own colour (EDITING §6); the CMS already refuses it.
+      if (site?.launched)
+        err(
+          "E_COLOR_DUP",
+          `colour ${color} is used by ${slugs.join(", ")} (site.launched is true)`,
+          `directions/${slugs[1]}.md`,
+          "color",
+        );
+      else
+        warn(
+          "W_COLOR_DUP",
+          `colour ${color} is used by ${slugs.join(", ")} (becomes an error once site.launched is true)`,
+          `directions/${slugs[1]}.md`,
+          "color",
+        );
+    }
   }
   for (const [a, b, why] of CONFUSABLE_PAIRS) {
     if (byColour.has(a) && byColour.has(b))

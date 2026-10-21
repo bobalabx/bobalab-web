@@ -31,10 +31,13 @@ import { VisuallyHidden } from "@/components/ui/VisuallyHidden";
 import { ChipsDemo } from "./ChipsDemo";
 import { initials } from "@/lib/content/people";
 
-export const metadata: Metadata = {
-  title: "Component kit",
-  robots: { index: false, follow: false },
-};
+const KIT_ENABLED = process.env.NEXT_PUBLIC_KIT === "1";
+
+// When the kit is off the page is a 404: never announce "Component kit" in the title
+// (verify ENG-03). scripts/build.mjs also drops out/kit/ from such exports.
+export const metadata: Metadata = KIT_ENABLED
+  ? { title: "Component kit", robots: { index: false, follow: false } }
+  : { title: "Page not found", robots: { index: false, follow: false } };
 
 const PROSE_SAMPLE = `## A heading inside a body (h1 is demoted)
 
@@ -57,7 +60,7 @@ function Section({ id, title, children }: { id: string; title: string; children:
 }
 
 export default function KitPage() {
-  if (process.env.NEXT_PUBLIC_KIT !== "1") notFound();
+  if (!KIT_ENABLED) notFound();
 
   const c = buildContent(
     loadRawContent(path.join(process.cwd(), "tests/fixtures/content/consent-edge-cases")),

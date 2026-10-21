@@ -40,7 +40,9 @@ export const ROLE_ORDER: PersonRole[] = [
 ];
 
 export const ROLE_LABELS: Record<PersonRole, { one: string; group: string }> = {
-  pi: { one: "Faculty Director", group: "Faculty Director" },
+  // No source gives the PI a lab title ("Faculty Director" was a brief placeholder;
+  // verify CON-05, R2 Q8). Neutral and accurate until the PI chooses one.
+  pi: { one: "Principal investigator", group: "Principal investigator" },
   postdoc: { one: "Postdoctoral scholar", group: "Postdocs" },
   phd: { one: "PhD student", group: "PhD students" },
   "predoc-staff": { one: "Pre-doc / research staff", group: "Pre-docs & research staff" },

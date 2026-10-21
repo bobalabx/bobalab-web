@@ -37,16 +37,10 @@ export function organizationLd(site: SiteData): WithContext<ResearchOrganization
     url: absoluteUrl("/", site.site_url),
     email: site.email,
     address: { "@type": "PostalAddress", streetAddress: site.address },
-    parentOrganization: {
-      "@type": "EducationalOrganization",
-      name: "Haas School of Business, University of California, Berkeley",
-      url: "https://haas.berkeley.edu/",
-      parentOrganization: {
-        "@type": "CollegeOrUniversity",
-        name: "University of California, Berkeley",
-        url: "https://www.berkeley.edu/",
-      },
-    },
+    // No parentOrganization: BOBALAB is a faculty member's research group, not a
+    // registered Haas or UC Berkeley unit (not on the Haas research-labs page; R2 §5,
+    // verify CON-06). The visible affiliation text stays as written in site.yml.
+    // Revisit if Haas registers the lab (R2 Q8).
     sameAs: Object.values(site.social ?? {}),
   };
 }

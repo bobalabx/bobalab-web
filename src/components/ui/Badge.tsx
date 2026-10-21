@@ -20,10 +20,16 @@ export function Badge({
   );
 }
 
-/** Shown on draft items in preview builds only (DECISIONS D-03). */
-export function DraftBadge({ show = true }: { show?: boolean }) {
+/**
+ * Shown on draft items in preview builds only (DECISIONS D-03).
+ * `line`: the badge sits on its own line under running text (in block flow, not
+ * in a flex/grid row that already has a gap): it gets a block wrapper with the
+ * standard stacked-metadata step above it (verify VIS-15).
+ */
+export function DraftBadge({ show = true, line = false }: { show?: boolean; line?: boolean }) {
   if (!show) return null;
-  return <Badge tone="draft">Draft · pending lab review</Badge>;
+  const badge = <Badge tone="draft">Draft · pending lab review</Badge>;
+  return line ? <span className="bl-draft-line">{badge}</span> : badge;
 }
 
 /** Derived "Open to RAs" flag (D-05: from open student opportunities). */

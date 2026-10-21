@@ -18,11 +18,14 @@ import { SWATCH_IDS } from "./palette";
 // Shared field types
 
 /** Absolute http(s) URL, or a site-relative path ("/uploads/…"). The validator
- *  rejects http:// (E_HTTP_URL); the schema accepts it so the error is specific. */
+ *  rejects http:// (E_HTTP_URL); the schema accepts it so the error is specific.
+ *  A protocol-relative "//host/x" (or "/\host", which browsers read the same way)
+ *  is NOT a site path: withBasePath() and Markdoc leave it alone, so it would
+ *  link (or redirect) off-site (verify ENG-06). */
 export const urlField = z
   .string()
   .trim()
-  .refine((v) => /^https?:\/\/[^\s]+$/i.test(v) || /^\/[^\s]*$/.test(v), {
+  .refine((v) => /^https?:\/\/[^\s]+$/i.test(v) || /^\/(?![/\\])[^\s]*$/.test(v), {
     message: "must be an https:// URL or a site path starting with /",
   });
 
@@ -283,6 +286,11 @@ export const publicationSchema = z.strictObject({
         name: z.string().trim().min(1),
         year: yearField,
         under_title: z.string().trim().optional(),
+        /**
+         * "self-reported": known only from the PI's CV or site, not from the
+         * awarding body (CON-03, D11). Shown as "reported by the lab".
+         */
+        source: z.enum(["documented", "self-reported"]).optional(),
       }),
     )
     .default([]),

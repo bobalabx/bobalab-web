@@ -47,6 +47,12 @@
 ::view-transition-group(.pearl-morph) {
   animation-duration: var(--dur-morph);
   animation-timing-function: var(--ease-emph);
+  /* Paint the travelling pearl above every page-level group (verify VIS-01).
+     Groups paint in capture order: the pearl is captured from the OLD page, so the
+     NEW page's boundary group (React's `_t_N_`, fading in from 150 ms) would
+     otherwise sit on top of it and wash it out for the second half of the morph.
+     Stays below the anchored site header (z-index 100). */
+  z-index: 10;
 }
 ::view-transition-image-pair(.pearl-morph) {
   animation-name: bl-via-blur;

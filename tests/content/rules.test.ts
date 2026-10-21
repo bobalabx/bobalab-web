@@ -58,6 +58,26 @@ const CASES: Case[] = [
     make: (f) => f.edit("people/avery-example.md", (d) => void (d.end = "2020")),
   },
   {
+    code: "E_SCHEMA",
+    severity: "error",
+    name: "protocol-relative //host link passed off as a site path (verify ENG-06)",
+    make: (f) =>
+      f.edit(
+        firstPub(f),
+        (d) => void (d.links = { ...(d.links as object), pdf: "//evil.example/paper.pdf" }),
+      ),
+  },
+  {
+    code: "E_SCHEMA",
+    severity: "error",
+    name: "redirect to a protocol-relative /\\host target (verify ENG-06)",
+    make: (f) =>
+      f.edit(
+        "site.yml",
+        (d) => void (d.redirects = [{ from: "/research/old/", to: "/\\evil.example/x" }]),
+      ),
+  },
+  {
     code: "E_SITE_MISSING",
     severity: "error",
     name: "site.yml removed",
@@ -325,10 +345,19 @@ const CASES: Case[] = [
       }),
   },
   {
+    code: "E_COLOR_DUP",
+    severity: "error",
+    name: "two live directions share a colour after launch",
+    make: (f) => f.edit("directions/learning.md", (d) => void (d.color = "butterfly-pea")),
+  },
+  {
     code: "W_COLOR_DUP",
     severity: "warning",
-    name: "two live directions share a colour",
-    make: (f) => f.edit("directions/learning.md", (d) => void (d.color = "butterfly-pea")),
+    name: "two live directions share a colour before launch is only a warning",
+    make: (f) => {
+      f.edit("directions/learning.md", (d) => void (d.color = "butterfly-pea"));
+      f.edit("site.yml", (d) => void (d.launched = false));
+    },
   },
   {
     code: "W_COLOR_CONFUSABLE",

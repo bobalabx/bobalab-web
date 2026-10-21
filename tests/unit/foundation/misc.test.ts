@@ -133,4 +133,29 @@ describe("wordmark geometry", () => {
     expect(WORDMARK.pearl.r).toBeGreaterThan(40);
     expect(WORDMARK.axes).toMatchObject({ wght: 680, opsz: 144, SOFT: 100 });
   });
+
+  // verify VIS-02: the mark read "BOBAL AB" (A->L ink 1 unit, L->A 23 units).
+  it("reads as one word: the A->L join is never tighter than a gap inside LAB", () => {
+    const { boba, join, lab, minClear } = WORDMARK.spacing;
+    const rhythm = boba.reduce((a, b) => a + b, 0) / boba.length;
+    for (const g of lab) expect(join).toBeGreaterThanOrEqual(g - 0.01);
+    // ...and not a word space: within 1.35x of the BOBA rhythm.
+    expect(join / rhythm).toBeLessThan(1.35);
+    for (const g of lab) expect(g / rhythm).toBeGreaterThan(0.9);
+    // No two LAB neighbours touch (the mono L's long foot vs the A's leg).
+    expect(minClear).toBeGreaterThanOrEqual(5);
+    // Raw ink: the BOBA A -> LAB L bounding-box gap is at least every LAB one.
+    const xs = (d: string) =>
+      [...d.matchAll(/([MLQCHV])([^MLQCHVZ]*)/g)].flatMap(([, op = "", args = ""]) => {
+        const n = args.match(/-?\d+(?:\.\d+)?/g)?.map(Number) ?? [];
+        if (op === "V") return [];
+        return op === "H" ? n : n.filter((_, i) => i % 2 === 0);
+      });
+    const box = (d: string) => ({ left: Math.min(...xs(d)), right: Math.max(...xs(d)) });
+    const [a, l, a2, b] = [WORDMARK.boba[2], ...WORDMARK.lab].map(box);
+    if (!a || !l || !a2 || !b) throw new Error("wordmark glyphs missing");
+    const joinInk = l.left - a.right;
+    expect(joinInk).toBeGreaterThanOrEqual(a2.left - l.right);
+    expect(joinInk).toBeGreaterThanOrEqual(b.left - a2.right);
+  });
 });
