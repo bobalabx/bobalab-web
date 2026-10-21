@@ -41,9 +41,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      # Full history, blobless: each direction page's "Last updated" (§D5.11) is
+      # the newest commit touching its own content files (git log -- <files>).
+      # The default shallow clone (depth 1) makes HEAD look like it added every
+      # file, so any commit would re-date every direction page. blob:none keeps
+      # commits and trees only; git log -- <paths> needs no file contents.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
+          filter: blob:none
+      - name: Full git history (direction pages' Last updated, §D5.11)
+        run: test "$(git rev-parse --is-shallow-repository)" = false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
@@ -83,6 +92,8 @@ jobs:
         run: node scripts/perf/export-check.mjs out
         env:
           NEXT_PUBLIC_BASE_PATH: ${{ steps.site.outputs.base_path }}
+      - name: CMS sign-in configured (REPLACE-ME is an error once site.yml launched is true)
+        run: node scripts/cms/check-backend.mjs out/admin/config.yml --site content/site.yml
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: out
@@ -120,11 +131,17 @@ jobs:
       pull-requests: write
       actions: write
     steps:
+      # The token is not stored in .git/config (persist-credentials: false) and
+      # npm runs no install scripts: this job holds a write-scoped GITHUB_TOKEN,
+      # and the slug script needs only `yaml`. The token reaches git only in the
+      # push below, and gh through GH_TOKEN, both in the one step that needs it.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-      - run: npm ci
+      - run: npm ci --ignore-scripts --omit=dev --no-audit --no-fund
       - run: npm run slugs:record
       - id: pr
         name: Propose the updated list as a pull request
@@ -145,7 +162,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -C "$BRANCH"
           git commit -m "chore(content): record published slugs after deploy ${GITHUB_SHA::7}"
-          git push --force origin "$BRANCH"
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH"
           if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')" = "0" ]; then
             gh pr create --base main --head "$BRANCH" \
               --title "Record published slugs" \

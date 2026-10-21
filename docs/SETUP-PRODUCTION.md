@@ -106,7 +106,9 @@ Decap's GitHub backend needs a small OAuth server; GitHub Pages cannot run one (
    - `backend.repo: "<ORG>/<REPO>"` if it differs;
    - `site_url` / `display_url` if the host differs.
 
-   Run `npm run cms:config` (`node scripts/cms/build-config.mjs`), commit both files, and let CI pass. `auth_scope: public_repo` stays for a public repo; use `repo` only if the repo goes private (R4 §8 C5). The `/admin/` CSP allows the bridge origin derived from `base_url`.
+   Run `npm run cms:config` (`node scripts/cms/build-config.mjs`), commit both files, and let CI pass (`tests/unit/cms/config.test.ts` accepts any https origin for `base_url`). `auth_scope: public_repo` stays for a public repo; use `repo` only if the repo goes private (R4 §8 C5). The `/admin/` CSP allows the bridge origin derived from `base_url`. Until this step is done, every deploy warns "the CMS sign-in cannot work yet" (`scripts/cms/check-backend.mjs`); once `site.yml` has `launched: true` that check fails the deploy, so the live `/admin/` never shows a login that cannot work.
+
+   GitHub Pages cannot send `X-Frame-Options` or a `frame-ancestors` header, and browsers ignore `frame-ancestors` in the `<meta>` CSP of `/admin/`. Instead, `public/admin/cms-start.js` does not start the content manager inside a frame (it shows a link to open it on its own), which covers clickjacking of the editor.
 
 6. **Smoke test the editorial workflow** with a throwaway news item (R4 §8 C6, plus Verification required change 3):
    1. Open `https://<HOST>/admin/`, choose **Login with GitHub**, approve "BOBALAB website CMS".

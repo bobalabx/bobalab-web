@@ -22,6 +22,7 @@ content/  ──read.ts──► RawContent ──validate.ts──► issues (n
 - **Pages must not render their own `<main>`.** Each page renders exactly one `<h1 tabIndex={-1}>`; `RouteFocus` focuses it after client-side navigation (not on first load).
 - Metadata: root `title.template` is `"%s · BOBALAB"`; pages call `pageMetadata({ title, description, path })` from `src/lib/seo/metadata.ts`. `metadataBase` = `NEXT_PUBLIC_SITE_URL` → `site.site_url` → `https://bobalab-berkeley.github.io`, plus the base path.
 - CSP `<meta>` is emitted in production builds only (dev needs eval/websockets): `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'`.
+- The build moves the CSP `<meta>` to directly after `<meta charset>` (`hoistCsp` in scripts/build.mjs), because Next emits layout `<head>` children after its hoisted resources and a meta policy only governs what follows it; `scripts/perf/export-check.mjs` fails if it is not there. `script-src 'unsafe-inline'` remains (Next's no-nonce static output), so the policy mainly blocks off-origin loads. The build also deletes `out/kit/` (unless `NEXT_PUBLIC_KIT=1`) and every `out/**/_none/` placeholder, which would otherwise ship as blank not-found shells with status 200 (`pruneExport`).
 
 ## 3. Content layer (`src/lib/content/**`)
 
@@ -96,13 +97,14 @@ Errors fail CI (`validate-content`); warnings print. Each code has a fixture tes
 | E_DIRECTIONS_EMPTY / W_DIRECTIONS_EMPTY    | error / warn (draft) | Paper (not WIP) or project without a direction                                                                                                     |
 | E_HTTP_URL                                 | error                | Any `http://` URL                                                                                                                                  |
 | E_ALT_MISSING                              | error                | Image without alt (figure, hero, teaser, news image, person photo)                                                                                 |
-| W_CONSENT_PHOTO / _EMAIL / _NOW_AT         | warn                 | Value set but consent flag false (it will not render)                                                                                              |
+| W_CONSENT_PHOTO / _EMAIL / _NOW_AT         | warn                 | Value set but consent flag false (it will not render; an uploaded photo file is still published)                                                   |
 | E_DIR_COUNT_ZERO / W_DIR_COUNT_ZERO        | error / warn         | 0 live non-draft directions; error only when `site.launched: true` (D-03)                                                                          |
 | E_DIR_COUNT_MAX                            | error                | More than 8 live directions                                                                                                                        |
 | W_DIR_COUNT_HIGH                           | warn                 | 7–8 directions (consider `figure_mode: dotplot`)                                                                                                   |
 | E_DIR_ORDER_DUP / E_DIR_ORDER_UNKNOWN      | error                | `direction_order` duplicate / slug without a file (D-04)                                                                                           |
 | W_DIR_ORDER_MISSING / W_DIR_ORDER_ARCHIVED | warn                 | Live direction not listed (appended) / archived one listed (ignored)                                                                               |
-| W_COLOR_DUP / W_COLOR_CONFUSABLE           | warn                 | Shared colour / CVD-confusable pair (§C3)                                                                                                          |
+| E_COLOR_DUP / W_COLOR_DUP                  | error / warn         | Two live directions share a colour; error only when `site.launched: true` (§C3)                                                                    |
+| W_COLOR_CONFUSABLE                         | warn                 | CVD-confusable pair (§C3)                                                                                                                          |
 | W_ARCHIVED_NO_DATE                         | warn                 | Archived direction without `archived_on`                                                                                                           |
 | W_BODY_LENGTH                              | warn                 | Non-draft direction body outside 80–150 words                                                                                                      |
 | W_OPP_NO_ROUTE / W_OPP_CLOSED_PAST         | warn                 | Opportunity with no route / open but past `closes_on`                                                                                              |
@@ -163,6 +165,8 @@ The **figure** (Fig. 1) is WP1's (`components/figure/**`); it uses `Pearl`'s mat
 | `npm run e2e`      | Playwright `tests/e2e/**` against `BASE_URL` (default shared dev server `http://localhost:3100`). WP0's `kit.spec.ts` needs a server started with `NEXT_PUBLIC_KIT=1`. |
 
 When several packages run Playwright at once, pass `--output=test-results/<WP>/pw-output` (or set `E2E_OUTPUT`) so one run does not empty another's artifact folder (WP5 request 7).
+
+**WebKit keyboard tests on Windows.** Playwright's WebKit on Windows moves Tab focus only between buttons, never to links; Alt+Tab does the same (MEASURED 2026-10-20, Playwright 1.64.1, WebKit 2370; Chromium on the same page tabs through every link). This is the test browser, not the site. Specs that walk focus with the keyboard first probe a blank page for the key that reaches links (`Tab`, or `Alt+Tab` as on macOS WebKit). When neither does, they focus the same elements by script and still check the focus ring, the caption and the state; the Tab order itself is then covered by Chromium. `tests/e2e/motion-and-colors.spec.ts` does this. WebKit in Playwright 1.64 also emulates `forced-colors: active`, so the forced-colours test runs in both browsers.
 
 **Fixtures** (`tests/fixtures/content/<set>`, generated by `node tests/fixtures/build-fixtures.mjs`, all fictional): `n0` (0 live, 2 draft directions, `launched: false`), `n1 n2 n3 n4 n6 n7 n8`, `long-labels` (8/28-char and two-line labels, 90-char title), `seeds-0-1-7-12-24`, `consent-edge-cases` (listed/unlisted, consent flags, alumni by `end`, draft person, collaborator consent). Every set validates with 0 errors. Use: `CONTENT_DIR=tests/fixtures/content/n4 npm run dev`.
 

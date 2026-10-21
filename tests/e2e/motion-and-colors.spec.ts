@@ -131,6 +131,52 @@ async function routesWithDirection(request: APIRequestContext) {
   return d ? [...ROUTES, d] : ROUTES;
 }
 
+/**
+ * The key that moves focus through links in this browser, probed on a blank
+ * page: "Tab" (Chromium; Linux WebKit not verified), "Alt+Tab" (WebKit on
+ * macOS, where Tab skips links like Safari's default), or null when neither
+ * reaches a link.
+ * Null is Playwright's WebKit on Windows (MEASURED 2026-10-20, WebKit 2370 /
+ * Playwright 1.64): Tab and Alt+Tab only visit buttons, so a Tab walk there
+ * never reaches the skip link or the header links.
+ */
+async function linkTabKey(page: Page): Promise<string | null> {
+  const probe = await page.context().newPage();
+  try {
+    await probe.setContent('<button>b</button><a href="#x">a</a>');
+    for (const key of ["Tab", "Alt+Tab"]) {
+      await probe.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+      for (let i = 0; i < 2; i++) {
+        await probe.keyboard.press(key);
+        if (await probe.evaluate(() => document.activeElement?.tagName === "A")) return key;
+      }
+    }
+    return null;
+  } finally {
+    await probe.close();
+  }
+}
+
+/**
+ * Focus the i-th element of the page's sequential focus order, the way the
+ * i-th Tab press from a fresh load would, without the Tab key: visible, enabled
+ * links, buttons, form controls and tabindex ≥ 0 in DOM order (the site uses no
+ * positive tabindex). Script focus with no prior pointer input matches
+ * :focus-visible in Chromium and WebKit, so the ring under test is the same.
+ */
+async function focusNth(page: Page, i: number) {
+  await page.evaluate((n) => {
+    const sel =
+      "a[href], button:not([disabled]), input:not([disabled]):not([type=hidden]), select:not([disabled]), textarea:not([disabled]), [tabindex]";
+    const order = [...document.querySelectorAll<HTMLElement>(sel)].filter((el) => {
+      if (el.tabIndex < 0 || el.closest("[inert]")) return false;
+      const s = getComputedStyle(el);
+      return s.visibility !== "hidden" && el.getClientRects().length > 0;
+    });
+    order[n]?.focus();
+  }, i);
+}
+
 test.describe("prefers-reduced-motion: reduce", () => {
   test.use({ contextOptions: { reducedMotion: "reduce" } });
 
@@ -235,13 +281,22 @@ test.describe("forced colours", () => {
 
   test("zero axe violations and a visible keyboard focus outline", async ({ page, request }) => {
     test.setTimeout(5 * 60_000);
-    // WebKit has no forced-colors mode: without this guard the test would pass
-    // there without testing anything.
+    // Chromium emulates forced colours, and so does WebKit in Playwright 1.64
+    // (MEASURED 2026-10-20: matchMedia matches, so this runs there too). A
+    // browser that does not would pass without testing anything: skip it.
     await page.goto("/");
     test.skip(
       !(await page.evaluate(() => matchMedia("(forced-colors: active)").matches)),
       "this browser does not emulate forced colours",
     );
+    const tabKey = await linkTabKey(page);
+    if (!tabKey) {
+      test.info().annotations.push({
+        type: "keyboard",
+        description:
+          "Tab does not reach links in this browser (Playwright WebKit on Windows): focus rings checked on the first two elements of the focus order, focused by script",
+      });
+    }
     const violations: string[] = [];
     for (const path of await routesWithDirection(request)) {
       const res = await page.goto(path);
@@ -254,7 +309,8 @@ test.describe("forced colours", () => {
       }
       // Skip link, then the first header link: both must show an outline.
       for (let i = 0; i < 2; i++) {
-        await page.keyboard.press("Tab");
+        if (tabKey) await page.keyboard.press(tabKey);
+        else await focusNth(page, i);
         const ring = await page.evaluate(() => {
           const el = document.activeElement as HTMLElement | null;
           if (!el || el === document.body) return "no focus";

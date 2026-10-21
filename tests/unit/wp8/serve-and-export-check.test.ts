@@ -125,7 +125,6 @@ describe("export-check", () => {
       write(o, f, `<a href="/research/live-one/">x</a><a href="/people/avery-pi/">pi</a>`);
     }
     write(o, "people/avery-pi/index.html", "pi");
-    write(o, "research/_none/index.html", "placeholder");
     write(
       o,
       "sitemap.xml",
@@ -174,6 +173,22 @@ describe("export-check", () => {
     expect(errors).toContain("sitemap lists https://x.test/kit/");
     expect(errors).toContain("robots.txt does not disallow /admin/");
     expect(errors).toContain("Windows-style segment folder out/kit/__next.kit/");
+  });
+
+  it("fails on pruned not-found shells (ENG-03) and a CSP <meta> that is not first (ENG-05)", () => {
+    const o = goodOut();
+    write(o, "research/_none/index.html", "placeholder");
+    write(o, "kit/index.html", "kit shell");
+    const csp = `<meta http-equiv="Content-Security-Policy" content="default-src 'self'"/>`;
+    write(o, "about/index.html", `<head><meta charSet="utf-8"/><link rel="preload"/>${csp}</head>`);
+    write(o, "join/index.html", `<head><meta charSet="utf-8"/>${csp}<link rel="preload"/></head>`);
+    write(o, "admin/index.html", `<head><meta charSet="utf-8"/><title>x</title>${csp}</head>`);
+    const errors = checkExport(o, { contentDir: contentFixture() }).errors;
+    expect(errors).toEqual([
+      "out/kit/ is a not-found shell served with status 200 (run npm run build)",
+      "out/research/_none/ is a not-found shell served with status 200 (run npm run build)",
+      "out/about/index.html: CSP <meta> is not the first tag after <meta charSet>",
+    ]);
   });
 
   it("fails when a hidden URL leaks into an RSC payload, the feed or JSON-LD; ignores other origins", () => {

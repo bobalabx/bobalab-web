@@ -16,6 +16,9 @@
  *     whose page is missing from out/ or is a `noindex` not-found page (GitHub
  *     Pages would serve such a "soft 404" with status 200);
  *   - robots.txt does not disallow /admin/;
+ *   - out/kit/ or any `_none` folder under out/ ships (blank not-found shells that
+ *     GitHub Pages would serve with status 200; ENG-03);
+ *   - a page's CSP <meta> does not directly follow <meta charSet> (ENG-05);
  *   - out/ still has Windows-style segment folders (`__next.*` folders or file
  *     names with a backslash; D-07 — scripts/fix-win-export.mjs repairs them).
  * Exit 2: out/ missing. Run it on `npm run build` output, not build:preview
@@ -136,6 +139,24 @@ export function checkExport(
     : "";
   if (robots && !new RegExp(`^Disallow: ${basePath}/admin/\\s*$`, "m").test(robots)) {
     errors.push("robots.txt does not disallow /admin/");
+  }
+
+  // ENG-03: not-found shells must not ship (scripts/build.mjs pruneExport); GitHub
+  // Pages would serve them with status 200.
+  for (const e of entries) {
+    if (e.dir && (e.rel === "kit" || e.rel.split("/").pop() === "_none"))
+      errors.push(`out/${e.rel}/ is a not-found shell served with status 200 (run npm run build)`);
+  }
+  // ENG-05: a <meta> CSP only governs what follows it, so it must directly follow
+  // <meta charSet> (scripts/build.mjs hoistCsp). /admin/ ships its own head.
+  for (const e of entries) {
+    if (e.dir || !e.rel.endsWith(".html") || e.rel.startsWith("admin/")) continue;
+    const html = fs.readFileSync(path.join(outDir, e.rel), "utf8");
+    if (
+      html.includes('http-equiv="Content-Security-Policy"') &&
+      !html.includes('<meta charSet="utf-8"/><meta http-equiv="Content-Security-Policy"')
+    )
+      errors.push(`out/${e.rel}: CSP <meta> is not the first tag after <meta charSet>`);
   }
 
   const hidden = hiddenSlugs(contentDir);
