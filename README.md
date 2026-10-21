@@ -3,7 +3,7 @@
 Website of BOBALAB, the Berkeley Operations and Behavioral Analytics Lab (Haas School of Business, UC Berkeley). Static Next.js site, content in Markdown/YAML edited through Decap CMS, hosted on GitHub Pages.
 
 - Spec: `docs/research/research-brief.md` · Decisions (binding): `docs/DECISIONS.md`
-- How it fits together: `docs/ARCHITECTURE.md` · Dataset → schema: `docs/CONTENT-MAPPING.md` · JS baseline: `docs/PERF-BASELINE.md`
+- How it fits together: `docs/ARCHITECTURE.md` · Dataset → schema: `docs/CONTENT-MAPPING.md` · JS baseline: `docs/PERF-BASELINE.md` · Verification results: `docs/TESTING-REPORT.md`
 - Changing a file another package owns: `docs/change-requests/README.md`
 
 ## Requirements
