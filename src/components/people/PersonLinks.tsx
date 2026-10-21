@@ -1,5 +1,5 @@
 /**
- * A person's public links (website, Scholar, LinkedIn, GitHub, ORCID, CV) and
+ * A person's public links (Haas profile, website, Scholar, LinkedIn, GitHub, ORCID, CV) and
  * email only when `email_public` (the loader drops it otherwise). Every link's
  * accessible name includes the person's name (WCAG 2.4.4).
  */

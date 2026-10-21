@@ -280,23 +280,42 @@ test("PI profile: h1, breadcrumb, ProfilePage + Person JSON-LD", async ({ page }
     p.authorList.some((a) => a.person?.slug === pi!.slug),
   );
   const counted = authored.filter((p) => p.counted).length;
+  // The newest five are listed; "See all N" carries the rest (VIS-08).
   if (counted)
     await expect(page.locator('section[aria-labelledby="publications"] .bl-pub')).toHaveCount(
-      counted,
+      Math.min(counted, 5),
     );
+  // Work in progress is collapsed under its heading; opening it shows the titles.
+  const wip = authored.length - counted;
+  if (wip) {
+    const details = page.locator('section[aria-labelledby="in-progress"] details');
+    await expect(details).not.toHaveAttribute("open");
+    await expect(page.locator("#in-progress")).toBeVisible();
+    await details.locator("summary").click();
+    await expect(details.locator(".bl-pub")).toHaveCount(wip);
+  }
+  // The Haas faculty profile leads the header links when the person has one (VIS-07).
+  const haas = (pi as PublicPerson).links?.haas;
+  if (haas) {
+    const first = page.locator(".pp-profile__head .pp-links a").first();
+    await expect(first).toHaveAttribute("href", haas);
+    await expect(first).toHaveAccessibleName(new RegExp(`^Haas faculty profile ?of ${pi!.name}$`));
+  }
   // Sections without content are not rendered.
   if (!(pi as PublicPerson).body?.trim()) await expect(page.locator("#about")).toHaveCount(0);
   // Direction tags sit in the header, only when the person has directions in this build.
   const dirs = pi!.directions.filter((s) => content.getDirection(s)).length;
   await expect(page.locator(".pp-profile__head .bl-tags li")).toHaveCount(dirs);
-  // The lab affiliation (site.yml) appears under the Faculty Director's title.
+  // The lab affiliation (site.yml) appears under the principal investigator's title.
   await expect(page.locator(".pp-profile__affil")).toHaveText(content.site.affiliation_text);
   // Publications link: a filtered view of the list, named for the person.
   if (counted)
     await expect(
       // (Chromium puts a space before the visually hidden part of the name.)
       page.getByRole("link", {
-        name: new RegExp(`^View in Publications ?, filtered to ${pi!.name}$`),
+        name: new RegExp(
+          `^(View in Publications|See all ${counted} in Publications) ?, filtered to ${pi!.name}$`,
+        ),
       }),
     ).toHaveAttribute("href", `/publications/?member=${pi!.slug}`);
 });
@@ -346,7 +365,7 @@ for (const r of ROUTES) {
   });
 }
 
-test("layout: the Faculty Director card spans two grid columns and lines up with them", async ({
+test("layout: the principal investigator card spans two grid columns and lines up with them", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1366, height: 768 });

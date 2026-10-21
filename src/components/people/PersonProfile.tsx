@@ -2,7 +2,8 @@
  * Person page body (brief §D9 "Person page"): header (avatar, role, name,
  * title/program, the lab affiliation for the PI, tenure, direction tags,
  * links, email only when public), then — each only when it has content — bio,
- * publications (as a linked author, D-05 counted), work in progress, projects,
+ * the newest publications (as a linked author, D-05 counted) with a link to the
+ * full filtered list, work in progress (collapsed), projects (compact rows),
  * news.
  * The PI's page carries ProfilePage + Person JSON-LD (brief §G3).
  */
@@ -13,14 +14,15 @@ import { DraftBadge } from "@/components/ui/Badge";
 import { PearlTagList } from "@/components/ui/PearlTag";
 import { Prose } from "@/components/ui/Prose";
 import { PublicationEntry } from "@/components/ui/PublicationEntry";
-import { ProjectCard } from "@/components/ui/ProjectCard";
 import { NewsItem } from "@/components/ui/NewsItem";
 import { JsonLd } from "@/components/ui/JsonLd";
 import { Icon } from "@/components/ui/icons";
+import { CompactProjectList } from "@/components/projects/CompactProjectList";
 import { PersonAvatar } from "./PersonAvatar";
 import { PersonLinks } from "./PersonLinks";
 import { Breadcrumb } from "./Breadcrumb";
 import type { PersonProfileModel } from "./model";
+import "@/components/projects/projects.css";
 import "./people.css";
 
 interface SectionLink {
@@ -33,6 +35,7 @@ export function PersonProfile({ content, model }: { content: Content; model: Per
   const p = model.item.person;
   const path = `/people/${p.slug}/`;
   const hasBio = Boolean(p.body?.trim());
+  const morePubs = model.publications.length > model.shownPublications.length;
 
   const sections: SectionLink[] = [
     ...(hasBio ? [{ id: "about", label: "About" }] : []),
@@ -65,7 +68,7 @@ export function PersonProfile({ content, model }: { content: Content; model: Per
             {p.name}
           </h1>
           {model.lead && <p className="pp-profile__lead">{model.lead}</p>}
-          {/* The lab's affiliation (site.yml) under the Faculty Director's title. */}
+          {/* The lab's affiliation (site.yml) under the principal investigator's title. */}
           {p.role === "pi" && content.site.affiliation_text && (
             <p className="pp-profile__affil">{content.site.affiliation_text}</p>
           )}
@@ -120,48 +123,62 @@ export function PersonProfile({ content, model }: { content: Content; model: Per
 
         {model.publications.length > 0 && (
           <section className="pp-section" aria-labelledby="publications">
-            <div className="pp-section__head">
-              <h2 id="publications">Publications</h2>
-              {/* Every paper is already listed here, so the link offers the filterable
-                  list (search, BibTeX), not "see all". */}
+            <h2 id="publications">Publications</h2>
+            {/* The newest few; the full list (search, filters, BibTeX) is one link away,
+                filtered to this person, so a long record does not bury the page. */}
+            <div className="pp-pubs">
+              {model.shownPublications.map((pub) => (
+                <PublicationEntry key={pub.slug} pub={pub} as="h3" currentPerson={p.slug} />
+              ))}
+            </div>
+            <p className="pp-section__foot">
               <Link
                 className="pp-section__more"
                 href={`/publications/?member=${encodeURIComponent(p.slug)}`}
               >
-                View in Publications<span className="vh">, filtered to {p.name}</span>{" "}
+                <span>
+                  {morePubs
+                    ? `See all ${model.publications.length} in Publications`
+                    : "View in Publications"}
+                  <span className="vh">, filtered to {p.name}</span>
+                </span>
                 <Icon name="arrow-right" />
               </Link>
-            </div>
-            <div className="pp-pubs">
-              {model.publications.map((pub) => (
-                <PublicationEntry key={pub.slug} pub={pub} as="h3" currentPerson={p.slug} />
-              ))}
-            </div>
+            </p>
           </section>
         )}
 
         {model.inProgress.length > 0 && (
           <section className="pp-section" aria-labelledby="in-progress">
             <h2 id="in-progress">Work in progress</h2>
-            <p className="pp-section__note">Papers in progress, without a public version yet.</p>
-            <div className="pp-pubs">
-              {model.inProgress.map((pub) => (
-                <PublicationEntry key={pub.slug} pub={pub} as="h3" currentPerson={p.slug} />
-              ))}
-            </div>
+            <p className="pp-section__note">
+              Papers in progress, without a public version or a documented talk yet.
+            </p>
+            {/* Collapsed: titles without a public version are secondary to the papers.
+                The heading stays outside, so the on-page link always lands on it. */}
+            <details className="pp-disclosure">
+              <summary className="pp-disclosure__summary">
+                <Icon name="chevron" className="pp-disclosure__chev" />
+                <span className="pp-disclosure__show">
+                  Show {model.inProgress.length}{" "}
+                  {model.inProgress.length === 1 ? "title" : "titles"}
+                </span>
+                <span className="pp-disclosure__hide">Hide work in progress</span>
+              </summary>
+              <div className="pp-pubs">
+                {model.inProgress.map((pub) => (
+                  <PublicationEntry key={pub.slug} pub={pub} as="h3" currentPerson={p.slug} />
+                ))}
+              </div>
+            </details>
           </section>
         )}
 
         {model.projects.length > 0 && (
           <section className="pp-section" aria-labelledby="projects">
             <h2 id="projects">Projects</h2>
-            <ul className="pp-cards" role="list">
-              {model.projects.map((pr) => (
-                <li key={pr.slug}>
-                  <ProjectCard project={pr} as="h3" />
-                </li>
-              ))}
-            </ul>
+            {/* Compact rows (title, directions, years), active first; cards live on /projects/. */}
+            <CompactProjectList projects={model.projects} label={`Projects of ${p.name}`} />
           </section>
         )}
 

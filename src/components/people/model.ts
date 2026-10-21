@@ -52,8 +52,22 @@ export interface PersonLink {
   href: string;
 }
 
-const LINK_ORDER = ["website", "scholar", "linkedin", "github", "orcid", "cv"] as const;
+/**
+ * Display order of a person's links. The Haas faculty profile leads: it is the
+ * PI's official university page (R2 §2), the one a Haas visitor checks first.
+ * Every key in the schema's `links` object must appear here, or it is dropped.
+ */
+export const LINK_ORDER = [
+  "haas",
+  "website",
+  "scholar",
+  "linkedin",
+  "github",
+  "orcid",
+  "cv",
+] as const satisfies ReadonlyArray<keyof NonNullable<PublicPerson["links"]>>;
 const LINK_LABELS: Record<(typeof LINK_ORDER)[number], string> = {
+  haas: "Haas faculty profile",
   website: "Website",
   scholar: "Google Scholar",
   linkedin: "LinkedIn",
@@ -124,7 +138,7 @@ export interface PeopleIndexModel {
   directionOptions: ChipOptionModel[];
   /** Show the filter island only when it can actually narrow the list. */
   showFilters: boolean;
-  /** "1 Faculty Director · 8 Undergraduate RAs · 21 Alumni" parts. */
+  /** "1 Principal investigator · 8 Undergraduate RAs · 21 Alumni" parts. */
   summary: Array<{ count: number; label: string }>;
 }
 
@@ -199,7 +213,7 @@ export function buildPeopleIndex(c: Content): PeopleIndexModel {
 
 export interface PersonProfileModel {
   item: PersonItem;
-  /** "Faculty Director" · "Alumni · Undergraduate RA". */
+  /** "Principal investigator" · "Alumni · Undergraduate RA". */
   eyebrow: string;
   /** Position title (PI) or program, when present. */
   lead: string | null;
@@ -208,6 +222,8 @@ export interface PersonProfileModel {
   directions: DirectionView[];
   /** Papers that count under D-05, newest first. */
   publications: PublicationView[];
+  /** The newest PROFILE_PUBLICATION_LIMIT of those, listed on the page; the rest are a link away. */
+  shownPublications: PublicationView[];
   /** Work in progress without a public version (D-05 "In progress"). */
   inProgress: PublicationView[];
   projects: ProjectView[];
@@ -226,12 +242,16 @@ const byStatus = (a: ProjectView, b: ProjectView) =>
   (b.start_year ?? 0) - (a.start_year ?? 0) ||
   a.title.localeCompare(b.title);
 
+/** Papers listed on a person page before "See all N in Publications" carries the rest (VIS-08). */
+export const PROFILE_PUBLICATION_LIMIT = 5;
+
 export function buildPersonProfile(c: Content, slug: string): PersonProfileModel | undefined {
   const d = personDetail(c, slug);
   if (!d) return undefined;
   const p = d.person;
   const roleOne = ROLE_LABELS[p.role].one;
   const lead = p.title?.trim() || p.program?.trim() || null;
+  const publications = d.publications.filter((x) => x.counted);
   return {
     item: toItem(c, p),
     eyebrow: p.isAlumni ? `Alumni · ${roleOne}` : roleOne,
@@ -239,7 +259,8 @@ export function buildPersonProfile(c: Content, slug: string): PersonProfileModel
     tenure: tenureLine(p),
     links: personLinks(p),
     directions: d.directions,
-    publications: d.publications.filter((x) => x.counted),
+    publications,
+    shownPublications: publications.slice(0, PROFILE_PUBLICATION_LIMIT),
     inProgress: d.publications.filter((x) => !x.counted),
     projects: [...d.projects].sort(byStatus),
     news: d.news,

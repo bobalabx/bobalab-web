@@ -56,7 +56,7 @@ describe("People index (consent-edge-cases, production)", () => {
     ]);
   });
 
-  it("gives the Faculty Director the wide lead card (well-formed class names)", () => {
+  it("gives the principal investigator the wide lead card (well-formed class names)", () => {
     expect(html).toContain('<ul class="pp-grid pp-grid--lead" role="list">');
     expect(html).toMatch(
       /<article class="pp-card pp-card--lead" aria-labelledby="person-avery-example"/,
@@ -72,7 +72,7 @@ describe("People index (consent-edge-cases, production)", () => {
     for (const attrs of years) expect(attrs).toMatch(/role="group" aria-labelledby="alumni-/);
   });
 
-  it("hides the meaningless count next to the Faculty Director heading", () => {
+  it("hides the meaningless count next to the principal investigator heading", () => {
     const pi = between(html, 'aria-labelledby="people-pi"', "</section>");
     expect(pi).not.toContain("pp-group__count");
     const phd = between(html, 'aria-labelledby="people-phd"', "</section>");
@@ -247,17 +247,67 @@ describe("Person page (consent-edge-cases)", () => {
     expect(blair).not.toContain('id="directions"');
   });
 
-  it("puts the lab affiliation (site.yml) under the Faculty Director's title only", () => {
+  it("puts the lab affiliation (site.yml) under the principal investigator's title only", () => {
     const affil = c.site.affiliation_text;
     expect(html).toContain(`<p class="pp-profile__affil">${affil}</p>`);
     expect(blair).not.toContain("pp-profile__affil");
   });
 
-  it("labels the publications link as a filtered view, with the person's name", () => {
-    expect(html).toMatch(/href="\/publications\/?\?member=avery-example"/);
-    expect(html).toContain("View in Publications");
-    expect(html).toContain("filtered to Avery Example");
-    expect(html).not.toContain("See all");
+  it("lists the newest five papers and links to all of them, filtered to the person (VIS-08)", () => {
+    const pubs = between(html, 'aria-labelledby="publications"', "</section>");
+    expect(pi.publications.length).toBe(7);
+    expect(pubs.match(/<article class="bl-pub"/g)?.length).toBe(5);
+    for (const p of pi.publications.slice(0, 5)) expect(pubs).toContain(`id="pub-${p.slug}"`);
+    for (const p of pi.publications.slice(5)) expect(pubs).not.toContain(`id="pub-${p.slug}"`);
+    expect(pubs).toMatch(/href="\/publications\/?\?member=avery-example"/);
+    expect(pubs).toContain("See all 7 in Publications");
+    expect(pubs).toContain("filtered to Avery Example");
+    // The on-page count is the full total, not the five shown.
+    expect(html).toMatch(/href="#publications">.*?<\/span>7<span class="vh">\)/);
+  });
+
+  it("says 'View in Publications' when every paper is already listed", () => {
+    // Blair has one paper: nothing is cut, so no "See all N".
+    const pubs = between(blair, 'aria-labelledby="publications"', "</section>");
+    expect(pubs.match(/<article class="bl-pub"/g)?.length).toBe(1);
+    expect(pubs).toContain("View in Publications");
+    expect(pubs).not.toContain("See all");
+  });
+
+  it("collapses work in progress under a visible heading (no-JS <details>)", () => {
+    const wip = between(html, 'aria-labelledby="in-progress"', "</section>");
+    expect(wip).toContain('<h2 id="in-progress">Work in progress</h2>');
+    expect(wip.indexOf('<h2 id="in-progress"')).toBeLessThan(wip.indexOf("<details"));
+    expect(wip).toMatch(/<details class="pp-disclosure">/);
+    expect(wip).not.toMatch(/<details[^>]*\sopen[\s=>]/);
+    expect(wip).toContain("Show 1 title");
+    expect(wip).toContain('id="pub-example-2020-fixture-paper-194"');
+  });
+
+  it("lists projects as compact rows, not cards", () => {
+    const projects = between(html, 'aria-labelledby="projects"', "</section>");
+    expect(projects).toContain('aria-label="Projects of Avery Example"');
+    expect(projects.match(/<li class="pj-row"/g)?.length).toBe(pi.projects.length);
+    expect(projects).not.toContain("bl-card");
+  });
+
+  it("leads the header links with the Haas faculty profile (VIS-07 / CON-12)", () => {
+    const withHaas = {
+      ...pi,
+      links: [
+        {
+          key: "haas",
+          label: "Haas faculty profile",
+          href: "https://haas.berkeley.edu/faculty/x/",
+        },
+        ...pi.links,
+      ],
+    };
+    const h = renderToStaticMarkup(<PersonProfile content={c} model={withHaas} />);
+    const links = between(h, 'aria-label="Links for Avery Example"', "</ul>");
+    expect(links.indexOf("Haas faculty profile")).toBeGreaterThan(-1);
+    expect(links.indexOf("Haas faculty profile")).toBeLessThan(links.indexOf("Website"));
+    expect(links).toContain('<span class="vh"> of Avery Example</span>');
   });
 
   it("does not repeat 'Alumni' as a badge next to the eyebrow", () => {

@@ -14,7 +14,11 @@ export function generateMetadata(): Metadata {
   const c = getContent();
   const m = buildPeopleIndex(c);
   // Category names (plural group labels), not the counted summary ("1 Master's student").
-  const groups = [...m.groups.map((g) => g.label), ...(m.alumniItems.length ? ["alumni"] : [])];
+  // The PI is named by the sentence itself, so a lone role label never makes up the list.
+  const groups = [
+    ...m.groups.filter((g) => g.role !== "pi").map((g) => g.label),
+    ...(m.alumniItems.length ? ["alumni"] : []),
+  ];
   const who =
     groups.length > 1
       ? `${groups.slice(0, -1).join(", ")} and ${groups[groups.length - 1]}`
@@ -22,7 +26,11 @@ export function generateMetadata(): Metadata {
   const lab = `${c.site.name}, the ${c.site.long_name}`;
   return pageMetadata({
     title: "People",
-    description: clipDescription(who ? `People of ${lab}: ${who}.` : `People of ${lab}.`),
+    description: clipDescription(
+      who
+        ? `People of ${lab}: its principal investigator, ${who}.`
+        : `People of ${lab} and its principal investigator.`,
+    ),
     path: "/people/",
   });
 }

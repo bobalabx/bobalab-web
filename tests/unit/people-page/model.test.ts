@@ -5,7 +5,10 @@ import { describe, expect, it } from "vitest";
 import { buildContent, loadRawContent } from "@/lib/content/load";
 import { EMPTY_PARAM } from "@/lib/content/queries";
 import { DEFAULT_SWATCH_ORDER } from "@/lib/content/palette";
+import { personSchema } from "@/lib/content/schema";
 import {
+  LINK_ORDER,
+  PROFILE_PUBLICATION_LIMIT,
   avatarSwatch,
   buildPeopleIndex,
   buildPersonProfile,
@@ -28,7 +31,7 @@ describe("buildPeopleIndex — order and grouping (§D9)", () => {
   it("groups current people in the §D9 role order, skipping empty groups", () => {
     expect(m.groups.map((g) => g.role)).toEqual(["pi", "postdoc", "phd", "undergrad", "affiliate"]);
     expect(m.groups.map((g) => g.label)).toEqual([
-      "Faculty Director",
+      "Principal investigator",
       "Postdocs",
       "PhD students",
       "Undergraduate RAs",
@@ -91,7 +94,7 @@ describe("buildPeopleIndex — order and grouping (§D9)", () => {
 
   it("summarises the roster with singular/plural labels", () => {
     expect(m.summary).toEqual([
-      { count: 1, label: "Faculty Director" },
+      { count: 1, label: "Principal investigator" },
       { count: 1, label: "Postdoctoral scholar" },
       { count: 1, label: "PhD student" },
       { count: 1, label: "Undergraduate RA" },
@@ -160,6 +163,29 @@ describe("person helpers", () => {
     expect(personLinks({ links: {}, email: undefined })).toEqual([]);
   });
 
+  it("leads with the Haas faculty profile (VIS-07 / CON-12)", () => {
+    const links = personLinks({
+      links: {
+        cv: "https://c.example/cv.pdf",
+        orcid: "https://orcid.org/0000-0000-0000-0000",
+        website: "https://a.example",
+        haas: "https://haas.berkeley.edu/faculty/x/",
+      },
+      email: undefined,
+    });
+    expect(links.map((l) => [l.key, l.label])).toEqual([
+      ["haas", "Haas faculty profile"],
+      ["website", "Website"],
+      ["orcid", "ORCID"],
+      ["cv", "CV"],
+    ]);
+  });
+
+  it("renders every link kind the schema accepts (none silently dropped)", () => {
+    const keys = Object.keys(personSchema.shape.links.unwrap().shape);
+    expect([...LINK_ORDER].sort()).toEqual(keys.sort());
+  });
+
   it("consent gating reaches the model: devon's photo and email are gone, blair's stay", () => {
     const m = buildPeopleIndex(load("consent-edge-cases"));
     const by = (s: string) => m.all.find((i) => i.person.slug === s)!.person;
@@ -174,6 +200,28 @@ describe("person helpers", () => {
 
 describe("buildPersonProfile (§D9 person page)", () => {
   const c = load("consent-edge-cases");
+
+  it("lists only the newest few papers; the rest are a filtered link away (VIS-08)", () => {
+    expect(PROFILE_PUBLICATION_LIMIT).toBe(5);
+    const base = buildPersonProfile(c, "avery-example")!;
+    const pub = base.publications[0]!;
+    // Twelve counted papers, newest first, as the loader orders them.
+    const many = Array.from({ length: 12 }, (_, i) => ({
+      ...pub,
+      slug: `many-${i}`,
+      year: 2025 - i,
+      authorList: [{ name: "Avery Example", person: base.item.person }],
+    }));
+    const big = buildPersonProfile({ ...c, publications: many } as typeof c, "avery-example")!;
+    expect(big.publications).toHaveLength(12);
+    expect(big.shownPublications.map((p) => p.slug)).toEqual([
+      "many-0",
+      "many-1",
+      "many-2",
+      "many-3",
+      "many-4",
+    ]);
+  });
 
   it("exists only for listed people with a profile page (the PI always)", () => {
     expect(buildPersonProfile(c, "avery-example")).toBeDefined();
@@ -195,7 +243,8 @@ describe("buildPersonProfile (§D9 person page)", () => {
       "consent-project",
       "platforms-project",
     ]);
-    expect(m.eyebrow).toBe("Faculty Director");
+    expect(m.shownPublications).toEqual(m.publications.slice(0, PROFILE_PUBLICATION_LIMIT));
+    expect(m.eyebrow).toBe("Principal investigator");
     expect(m.lead).toBe("Fixture Professor of Examples");
   });
 

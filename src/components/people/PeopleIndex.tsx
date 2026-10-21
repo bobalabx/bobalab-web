@@ -2,7 +2,7 @@
  * The People index body (brief §D9, DECISIONS D-06). Server component; the only
  * client code is the optional filter island (PeopleFilters).
  *
- * Order: Faculty Director → Postdocs → PhD students → Pre-docs & research
+ * Order: Principal investigator → Postdocs → PhD students → Pre-docs & research
  * staff → Master's students → Undergraduate RAs → Affiliates & collaborators,
  * then Alumni in a collapsed <details>, grouped by end year (newest first).
  * Sorting inside a group: role → rank → last name (lib/content/people).
@@ -115,7 +115,7 @@ export function PeopleIndex({ content }: { content: Content }) {
             <h2 id={g.id} className="pp-group__title">
               {g.label}
             </h2>
-            {/* A count of "1" next to "Faculty Director" says nothing. */}
+            {/* A count of "1" next to "Principal investigator" says nothing. */}
             {g.role !== "pi" && (
               <span className="pp-group__count">
                 <MaybeCount filterable={f} items={g.items} noun={["person", "people"]} />

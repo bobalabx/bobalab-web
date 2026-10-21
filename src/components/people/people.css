@@ -143,7 +143,7 @@
   list-style: none;
 }
 /*
- * The Faculty Director's card uses the same column grid as every other group
+ * The principal investigator's card uses the same column grid as every other group
  * and spans two columns, so its right edge lines up with the cards below.
  * Two 19rem columns + the 1rem gap fit from 39rem of group width.
  */
@@ -287,7 +287,8 @@ img.pp-avatar--profile {
 }
 
 /* ---------- Alumni ------------------------------------------------------ */
-.pp-alumni__summary {
+.pp-alumni__summary,
+.pp-disclosure__summary {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
@@ -304,26 +305,33 @@ img.pp-avatar--profile {
   cursor: pointer;
   list-style: none;
 }
-.pp-alumni__summary::-webkit-details-marker {
+.pp-alumni__summary::-webkit-details-marker,
+.pp-disclosure__summary::-webkit-details-marker {
   display: none;
 }
-.pp-alumni__summary:hover {
+.pp-alumni__summary:hover,
+.pp-disclosure__summary:hover {
   border-color: var(--ink);
 }
-.pp-alumni__chev {
+.pp-alumni__chev,
+.pp-disclosure__chev {
   width: 1.1em;
   height: 1.1em;
 }
-.pp-alumni__details[open] .pp-alumni__chev {
+.pp-alumni__details[open] .pp-alumni__chev,
+.pp-disclosure[open] .pp-disclosure__chev {
   transform: rotate(90deg);
 }
 @media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="reduce"]) .pp-alumni__chev {
+  :root:not([data-motion="reduce"]) .pp-alumni__chev,
+  :root:not([data-motion="reduce"]) .pp-disclosure__chev {
     transition: transform var(--dur-fast, 160ms) var(--ease-out, ease-out);
   }
 }
 .pp-alumni__details[open] .pp-alumni__show,
-.pp-alumni__details:not([open]) .pp-alumni__hide {
+.pp-alumni__details:not([open]) .pp-alumni__hide,
+.pp-disclosure[open] .pp-disclosure__show,
+.pp-disclosure:not([open]) .pp-disclosure__hide {
   display: none;
 }
 .pp-alumni__years {
@@ -547,25 +555,18 @@ img.pp-avatar--profile {
   color: var(--ink-muted);
   margin-top: calc(-1 * var(--s-2));
 }
+/* "See all N in Publications" under the newest papers. */
+.pp-section__foot {
+  margin-top: calc(-1 * var(--s-2));
+}
+/* Work in progress: collapsed list under its (always visible) heading. */
+.pp-disclosure > .pp-pubs {
+  margin-top: var(--s-4);
+}
 .pp-pubs,
 .pp-news {
   display: grid;
   border-bottom: 1px solid var(--hairline);
-}
-.pp-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr));
-  gap: var(--s-4);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.pp-cards > li {
-  display: flex;
-  min-width: 0;
-}
-.pp-cards > li > * {
-  flex: 1;
 }
 .pp-back {
   margin-top: var(--s-8);
@@ -575,6 +576,7 @@ img.pp-avatar--profile {
 @media (forced-colors: active) {
   .pp-card,
   .pp-alumni__summary,
+  .pp-disclosure__summary,
   .pp-links--buttons a {
     border-color: CanvasText;
   }
