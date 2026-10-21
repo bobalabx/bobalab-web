@@ -32,7 +32,7 @@ window.BOBALAB_CMS = {
       "in-progress": "In progress",
     },
     roles: {
-      pi: "Faculty Director",
+      pi: "Principal investigator",
       postdoc: "Postdoctoral scholar",
       phd: "PhD student",
       "predoc-staff": "Pre-doc / research staff",
@@ -163,6 +163,98 @@ window.BOBALAB_CMS = {
         earlier: "start_year",
         later: "end_year",
         labels: ["Start year", "End year"],
+      },
+    ],
+    required: [
+      {
+        code: "E_AS_OF_MISSING",
+        scope: "publications",
+        field: "as_of",
+        when: [
+          {
+            field: "status",
+            notIn: ["published"],
+          },
+        ],
+        anySet: [],
+        message:
+          "“As of” is needed when the status is not Published: when was the status last checked?",
+      },
+      {
+        code: "E_STATUS_SOURCE_MISSING",
+        scope: "publications",
+        field: "status_source",
+        when: [
+          {
+            field: "status",
+            notIn: ["published"],
+          },
+        ],
+        anySet: [],
+        message:
+          "“Status source” is needed when the status is not Published (documented or self-reported)",
+      },
+      {
+        code: "E_YEAR_MISSING",
+        scope: "publications",
+        field: "year",
+        when: [],
+        anySet: [
+          "doi",
+          "links.pdf",
+          "links.ssrn",
+          "links.arxiv",
+          "links.publisher",
+          "presentations.*.url",
+        ],
+        message:
+          "“Year” is needed once the paper has a public version (a DOI, a PDF, SSRN, arXiv or publisher link, or a presentation link)",
+      },
+      {
+        code: "E_DIRECTIONS_EMPTY",
+        scope: "publications",
+        field: "directions",
+        min: 1,
+        when: [
+          {
+            field: "type",
+            notIn: ["work-in-progress"],
+          },
+          {
+            field: "draft",
+            notIn: [true],
+          },
+        ],
+        anySet: [],
+        message:
+          "choose at least one “Research direction” (not needed for work in progress, or while “Draft · pending lab review” is on)",
+      },
+      {
+        code: "E_DIRECTIONS_EMPTY",
+        scope: "projects",
+        field: "directions",
+        min: 1,
+        when: [
+          {
+            field: "status",
+            notIn: ["archived"],
+          },
+          {
+            field: "draft",
+            notIn: [true],
+          },
+        ],
+        anySet: [],
+        message:
+          "choose at least one “Research direction”; the first is the project’s home direction (not needed for archived projects, or while “Draft · pending lab review” is on)",
+      },
+    ],
+    unique: [
+      {
+        code: "E_DIR_ORDER_DUP",
+        scope: "settings/site",
+        field: "direction_order",
+        label: "Direction order",
       },
     ],
   },

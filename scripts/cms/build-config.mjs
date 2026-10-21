@@ -92,8 +92,9 @@ export function buildPreviewCss() {
  * the site's own sources so it cannot drift:
  *  - labels: site wording and colours for preview-templates.js
  *    (src/components/ui/labels.ts, src/lib/content/people.ts, palette.ts);
- *  - rules: "all or nothing" optional objects enforced by cms-hooks.js
- *    (from the zod schema; see allOrNothingRules).
+ *  - rules enforced by cms-hooks.js: "all or nothing" optional objects (from
+ *    the zod schema; see allOrNothingRules), file names of new entries,
+ *    cross-field order, "required when …" and distinct-list rules (cms/source.mjs).
  */
 export async function buildCmsData(models, source) {
   const labels = await loadTs("src/components/ui/labels.ts");
@@ -120,6 +121,8 @@ export async function buildCmsData(models, source) {
       allOrNothing: allOrNothingRules(models, source),
       slugs: slugRules(source, schema.SLUG_PATTERNS),
       order: orderRules(models, source),
+      required: requiredRules(models, source),
+      unique: uniqueRules(models, source),
     },
   };
   return [
@@ -162,6 +165,81 @@ export function orderRules(models, source) {
       if (!model.fields.some((x) => x.name === f))
         throw new Error(`orderRules: ${r.scope} has no field ${f}`);
     return { scope: r.scope, earlier: r.earlier, later: r.later, labels: r.labels };
+  });
+}
+
+/** The zod model of a rule scope: a folder collection or "<file collection>/<file>". */
+function modelOfScope(models, source, scope) {
+  if (!scope.includes("/")) return models[scope];
+  const [fc, file] = scope.split("/");
+  const f = source.fileCollections.find((c) => c.name === fc)?.files.find((x) => x.name === file);
+  return f ? models[f.schema] : undefined;
+}
+
+/** The node at a dotted path ("links.pdf", "presentations.*.url") of an object model. */
+export function nodeAtPath(model, dotted) {
+  let node = model;
+  for (const part of dotted.split(".")) {
+    if (part === "*") {
+      if (node?.kind !== "array") return undefined;
+      node = node.items;
+      continue;
+    }
+    if (node?.kind !== "object") return undefined;
+    node = node.fields.find((x) => x.name === part)?.node;
+  }
+  return node;
+}
+
+/**
+ * "Required when …" rules (cms/source.mjs requiredRules) for cms-hooks.js, each
+ * path checked against the schema, and every enum value in a condition too.
+ */
+export function requiredRules(models, source) {
+  return (source.requiredRules ?? []).map((r, i) => {
+    const where = `requiredRules[${i}] (${r.code})`;
+    const model = modelOfScope(models, source, r.scope);
+    if (!model) throw new Error(`${where}: unknown scope ${r.scope}`);
+    const target = nodeAtPath(model, r.field);
+    if (!target) throw new Error(`${where}: ${r.scope} has no field ${r.field}`);
+    if (r.min != null && target.kind !== "array")
+      throw new Error(`${where}: min is for lists, ${r.field} is ${target.kind}`);
+    for (const c of r.when ?? []) {
+      const node = nodeAtPath(model, c.field);
+      if (!node) throw new Error(`${where}: ${r.scope} has no field ${c.field}`);
+      const values = c.in ?? c.notIn;
+      if (!Array.isArray(values) || (c.in && c.notIn))
+        throw new Error(`${where}: a condition needs exactly one of in / notIn`);
+      if (node.kind === "enum")
+        for (const v of values)
+          if (!node.values.includes(v))
+            throw new Error(`${where}: ${c.field} has no value ${JSON.stringify(v)}`);
+    }
+    for (const p of r.anySet ?? [])
+      if (!nodeAtPath(model, p)) throw new Error(`${where}: ${r.scope} has no field ${p}`);
+    if (!r.message) throw new Error(`${where}: needs a message`);
+    return {
+      code: r.code,
+      scope: r.scope,
+      field: r.field,
+      ...(r.min != null ? { min: r.min } : {}),
+      when: (r.when ?? []).map((c) =>
+        c.in ? { field: c.field, in: c.in } : { field: c.field, notIn: c.notIn },
+      ),
+      anySet: r.anySet ?? [],
+      message: r.message,
+    };
+  });
+}
+
+/** Lists whose items must be distinct (cms/source.mjs uniqueRules). */
+export function uniqueRules(models, source) {
+  return (source.uniqueRules ?? []).map((r) => {
+    const model = modelOfScope(models, source, r.scope);
+    if (!model) throw new Error(`uniqueRules: unknown scope ${r.scope}`);
+    if (nodeAtPath(model, r.field)?.kind !== "array")
+      throw new Error(`uniqueRules: ${r.scope}.${r.field} is not a list`);
+    return { code: r.code, scope: r.scope, field: r.field, label: r.label };
   });
 }
 
@@ -215,7 +293,7 @@ function adminHtml(source, decapVersion, { local, proxyOrigin }) {
 
 /**
  * Every generated file: { "public/admin/x": string | Buffer }.
- * @param {{ local?: boolean, localSiteUrl?: string }} [opts]
+ * @param {{ local?: boolean, localSiteUrl?: string, proxyUrl?: string }} [opts]
  */
 export async function generate(opts = {}) {
   const schema = await loadSchemaModule();

@@ -9,6 +9,8 @@ import path from "node:path";
 import { parse } from "yaml";
 import { describe, expect, it } from "vitest";
 import { SWATCH_IDS } from "@/lib/content/palette";
+import { backendProblems, verdict } from "../../../scripts/cms/check-backend.mjs";
+import { URL_OR_PATH_RE } from "../../../scripts/cms/lib/decap-config.mjs";
 import { ROOT } from "./helpers";
 
 type Cfg = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -28,8 +30,13 @@ describe("production config.yml", () => {
     expect(config.backend.auth_scope).toBe("public_repo");
     expect(config.backend.squash_merges).toBe(true);
     expect(config.backend.branch).toBe("main");
-    // Placeholder until the lab deploys its OAuth Worker (R4 §8 C).
-    expect(config.backend.base_url).toMatch(/^https:\/\/.+REPLACE-ME/);
+    // An https origin: the REPLACE-ME placeholder until the lab deploys its OAuth
+    // Worker (R4 §8 C, docs/SETUP-PRODUCTION.md §5), then the Worker's own origin.
+    // scripts/cms/check-backend.mjs fails a launched site that still has the placeholder.
+    const origin = new URL(config.backend.base_url);
+    expect(origin.protocol).toBe("https:");
+    expect(origin.pathname).toBe("/");
+    expect(origin.hostname).toMatch(/^[a-z0-9.-]+$/i);
     expect(config.local_backend).toBeUndefined();
   });
 
@@ -138,6 +145,17 @@ describe("production config.yml", () => {
   });
 });
 
+describe("URL fields (ENG-06: mirrors schema urlField)", () => {
+  const re = new RegExp(URL_OR_PATH_RE);
+  it("accepts https addresses and site paths", () => {
+    for (const v of ["https://x.test/", "/uploads/a.pdf", "/"]) expect(re.test(v), v).toBe(true);
+  });
+  it("rejects protocol-relative //host and /\\host, which browsers send off-site", () => {
+    for (const v of ["//evil.example/x", "/\\evil.example", "http://x.test/"])
+      expect(re.test(v), v).toBe(false);
+  });
+});
+
 describe("/admin/ page", () => {
   const csp = /http-equiv="Content-Security-Policy"\s+content="([^"]+)"/.exec(html)?.[1] ?? "";
   const directive = (name: string) =>
@@ -238,4 +256,61 @@ describe("generated admin files", () => {
     expect(r.stderr).not.toMatch(/out of date/);
     expect(r.status).toBe(0);
   }, 120_000);
+});
+
+describe("scripts/cms/check-backend.mjs (CMS-05: no dead login after launch)", () => {
+  const prod = (base_url: string, extra: Cfg = {}) => ({
+    backend: { name: "github", repo: "lab/site", base_url },
+    ...extra,
+  });
+
+  it("accepts a configured Worker origin or a custom host", () => {
+    expect(backendProblems(prod("https://bobalab-cms-auth.lab.workers.dev"))).toEqual([]);
+    expect(backendProblems(prod("https://cms-auth.example.edu"))).toEqual([]);
+  });
+
+  it("flags the placeholder: a warning before launch, an error after", () => {
+    const placeholder = prod("https://bobalab-cms-auth.REPLACE-ME.workers.dev");
+    expect(backendProblems(placeholder)).toEqual([
+      "backend.base_url still has the placeholder: https://bobalab-cms-auth.REPLACE-ME.workers.dev",
+    ]);
+    expect(verdict(placeholder, { launched: false })?.level).toBe("warning");
+    expect(verdict(placeholder, { launched: true })?.level).toBe("error");
+    expect(verdict(prod("https://a.workers.dev"), { launched: true })).toBeNull();
+  });
+
+  it("rejects http, paths and a local backend in a production config", () => {
+    expect(backendProblems(prod("http://a.workers.dev")).join()).toMatch(/https origin/);
+    expect(backendProblems(prod("https://a.workers.dev/auth")).join()).toMatch(/https origin/);
+    expect(backendProblems(prod("https://a.workers.dev", { local_backend: true })).join()).toMatch(
+      /local_backend/,
+    );
+  });
+
+  it("agrees with the committed config.yml (placeholder or not)", () => {
+    const placeholder = /REPLACE-ME/.test(config.backend.base_url);
+    expect(backendProblems(config).length > 0).toBe(placeholder);
+  });
+
+  it("exits 1 for a launched site that still has the placeholder, 0 before launch", () => {
+    const tmp = fs.mkdtempSync(path.join(ROOT, "test-results", "cms-backend-"));
+    try {
+      const site = path.join(tmp, "site.yml");
+      const run = () =>
+        spawnSync(
+          process.execPath,
+          [path.join(ROOT, "scripts/cms/check-backend.mjs"), admin("config.yml"), "--site", site],
+          { cwd: ROOT, encoding: "utf8", env: { ...process.env, GITHUB_ACTIONS: "" } },
+        );
+      if (!/REPLACE-ME/.test(config.backend.base_url)) return; // configured: nothing to show
+      fs.writeFileSync(site, "launched: false\n");
+      expect(run().status).toBe(0);
+      fs.writeFileSync(site, "launched: true\n");
+      const r = run();
+      expect(r.status).toBe(1);
+      expect(r.stderr).toMatch(/sign-in cannot work yet/);
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true });
+    }
+  });
 });

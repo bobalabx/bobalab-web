@@ -133,11 +133,199 @@
     });
   }
 
-  var api = { createGate: createGate, wrap: wrap };
+  // ---------------------------------------------------------------------------
+  // Removing an item from a single-field list (verification finding CMS-01).
+  //
+  // MEASURED 2026-10-20 (decap-cms 3.17.1): ListControl.handleRemove computes the
+  // metadata path of the removed item as the item's VALUE for single-field lists
+  // (`field:` instead of `fields:`), e.g. the slug "ai-at-work", and then calls
+  // `metadata.removeIn("ai-at-work")` whenever the list has relation metadata.
+  // Immutable rejects a string key path ("Invalid keyPath: expected Ordered
+  // Collection or Array"), so the click throws and nothing is removed. Every
+  // Settings → Site → Direction order item has such metadata (relation widget).
+  //
+  // The subclass below runs Decap's own handleRemove unchanged, but for
+  // single-field lists it hides the metadata from that one call. Decap then
+  // passes no metadata update along with the shorter list, which is what the
+  // removeIn could at best have done anyway: list metadata is keyed by the item
+  // field's name ("direction"), never by a value, so the path matched nothing.
+  // The metadata is kept for the remaining items' preview labels.
+  // tests/unit/cms/widgets.test.ts covers it; tests/e2e/cms-local.spec.ts removes
+  // a Direction order item in the browser. Re-check at every Decap bump.
+
+  /** Is this a list of single values (`field:`), Decap's "SINGLE" list type? */
+  function isSingleList(field) {
+    if (!field || typeof field.get !== "function") return false;
+    return !field.get("fields") && !field.get("types") && !!field.get("field");
+  }
+
+  // ---------------------------------------------------------------------------
+  // Reordering list items with the keyboard (verification findings CMS-08, CMS-12).
+  //
+  // MEASURED 2026-10-20: Decap 3.17.1's list widget gives dnd-kit only mouse and
+  // touch sensors, so a focused drag handle ignores the keyboard (Space, arrows),
+  // although dnd-kit still describes the keyboard steps to screen readers. The
+  // subclass wraps the list in a <div> that listens for Up and Down arrow keys on
+  // one of ITS OWN handles, moves the item with Decap's own onSortEnd (the same
+  // call a mouse drop makes), puts the focus back on the moved handle and
+  // announces the new position. cms-a11y.js names the handles and describes the keys.
+
+  // Decap renders no item ids into the page, so each item gets its list key
+  // (dnd-kit's id for it) as data-bobalab-key after every render; cms-a11y.js
+  // uses it to name items in dnd-kit's spoken messages.
+  var KEY = "data-bobalab-key";
+  var ITEM = '[class*="SortableListItem"]';
+  var live = null;
+
+  function announce(text) {
+    if (typeof document === "undefined") return;
+    if (!live || !live.isConnected) {
+      live = document.createElement("div");
+      live.id = "bobalab-reorder-status";
+      live.setAttribute("role", "status");
+      live.setAttribute("aria-live", "polite");
+      live.style.cssText =
+        "position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap";
+      document.body.appendChild(live);
+    }
+    live.textContent = "";
+    // Cleared first, so the same message twice is read twice.
+    setTimeout(function () {
+      live.textContent = text;
+    }, 50);
+  }
+
+  /** The list item element of a keydown on its drag handle, or null. */
+  function handleItem(target) {
+    if (!target || typeof target.closest !== "function") return null;
+    if (target.getAttribute("aria-roledescription") !== "sortable") return null;
+    if (!target.closest('[class*="TopBar"]')) return null; // a multi-select chip
+    return target.closest(ITEM);
+  }
+
+  /** New index for an arrow key, or -1 when the item cannot move that way. */
+  function moveTarget(key, index, size) {
+    var j = key === "ArrowUp" ? index - 1 : key === "ArrowDown" ? index + 1 : -1;
+    return j >= 0 && j < size && index >= 0 ? j : -1;
+  }
+
+  /** This list's own item elements, in order (not those of nested lists). */
+  function itemsOf(wrapper, forID) {
+    if (!wrapper) return [];
+    var listRoot = null;
+    for (var c = wrapper.firstElementChild; c; c = c.nextElementSibling)
+      if (c.id === forID) listRoot = c;
+    if (!listRoot) return [];
+    return Array.prototype.slice.call(listRoot.querySelectorAll(":scope > div > " + ITEM));
+  }
+
+  function itemLabel(item) {
+    var bar = item && item.querySelector(':scope > [class*="TopBar"]');
+    var next = bar && bar.nextElementSibling;
+    return next ? (next.textContent || "").replace(/s+/g, " ").trim() : "";
+  }
+
+  function patchList(Base, h) {
+    if (typeof Base !== "function") return Base;
+    class BobalabListControl extends Base {
+      constructor(props) {
+        super(props);
+        var self = this;
+        this.bobalabEl = null;
+        this.bobalabRef = function (el) {
+          self.bobalabEl = el;
+        };
+        this.bobalabKeyDown = function (e) {
+          if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+          var item = handleItem(e.target);
+          var key = item && item.getAttribute(KEY);
+          var keys = (self.state && self.state.keys) || [];
+          var i = key ? keys.indexOf(key) : -1;
+          if (i === -1) return; // not a handle of THIS list (a nested list handles its own)
+          var j = moveTarget(e.key, i, keys.length);
+          if (j === -1) return;
+          e.preventDefault();
+          e.stopPropagation();
+          var label = itemLabel(item);
+          self.onSortEnd({ oldIndex: i, newIndex: j });
+          setTimeout(function () {
+            var moved = itemsOf(self.bobalabEl, self.props.forID).filter(function (el) {
+              return el.getAttribute(KEY) === key;
+            })[0];
+            var h2 = moved && moved.querySelector('[aria-roledescription="sortable"]');
+            if (h2 && document.activeElement !== h2) h2.focus();
+          }, 0);
+          announce(
+            (label ? "“" + label + "”" : "Item") +
+              " moved to position " +
+              (j + 1) +
+              " of " +
+              keys.length +
+              ".",
+          );
+        };
+        var inherited = this.handleRemove;
+        if (typeof inherited !== "function") return;
+        this.handleRemove = function (index, event) {
+          var props = self.props;
+          var meta = props && props.metadata;
+          if (!isSingleList(props && props.field) || !meta || meta.size === 0) {
+            return inherited(index, event);
+          }
+          // handleRemove reads this.props synchronously, then calls onChange.
+          self.props = Object.assign({}, props, { metadata: undefined });
+          try {
+            return inherited(index, event);
+          } finally {
+            self.props = props;
+          }
+        };
+      }
+      bobalabTag() {
+        var keys = (this.state && this.state.keys) || [];
+        itemsOf(this.bobalabEl, this.props.forID).forEach(function (el, i) {
+          if (keys[i] && el.getAttribute(KEY) !== keys[i]) el.setAttribute(KEY, keys[i]);
+        });
+      }
+      componentDidMount() {
+        if (super.componentDidMount) super.componentDidMount();
+        this.bobalabTag();
+      }
+      componentDidUpdate(prevProps, prevState, snapshot) {
+        if (super.componentDidUpdate) super.componentDidUpdate(prevProps, prevState, snapshot);
+        this.bobalabTag();
+      }
+      render() {
+        var inner = super.render();
+        if (typeof h !== "function" || typeof this.onSortEnd !== "function") return inner;
+        return h(
+          "div",
+          { className: "bobalab-list", onKeyDown: this.bobalabKeyDown, ref: this.bobalabRef },
+          inner,
+        );
+      }
+    }
+    return BobalabListControl;
+  }
+
+  var api = {
+    createGate: createGate,
+    wrap: wrap,
+    patchList: patchList,
+    isSingleList: isSingleList,
+    handleItem: handleItem,
+    moveTarget: moveTarget,
+    itemsOf: itemsOf,
+  };
   root.BobalabCmsWidgets = api;
 
   var CMS = root.CMS;
-  if (!CMS || typeof CMS.getWidget !== "function" || !root.h || !root.createClass) return;
+  if (!CMS || typeof CMS.getWidget !== "function") return;
+  var list = CMS.getWidget("list");
+  if (list && list.control) {
+    CMS.registerWidget("list", patchList(list.control, root.h), list.preview, list.schema);
+  }
+  if (!root.h || !root.createClass) return;
   var rt = CMS.getWidget("richtext");
   if (!rt || !rt.control) return;
   CMS.registerWidget("richtext", wrap(rt.control, root.h, root.createClass), rt.preview, rt.schema);

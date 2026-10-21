@@ -182,7 +182,7 @@ collections:
             name: url
             widget: string
             pattern:
-              - (?=^(?:https://\S+|/\S*)$)
+              - (?=^(?:https://\S+|/(?![/\\])\S*)$)
               - Use a full https:// address or a site path starting with /.
             required: false
             hint: https://… or a site path such as /publications/…/
@@ -202,7 +202,7 @@ collections:
             media_library:
               config:
                 max_file_size: 2097152
-          - label: Alt text
+          - label: Alt text (required with an image)
             name: alt
             widget: string
             pattern:
@@ -347,14 +347,14 @@ collections:
         widget: string
         required: false
         hint: Journal or conference, e.g. Management Science.
-      - label: Year
+      - label: Year (required with a public version)
         name: year
         widget: number
         value_type: int
         min: 1990
         step: 1
         required: false
-        hint: Publication year (1990 to next year). Leave empty for work in progress.
+        hint: Publication year (1990 to next year). Needed once the paper has a DOI, PDF, SSRN, arXiv or publisher link, or a presentation link. Leave empty for work in progress.
       - label: Online date
         name: date_online
         widget: string
@@ -417,7 +417,7 @@ collections:
           - At most 200 characters.
         required: false
         hint: e.g. “at Manufacturing & Service Operations Management, 2nd round”.
-      - label: Status source
+      - label: Status source (required unless Published)
         name: status_source
         widget: select
         options:
@@ -428,7 +428,7 @@ collections:
         multiple: false
         required: false
         hint: Self-reported statuses are labelled “reported by the lab” on the site.
-      - label: As of
+      - label: As of (required unless Published)
         name: as_of
         widget: string
         pattern:
@@ -485,7 +485,7 @@ collections:
             name: data
             widget: string
             pattern:
-              - (?=^(?:https://\S+|/\S*)$)
+              - (?=^(?:https://\S+|/(?![/\\])\S*)$)
               - Use a full https:// address or a site path starting with /.
             required: false
             hint: https://… or a site path.
@@ -589,12 +589,23 @@ collections:
             widget: string
             required: false
             hint: Only if the paper had a different title then.
+          - label: Source
+            name: source
+            widget: select
+            options:
+              - label: Documented (the awarding body lists it)
+                value: documented
+              - label: Self-reported (only the lab or a CV says so)
+                value: self-reported
+            multiple: false
+            required: false
+            hint: Self-reported awards are labelled “reported by the lab” on the paper page.
         collapsed: true
         allow_add: true
         required: false
         default: []
         summary: "{{fields.name}} ({{fields.year}})"
-      - label: Research directions
+      - label: Research directions (required except for work in progress)
         name: directions
         widget: relation
         collection: directions
@@ -608,7 +619,7 @@ collections:
         multiple: true
         required: false
         default: []
-        hint: Required for papers (not for work in progress).
+        hint: At least one, except for work in progress and while “Draft · pending lab review” is on.
       - label: In brief
         name: in_brief
         widget: text
@@ -630,7 +641,7 @@ collections:
             media_library:
               config:
                 max_file_size: 2097152
-          - label: Alt text
+          - label: Alt text (required with an image)
             name: alt
             widget: string
             pattern:
@@ -791,6 +802,8 @@ collections:
         required: false
         default: []
         hint: Up to 3 short phrases.
+        label_singular: interest
+        summary: "{{fields.interest}}"
       - label: Research directions
         name: directions
         widget: relation
@@ -810,12 +823,12 @@ collections:
         name: photo
         widget: image
         required: false
-        hint: Square headshot, JPG or WebP, at most 2 MB. Shown only when “Photo consent” is on.
+        hint: "Upload only after the person has agreed in writing: uploaded files are public as soon as they are published, even while “Photo consent” is off, so the CMS does not save a photo without that consent. Square headshot, JPG or WebP, at most 2 MB."
         choose_url: false
         media_library:
           config:
             max_file_size: 2097152
-      - label: Photo alt text
+      - label: Photo alt text (required with a photo)
         name: photo_alt
         widget: string
         pattern:
@@ -1083,6 +1096,8 @@ collections:
         required: false
         default: []
         hint: Up to 6 short method names (≤ 40 characters each).
+        label_singular: method
+        summary: "{{fields.method}}"
       - label: Key findings
         name: findings
         widget: list
@@ -1141,7 +1156,7 @@ collections:
             media_library:
               config:
                 max_file_size: 2097152
-          - label: Alt text
+          - label: Alt text (required with an image)
             name: alt
             widget: string
             pattern:
@@ -1230,7 +1245,7 @@ collections:
           - At most 200 characters.
         required: false
         hint: ≤ 200 characters.
-      - label: Research directions
+      - label: Research directions (required unless archived)
         name: directions
         widget: relation
         collection: directions
@@ -1244,7 +1259,7 @@ collections:
         multiple: true
         required: false
         default: []
-        hint: At least one; the first is the primary direction (breadcrumb).
+        hint: At least one unless the project is archived or “Draft · pending lab review” is on; the first is the primary direction (breadcrumb).
       - label: Status
         name: status
         widget: select
@@ -1389,7 +1404,7 @@ collections:
             name: url
             widget: string
             pattern:
-              - (?=^(?:https://\S+|/\S*)$)
+              - (?=^(?:https://\S+|/(?![/\\])\S*)$)
               - Use a full https:// address or a site path starting with /.
             required: true
             hint: https://… or a site path.
@@ -1446,7 +1461,7 @@ collections:
             media_library:
               config:
                 max_file_size: 2097152
-          - label: Alt text
+          - label: Alt text (required with an image)
             name: alt
             widget: string
             pattern:
@@ -2095,7 +2110,9 @@ collections:
             allow_add: true
             required: false
             default: []
-            hint: The order of the pearls in Fig. 1. Drag to reorder. Each live direction once; archived directions are left out.
+            hint: "The order of the pearls in Fig. 1. Each item shows the direction’s address (e.g. ai-at-work). Drag an item by its handle, or focus the handle and use Space, the arrow keys and Space again. Each live direction once; remove archived directions (×). An item that opens as an empty choice is an archived direction: remove it."
+            label_singular: direction
+            summary: "{{fields.direction}}"
           - label: Redirects
             name: redirects
             widget: list
@@ -2112,7 +2129,7 @@ collections:
                 name: to
                 widget: string
                 pattern:
-                  - (?=^(?:https://\S+|/\S*)$)
+                  - (?=^(?:https://\S+|/(?![/\\])\S*)$)
                   - Use a full https:// address or a site path starting with /.
                 required: true
                 hint: A site path such as /research/new-slug/ or https://…

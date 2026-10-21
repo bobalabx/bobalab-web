@@ -7,8 +7,8 @@
 
 /** https only: the validator rejects http:// (E_HTTP_URL), so the CMS does too. */
 export const HTTPS_URL_RE = "^https://\\S+$";
-/** zod urlField: an https URL or a site path starting with "/". */
-export const URL_OR_PATH_RE = "^(?:https://\\S+|/\\S*)$";
+/** zod urlField: an https URL or a site path starting with "/" (not "//host" or "/\host"). */
+export const URL_OR_PATH_RE = "^(?:https://\\S+|/(?![/\\\\])\\S*)$";
 
 const FORMAT_RULES = {
   url: { re: URL_OR_PATH_RE, msg: "Use a full https:// address or a site path starting with /." },

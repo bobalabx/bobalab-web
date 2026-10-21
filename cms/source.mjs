@@ -84,6 +84,88 @@ export const orderRules = [
   },
 ];
 
+/**
+ * "Required when …" rules that the content validator (src/lib/content/validate.ts)
+ * reports as ERRORS, so the required validate-content check would reject the
+ * pull request, but that Decap cannot express (verification finding CMS-04).
+ * cms-hooks.js blocks a save that breaks one, with the message below;
+ * tests/unit/cms/hooks.test.ts runs the validator on the same cases, so the two
+ * cannot drift apart silently. The generator checks every field path.
+ *
+ *   scope    folder collection, or "<file collection>/<file>"
+ *   field    the field that must have a value (`min`: a list with at least that many items)
+ *   when     every condition must hold: { field, notIn: [values] } or { field, in: [values] }
+ *            (a missing value is in no list, so `draft` off = { field: "draft", notIn: [true] })
+ *   anySet   …and at least one of these paths has a value ("*" = any list item)
+ */
+export const requiredRules = [
+  {
+    code: "E_AS_OF_MISSING",
+    scope: "publications",
+    field: "as_of",
+    when: [{ field: "status", notIn: ["published"] }],
+    message:
+      "“As of” is needed when the status is not Published: when was the status last checked?",
+  },
+  {
+    code: "E_STATUS_SOURCE_MISSING",
+    scope: "publications",
+    field: "status_source",
+    when: [{ field: "status", notIn: ["published"] }],
+    message:
+      "“Status source” is needed when the status is not Published (documented or self-reported)",
+  },
+  {
+    code: "E_YEAR_MISSING",
+    scope: "publications",
+    field: "year",
+    anySet: [
+      "doi",
+      "links.pdf",
+      "links.ssrn",
+      "links.arxiv",
+      "links.publisher",
+      "presentations.*.url",
+    ],
+    message:
+      "“Year” is needed once the paper has a public version (a DOI, a PDF, SSRN, arXiv or publisher link, or a presentation link)",
+  },
+  {
+    code: "E_DIRECTIONS_EMPTY",
+    scope: "publications",
+    field: "directions",
+    min: 1,
+    when: [
+      { field: "type", notIn: ["work-in-progress"] },
+      { field: "draft", notIn: [true] },
+    ],
+    message:
+      "choose at least one “Research direction” (not needed for work in progress, or while “Draft · pending lab review” is on)",
+  },
+  {
+    code: "E_DIRECTIONS_EMPTY",
+    scope: "projects",
+    field: "directions",
+    min: 1,
+    when: [
+      { field: "status", notIn: ["archived"] },
+      { field: "draft", notIn: [true] },
+    ],
+    message:
+      "choose at least one “Research direction”; the first is the project’s home direction (not needed for archived projects, or while “Draft · pending lab review” is on)",
+  },
+];
+
+/** Lists whose items must be distinct (validator errors; cms-hooks.js blocks the save). */
+export const uniqueRules = [
+  {
+    code: "E_DIR_ORDER_DUP",
+    scope: "settings/site",
+    field: "direction_order",
+    label: "Direction order",
+  },
+];
+
 // ---------------------------------------------------------------------------
 // Shared field snippets
 
@@ -126,8 +208,11 @@ const imageField = (hint) => ({
   media_library: { config: { max_file_size: media.imageMaxBytes } },
 });
 
+// Labels of fields that are required only in some cases say so: Decap would
+// otherwise label them "(optional)", and cms-a11y.js drops that suffix for
+// labels that contain "(required" (verification finding CMS-09).
 const ALT = {
-  label: "Alt text",
+  label: "Alt text (required with an image)",
   hint: "Required when an image is set. Say what the image shows and why it matters, in a sentence (≤ 300 characters). Do not start with “Image of”.",
 };
 
@@ -161,8 +246,8 @@ const fileField = (label, hint) => ({
 
 const HTTPS = (label, hint) => ({ label, hint: hint ?? "A full address starting with https://" });
 
-const directionsRel = (hint) => ({
-  label: "Research directions",
+const directionsRel = (hint, label = "Research directions") => ({
+  label,
   relation: "directions",
   hint: hint ?? "The directions (pearls) this belongs to.",
 });
@@ -338,8 +423,8 @@ export const collections = [
       },
       venue: { label: "Venue", hint: "Journal or conference, e.g. Management Science." },
       year: {
-        label: "Year",
-        hint: "Publication year (1990 to next year). Leave empty for work in progress.",
+        label: "Year (required with a public version)",
+        hint: "Publication year (1990 to next year). Needed once the paper has a DOI, PDF, SSRN, arXiv or publisher link, or a presentation link. Leave empty for work in progress.",
       },
       date_online: {
         label: "Online date",
@@ -373,14 +458,17 @@ export const collections = [
         hint: "e.g. “at Manufacturing & Service Operations Management, 2nd round”.",
       },
       status_source: {
-        label: "Status source",
+        label: "Status source (required unless Published)",
         options: {
           documented: "Documented (a public record shows it)",
           "self-reported": "Self-reported (the lab or a CV says so)",
         },
         hint: "Self-reported statuses are labelled “reported by the lab” on the site.",
       },
-      as_of: { label: "As of", hint: `When the status was last checked. ${PARTIAL_DATE_HINT}` },
+      as_of: {
+        label: "As of (required unless Published)",
+        hint: `When the status was last checked. ${PARTIAL_DATE_HINT}`,
+      },
       links: {
         label: "Links and materials",
         widget: "object",
@@ -428,9 +516,20 @@ export const collections = [
             label: "Awarded under the title",
             hint: "Only if the paper had a different title then.",
           },
+          source: {
+            label: "Source",
+            options: {
+              documented: "Documented (the awarding body lists it)",
+              "self-reported": "Self-reported (only the lab or a CV says so)",
+            },
+            hint: "Self-reported awards are labelled “reported by the lab” on the paper page.",
+          },
         },
       },
-      directions: directionsRel("Required for papers (not for work in progress)."),
+      directions: directionsRel(
+        "At least one, except for work in progress and while “Draft · pending lab review” is on.",
+        "Research directions (required except for work in progress)",
+      ),
       in_brief: {
         label: "In brief",
         widget: "text",
@@ -491,15 +590,17 @@ export const collections = [
       rank: { label: "Sort rank", hint: "Optional; lower numbers sort first within a group." },
       interests: {
         label: "Interests",
+        label_singular: "interest",
         hint: "Up to 3 short phrases.",
+        summary: "{{fields.interest}}",
         field: { label: "Interest" },
       },
       directions: directionsRel(),
       photo: imageField(
-        "Square headshot, JPG or WebP, at most 2 MB. Shown only when “Photo consent” is on.",
+        "Upload only after the person has agreed in writing: uploaded files are public as soon as they are published, even while “Photo consent” is off, so the CMS does not save a photo without that consent. Square headshot, JPG or WebP, at most 2 MB.",
       ),
       photo_alt: {
-        label: "Photo alt text",
+        label: "Photo alt text (required with a photo)",
         hint: "Required when a photo is set, e.g. “Portrait of Jane Doe”.",
       },
       photo_consent: {
@@ -597,7 +698,9 @@ export const collections = [
       open_to_collaborators: { label: "Open to collaborators" },
       methods: {
         label: "Methods",
+        label_singular: "method",
         hint: "Up to 6 short method names (≤ 40 characters each).",
+        summary: "{{fields.method}}",
         field: { label: "Method" },
       },
       findings: {
@@ -638,7 +741,10 @@ export const collections = [
     fields: {
       title: { label: "Title", hint: "≤ 120 characters." },
       summary: { label: "Summary", widget: "text", hint: "≤ 200 characters." },
-      directions: directionsRel("At least one; the first is the primary direction (breadcrumb)."),
+      directions: directionsRel(
+        "At least one unless the project is archived or “Draft · pending lab review” is on; the first is the primary direction (breadcrumb).",
+        "Research directions (required unless archived)",
+      ),
       status: {
         label: "Status",
         options: {
@@ -902,7 +1008,10 @@ export const fileCollections = [
           },
           direction_order: {
             label: "Direction order",
-            hint: "The order of the pearls in Fig. 1. Drag to reorder. Each live direction once; archived directions are left out.",
+            label_singular: "direction",
+            hint: "The order of the pearls in Fig. 1. Each item shows the direction’s address (e.g. ai-at-work). Drag an item by its handle, or focus the handle and use Space, the arrow keys and Space again. Each live direction once; remove archived directions (×). An item that opens as an empty choice is an archived direction: remove it.",
+            // The collapsed items show the stored address (Decap: summary of a single-field list).
+            summary: "{{fields.direction}}",
             field: {
               label: "Direction",
               relation: "directions",

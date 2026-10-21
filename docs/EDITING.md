@@ -26,7 +26,7 @@ There are **two different things called "draft"**. Keep them apart:
 
 The normal path:
 
-1. Open a collection, click **New …** or an existing entry, and edit. The right-hand pane is a **preview** styled like the site (news, people, publications and research directions show the site's own card; it is an approximation of the live page).
+1. Open a collection, click its **＋** button (for example **＋ Publication**, **＋ News item**, **＋ Person**) or an existing entry, and edit. The right-hand pane is a **preview** styled like the site (news, people, publications and research directions show the site's own card; it is an approximation of the live page).
 2. Click **Save**. This creates a workflow draft. You can come back and keep editing.
 3. When the text is ready, set the status to **In review** (top bar, or drag the card on the Workflow board). A maintainer or the PI reviews it. If the lab requires an approval, they approve the pull request on github.com.
 4. Move it to **Ready**, then **Publish** (section 3).
@@ -35,6 +35,8 @@ The normal path:
 > **The repository is public.** Workflow drafts and the content files can be read on github.com even before they are published. Never put embargoed results, unpublished personal data, home addresses, phone numbers or anything a person has not agreed to share into any field, draft or not.
 
 The **file name** (the page address) is made when you first save: news use the date plus the title, people their name, directions the short label, and publications the first author's name, the year you create the entry and the start of the title. Fill those fields in **before the first save**. The CMS cannot rename a file afterwards; ask a maintainer, who will also add a redirect. If an address would break the site's rules, the CMS does not save and says what to change. For example, a publication address may have at most 60 characters: when the first author has a long name, type only their last name for the first save, then complete the name and save again.
+
+**Publications: last name first.** The lab's paper addresses start with the first author's **last name** and the year (`sinchaisri-2026-compliance-aware-rl`), but the CMS builds the address from the whole name in the first author field and from the year you **create** the entry. So for every new publication: type only the first author's last name, save once, then complete the name and save again. If you forget, the first Save stops once with "Not saved yet: check the address first …" and shows the address it would use; Save again keeps it as shown. For an older paper (say 2023), the address still carries this year; if it must match, ask a maintainer to add the file.
 
 ## 3. Publish: wait for the green check
 
@@ -45,7 +47,14 @@ Every change runs an automatic check called **validate-content** (spelling of da
 - If the check is red, open its details on github.com: each message names the file and field (for example `E_ALT_MISSING … image.alt`). Fix the field in the CMS and save again; the check reruns.
 - After **Publish**, the site rebuilds automatically. Wait a few minutes, then reload the live page. If nothing changes after about 15 minutes, tell a maintainer.
 
-The CMS itself already blocks some mistakes when you save: an image without alt text, a link with an address but no link text, web addresses that do not start with `https://`, dates in the wrong format, texts longer than the site can show, and a new entry whose address would not fit the site's rules. The message (top right, starting "Not saved") tells you what to fix.
+The CMS itself already blocks many mistakes when you save, so they never reach the check:
+
+- an image without alt text, a link with an address but no link text, web addresses that do not start with `https://`, dates in the wrong format, texts longer than the site can show;
+- a new entry whose address would not fit the site's rules;
+- fields that are required only in some cases. Their labels say when, for example **Alt text (required with an image)**, **As of (required unless Published)**, **Status source (required unless Published)**, **Year (required with a public version)** and **Research directions (required except for work in progress)**; a paper or project needs at least one research direction unless "Draft · pending lab review" is on;
+- the same direction twice in **Direction order**, a colour that another direction already uses (section 6), and a person's photo without photo consent (section 4).
+
+The message appears at the top right and reads like **"Failed to persist entry: Error: Not saved: …"**. Everything after "Not saved:" tells you what to fix; nothing was written. Fix it and save again.
 
 ## 4. Consent rules (people, photos, emails)
 
@@ -61,15 +70,17 @@ The site shows people only with their consent (lab decision D-06). The switches 
 Rules:
 
 - Turn a switch on **only after the person agreed in writing** (an email is enough). Keep that email; do not paste it into the site. If someone withdraws consent, turn the switch off and publish at once.
+- **Upload a photo only after photo consent.** An uploaded file is public at `/uploads/…` as soon as it is published, even while "Photo consent" is off and no page shows it. The CMS therefore does not save a person with a photo while "Photo consent" is off. If someone withdraws photo consent, remove the photo from the entry as well and ask a maintainer to delete the file from `public/uploads/`.
 - **External coauthors are not people.** In a publication, type their name in the author list and optionally their web page. Only the PI, lab members and alumni have person entries.
 - Nobody becomes an "Affiliate" without their written consent.
 - Project **collaborators** are shown only when their "Consent to be shown" switch is on; **partners** only when "Public" is on.
 - Students who leave: set the **End** date (they move to Alumni automatically; the CMS will not save an End before the Start) and ask whether they want "Now at" shown.
+- **Program:** when a member consents to appear, ask how they want their program written, with their capitalisation (for example "EECS", "Applied Math & Data Science"). Do not repeat the degree the role already shows ("Master's student · IEOR", not "· IEOR MS"). Never leave it in lower case.
 - Never add anyone from old, hidden rosters on other sites. When in doubt, leave the person out and ask the PI.
 
 ## 5. Images and alt text
 
-- Upload **JPG, PNG, WebP or GIF** images up to **2 MB** (PDFs up to 10 MB). Do not upload SVG, HTML or other files: the automatic check rejects them because they could run code next to the content manager. The site does not show images from other websites, so always upload.
+- Upload **JPG, PNG, WebP or GIF** images up to **2 MB** (PDFs up to 10 MB). A larger file is refused with a browser message "File too large. Configured to not allow files greater than 2097 kB." (2 MB is 2097 kB in that message; for PDFs it says 10485 kB). Do not upload SVG, HTML or other files: the automatic check rejects them because they could run code next to the content manager. The site does not show images from other websites, so always upload.
 - Only upload images the lab may use (your own figures, photos with the person's permission, figures from your paper when the publisher allows it).
 - **Alt text is required whenever an image is set** (the CMS will not save without it). Write one sentence that says what the image shows and why it matters, as you would describe it on the phone:
   - Good: "Line chart: couriers' delivery times fall over their first 200 orders, faster for those who follow recommendations."
@@ -82,18 +93,20 @@ Rules:
 
 The research directions are the pearls of Fig. 1 on the home page.
 
-**Reorder the pearls.** Go to **Settings → Site → Direction order** and drag the items by their handle into the order you want, then save and publish. The order lives in this one list on purpose: changing it never needs edits to several direction entries at once. Each live direction must appear exactly once; archived directions are left out.
+**Reorder the pearls.** Go to **Settings → Site → Direction order**. Each item shows the direction's address (for example `ai-at-work`, the file name of the direction). Drag an item by its handle (the two lines at the top of the item), or use the keyboard: press Tab until the handle is focused (a screen reader announces "Reorder “ai-at-work”, item 2 of 4"), then press the **Up** or **Down arrow** key once per step; the focus stays on the item and its new position is announced. Then save and publish. The order lives in this one list on purpose: changing it never needs edits to several direction entries at once. Each live direction must appear exactly once (the CMS will not save a direction listed twice); archived directions are left out.
+
+**Remove an item** with the **×** at its top right. An item that opens as an empty choice is a direction that has been archived: remove it.
 
 **Add a direction.** Create it under Research directions (fill in the **short label** first: it becomes the address), then add it to **Direction order**. Up to 8 directions fit; with 7–8, consider **Settings → Site → Fig. 1 layout: Dot plot**.
 
-**Choose a colour.** Each direction needs its **own** colour. The preview shows the pearl, the header band and a warning when a colour is easy to confuse for colour-blind readers:
+**Choose a colour.** Each direction needs its **own** colour: the CMS will not save a colour that another live (not archived) direction already uses. The preview shows the pearl, the header band, the colours the other live directions use, and a warning when a colour is easy to confuse for colour-blind readers, with the direction that uses the other colour of the pair (if any):
 
 - Use the six main colours first: Butterfly pea (blue), Oolong (amber), Lychee (rose), Matcha (green), Jasmine (teal), Black sesame (charcoal).
 - Taro (violet) and Thai tea (orange) are **reserve** colours.
 - Avoid these pairs: **Taro with Butterfly pea**, **Thai tea with Oolong**, **Matcha with Thai tea**.
 - The automatic check warns about shared or confusable colours; fix it before launch.
 
-**Archive a direction** instead of deleting it (section 7): set **Status: Archived**, set **Archived on** (e.g. `2026-10`), remove it from **Direction order**, save and publish. It leaves Fig. 1, but its page stays with a dated "Archived" note and it is listed under "Earlier and related research".
+**Archive a direction** instead of deleting it (section 7): set **Status: Archived**, set **Archived on** (e.g. `2026-10`), save and publish; then open **Settings → Site**, remove it from **Direction order** (×), save and publish. It leaves Fig. 1, but its page stays with a dated "Archived" note and it is listed under "Earlier and related research".
 
 ## 7. Archive instead of deleting
 
@@ -154,7 +167,7 @@ Maintainers and curious editors can try the content manager without a GitHub acc
 
 1. In a copy of the repository, run `npm ci` once, then **`npm run cms:local`**.
 2. Open **`http://localhost:3100/admin/local.html`** and click **Login**.
-3. Changes are written straight into the files on your computer (no drafts board, every Publish writes the file), and the local site at `http://localhost:3100` shows them after a reload.
+3. Changes are written straight into the files on your computer (no drafts board, every Publish writes the file), and the local site at `http://localhost:3100` shows them after a reload. One exception: the own page of an entry you **created** (for example `/news/<new-address>/`) may say "not found" until you stop and restart `npm run cms:local`, because the local site works out the list of pages once; lists such as `/news/` show the new entry at once, and the published site is built afresh every time.
 4. Press **Ctrl+C** to stop. Use Git to review or throw away what you changed (`git status`, `git restore content/`).
 
 ## 12. Tips and known quirks
@@ -164,5 +177,8 @@ Maintainers and curious editors can try the content manager without a GitHub acc
 - **Long texts:** the CMS stops you at the site's limits (for example a pearl's short label at 28 characters, a news summary at 280).
 - **Dates** in "As of", "Archived on" and similar fields accept `2026`, `2026-10` or `2026-10-20`.
 - **Relations to people** (an author's lab person, a project team, the people in a news item) only offer people who agreed to be listed.
-- The content manager works best on a laptop or desktop. In windows narrower than 800 pixels (phones), the editor shows the form only, without the preview pane and the "Check for preview" button. Use a laptop to review and publish.
+- **The first save of a file may change lines you did not touch.** The CMS writes the whole file in its own style: long texts are wrapped at 80 characters, quotes around dates are dropped, fields follow the editor's order and empty settings such as `social: {}` disappear. The site reads both forms the same way. Reviewers: expect these formatting-only lines in the first CMS change of each file; later changes show only what was edited.
+- **Opening an entry by its address.** If you paste or type another entry's address into the address bar while the editor is open, the page reloads to show that entry (the editor would otherwise keep showing the previous one). If you see "Not saved: the editor still shows …", reload the page (F5) and make the change again.
+- **Drag announcements for screen readers.** When you drag an item with the mouse, the spoken messages name the item and its position. Lists cannot be reordered with Space and the arrow keys as the built-in instructions of the drag library suggest; use the Up and Down arrow keys on the focused handle (section 6). The tags of multi-select fields (for example a project's Research directions, where the first is the project's home direction) can be dragged with the mouse; without a mouse, remove the tags with their × and add them again in the order you want.
+- The content manager works best on a laptop or desktop. In windows narrower than 800 pixels (phones), the editor shows the form only, without the preview pane and the "Check for Preview" button. Use a laptop to review and publish.
 - Something broken or unclear? Tell a maintainer, or open an issue on the repository.

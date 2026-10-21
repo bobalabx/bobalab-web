@@ -555,6 +555,139 @@
     preliminary: "Preliminary",
   };
 
+  // Colours of the OTHER directions (verification finding CMS-07). Decap hands
+  // previews getCollection(name); cms-hooks.js keeps it for its save check and
+  // caches the saved directions. The note re-renders once they have loaded.
+
+  var hooks = window.BobalabCmsHooks || {};
+
+  function swatchName(id) {
+    return ((L.swatches || {})[id] || { name: id }).name;
+  }
+
+  function colourUseRows(slug, d, pairs) {
+    var list = typeof hooks.cachedDirections === "function" ? hooks.cachedDirections() : null;
+    var rows = [];
+    var archived = d.status === "archived";
+    var hits =
+      list && typeof hooks.colourConflicts === "function"
+        ? hooks.colourConflicts(slug, d.color, list, L.confusablePairs || [])
+        : null;
+    if (hits && hits.same.length && !archived) {
+      rows.push(
+        Note(
+          [
+            h("strong", { key: "a" }, "Colour taken. "),
+            swatchName(d.color) +
+              " is already the colour of " +
+              hits.same
+                .map(function (x) {
+                  return "“" + x.name + "”";
+                })
+                .join(", ") +
+              ". Choose another colour: the CMS will not save this one.",
+          ],
+          true,
+        ),
+      );
+    }
+    if (pairs.length) {
+      rows.push(
+        h(
+          "p",
+          { className: "t-sm t-muted", key: "pairs" },
+          "Colour-blind readers may confuse it with " +
+            pairs
+              .map(function (p) {
+                var other = p[0] === d.color ? p[1] : p[0];
+                var users = hits
+                  ? hits.confusable.filter(function (x) {
+                      return x.color === other;
+                    })
+                  : [];
+                var use = !list
+                  ? ""
+                  : users.length
+                    ? ", used by " +
+                      users
+                        .map(function (x) {
+                          return "“" + x.name + "”";
+                        })
+                        .join(", ")
+                    : ", not used by another direction now";
+                return swatchName(other) + " (" + p[2] + use + ")";
+              })
+              .join(", ") +
+            "; do not use both.",
+        ),
+      );
+    }
+    if (list) {
+      var others = list.filter(function (x) {
+        return x.slug !== slug && x.data && x.data.status !== "archived" && x.data.color;
+      });
+      if (others.length) {
+        rows.push(
+          h(
+            "p",
+            { className: "t-sm t-muted", key: "inuse" },
+            "Colours of the other live directions: " +
+              others
+                .map(function (x) {
+                  return (
+                    swatchName(x.data.color) +
+                    " (" +
+                    (x.data.short_label || x.data.title || x.slug) +
+                    ")"
+                  );
+                })
+                .join(", ") +
+              ".",
+          ),
+        );
+      }
+    }
+    return rows;
+  }
+
+  // With Decap's createClass (the browser), a small component loads the other
+  // directions once and re-renders; without it (unit tests), rows render directly.
+  var ColourUseClass =
+    typeof window.createClass === "function"
+      ? window.createClass({
+          displayName: "BobalabColourUse",
+          getInitialState: function () {
+            return { n: 0 };
+          },
+          componentDidMount: function () {
+            var self = this;
+            self.alive = true;
+            if (typeof hooks.loadDirections === "function")
+              hooks.loadDirections(false).then(function () {
+                if (self.alive) self.setState({ n: self.state.n + 1 });
+              });
+          },
+          componentWillUnmount: function () {
+            this.alive = false;
+          },
+          render: function () {
+            return h.apply(
+              null,
+              ["div", null].concat(colourUseRows(this.props.slug, this.props.d, this.props.pairs)),
+            );
+          },
+        })
+      : null;
+
+  function ColourUse(props, d, pairs) {
+    if (typeof hooks.rememberCollectionLoader === "function")
+      hooks.rememberCollectionLoader(props.getCollection);
+    var slug = (props.entry && props.entry.get("slug")) || "";
+    if (ColourUseClass)
+      return h(ColourUseClass, { key: "use", slug: slug, d: d, pairs: pairs, color: d.color });
+    return h.apply(null, ["div", { key: "use" }].concat(colourUseRows(slug, d, pairs)));
+  }
+
   function DirectionPreview(props) {
     var d = data(props.entry);
     var sw = (L.swatches || {})[d.color] || null;
@@ -616,20 +749,7 @@
             ? " · a reserve colour: use it only when the six main colours are taken"
             : "",
         ),
-        pairs.length
-          ? h(
-              "p",
-              { className: "t-sm t-muted" },
-              "Colour-blind readers may confuse it with " +
-                pairs
-                  .map(function (p) {
-                    var other = p[0] === d.color ? p[1] : p[0];
-                    return ((L.swatches || {})[other] || { name: other }).name + " (" + p[2] + ")";
-                  })
-                  .join(", ") +
-                "; do not use both.",
-            )
-          : null,
+        ColourUse(props, d, pairs),
       ),
       findings.length
         ? h(
