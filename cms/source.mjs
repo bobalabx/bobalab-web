@@ -28,11 +28,11 @@
 // PLACEHOLDERS (marked REPLACE-ME): the lab fills these in during hookup
 // (docs/SETUP-PRODUCTION.md, WP8). Then run the generator and open a PR.
 
-export const SITE_URL = "https://bobalab-berkeley.github.io";
+export const SITE_URL = "https://bobalabx.github.io/bobalab-web";
 
 export const backend = {
   name: "github",
-  repo: "bobalab-berkeley/bobalab-berkeley.github.io",
+  repo: "bobalabx/bobalab-web",
   branch: "main",
   // The lab's OAuth bridge (forked sveltia-cms-auth Worker on Cloudflare).
   base_url: "https://bobalab-cms-auth.REPLACE-ME.workers.dev",
@@ -970,7 +970,7 @@ export const fileCollections = [
           address: { label: "Postal address" },
           site_url: HTTPS(
             "Site address",
-            "Canonical address, e.g. https://bobalab-berkeley.github.io",
+            "Canonical origin without the path, e.g. https://bobalabx.github.io",
           ),
           social: {
             label: "Social links",

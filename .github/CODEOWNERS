@@ -7,20 +7,20 @@
 # its entry to count. Pull request authors cannot approve their own PRs, so a
 # maintainer who edits content needs a second maintainer (docs/HANDOVER.md §4).
 #
-# Replace "bobalab-berkeley" if the organization has another name. The last
-# matching line wins.
+# The org is "bobalabx". Until a "web-maintainers" team exists there, GitHub
+# flags these lines as unknown owners (harmless). The last matching line wins.
 
 # Everything: the web maintainers.
-*                         @bobalab-berkeley/web-maintainers
+*                         @bobalabx/web-maintainers
 
 # Content edited through Decap (cms/* branches): maintainers review what editors publish.
-/content/                 @bobalab-berkeley/web-maintainers
-/public/uploads/          @bobalab-berkeley/web-maintainers
+/content/                 @bobalabx/web-maintainers
+/public/uploads/          @bobalabx/web-maintainers
 
 # Build, CI/CD, CMS configuration and the vendored Decap bundle.
-/.github/                 @bobalab-berkeley/web-maintainers
-/public/admin/            @bobalab-berkeley/web-maintainers
-/cms/                     @bobalab-berkeley/web-maintainers
-/scripts/                 @bobalab-berkeley/web-maintainers
-/package.json             @bobalab-berkeley/web-maintainers
-/package-lock.json        @bobalab-berkeley/web-maintainers
+/.github/                 @bobalabx/web-maintainers
+/public/admin/            @bobalabx/web-maintainers
+/cms/                     @bobalabx/web-maintainers
+/scripts/                 @bobalabx/web-maintainers
+/package.json             @bobalabx/web-maintainers
+/package-lock.json        @bobalabx/web-maintainers

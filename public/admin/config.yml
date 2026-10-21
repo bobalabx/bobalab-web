@@ -3,7 +3,7 @@
 # Change the source, run `node scripts/cms/build-config.mjs`, commit both. tests/unit/cms checks parity.
 backend:
   name: github
-  repo: bobalab-berkeley/bobalab-berkeley.github.io
+  repo: bobalabx/bobalab-web
   branch: main
   base_url: https://bobalab-cms-auth.REPLACE-ME.workers.dev
   auth_endpoint: auth
@@ -11,8 +11,8 @@ backend:
   squash_merges: true
   cms_label_prefix: decap/
 publish_mode: editorial_workflow
-site_url: https://bobalab-berkeley.github.io
-display_url: https://bobalab-berkeley.github.io
+site_url: https://bobalabx.github.io/bobalab-web
+display_url: https://bobalabx.github.io/bobalab-web
 logo:
   src: logo.svg
   show_in_header: false
@@ -2003,7 +2003,7 @@ collections:
               - (?=^https://\S+$)
               - Use a full address starting with https://.
             required: false
-            hint: Canonical address, e.g. https://bobalab-berkeley.github.io
+            hint: Canonical origin without the path, e.g. https://bobalabx.github.io
           - label: Social links
             name: social
             widget: object

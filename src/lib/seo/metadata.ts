@@ -27,7 +27,7 @@ export const FEED_ALTERNATE_TYPES = {
 
 /** Canonical origin: NEXT_PUBLIC_SITE_URL → site.yml site_url → the planned GitHub Pages origin. */
 export function siteOrigin(siteUrl?: string): string {
-  const v = process.env.NEXT_PUBLIC_SITE_URL || siteUrl || "https://bobalab-berkeley.github.io";
+  const v = process.env.NEXT_PUBLIC_SITE_URL || siteUrl || "https://bobalabx.github.io";
   return v.replace(/\/+$/, "");
 }
 

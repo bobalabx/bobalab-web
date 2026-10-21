@@ -104,7 +104,7 @@ async function loadRoutes() {
 
 describe.each(SETS)("sitemap for %s", (dir) => {
   const site = YAML.parse(fs.readFileSync(path.join(dir, "site.yml"), "utf8")) ?? {};
-  const origin = String(site.site_url ?? "https://bobalab-berkeley.github.io").replace(/\/+$/, "");
+  const origin = String(site.site_url ?? "https://bobalabx.github.io").replace(/\/+$/, "");
 
   it.each([
     ["production", "0"],

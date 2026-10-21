@@ -61,7 +61,7 @@ jobs:
             --exclude-path out/admin
             --exclude-path out/_next
             --exclude '^https?://(localhost|127\.0\.0\.1)'
-            --exclude '^https://bobalab-berkeley\.github\.io'
+            --exclude '^https://bobalabx\.github\.io'
             --exclude '^https://example\.(com|org|invalid)'
             'out/**/*.html'
             'content/**/*.md'
