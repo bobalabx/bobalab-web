@@ -230,7 +230,9 @@ test.describe("RSS feed", () => {
     const c = content();
     const res = await request.get("/news/feed.xml");
     expect(res.status()).toBe(200);
-    expect(res.headers()["content-type"]).toContain("application/rss+xml");
+    // `next dev` sends the route's application/rss+xml; a static host (GitHub Pages,
+    // scripts/serve-out.mjs) types the exported file by its .xml extension.
+    expect(res.headers()["content-type"]).toMatch(/^application\/(rss\+)?xml\b/);
     const xml = await res.text();
     await open(page, "/news/");
     const parsed = await page.evaluate((src) => {

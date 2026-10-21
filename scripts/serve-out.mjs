@@ -14,6 +14,7 @@
  *   /file.ext  → the file, with a content type from its extension
  *                (.txt as text/plain: the App Router's static-export payloads)
  *   anything else → status 404 with out/404.html as the body
+ *   text, JSON, XML and SVG bodies are gzip-compressed when the client accepts it
  * NEXT_PUBLIC_BASE_PATH (or --base-path) is stripped from request paths; a
  * request outside it is a 404, and "/" redirects to the base path.
  * Paths are decoded and confined to the served folder (no traversal).
@@ -24,6 +25,10 @@ import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import zlib from "node:zlib";
+
+/** Content types GitHub Pages serves gzip-compressed (text, JSON, XML, SVG). */
+const COMPRESSIBLE = /^(text\/|application\/(json|xml|manifest\+json)|image\/svg\+xml)/;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -132,6 +137,22 @@ export function createServer({
     };
     if (!file) {
       res.writeHead(plan.status, headers).end(method === "HEAD" ? undefined : "Not found\n");
+      return;
+    }
+    // GitHub Pages gzips text responses; do the same so local Lighthouse/transfer
+    // numbers match production (uncompressed HTML/CSS/JS cost ~25 Performance points).
+    const gzip =
+      COMPRESSIBLE.test(headers["Content-Type"]) &&
+      /\bgzip\b/.test(String(req.headers["accept-encoding"] ?? ""));
+    if (gzip) {
+      const body = zlib.gzipSync(fs.readFileSync(file));
+      res.writeHead(plan.status, {
+        ...headers,
+        "Content-Encoding": "gzip",
+        Vary: "Accept-Encoding",
+        "Content-Length": body.length,
+      });
+      res.end(method === "HEAD" ? undefined : body);
       return;
     }
     const size = fs.statSync(file).size;
