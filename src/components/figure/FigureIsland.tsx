@@ -194,7 +194,7 @@ function wire(fig: HTMLElement): () => void {
     off.push(() => io.disconnect());
   }
 
-  // Intro hand-off: the pre-paint script drops <html data-intro> after 1 s; keep the
+  // Intro hand-off: the pre-paint script drops <html data-intro> after 2 s; keep the
   // plate's copy until the longest intro (n = 8, 12 seeds) has finished.
   if (R.hasAttribute("data-intro")) {
     fig.dataset.intro = "";

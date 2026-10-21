@@ -30,3 +30,5 @@ The `noindex` test above does not work: `src/app/kit/page.tsx` sets `robots: { i
 ```
 
 (In a production or preview export `/kit/` is Next's not-found page, whose `h1` is the 404 copy, so the tests skip; under `NEXT_PUBLIC_KIT=1 next dev` they run.)
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20) (the reviewer's corrected heading check); the data-intro wait follows the 2 s timeout; the kit.spec.ts exclusion is removed from ci.yml.

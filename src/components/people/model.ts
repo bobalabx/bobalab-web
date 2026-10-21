@@ -13,39 +13,22 @@ import type {
 import {
   ROLE_LABELS,
   ROLE_ORDER,
+  avatarSwatch,
   groupPeople,
   initials,
   type PublicPerson,
 } from "@/lib/content/people";
 import { directionsOf, personDetail } from "@/lib/content/queries";
 import { formatDate } from "@/lib/content/dates";
-import { DEFAULT_SWATCH_ORDER, type SwatchId } from "@/lib/content/palette";
+import type { SwatchId } from "@/lib/content/palette";
 import type { PersonRole } from "@/lib/content/schema";
 import type { FilterMeta } from "./filter";
 
 // ---------------------------------------------------------------------------
 // Person-level helpers
 
-/**
- * Deterministic avatar colour from the CVD-checked swatch set (§C3).
- * A person tagged with a direction takes that direction's colour (so the
- * avatar agrees with their tags); otherwise a stable hash of the slug picks
- * one, so the same person always gets the same pearl.
- */
-export function avatarSwatch(
-  slug: string,
-  directions: ReadonlyArray<{ color: SwatchId }> = [],
-): SwatchId {
-  const own = directions[0]?.color;
-  if (own) return own;
-  // FNV-1a, 32 bit.
-  let h = 0x811c9dc5;
-  for (let i = 0; i < slug.length; i++) {
-    h ^= slug.charCodeAt(i);
-    h = Math.imul(h, 0x01000193) >>> 0;
-  }
-  return DEFAULT_SWATCH_ORDER[h % DEFAULT_SWATCH_ORDER.length]!;
-}
+/** Shared with PersonCard and the home People strip (WP4 request 1). */
+export { avatarSwatch };
 
 /** "Undergraduate RA · applied math", or the position title (the PI's faculty title). */
 export function roleLine(p: Pick<PublicPerson, "role" | "title" | "program">): string {
@@ -126,6 +109,8 @@ export interface ChipOptionModel {
   value: string;
   label: string;
   count: number;
+  /** Direction chips carry the direction colour (FilterChips dot; WP4 request 3). */
+  swatch?: SwatchId;
 }
 
 export interface PeopleIndexModel {
@@ -186,6 +171,7 @@ export function buildPeopleIndex(c: Content): PeopleIndexModel {
     .map((d) => ({
       value: d.slug,
       label: d.short_label,
+      swatch: d.color,
       count: all.filter((i) => i.meta.directions.includes(d.slug)).length,
     }))
     .filter((o) => o.count > 0);

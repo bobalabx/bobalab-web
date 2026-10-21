@@ -15,3 +15,5 @@
 - Proposed change: accept `index: number | null` in `DirectionPearlProps`; when it is `null`, render the halo and the pearl body without the numeral (`PearlBody` skips `.f1-idx`), never wrap it in a `<ViewTransition>`, and ignore `seedCount`. WP2 then replaces the block above with `<DirectionPearl slug={d.slug} index={null} swatch={d.color} seedCount={0} size="hero" />`.
 - Blocking? No (workaround in place; the archived page passes axe and the visual check).
 - Test that proves it: `tests/e2e/research.spec.ts` "archived direction …" asserts the band has one `.f1-dp--hero` and no `.f1-idx`.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20). `DirectionPearlProps.index` is `number | null`; null draws halo + body only (no numeral, no seeds, no view-transition name, no bloom). DirectionHeader uses it; the composition from WP1 internals is gone.

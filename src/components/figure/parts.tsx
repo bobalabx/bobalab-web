@@ -13,13 +13,14 @@ import { VT } from "@/lib/vt";
 type Vars = CSSProperties & Record<`--${string}`, string | number>;
 
 /** The matte pearl body with its index numeral, optionally the morph source/target. */
-export function PearlBody({ index, vtName }: { index: number; vtName?: string }) {
+export function PearlBody({ index, vtName }: { index: number | null; vtName?: string }) {
+  // index null = archived direction: no numeral and never a morph name (WP2 request 3).
   const body = (
     <span className="pearl f1-pearl">
-      <span className="f1-idx">{pad2(index)}</span>
+      {index != null && <span className="f1-idx">{pad2(index)}</span>}
     </span>
   );
-  if (!vtName) return body;
+  if (!vtName || index == null) return body;
   return (
     <ViewTransition name={vtName} share={VT.morph} default="none">
       {body}

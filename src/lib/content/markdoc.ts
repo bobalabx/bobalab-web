@@ -6,8 +6,12 @@
  * - External links get rel="noopener noreferrer".
  */
 import Markdoc, { Tag, type Config, type Node, type RenderableTreeNode } from "@markdoc/markdoc";
+import { withBasePath } from "@/lib/site/paths";
 
 const isExternal = (href: string) => /^https?:\/\//i.test(href);
+/** Site-relative ("/x/") links and images get the base path (WP5 request 9); "#…", "mailto:" and URLs do not. */
+const siteRelative = (href: string) =>
+  href.startsWith("/") && !href.startsWith("//") ? withBasePath(href) : href;
 
 export const markdocConfig: Config = {
   nodes: {
@@ -24,7 +28,7 @@ export const markdocConfig: Config = {
       attributes: { href: { type: String, required: true }, title: { type: String } },
       transform(node: Node, config: Config) {
         const href = String(node.attributes.href ?? "");
-        const attrs: Record<string, string> = { href };
+        const attrs: Record<string, string> = { href: siteRelative(href) };
         if (node.attributes.title) attrs.title = String(node.attributes.title);
         if (isExternal(href)) attrs.rel = "noopener noreferrer";
         return new Tag("a", attrs, node.transformChildren(config));
@@ -38,7 +42,7 @@ export const markdocConfig: Config = {
       },
       transform(node: Node) {
         return new Tag("img", {
-          src: String(node.attributes.src ?? ""),
+          src: siteRelative(String(node.attributes.src ?? "")),
           alt: String(node.attributes.alt ?? ""),
           loading: "lazy",
           decoding: "async",
@@ -61,13 +65,17 @@ export function markdownToHtml(source: string | undefined | null): string {
 
 /** Plain text (meta descriptions, word counts). */
 export function markdownToText(source: string | undefined | null): string {
-  return markdownToHtml(source)
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&amp;/g, "&")
-    .replace(/\s+/g, " ")
-    .trim();
+  return (
+    markdownToHtml(source)
+      // Block tags separate words; inline tags (a, strong, em, code…) do not (WP5 request 9).
+      .replace(/<\/?(?:p|li|ul|ol|h[1-6]|blockquote|pre|tr|td|th|table|br|hr|img)\b[^>]*>/gi, " ")
+      .replace(/<[^>]+>/g, "")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&amp;/g, "&")
+      .replace(/\s+/g, " ")
+      .trim()
+  );
 }

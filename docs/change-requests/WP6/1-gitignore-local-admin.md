@@ -12,3 +12,5 @@
 - Blocking? no (the files are cleaned up automatically; the integrator should not commit `public/admin/local.html` or `public/admin/_csp-probe.html` if either is ever present).
 - Test that proves it: `node scripts/cms/build-config.mjs --local && git status --short public/admin` shows nothing new; `node scripts/cms/build-config.mjs --clean-local` removes both local files.
 - Review note (2026-10-20, WP6 adversarial review): confirmed neither file is present after the e2e run; `_csp-probe.html` added to the request.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20).

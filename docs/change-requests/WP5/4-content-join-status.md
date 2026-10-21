@@ -9,3 +9,5 @@
   ```
 - Blocking? no.
 - Test that proves it: `tests/e2e/pages.spec.ts` "Join › three audiences…" still passes (status text comes from `opportunities/urap.md`); `/join/` no longer shows "Fall 2026" in the students prose.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20).

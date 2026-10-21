@@ -354,19 +354,3 @@
     translate: 3px 0;
   }
 }
-
-/* Work-around (change request WP1/4): long badges must wrap at 320–390 px. */
-.hm-sec .bl-pub,
-.hm-sec .bl-news {
-  grid-template-columns: minmax(0, 1fr);
-}
-.hm-sec .bl-badge {
-  white-space: normal;
-  max-width: 100%;
-}
-/* The home digest shows type, year, authors, venue/status, tags and materials
-   (brief §D3.3); the full award list lives on /publications/ and the paper page
-   (change request WP1/5 asks PublicationEntry for a prop instead of this rule). */
-.hm-sec .bl-pub__awards {
-  display: none;
-}

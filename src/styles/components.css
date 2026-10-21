@@ -37,16 +37,17 @@
   --pd: clamp(120px, 18vw, 160px);
 }
 /* Specular crescent: only when D >= 32 px, alpha <= .25 (§C9). */
+/* Satin sheen, the same material as the Fig. 1 pearl (D-02a; WP2 request 4). */
 .bl-pearl--gloss::before {
   content: "";
   position: absolute;
-  inset: 9% 38% 52% 14%;
+  left: 13%;
+  top: 15%;
+  width: 34%;
+  height: 14%;
   border-radius: 50%;
-  border-top: max(2px, calc(var(--pd) * 0.045)) solid var(--pearl-gloss);
-  border-left: max(2px, calc(var(--pd) * 0.045)) solid var(--pearl-gloss);
-  border-right: 0;
-  border-bottom: 0;
-  transform: rotate(-8deg);
+  rotate: -35deg;
+  background: radial-gradient(closest-side, var(--pearl-sheen), transparent);
   pointer-events: none;
 }
 .bl-pearl__idx {
@@ -268,6 +269,9 @@ a.bl-tag:hover {
   border-color: var(--ink);
   color: var(--paper);
 }
+.bl-chip[aria-pressed="true"] .bl-dot {
+  box-shadow: 0 0 0 1.5px var(--paper);
+}
 .bl-chip__count {
   font-family: var(--font-data);
   font-size: var(--fs-mono);
@@ -355,6 +359,7 @@ a.bl-tag:hover {
 /* ---------- Publication entry ------------------------------------------ */
 .bl-pub {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--s-2);
   padding-block: var(--s-5);
   border-top: 1px solid var(--hairline);
@@ -391,18 +396,49 @@ a.bl-tag:hover {
   font-size: var(--fs-sm);
   color: var(--ink-muted);
 }
+/* Awards read as a quiet ruled list that wraps (WP3 request 1, WCAG 1.4.10). */
 .bl-pub__awards {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-2);
+  display: grid;
+  gap: var(--s-1);
   margin: 0;
   padding: 0;
   list-style: none;
+}
+.bl-pub__awards > li {
+  position: relative;
+  min-width: 0;
+  padding-left: 1.15rem;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-sm);
+}
+.bl-pub__awards > li::before {
+  content: "";
+  position: absolute;
+  left: 0.1rem;
+  top: 0.4em;
+  width: 0.55rem;
+  height: 0.55rem;
+  box-sizing: border-box;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+}
+.bl-pub__awards .bl-badge {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: normal;
 }
 
 /* ---------- News item --------------------------------------------------- */
 .bl-news {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--s-2);
   padding-block: var(--s-4);
   border-top: 1px solid var(--hairline);
@@ -495,7 +531,7 @@ a.bl-tag:hover {
   justify-content: space-between;
   gap: var(--s-2) var(--s-5);
   padding-block: var(--s-3);
-  min-height: var(--header-h);
+  min-height: calc(var(--header-h) - 1px); /* the header adds a 1 px bottom border */
   box-sizing: border-box;
 }
 .bl-header__brand {
@@ -505,9 +541,14 @@ a.bl-tag:hover {
   color: var(--ink);
   text-decoration: none;
 }
-.bl-header__brand .bl-wordmark {
-  height: 1.6rem;
-  width: auto;
+.bl-header__brand {
+  gap: 0.5rem;
+}
+.bl-header__name {
+  font-family: var(--font-data);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  letter-spacing: 0.08em;
 }
 .bl-nav__list {
   display: flex;

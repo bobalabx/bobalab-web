@@ -106,7 +106,7 @@ Decap's GitHub backend needs a small OAuth server; GitHub Pages cannot run one (
    - `backend.repo: "<ORG>/<REPO>"` if it differs;
    - `site_url` / `display_url` if the host differs.
 
-   Run `node scripts/cms/build-config.mjs`, commit both files, and let CI pass. `auth_scope: public_repo` stays for a public repo; use `repo` only if the repo goes private (R4 §8 C5). The `/admin/` CSP allows the bridge origin derived from `base_url`.
+   Run `npm run cms:config` (`node scripts/cms/build-config.mjs`), commit both files, and let CI pass. `auth_scope: public_repo` stays for a public repo; use `repo` only if the repo goes private (R4 §8 C5). The `/admin/` CSP allows the bridge origin derived from `base_url`.
 
 6. **Smoke test the editorial workflow** with a throwaway news item (R4 §8 C6, plus Verification required change 3):
    1. Open `https://<HOST>/admin/`, choose **Login with GitHub**, approve "BOBALAB website CMS".

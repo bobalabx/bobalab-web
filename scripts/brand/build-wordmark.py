@@ -41,7 +41,9 @@ OUT = os.path.join(ROOT, "src", "components", "brand", "wordmark-geometry.ts")
 # Design units of the output: Fraunces cap height is normalised to CAP.
 CAP = 100.0
 TRACK_LAB = 0.08  # em
-GAP = 0.16  # em between BOBA and LAB (H)
+# No word space between BOBA and LAB (JUDGE.md visual-fix 11, WP1 request 2):
+# the first L starts at the end of the last A's advance, pulled left by the
+# Plex Mono L's left side bearing, so the A->L gap is never wider than L->A.
 OVERSHOOT = 0.02  # pearl diameter = cap * (1 + 2 * overshoot)
 
 
@@ -99,7 +101,8 @@ def main():
         letters.append(d)
         x += adv
     boba_end = x
-    x += GAP * em
+    _, _, l_bounds = glyph_outline(plex, "L", s_px, 0, baseline)
+    x -= l_bounds[0] * s_px
     lab = []
     track = TRACK_LAB * em
     for i, ch in enumerate("LAB"):

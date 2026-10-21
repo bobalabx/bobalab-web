@@ -15,7 +15,6 @@ import { ViewTransition } from "react";
 import type { DirectionView } from "@/lib/content/load";
 import { pad2 } from "@/lib/content/directions";
 import { pearlVtName, TRANSITION, VT } from "@/lib/vt";
-import { Halo } from "@/components/figure/parts";
 import { Badge, DraftBadge, OpenToRAsBadge } from "@/components/ui/Badge";
 import { DateText } from "@/components/ui/DateText";
 import { Icon } from "@/components/ui/icons";
@@ -60,10 +59,13 @@ export function DirectionHeader({ direction: d }: { direction: DirectionView }) 
             <div className="dr-hero__pearl">
               {archived ? (
                 // No index and no Fig. 1 source: a quiet pearl with its halo, no name, no seeds.
-                <span className="f1-dp f1-dp--hero" data-swatch={d.color} aria-hidden="true">
-                  <Halo />
-                  <span className="pearl f1-pearl" />
-                </span>
+                <DirectionPearl
+                  slug={d.slug}
+                  index={null}
+                  swatch={d.color}
+                  seedCount={0}
+                  size="hero"
+                />
               ) : (
                 <DirectionPearl
                   slug={d.slug}

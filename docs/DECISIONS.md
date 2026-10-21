@@ -63,8 +63,14 @@ Labels: DOCUMENTED (primary source), MEASURED (we ran it), HYPOTHESIS, UNKNOWN.
 - **Before the repo is pushed anywhere public, the lab decides H-5/H-11**, because drafts in a public repo are publicly readable.
 
 ## D-07 Windows static export
-- Next issue #85374 (prefetch files written under backslash paths on Windows; UNKNOWN whether still present in 16.4.2) is handled two ways. CI deploys build on `ubuntu-latest`. Locally, `scripts/fix-win-export.mjs` runs after `next build` on win32 and repairs the output; WP8 verifies it by serving `out/` and checking for 404s.
+- Next issue #85374 (prefetch files written under backslash paths on Windows; MEASURED present in 16.4.2 as nested `__next.*` folders, WP8 browser probe 2026-10-20) is handled two ways. CI deploys build on `ubuntu-latest`. Locally, `scripts/fix-win-export.mjs` runs after `next build` on win32 and repairs the output; WP8 verifies it by serving `out/` and checking for 404s.
 
 ## D-08 Stack
 - As in brief §F1: Next 16.4.2 static export, React 19.3.1, TS 6.0.3, Tailwind 4.3.3 via `@tailwindcss/postcss`, Markdoc, zod, yaml, MiniSearch, citation-js, Decap CMS 3.17.1 (vendored), Playwright plus axe, Vitest, ESLint 10, Prettier. No motion library and no d3.
 - `cacheComponents`, `partialPrefetching` and `@tailwindcss/turbopack` are removed (H-13).
+
+## D-09 CMS body widget: keep `richtext` with the load-time wrapper (integration, 2026-10-20; WP6 request 3)
+- **Decision:** option A. Body fields keep Decap's `richtext` widget (brief §F3, WP6 acceptance #3). `public/admin/cms-widgets.js` wraps it so an entry no longer shows "Unsaved changes" when it is only opened (MEASURED by WP6 review: 8 of 8 entries open clean).
+- **Known limit:** saving an entry whose body the editor actually changed rewrites the body in the widget's Markdown style (`*` list markers, loose lists). `docs/EDITING.md` §12 explains it.
+- **Re-check at every Decap bump:** if richtext stops normalising on load, delete `cms-widgets.js` and its line in `cms/admin.html`.
+- **Rollback (option B):** `widget: "markdown"` in `cms/source.mjs`, `npm run cms:config`, update the body-widget assertion in `tests/unit/cms/config.test.ts`; `cms-widgets.js` can then go.

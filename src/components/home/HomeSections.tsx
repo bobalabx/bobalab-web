@@ -105,7 +105,7 @@ export function PublicationsSection({ items }: { items: PublicationView[] }) {
       <ol role="list" className="hm-list hm-rows">
         {items.map((p) => (
           <li key={p.slug}>
-            <PublicationEntry pub={p} as="h3" />
+            <PublicationEntry pub={p} as="h3" showAwards={false} />
           </li>
         ))}
       </ol>

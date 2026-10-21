@@ -10,7 +10,7 @@ venue: SSRN working paper 7151739
 year: 2026
 doi: 10.2139/ssrn.7151739
 status: working-paper
-status_source: self-reported
+status_source: documented
 as_of: "2026-08"
 links:
   ssrn: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7151739

@@ -833,6 +833,14 @@ collections:
         name: links
         widget: object
         fields:
+          - label: Haas faculty profile
+            name: haas
+            widget: string
+            pattern:
+              - (?=^https://\S+$)
+              - Use a full address starting with https://.
+            required: false
+            hint: https://haas.berkeley.edu/faculty/… (faculty only).
           - label: Website
             name: website
             widget: string

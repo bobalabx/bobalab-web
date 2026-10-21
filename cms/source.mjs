@@ -511,6 +511,10 @@ export const collections = [
         widget: "object",
         collapsed: true,
         fields: {
+          haas: HTTPS(
+            "Haas faculty profile",
+            "https://haas.berkeley.edu/faculty/… (faculty only).",
+          ),
           website: HTTPS("Website"),
           scholar: HTTPS("Google Scholar"),
           linkedin: HTTPS("LinkedIn"),

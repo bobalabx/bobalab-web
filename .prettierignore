@@ -9,6 +9,7 @@ package-lock.json
 src/components/brand/wordmark-geometry.ts
 tests/fixtures/content/**/*.md
 docs/research/
+docs/design/
 docs/DECISIONS.md
 AGENTS.md
 CLAUDE.md

@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   images: { unoptimized: true },
   basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? "",
+  // `next dev` only: serve /admin/ like GitHub Pages does (WP6 request 5). A static
+  // export cannot use rewrites, so the key must be absent from every build.
+  ...(process.env.NODE_ENV === "development"
+    ? { rewrites: async () => [{ source: "/admin/", destination: "/admin/index.html" }] }
+    : {}),
 };
 
 export default nextConfig;

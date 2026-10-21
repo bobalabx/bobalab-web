@@ -8,7 +8,7 @@
  *   node scripts/perf/asset-budget.mjs                             (both, default paths)
  *
  * uploads (the files editors add through the CMS):
- *   - only jpg/jpeg/png/webp/gif/pdf (plus the generated manifest.json): an SVG,
+ *   - only jpg/jpeg/png/webp/gif/pdf (generated files live in public/media/): an SVG,
  *     HTML or XML upload would run on the same origin as /admin/, where Decap
  *     keeps the editor's GitHub token;
  *   - every file ≤ 10 MB; raster images ≤ 2 MB.
@@ -207,7 +207,7 @@ export function checkOut(outDir, { contentDir = path.join(ROOT, "content"), base
   }
 
   // Headshots: variants of consented photos of listed, non-draft people.
-  const manifestFile = path.join(outDir, "uploads", "manifest.json");
+  const manifestFile = path.join(outDir, "media", "manifest.json");
   const manifest = fs.existsSync(manifestFile)
     ? JSON.parse(fs.readFileSync(manifestFile, "utf8"))
     : { images: {} };

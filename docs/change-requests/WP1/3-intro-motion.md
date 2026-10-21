@@ -9,3 +9,5 @@
   - motion.ts `prePaintSource`: `setTimeout(function(){d.removeAttribute("data-intro")},2000)`.
 - Blocking? no (workaround in place).
 - Test that proves it: `tests/e2e/figure.spec.ts` "intro plays on the first home view of a session only" still passes; intro frames in `test-results/WP1/intro-*.png` complete.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20). The `.pearl-group` settle rule, `@keyframes bl-settle`, `--dur-intro` and `--stagger-intro` are removed from motion.css; the pre-paint timeout is 2000 ms; kit.spec.ts waits 2100 ms.

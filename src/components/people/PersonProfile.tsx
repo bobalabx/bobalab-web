@@ -134,7 +134,7 @@ export function PersonProfile({ content, model }: { content: Content; model: Per
             </div>
             <div className="pp-pubs">
               {model.publications.map((pub) => (
-                <PublicationEntry key={pub.slug} pub={pub} as="h3" />
+                <PublicationEntry key={pub.slug} pub={pub} as="h3" currentPerson={p.slug} />
               ))}
             </div>
           </section>
@@ -146,7 +146,7 @@ export function PersonProfile({ content, model }: { content: Content; model: Per
             <p className="pp-section__note">Papers in progress, without a public version yet.</p>
             <div className="pp-pubs">
               {model.inProgress.map((pub) => (
-                <PublicationEntry key={pub.slug} pub={pub} as="h3" />
+                <PublicationEntry key={pub.slug} pub={pub} as="h3" currentPerson={p.slug} />
               ))}
             </div>
           </section>

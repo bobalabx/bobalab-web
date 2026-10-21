@@ -4,10 +4,14 @@
  * inside a labelled group; one scrolling row on mobile, wrapping on desktop.
  * State is owned by the caller (e.g. a URL-synced filter island).
  */
+import type { SwatchId } from "@/lib/content/palette";
+
 export interface ChipOption {
   value: string;
   label: string;
   count?: number;
+  /** Direction colour: renders the flat 10 px dot before the label (§C9; WP4 request 3). */
+  swatch?: SwatchId;
 }
 
 export interface FilterChipsProps {
@@ -34,6 +38,7 @@ export function FilterChips({ legend, options, selected, onToggle, hideLegend }:
                 aria-pressed={on}
                 onClick={() => onToggle(o.value)}
               >
+                {o.swatch && <span className="bl-dot" data-swatch={o.swatch} aria-hidden="true" />}
                 <span>{o.label}</span>
                 {o.count !== undefined && (
                   <span className="bl-chip__count">

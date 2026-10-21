@@ -93,12 +93,19 @@ export function scholarlyArticleLd(
   };
 }
 
+/**
+ * Links that unambiguously identify the person (schema.org `sameAs`). A CV is a
+ * document about the person, not an identity page, so it is left out (WP4 request 5).
+ */
+const IDENTITY_LINKS = ["haas", "website", "scholar", "orcid", "linkedin", "github"] as const;
+
 function personNode(
   p: Pick<PersonEntry, "name" | "title" | "links">,
   path: string,
   site: SiteData,
 ): Person {
-  const sameAs = Object.values(p.links ?? {}).filter(
+  const links: Partial<Record<string, string>> = p.links ?? {};
+  const sameAs = IDENTITY_LINKS.map((k) => links[k]).filter(
     (v): v is string => typeof v === "string" && /^https:/.test(v),
   );
   return {
@@ -106,7 +113,12 @@ function personNode(
     name: p.name,
     jobTitle: p.title,
     url: absoluteUrl(path, site.site_url),
-    worksFor: { "@id": absoluteUrl("/#organization", site.site_url) },
+    // Named and typed, so a consumer reading this page alone knows the employer.
+    worksFor: {
+      "@type": "ResearchOrganization",
+      "@id": absoluteUrl("/#organization", site.site_url),
+      name: site.long_name,
+    },
     sameAs,
   };
 }

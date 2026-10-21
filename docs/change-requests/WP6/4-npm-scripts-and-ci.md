@@ -16,3 +16,5 @@
   5. **Regenerate after shared-file changes (integrator).** `public/admin/{config.yml,preview.css,cms-data.js,logo.svg,fonts/*}` are generated from `src/lib/content/{schema,people,palette,dates}.ts`, `src/components/ui/labels.ts`, `src/styles/{tokens,base,prose,components}.css`, `src/fonts/*` and `src/components/brand/wordmark-geometry.ts` as well as `cms/`. After merging a change to any of those, run `npm run cms:config` (or `node scripts/cms/build-config.mjs`) and commit the result; until then `tests/unit/cms/config.test.ts` ("generated admin files are up to date") fails, by design.
 - Blocking? no.
 - Test that proves it: `npm run cms:check` exits 0; `npm run cms:vendor:check` prints `CHECK OK`.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): the four `cms:*` scripts; SETUP-PRODUCTION names `npm run cms:config`; admin files regenerated after the shared-file changes (item 5). Items 2–3 needed no change (CI already runs the CMS unit tests; cms-local.spec.ts stays out of the export e2e job).

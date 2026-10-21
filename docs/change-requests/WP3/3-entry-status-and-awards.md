@@ -5,7 +5,7 @@
   1. **Status echo.** For a working paper whose status is just `working-paper`, the entry reads
      `[Working paper] 2026` … `SSRN working paper 7151739 · Working paper · as of Aug 2026 · reported by the lab`:
      "working paper" three times, and "reported by the lab" attached to something that is not a review claim
-     (brief §D7 asks for the lab's own claim on *review statuses*). Affects 3 entries in preview, 1 in production
+     (brief §D7 asks for the lab's own claim on _review statuses_). Affects 3 entries in preview, 1 in production
      (`keppler-2026-teachers-knapsack`). The paper page already drops this note (`StatusNote` in
      `src/components/publications/PaperParts.tsx`), so lists and paper pages now disagree.
   2. **Awards weight (optional, art direction).** The Management Science paper has 7 awards, 5 with an
@@ -44,7 +44,10 @@
   ```
 
   (`#awards-h` is the id of the "Awards" heading on the paper page.)
+
 - Blocking? No.
 - Test that proves it: `tests/e2e/publications.spec.ts` "statuses show the lab's claim…" already skips bare
   working-paper statuses; add `expect(statusLine({ status: "working-paper", … }, "working-paper")).toBeNull()`
   to the WP0 unit tests.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): `statusLine(p, type)` drops a bare working-paper status (all callers pass the type), and list entries show at most two awards plus a "N more awards" link to `#awards-h` whose accessible name includes the title.

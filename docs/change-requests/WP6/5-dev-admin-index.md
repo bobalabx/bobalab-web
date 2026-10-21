@@ -17,3 +17,5 @@
 - Status: UNTESTED (WP6 may not edit `next.config.ts` or restart the shared dev server). Verify that `next dev` accepts it with `output: "export"` and that `npm run build` is unaffected.
 - Blocking? no.
 - Test that proves it: with the dev server restarted, `curl -I http://localhost:3100/admin/` → 200 and the page shows "Login with GitHub".
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): dev-only `rewrites` for `/admin/` in next.config.ts (absent from every build).

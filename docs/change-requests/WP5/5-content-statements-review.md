@@ -5,3 +5,5 @@
 - Proposed change: add both to `docs/CONTENT-QUESTIONS.md` as launch blockers for the PI ("approve and flip `draft: false`"), and consider adding `last_reviewed: YYYY-MM-DD` when they are approved (the pages show "Last reviewed …" when it is set).
 - Blocking? no (the pages render honestly either way).
 - Test that proves it: after the flip, `production-render.test.tsx` output contains the statement bodies; `tests/e2e/pages.spec.ts` "privacy statement: storage keys match the code" keeps the keys in sync with `src/lib/site/motion.ts`.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): the launch blocker is CONTENT-QUESTIONS A11; both statements stay `draft: true` until the lab approves them.

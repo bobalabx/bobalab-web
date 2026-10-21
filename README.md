@@ -14,24 +14,26 @@ For browser tests: `npx playwright install chromium` (CI also installs webkit).
 
 ## Scripts
 
-| Script                                | What it does                                                                                                                                                            |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`                         | `next dev` on port 3100. Includes drafts (preview ribbon). `CONTENT_DIR=tests/fixtures/content/n4 npm run dev` uses a fixture set. `NEXT_PUBLIC_KIT=1` enables `/kit/`. |
-| `npm run build`                       | Production static export to `out/` (drafts excluded), via `scripts/build.mjs`; on Windows it then runs `scripts/fix-win-export.mjs` if present (D-07).                  |
-| `npm run build:preview`               | Same with `INCLUDE_DRAFTS=1` (drafts + ribbon). Never deploy it.                                                                                                        |
-| `npm run start` / `npm run serve:out` | Serve `out/` locally → `scripts/serve-out.mjs` (**WP8, not yet written**)                                                                                               |
-| `npm run lint` / `npm run typecheck`  | ESLint 10 flat config / `tsc --noEmit`                                                                                                                                  |
-| `npm run test`                        | Vitest unit tests (`tests/unit/**`)                                                                                                                                     |
-| `npm run validate`                    | Content validation over `CONTENT_DIR` (default `./content`) + rule fixtures (`tests/content/**`); CI job `validate-content`                                             |
-| `npm run e2e`                         | Playwright (`tests/e2e/**`), `BASE_URL` default `http://localhost:3100`                                                                                                 |
-| `npm run media`                       | `scripts/media/build-images.mjs` (**WP7, not yet written**)                                                                                                             |
-| `npm run cms:local`                   | `scripts/cms/local.mjs` (**WP6, not yet written**)                                                                                                                      |
-| `npm run perf`                        | `scripts/perf/js-budget.mjs` (**WP8, not yet written**)                                                                                                                 |
-| `npm run slugs:record`                | Write `content/.published-slugs.json` (D-05 redirect check)                                                                                                             |
-| `npm run brand:wordmark`              | Regenerate the outlined wordmark (Python 3 + fontTools)                                                                                                                 |
-| `npm run format` / `format:check`     | Prettier                                                                                                                                                                |
-
-Scripts marked "not yet written" point at files owned by other work packages; they fail until those packages land.
+| Script                                                | What it does                                                                                                                                                            |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`                                         | `next dev` on port 3100. Includes drafts (preview ribbon). `CONTENT_DIR=tests/fixtures/content/n4 npm run dev` uses a fixture set. `NEXT_PUBLIC_KIT=1` enables `/kit/`. |
+| `npm run build`                                       | Production static export to `out/` (drafts excluded), via `scripts/build.mjs`; on Windows it then runs `scripts/fix-win-export.mjs` if present (D-07).                  |
+| `npm run build:preview`                               | Same with `INCLUDE_DRAFTS=1` (drafts + ribbon). Never deploy it.                                                                                                        |
+| `npm run start` / `npm run serve:out`                 | Serve `out/` locally like GitHub Pages → `scripts/serve-out.mjs`                                                                                                        |
+| `npm run lint` / `npm run typecheck`                  | ESLint 10 flat config / `tsc --noEmit`                                                                                                                                  |
+| `npm run test`                                        | Vitest unit tests (`tests/unit/**`)                                                                                                                                     |
+| `npm run validate`                                    | Content validation over `CONTENT_DIR` (default `./content`) + rule fixtures (`tests/content/**`); CI job `validate-content`                                             |
+| `npm run e2e`                                         | Playwright (`tests/e2e/**`), `BASE_URL` default `http://localhost:3100`                                                                                                 |
+| `npm run media` / `media:check`                       | `scripts/media/build-images.mjs` (WebP variants + manifest; `--check` for CI)                                                                                           |
+| `npm run import:content`                              | One-off dataset importer (`-- --dataset <path> --write`) → `scripts/import/import-dataset.mjs`                                                                          |
+| `npm run cms:local`                                   | Local no-account Decap demo → `scripts/cms/local.mjs`                                                                                                                   |
+| `npm run cms:config` / `cms:check`                    | Regenerate / verify `public/admin/*` from `cms/source.mjs` and the shared schema, tokens and fonts                                                                      |
+| `npm run cms:vendor` / `cms:vendor:check`             | Re-vendor / verify the Decap 3.17.1 bundle against the npm tarball                                                                                                      |
+| `npm run perf`                                        | JS budget on `out/` → `scripts/perf/js-budget.mjs`                                                                                                                      |
+| `npm run perf:assets` / `check:export` / `lighthouse` | Font/transfer/upload budgets, export contract check, Lighthouse on the key pages (`scripts/perf/*`, `docs/HANDOVER.md` §10)                                             |
+| `npm run slugs:record`                                | Write `content/.published-slugs.json` (D-05 redirect check)                                                                                                             |
+| `npm run brand:wordmark`                              | Regenerate the outlined wordmark (Python 3 + fontTools)                                                                                                                 |
+| `npm run format` / `format:check`                     | Prettier                                                                                                                                                                |
 
 ## Content
 

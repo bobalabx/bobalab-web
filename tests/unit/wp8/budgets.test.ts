@@ -207,17 +207,17 @@ describe("asset budgets fail when they should", () => {
     write(out, "_next/static/chunks/big.js", scriptOfGz(300 * KB));
     const fonts = `<link rel="preload" href="/_next/static/media/a.woff2" as="font" crossorigin="" type="font/woff2"/><link rel="preload" href="/_next/static/media/b.woff2" as="font"/>`;
     write(out, "index.html", page(["/_next/static/chunks/big.js"], fonts));
-    write(out, "uploads/p-480.webp", Buffer.alloc(41 * KB));
+    write(out, "media/p-480.webp", Buffer.alloc(41 * KB));
     write(
       out,
-      "uploads/manifest.json",
+      "media/manifest.json",
       JSON.stringify({
         version: 1,
         images: {
           "/uploads/p.jpg": {
             width: 800,
             height: 800,
-            variants: [{ width: 480, src: "/uploads/p-480.webp" }],
+            variants: [{ width: 480, src: "/media/p-480.webp" }],
           },
         },
       }),

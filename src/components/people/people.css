@@ -547,17 +547,6 @@ img.pp-avatar--profile {
   color: var(--ink-muted);
   margin-top: calc(-1 * var(--s-2));
 }
-/* Long award names: let the shared badge wrap here (same issue as change request WP2/1). */
-.pp-pubs .bl-pub__awards li {
-  min-width: 0;
-  max-width: 100%;
-}
-.pp-pubs .bl-pub__awards .bl-badge {
-  white-space: normal;
-  height: auto;
-  padding-block: 0.2rem;
-  border-radius: var(--r-md);
-}
 .pp-pubs,
 .pp-news {
   display: grid;

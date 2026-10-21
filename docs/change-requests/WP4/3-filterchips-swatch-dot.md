@@ -22,5 +22,8 @@
   ```
 
   Pressed state: the dot sits on `--ink`; add `.bl-chip[aria-pressed="true"] .bl-dot { box-shadow: 0 0 0 1.5px var(--paper); }` so it stays visible.
+
 - Blocking? No. When it lands, WP4 passes `swatch` in `src/components/people/PeopleIndex.tsx` (`directionOptions.map(({ value, label }) => …)` → add `swatch: d.color`; the model already knows the direction).
 - Test that proves it: render test asserting `data-swatch` on the dot inside a direction chip, and `tests/e2e/people.spec.ts` axe passes with a pressed direction chip.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): `ChipOption.swatch` renders the 10 px dot; pressed chips ring it in `--paper`; WP4 passes the direction colour. WP3's /publications/ chips are unchanged (optional; WP3 did not ask).

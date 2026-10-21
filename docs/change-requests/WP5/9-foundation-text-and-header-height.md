@@ -27,3 +27,5 @@
   (`withBasePath` from `src/lib/site/paths.ts` leaves `mailto:`, `#…` and absolute URLs alone.)
 - Blocking? no. WP5 works around 1 in its own file; 3 only matters with a base path.
 - Test that proves it: a unit test `markdownToText("Email [a@b.c](mailto:a@b.c).") === "Email a@b.c."`; in Playwright, `.bl-header` height equals the computed `--header-h` at ≥ 48rem.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): block-only word breaks in `markdownToText()`; `--header-h: 4.3125rem` (header inner min-height = token − 1 px border); base-path-aware site-relative links and images in Markdoc (`#…`, `mailto:` and URLs untouched). Unit tests in tests/unit/foundation/change-requests.test.tsx.

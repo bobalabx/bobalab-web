@@ -53,3 +53,5 @@
 
 - Blocking? No. WP3 applies exactly this, scoped to `.pubs-list` (index, work-in-progress list and the paper page's "Related papers"), in `src/components/publications/publications.css`. Remove that block once this lands.
 - Test that proves it: `tests/e2e/publications.spec.ts` "no horizontal scroll at 320 px" and the 390 px screenshots in `test-results/WP3/index-390-*.png`.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20) (CSS route, components.css). The local copies are removed from publications.css, direction.css, people.css and home.css.

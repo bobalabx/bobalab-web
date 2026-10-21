@@ -12,3 +12,5 @@
   - README scripts table: drop "(WP8, not yet written)" from `serve:out` and `perf`; add a row `node scripts/perf/export-check.mjs` · `node scripts/perf/asset-budget.mjs` · `node scripts/perf/lighthouse.mjs` (see `docs/HANDOVER.md` §10).
 - Blocking? no.
 - Test that proves it: `npx vitest run --config vitest.config.ts tests/unit/wp8/fix-win-export.test.ts` (uses Next's own `convertSegmentPathToStaticExportFilename` to compute the names the client requests).
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): ARCHITECTURE §7 replaced, DECISIONS D-07 says MEASURED, README scripts table updated.

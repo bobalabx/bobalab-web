@@ -12,7 +12,7 @@ venue: SSRN working paper 4924786
 year: 2026
 doi: 10.2139/ssrn.4924786
 status: working-paper
-status_source: self-reported
+status_source: documented
 as_of: "2026-10-20"
 links:
   pdf: https://parksinchaisri.github.io/files/paper-knapsack.pdf

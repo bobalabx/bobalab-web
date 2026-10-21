@@ -16,6 +16,15 @@ export const OG_IMAGE = {
   alt: "BOBALAB wordmark",
 };
 
+/**
+ * RSS discovery on every page (brief §D10/§G3; WP5 request 6). Relative, so it
+ * resolves against `metadataBase` (which carries the base path). Pages that set
+ * `alternates` replace the layout's object, so pageMetadata() merges it too.
+ */
+export const FEED_ALTERNATE_TYPES = {
+  "application/rss+xml": [{ url: "news/feed.xml", title: "BOBALAB news" }],
+};
+
 /** Canonical origin: NEXT_PUBLIC_SITE_URL → site.yml site_url → the planned GitHub Pages origin. */
 export function siteOrigin(siteUrl?: string): string {
   const v = process.env.NEXT_PUBLIC_SITE_URL || siteUrl || "https://bobalab-berkeley.github.io";
@@ -50,7 +59,7 @@ export function pageMetadata(input: PageMetaInput): Metadata {
   return {
     title: input.title,
     description,
-    alternates: { canonical: url || "./" },
+    alternates: { canonical: url || "./", types: FEED_ALTERNATE_TYPES },
     openGraph: {
       type: input.type ?? "website",
       siteName: "BOBALAB",

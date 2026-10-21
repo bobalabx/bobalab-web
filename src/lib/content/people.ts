@@ -6,6 +6,28 @@
  */
 import type { PersonEntry, PersonRole } from "./schema";
 import { periodEndedBefore, parseDateParts, todayInLab } from "./dates";
+import { DEFAULT_SWATCH_ORDER, type SwatchId } from "./palette";
+
+/**
+ * Deterministic pearl-initial avatar colour (brief §D9; WP4 request 1).
+ * A person tagged with a direction takes that direction's colour (so the
+ * avatar agrees with their tags); otherwise a stable FNV-1a hash of the slug
+ * picks one from the CVD-checked set (§C3), so the same person gets the same
+ * pearl on home, /people/ and every card.
+ */
+export function avatarSwatch(
+  slug: string,
+  directions: ReadonlyArray<{ color: SwatchId }> = [],
+): SwatchId {
+  const own = directions[0]?.color;
+  if (own) return own;
+  let h = 0x811c9dc5;
+  for (let i = 0; i < slug.length; i++) {
+    h ^= slug.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return DEFAULT_SWATCH_ORDER[h % DEFAULT_SWATCH_ORDER.length]!;
+}
 
 export const ROLE_ORDER: PersonRole[] = [
   "pi",

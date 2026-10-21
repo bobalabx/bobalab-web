@@ -12,3 +12,5 @@
 - Record the choice as a DECISIONS entry either way.
 - Blocking? no.
 - Test that proves it: `npx playwright test tests/e2e/cms-local.spec.ts -g "rich-text bodies"`.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): option A recorded as DECISIONS D-09.

@@ -16,3 +16,5 @@
 - Blocking? No.
 - Test that proves it: `tests/unit/publications/seo.test.ts` "paper SEO by publication type";
   `tests/e2e/publications.spec.ts` "Scholar tags: only for papers with a public version, with a real institution".
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20) (second option): `scholarMeta()` no longer copies `venue` into institution tags, and its doc comment says they are the caller's job; WP3's `paperScholarMeta()` stays the source.

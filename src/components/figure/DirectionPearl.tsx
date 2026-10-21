@@ -16,6 +16,8 @@
  * - `bloomOnMount` replays the destination re-bloom (halo, then seeds) once on
  *   mount. CSS only, inside the motion gate (off under reduced motion).
  * - `seedCount` is the number of counted papers (D-05); at most 12 dots are drawn.
+ * - `index={null}` draws an archived direction's quiet pearl (D-04): halo and body
+ *   only — no numeral, no seeds, never a view-transition name (WP2 request 3).
  */
 import type { JSX } from "react";
 import type { SwatchId } from "@/lib/content/palette";
@@ -24,7 +26,8 @@ import "./figure.css";
 
 export interface DirectionPearlProps {
   slug: string;
-  index: number;
+  /** 1…N for live directions; null for an archived (unindexed) direction. */
+  index: number | null;
   swatch: SwatchId;
   seedCount: number;
   size: "hero" | "rail";
@@ -44,18 +47,19 @@ export function DirectionPearl({
   className,
 }: DirectionPearlProps): JSX.Element {
   const hero = size === "hero";
+  const archived = index == null;
   const cls = ["f1-dp", `f1-dp--${size}`, className].filter(Boolean).join(" ");
   return (
     <span
       className={cls}
       data-swatch={swatch}
       data-slug={slug}
-      data-bloom={hero && bloomOnMount ? "" : undefined}
+      data-bloom={hero && bloomOnMount && !archived ? "" : undefined}
       aria-hidden="true"
     >
       {hero && <Halo />}
-      {hero && <SeedOrbit papers={seedCount} />}
-      <PearlBody index={index} vtName={vtName} />
+      {hero && !archived && <SeedOrbit papers={seedCount} />}
+      <PearlBody index={index} vtName={archived ? undefined : vtName} />
     </span>
   );
 }

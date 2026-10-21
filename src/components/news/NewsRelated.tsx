@@ -29,7 +29,7 @@ export function NewsRelated({ item }: { item: NewsView }) {
           <ul className="nw-related__list">
             {item.publicationRefs.map((p) => {
               const venue = [p.venue, p.year].filter(Boolean).join(", ");
-              const status = statusLine(p);
+              const status = statusLine(p, p.type);
               return (
                 <li key={p.slug}>
                   <Link href={`/publications/${p.slug}/`}>{p.title}</Link>

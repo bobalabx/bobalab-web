@@ -28,7 +28,7 @@ export function InProgressList({
       </p>
       <ul className="dr-wip__list" role="list" aria-labelledby={headingId}>
         {items.map((p) => {
-          const status = statusLine(p);
+          const status = statusLine(p, p.type);
           return (
             <li key={p.slug}>
               <Link href={`/publications/${p.slug}/`} className="dr-wip__link">

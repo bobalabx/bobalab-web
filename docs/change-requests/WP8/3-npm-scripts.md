@@ -12,3 +12,5 @@
   Running the e2e suite against an export needs two env vars (`E2E_STATIC=1 BASE_URL=http://127.0.0.1:4173 npx playwright test`); without a cross-env dependency that stays a documented command (HANDOVER §10), not a script.
 - Blocking? no.
 - Test that proves it: `npm run perf:assets`, `npm run check:export` and `npm run lighthouse` behave like the `node` commands.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20).

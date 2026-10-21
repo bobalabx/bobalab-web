@@ -25,3 +25,5 @@
 
 - Blocking? No. Today the self-links work; they are just redundant.
 - Test that proves it: `renderToStaticMarkup(<PublicationEntry pub={…} currentPerson="avery-example" />)` contains `<strong class="bl-pub__author--lab">Avery Example</strong>` and no `href="/people/avery-example/"`; WP4 adds `expect(html).not.toMatch(/href="\/people\/avery-example\/?"[^>]*class="bl-pub__author--lab"/)` to `tests/unit/people-page/render.test.tsx` once it lands.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): `currentPerson` prop; PersonProfile passes it at both call sites.

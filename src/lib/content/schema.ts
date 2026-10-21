@@ -325,6 +325,8 @@ export const personSchema = z
     photo_consent: z.boolean().default(false),
     links: z
       .strictObject({
+        /** Faculty profile on haas.berkeley.edu (PI, affiliated faculty; WP5 request 1). */
+        haas: externalUrlField.optional(),
         website: externalUrlField.optional(),
         scholar: externalUrlField.optional(),
         linkedin: externalUrlField.optional(),

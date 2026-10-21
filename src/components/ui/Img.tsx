@@ -1,10 +1,11 @@
 /**
  * Responsive image for the static export (server component: reads the media manifest).
  *
- * Manifest: public/uploads/manifest.json, written by `npm run media` (WP7):
+ * Manifest: public/media/manifest.json, written by `npm run media` (WP7). Generated
+ * files live in public/media/, outside the CMS media folder (WP6 request 6):
  *   { "version": 1, "images": { "/uploads/x.jpg": { "width": 1600, "height": 900,
- *       "variants": [ { "width": 480, "src": "/uploads/x-480.webp" },
- *                     { "width": 960, "src": "/uploads/x-960.webp" } ] } } }
+ *       "variants": [ { "width": 480, "src": "/media/x-480.webp" },
+ *                     { "width": 960, "src": "/media/x-960.webp" } ] } } }
  * With a manifest entry we emit srcset plus intrinsic width/height (no CLS).
  * Without one, pass width/height explicitly.
  */
@@ -22,7 +23,7 @@ let manifest: Record<string, ManifestEntry> | null = null;
 function readManifest(): Record<string, ManifestEntry> {
   if (manifest && process.env.NODE_ENV !== "development") return manifest;
   try {
-    const file = path.join(process.cwd(), "public", "uploads", "manifest.json");
+    const file = path.join(process.cwd(), "public", "media", "manifest.json");
     const json = JSON.parse(fs.readFileSync(file, "utf8")) as {
       images?: Record<string, ManifestEntry>;
     };

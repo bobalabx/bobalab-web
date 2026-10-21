@@ -3,6 +3,7 @@ name: Park Sinchaisri
 role: pi
 title: Assistant Professor of Operations and Information Technology Management
 links:
+  haas: https://haas.berkeley.edu/faculty/park-sinchaisri/
   website: https://parksinchaisri.github.io/
   scholar: https://scholar.google.com/citations?user=viBF-ekAAAAJ&hl=en
   linkedin: https://www.linkedin.com/in/xalapao

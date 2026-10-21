@@ -14,7 +14,8 @@ const webkit = Boolean(process.env.CI || process.env.E2E_WEBKIT);
 
 export default defineConfig({
   testDir: "tests/e2e",
-  outputDir: "test-results/e2e",
+  // E2E_OUTPUT lets parallel package runs keep separate artifact folders (WP5 request 7).
+  outputDir: process.env.E2E_OUTPUT || "test-results/e2e",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,

@@ -18,7 +18,7 @@
 .f1-dp {
   --f1-glow: color-mix(in srgb, var(--dir-deep) 45%, transparent);
   --f1-rim: transparent;
-  --f1-sheen: rgb(255 248 238 / 0.16);
+  --f1-sheen: var(--pearl-sheen); /* one token with WP0's Pearl (WP2 request 4) */
   --f1-seed: var(--dir-seed);
   --f1-halo-a: 38%;
 }
@@ -53,7 +53,6 @@
   :is(.f1-item, .f1-dp)[data-swatch] {
     --f1-glow: color-mix(in srgb, var(--dir-light) 30%, transparent);
     --f1-rim: color-mix(in srgb, var(--pearl-rim) 60%, transparent);
-    --f1-sheen: rgb(255 248 238 / 0.1);
     /* Judge fix 15: seeds >= 3:1 against the dark plate (light tone at 55%: 3.5–4.1:1). */
     --f1-seed: color-mix(in srgb, var(--dir-light) 55%, var(--plate));
     --f1-halo-a: 26%;
@@ -766,23 +765,9 @@
     }
   }
 
-  /* Morph companions: every Fig. 1 pearl carries a pearl-{slug} name, so on a pearl
-     click the OTHER pearls become exit-only groups (and, coming back, enter-only ones).
-     Let them follow the page swap instead of lingering 420 ms over the destination.
-     Reduced motion still wins (motion.css sets these to 0 s with !important). */
-  :root:not([data-motion="reduce"])::view-transition-old(.pearl-morph):only-child {
-    animation-duration: var(--dur-page-exit);
-    animation-timing-function: var(--ease-in);
-  }
-  :root:not([data-motion="reduce"])::view-transition-new(.pearl-morph):only-child {
-    animation-duration: var(--dur-page-enter);
-    animation-delay: var(--dur-page-exit);
-    animation-timing-function: var(--ease-out);
-  }
-
   /* Intro (first home view per session; one-shot in list mode too). Opacity reaches 1
      within ~50 ms so pearls never pass through grey (judge fix 7). The island keeps
-     the plate's own data-intro alive past the pre-paint script's 1 s removal. */
+     the plate's own data-intro alive until the longest intro has finished. */
   :root:not([data-motion="reduce"]):is([data-intro]) .f1-plate .f1-group,
   :root:not([data-motion="reduce"]) .f1-plate[data-intro] .f1-group {
     animation: f1-sink 720ms calc(var(--i, 0) * 70ms) backwards;

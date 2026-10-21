@@ -5,7 +5,7 @@
  */
 import Link from "next/link";
 import type { PublicPerson } from "@/lib/content/people";
-import { ROLE_LABELS, initials } from "@/lib/content/people";
+import { ROLE_LABELS, avatarSwatch, initials } from "@/lib/content/people";
 import type { DirectionView } from "@/lib/content/load";
 import { Pearl } from "./Pearl";
 import { Img } from "./Img";
@@ -14,6 +14,7 @@ import { PearlTagList } from "./PearlTag";
 import { isExternalUrl, withBasePath } from "@/lib/site/paths";
 
 const LINK_LABELS: Record<string, string> = {
+  haas: "Haas profile",
   website: "Website",
   scholar: "Google Scholar",
   linkedin: "LinkedIn",
@@ -48,7 +49,11 @@ export function PersonCard({
           className="bl-person__photo"
         />
       ) : (
-        <Pearl size="avatar" initials={initials(person.name)} swatch={directions[0]?.color} />
+        <Pearl
+          size="avatar"
+          initials={initials(person.name)}
+          swatch={avatarSwatch(person.slug, directions)}
+        />
       )}
       <div className="bl-person__body">
         <H className="bl-person__name" id={`person-${person.slug}`}>

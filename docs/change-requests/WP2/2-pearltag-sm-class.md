@@ -11,3 +11,5 @@
 
 - Blocking? No.
 - Test that proves it: render `<PearlTag label="x" size="sm" />` and assert the dot's class list is `["bl-dot", "bl-dot--sm"]`.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20) (whole-string class names, as in WP4 request 2). Unit test: tests/unit/foundation/change-requests.test.tsx.

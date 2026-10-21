@@ -16,7 +16,9 @@
 
   ```css
   /* components.css, after .bl-header__brand */
-  .bl-header__brand { gap: 0.5rem; }
+  .bl-header__brand {
+    gap: 0.5rem;
+  }
   .bl-header__name {
     font-family: var(--font-data);
     font-weight: 500;
@@ -24,5 +26,8 @@
     letter-spacing: 0.08em;
   }
   ```
+
 - Blocking? no (home renders; only the duplicate-wordmark look and mobile fold remain).
 - Test that proves it: `npx playwright test -c tests/visual/playwright.visual.config.ts home` — one wordmark SVG visible above the fold on `/`; at 390×844 the header is one row and `.f1-item:first-child .f1-pearl` top < 700.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20). SiteHeader now shows PearlMark (1.25rem) + mono "BOBALAB"; the large wordmark is only in the home hero. Note: below 48rem the nav keeps its own row (existing design), so the 390 px header is still two rows, but shorter than with the 1.6rem wordmark.

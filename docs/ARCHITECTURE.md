@@ -116,7 +116,7 @@ Errors fail CI (`validate-content`); warnings print. Each code has a fixture tes
 - **Tokens** `src/styles/tokens.css` (layer `base`): every §C2/§C3 hex, dark mode via `prefers-color-scheme` (no manual theme toggle). Direction colours via **`data-swatch="<id>"`** on any element, which sets `--dir-deep`, `--dir-tint`, `--dir-light`, `--dir-seed`, `--dir-band`, `--dir-dot`, `--dir-text` (mode-aware). Tailwind sees them through `@theme inline` (`bg-paper`, `text-ink`, `bg-dir-tint`, `font-display`, `text-mono`…).
 - **Layers**: tokens/base → `@layer base`; prose + primitives → `@layer components` (Tailwind utilities can override); `motion.css` and `forced-colors.css` unlayered (always win).
 - **Fonts** `src/fonts/index.ts` (next/font/local, 97.4 KiB preloaded): `--font-fraunces` (headings only, wght ≤ 620 for headings), `--font-inter` (text/UI), `--font-plex-mono` (indices, years, DOIs). Note: the latin subset has no `→` (U+2192); it renders from a fallback font. Prefer `<Icon name="arrow-right" />` for arrows in UI.
-- **Motion** `src/styles/motion.css`: all §C6 tokens; every view-transition rule (§E5): `.pearl-morph` (420 ms, `--ease-emph`, 3 px mid blur), root page swap (150 ms out / 210 ms in after 150 ms), `.page-swap`, `.band-fade`, `.nav-forward` / `.nav-back` (60 px), anchored `site-header`, `::view-transition { pointer-events: none }`; the intro `bl-settle` keyframes for `.pearl-group` under `:root[data-intro]` with `--i` stagger; reduced motion (OS **or** `data-motion="reduce"`) → VT 0 s, root ≤ 120 ms opacity crossfade. Transform animations must sit in `@media (prefers-reduced-motion: no-preference) { :root:not([data-motion="reduce"]) … }`.
+- **Motion** `src/styles/motion.css`: all §C6 tokens; every view-transition rule (§E5): `.pearl-morph` (420 ms, `--ease-emph`, 3 px mid blur), root page swap (150 ms out / 210 ms in after 150 ms), `.page-swap`, `.band-fade`, `.nav-forward` / `.nav-back` (60 px), anchored `site-header`, `::view-transition { pointer-events: none }`; morph companions (exit-only / enter-only `.pearl-morph` groups follow the page swap, WP1 request 6). The brief's generic `.pearl-group` settle intro is retired: Fig. 1's intro lives in WP1's `figure.css` and `<html data-intro>` stays for 2 s (WP1 request 3); reduced motion (OS **or** `data-motion="reduce"`) → VT 0 s, root ≤ 120 ms opacity crossfade. Transform animations must sit in `@media (prefers-reduced-motion: no-preference) { :root:not([data-motion="reduce"]) … }`.
 - **VT names** `src/lib/vt.ts`: `pearlVtName(slug)`, `VT.morph` etc., `TRANSITION.pearlOpen/…` for `<Link transitionTypes>`, `PAGE_ENTER_EXIT` for page-level `<ViewTransition enter exit>`. One mounted element per `pearl-{slug}` name; decorative pearls carry none.
 - **Motion preference** `src/lib/site/motion.ts`: `setMotionPreference()`, `motionReduced()`, `subscribeMotion()` — WP1's Pause/Play button must use these (same storage key `bobalab-motion`, event `bobalab-motion-change`). Intro flag: `sessionStorage["bobalab-intro"]`.
 
@@ -128,13 +128,15 @@ Errors fail CI (`validate-content`); warnings print. Each code has a fixture tes
 | `components/brand/` | `Wordmark`, `WordmarkLockup` (outlined SVG), `PearlMark`; `wordmark-geometry.ts` is generated                                                                                                                                                                                                                                                                                                                                                                |
 | `components/ui/`    | `Pearl` (sizes rail/row/card/avatar/hero, `index`, `initials`), `PearlTag`/`PearlTagList`, `Badge`/`DraftBadge`/`OpenToRAsBadge`, `EvidenceLabel`, `DateText`, `Prose`, `MaterialsRow` (+`materialsFromPublication`), `FilterChips` (client, controlled), `Img` (server; manifest), `Icon` (16 icons), `VisuallyHidden`, `JsonLd`, `PublicationEntry` (+`statusLine`), `NewsItem`, `PersonCard`, `ProjectCard`, `DirectionCard` (+`countsLine`), `labels.ts` |
 
+**Class names:** do not build class names with a leading space inside a template literal (`` `a${x ? " b" : ""}` ``); `prettier-plugin-tailwindcss` trims it (WP4 request 2). Use whole strings or `[a, x && b].filter(Boolean).join(" ")`.
+
 Utility classes for page packages: `bl-container`, `bl-measure`, `bl-stack`, `t-display`, `t-lead`, `t-sm`, `t-muted`, `t-mono`, `t-eyebrow`, `vh`, `bl-cta` / `bl-cta--quiet`, `bl-card`, `bl-tags`.
 
 The **figure** (Fig. 1) is WP1's (`components/figure/**`); it uses `Pearl`'s material tokens or its own `.pearl` classes (forced-colours rules for `.pearl`/`.seed` already exist).
 
 ### Media manifest (WP7 writes, `Img` reads)
 
-`public/uploads/manifest.json`:
+`public/media/manifest.json` (generated files live in `public/media/`, outside the CMS media folder `public/uploads/`, so editors only ever see their own uploads; WP6 request 6):
 
 ```json
 {
@@ -144,8 +146,8 @@ The **figure** (Fig. 1) is WP1's (`components/figure/**`); it uses `Pearl`'s mat
       "width": 1600,
       "height": 900,
       "variants": [
-        { "width": 480, "src": "/uploads/x-480.webp" },
-        { "width": 960, "src": "/uploads/x-960.webp" }
+        { "width": 480, "src": "/media/x-480.webp" },
+        { "width": 960, "src": "/media/x-960.webp" }
       ]
     }
   }
@@ -160,13 +162,15 @@ The **figure** (Fig. 1) is WP1's (`components/figure/**`); it uses `Pearl`'s mat
 | `npm run validate` | `tests/content/**`: CONTENT_DIR validation (skipped with a notice while `content/` does not exist), rule fixtures, fixture-set checks                                  |
 | `npm run e2e`      | Playwright `tests/e2e/**` against `BASE_URL` (default shared dev server `http://localhost:3100`). WP0's `kit.spec.ts` needs a server started with `NEXT_PUBLIC_KIT=1`. |
 
+When several packages run Playwright at once, pass `--output=test-results/<WP>/pw-output` (or set `E2E_OUTPUT`) so one run does not empty another's artifact folder (WP5 request 7).
+
 **Fixtures** (`tests/fixtures/content/<set>`, generated by `node tests/fixtures/build-fixtures.mjs`, all fictional): `n0` (0 live, 2 draft directions, `launched: false`), `n1 n2 n3 n4 n6 n7 n8`, `long-labels` (8/28-char and two-line labels, 90-char title), `seeds-0-1-7-12-24`, `consent-edge-cases` (listed/unlisted, consent flags, alumni by `end`, draft person, collaborator consent). Every set validates with 0 errors. Use: `CONTENT_DIR=tests/fixtures/content/n4 npm run dev`.
 
 **Kit page** `/kit/`: every primitive; only with `NEXT_PUBLIC_KIT=1`, else `notFound()` (in a production export `out/kit/index.html` is the not-found page with `noindex`; WP8 should keep `/kit/` out of the sitemap).
 
 ## 7. Windows static export (D-07)
 
-Observed on this machine (Windows 11, Next 16.4.2, 2026-10-20): `npm run build` succeeded; **no file names with backslashes** in `out/`; per-route segment files are written as nested folders (e.g. `out/kit/__next.kit/__PAGE__.txt`). Serving `out/` with a plain static server and navigating `/` → `/kit/` → `/` in Chromium produced **no 404s for existing routes** (only for routes other packages have not built yet). So issue #85374 did not reproduce for the routes that exist today; WP8 still owns `scripts/fix-win-export.mjs`, which `scripts/build.mjs` runs automatically on win32 when present.
+Observed on Windows 11 with Next 16.4.2 (2026-10-20): the export writes each nested page's segment files into a folder (`out/kit/__next.kit/__PAGE__.txt`) instead of the dotted name the client requests (`out/kit/__next.kit.__PAGE__.txt`), so prefetches 404 and navigations fall back to the full `index.txt` (MEASURED by WP8; Next #85374). `scripts/fix-win-export.mjs` (run by `scripts/build.mjs` on win32) moves every file in an `out/**/__next.*/` folder to `<folder>.<sub>.<file>` and removes the folder; it is idempotent and a no-op on Linux exports (`tests/unit/wp8/fix-win-export.test.ts`). CI deploys build on ubuntu-latest regardless. `scripts/perf/export-check.mjs` fails a build that still has such folders.
 
 ## 8. Generated assets
 

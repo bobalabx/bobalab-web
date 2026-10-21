@@ -593,74 +593,7 @@
   font-weight: 500;
 }
 
-/* Direction-card pearls use the same satin sheen as the direction-page pearls
-   (WP1 DirectionPearl, DECISIONS D-02a) instead of WP0's stroked crescent, so a
-   card's pearl and the hero it leads to look like one object. Remove once
-   docs/change-requests/WP2/4-pearl-sheen.md lands. (Forced colours: WP0 hides
-   the ::before.) */
-.rs-grid--dirs .bl-pearl--gloss::before {
-  inset: auto;
-  left: 13%;
-  top: 15%;
-  width: 34%;
-  height: 14%;
-  border: 0;
-  border-radius: 50%;
-  transform: none;
-  rotate: -35deg;
-  background: radial-gradient(closest-side, rgb(255 248 238 / 0.16), transparent);
-}
-@media (prefers-color-scheme: dark) {
-  .rs-grid--dirs .bl-pearl--gloss::before {
-    background: radial-gradient(closest-side, rgb(255 248 238 / 0.1), transparent);
-  }
-}
-
 /* Earlier (archived) directions: same card, quieter than the live ones. */
 .rs-grid--earlier .bl-card {
   background: transparent;
-}
-
-/* Awards read as a quiet ruled list, exactly as on /publications/ (WP3's
-   local rule), and long names wrap at 320 px (shared .bl-badge is nowrap).
-   Remove once WP0 applies docs/change-requests/WP3/1-awards-in-list-entries.md
-   (supersedes docs/change-requests/WP2/1-badge-wrap-awards.md). */
-.dr-pubs .bl-pub__awards {
-  display: grid;
-  gap: var(--s-1);
-}
-.dr-pubs .bl-pub__awards > li {
-  position: relative;
-  min-width: 0;
-  padding-left: 1.15rem;
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-}
-.dr-pubs .bl-pub__awards > li::before {
-  content: "";
-  position: absolute;
-  left: 0.1rem;
-  top: 0.4em;
-  width: 0.55rem;
-  height: 0.55rem;
-  box-sizing: border-box;
-  border: 1.5px solid var(--accent);
-  border-radius: 50%;
-}
-.dr-pubs .bl-pub__awards .bl-badge {
-  display: inline;
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  font-size: inherit;
-  line-height: inherit;
-  font-weight: 500;
-  color: var(--ink);
-  white-space: normal;
-}
-@media (forced-colors: active) {
-  .dr-pubs .bl-pub__awards > li::before {
-    border-color: CanvasText;
-  }
 }

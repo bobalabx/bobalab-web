@@ -347,45 +347,6 @@
 .pubs-list .bl-pub__title {
   text-wrap: pretty;
 }
-/* Awards inside list entries. WP0's pill badges are nowrap, so long award
-   names overflow narrow screens (WCAG 1.4.10), and seven pills read as noise.
-   Scoped workaround until docs/change-requests/WP3/1 lands: a quiet list,
-   one award per line with a small ring marker. */
-.pubs-list .bl-pub__awards {
-  display: grid;
-  gap: var(--s-1);
-}
-.pubs-list .bl-pub__awards > li {
-  position: relative;
-  min-width: 0;
-  padding-left: 1.15rem;
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-}
-.pubs-list .bl-pub__awards > li::before {
-  content: "";
-  position: absolute;
-  left: 0.1rem;
-  top: 0.4em;
-  width: 0.55rem;
-  height: 0.55rem;
-  box-sizing: border-box;
-  border: 1.5px solid var(--accent);
-  border-radius: 50%;
-}
-.pubs-list .bl-pub__awards .bl-badge {
-  display: inline;
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  font-size: inherit;
-  line-height: inherit;
-  font-weight: 500;
-  color: var(--ink);
-  white-space: normal;
-}
-
 .pubs-empty {
   display: grid;
   gap: var(--s-2);
@@ -492,6 +453,10 @@
 }
 .pub-title {
   margin-top: var(--s-1);
+  /* 320 px reflow (WCAG 1.4.10; WP8 request 4): <html lang="en"> hyphenates long words
+     ("Recom-mendation"); overflow-wrap lowers min-content where no hyphen point exists. */
+  hyphens: auto;
+  overflow-wrap: anywhere;
 }
 .pub-authors {
   font-size: var(--fs-lg);

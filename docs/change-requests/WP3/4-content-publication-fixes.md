@@ -7,8 +7,8 @@
   1. **Journal name of the two PACM HCI papers** (`jiang-2025-learning-on-the-go`, `keppler-2025-making-chatgpt-work`):
      `venue: Proceedings of the ACM on Human-Computer Interaction (CSCW 2025)` puts "(CSCW 2025)" into the
      journal name, so the BibTeX reads `journal = {Proceedings of the ACM on Human-Computer Interaction (CSCW 2025)}`
-     and Scholar gets the same `citation_journal_title`. R2 §3 P4/P5: the journal is *Proceedings of the ACM on
-     Human-Computer Interaction*; CSCW 2025 is where it was presented (DOCUMENTED, R2 §1.2: Bergen, 2025-10-20
+     and Scholar gets the same `citation_journal_title`. R2 §3 P4/P5: the journal is _Proceedings of the ACM on
+     Human-Computer Interaction_; CSCW 2025 is where it was presented (DOCUMENTED, R2 §1.2: Bergen, 2025-10-20
      "The Gig Economy" and 2025-10-21 "Enhancing Learning", program https://cscw.acm.org/2025/index.php/program-overview-3/).
      → `venue: Proceedings of the ACM on Human-Computer Interaction`, and add
      `presentations: [{ event: "CSCW 2025, Bergen", year: 2025, url: <program URL> }]` to each.
@@ -31,3 +31,5 @@
 - Blocking? No. WP3 renders whatever content provides.
 - Test that proves it: `tests/unit/publications/bibtex.test.ts` (golden files after item 1), the paper-page
   screenshots in `test-results/WP3/`.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): item 1 (journal names; "CSCW 2025, Bergen" presentations with the programme URL; golden files regenerated, only the journal line and the APA venue changed), item 2 (four items now `status_source: documented`), item 4 (presentation dates written "Apr 26, 2025" / "Jul 14, 2026"), item 5 ("Park Sinchaisri's …"; the lab may reword). Item 3 rejected — a lab decision (which stable PDF to link), tracked as CONTENT-QUESTIONS D9.

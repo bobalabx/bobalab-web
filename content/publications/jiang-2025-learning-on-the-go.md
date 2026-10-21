@@ -6,7 +6,7 @@ authors:
   - name: Wichinpong Park Sinchaisri
     person: park-sinchaisri
 type: journal
-venue: Proceedings of the ACM on Human-Computer Interaction (CSCW 2025)
+venue: Proceedings of the ACM on Human-Computer Interaction
 year: 2025
 date_online: "2025-10-16"
 volume: "9"
@@ -21,6 +21,9 @@ links:
 presentations:
   - event: EC 2025 Workshop on Human-AI Collaboration
     year: 2025
+  - event: CSCW 2025, Bergen
+    year: 2025
+    url: https://cscw.acm.org/2025/index.php/program-overview-3/
 press: []
 awards: []
 directions:

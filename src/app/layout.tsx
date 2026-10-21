@@ -5,6 +5,7 @@ import { getContent, isPreview } from "@/lib/content/load";
 import { lastUpdated } from "@/lib/site/build-info";
 import {
   DEFAULT_DESCRIPTION,
+  FEED_ALTERNATE_TYPES,
   SITE_TITLE_HOME,
   TITLE_TEMPLATE,
   OG_IMAGE,
@@ -34,6 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: DEFAULT_DESCRIPTION,
     applicationName: site.name,
     openGraph: { siteName: site.name, type: "website", images: [OG_IMAGE] },
+    alternates: { types: FEED_ALTERNATE_TYPES },
     twitter: { card: "summary_large_image" },
     formatDetection: { email: false, address: false, telephone: false },
   };

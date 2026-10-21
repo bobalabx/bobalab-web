@@ -19,3 +19,5 @@
 
 - Blocking? No. Lists keep the current format until this lands.
 - Test that proves it: `tests/unit/publications/csl.test.ts` ("venueLine … matches brief §D8 exactly"); `tests/e2e/publications.spec.ts` checks the paper-page line.
+
+Status: Applied (minimal version) in integration commit "integration: apply change requests" (2026-10-20): list entries use `pageRange()` (en dash), so lists and paper pages agree on page ranges. The full version (one shared venue line, dropping the meta-row year for journal articles) is not applied: it changes the entry anatomy on every list (brief §D7) and needs a design pass.

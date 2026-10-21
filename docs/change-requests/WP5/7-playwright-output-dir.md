@@ -11,3 +11,5 @@
   and a line in `docs/ARCHITECTURE.md` §6: "When several packages run Playwright at once, pass `--output=test-results/<WP>/pw-output` (or set `E2E_OUTPUT`)."
 - Blocking? no (the CLI flag works today).
 - Test that proves it: two concurrent `npx playwright test` runs with different `E2E_OUTPUT` values both pass.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20), with the line in ARCHITECTURE §6.

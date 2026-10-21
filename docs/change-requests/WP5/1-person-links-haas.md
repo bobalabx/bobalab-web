@@ -20,3 +20,5 @@
   WP6: add the matching optional `haas` string field (pattern `^https://`) to the people collection's `links` object so the parity test stays green.
 - Blocking? no. `src/components/pages/LabFacts.tsx` already reads `links.haas` generically (label "Haas faculty profile", listed first) and renders nothing when it is absent.
 - Test that proves it: after WP5 request 2 lands, `tests/e2e/pages.spec.ts` "About › mission, PI summary…" finds a `https://haas.berkeley.edu/faculty/` link in the About fact sheet; `tests/unit/feed/production-render.test.tsx` can then assert it in production mode too.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): `links.haas` in the schema, the "Haas profile" label in PersonCard, the CMS field, and the regenerated admin config (parity test green).

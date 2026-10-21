@@ -7,7 +7,13 @@
 import type { Metadata } from "next";
 import { ViewTransition } from "react";
 import { getContent } from "@/lib/content/load";
-import { currentPeople, featuredFindings, openOpportunities } from "@/lib/content/queries";
+import {
+  currentPeople,
+  directionsOf,
+  featuredFindings,
+  openOpportunities,
+} from "@/lib/content/queries";
+import { avatarSwatch } from "@/lib/content/people";
 import { buildFigure } from "@/lib/figure/buildFigure";
 import { organizationLd } from "@/lib/seo/jsonld";
 import { pageMetadata, SITE_TITLE_HOME } from "@/lib/seo/metadata";
@@ -67,7 +73,7 @@ export default function HomePage() {
           <NewsSection items={c.news.slice(0, 3)} />
           <PeopleSection
             people={people}
-            swatchOf={(p) => (p.directions[0] ? c.getDirection(p.directions[0])?.color : undefined)}
+            swatchOf={(p) => avatarSwatch(p.slug, directionsOf(c, p.directions))}
           />
           <WorkWithUsSection opportunities={openOpportunities(c)} email={site.email} />
         </div>

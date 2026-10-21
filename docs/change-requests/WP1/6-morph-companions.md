@@ -19,5 +19,8 @@
   ```
 
   Then delete the same block (comment "Morph companions") from `src/components/figure/figure.css`.
+
 - Blocking? no (the rules already live in figure.css).
 - Test that proves it: `tests/e2e/figure.spec.ts` "Enter opens the direction…" asserts every `::view-transition-old(pearl-<other>)` animation is ≤ 150 ms; "reduced motion: every view-transition animation is ≤ 120 ms" still passes.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20). The rules moved into motion.css (inside the no-preference gate) and are removed from figure.css.

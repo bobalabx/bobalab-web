@@ -12,7 +12,12 @@ const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
 async function openKit(page: Page) {
   const res = await page.goto("/kit/");
-  test.skip(res?.status() === 404, "kit page disabled (start the server with NEXT_PUBLIC_KIT=1)");
+  // In an export /kit/ is the not-found page served with 200, so detect the kit by its
+  // own heading (the enabled kit is noindex too; WP8 request 2).
+  const enabled =
+    res?.status() === 200 &&
+    (await page.getByRole("heading", { level: 1, name: "Component kit" }).count()) > 0;
+  test.skip(!enabled, "kit page disabled (start the server with NEXT_PUBLIC_KIT=1)");
   await page.waitForLoadState("networkidle");
   // Load lazy images so full-page screenshots show them.
   await page.evaluate(async () => {
@@ -120,7 +125,7 @@ test("RouteFocus focuses the h1 after a client-side navigation", async ({ page }
 test("data-intro is set on the first home view only", async ({ page }) => {
   await page.goto("/");
   expect(await page.evaluate(() => document.documentElement.hasAttribute("data-intro"))).toBe(true);
-  await page.waitForTimeout(1100);
+  await page.waitForTimeout(2100); // the pre-paint script clears it after 2 s (WP1 request 3)
   expect(await page.evaluate(() => document.documentElement.hasAttribute("data-intro"))).toBe(
     false,
   );

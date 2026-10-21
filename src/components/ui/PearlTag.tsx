@@ -15,7 +15,7 @@ export interface PearlTagProps {
 export function PearlTag({ label, swatch, href, size = "md" }: PearlTagProps) {
   const dot = (
     <span
-      className={`bl-dot${size === "sm" ? "bl-dot--sm" : ""}`}
+      className={size === "sm" ? "bl-dot bl-dot--sm" : "bl-dot"}
       data-swatch={swatch}
       aria-hidden="true"
     />

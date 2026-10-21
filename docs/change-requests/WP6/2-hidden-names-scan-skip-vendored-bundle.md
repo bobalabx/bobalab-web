@@ -11,3 +11,5 @@
   or give the test a longer timeout: `it("no tracked … name", () => { … }, 60_000);`
 - Blocking? no for WP6; yes for `npm run validate` (CI job `validate-content`) once WP6 is committed.
 - Test that proves it: `npm run validate` passes; the scan's duration drops from ~13.7 s to ~7 s.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20) (preferred option: skip regex).

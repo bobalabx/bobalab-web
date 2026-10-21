@@ -20,7 +20,10 @@ import {
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const TEXT_EXT =
   /\.(md|mdx|ya?ml|json|jsonc|txt|ts|tsx|js|mjs|cjs|css|html|svg|xml|csv|bib|py|toml|ini|sh)$/i;
-const SKIP = /^(node_modules|\.next|out|test-results|playwright-report|coverage)\//;
+// The vendored Decap bundle is pinned by SHA-256 to npm decap-cms@3.17.1 (WP6) and has
+// 0 matches; scanning its 4.86 MB took 6.3 s and timed the test out (WP6 request 2).
+const SKIP =
+  /^(node_modules|\.next|out|test-results|playwright-report|coverage)\/|^public\/admin\/decap-cms\.js(\.LICENSE\.txt)?$/;
 
 /** Tracked files plus untracked files that are not ignored (what a commit could include). */
 function repoFiles(): string[] {

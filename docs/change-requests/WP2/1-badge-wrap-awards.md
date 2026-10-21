@@ -17,3 +17,5 @@
 - Test that proves it: `tests/e2e/research.spec.ts` "visual QA and axe … 390" and "no horizontal scroll at 320 px" assert zero horizontal overflow on every direction page.
 
 **Update (WP2 review, 2026-10-20): superseded by `docs/change-requests/WP3/1-awards-in-list-entries.md`.** Same root cause, but WP3's version also turns awards into a quiet ruled list instead of seven outlined pills, which is what `/publications/` shows today. Two different renderings of the same paper on `/publications/` and `/research/{direction}/` looked inconsistent, so WP2's local workaround now mirrors WP3's rules exactly (scoped to `.dr-pubs`, used on direction and project pages). Please apply WP3 request 1 globally (plus WP1 request 4's `.bl-pub { grid-template-columns: minmax(0, 1fr) }`) and drop this one; WP2, WP3, WP4 and WP1 can then delete their local award rules.
+
+Status: Rejected — superseded by WP3 request 1, which was applied globally in integration commit "integration: apply change requests" (2026-10-20); the WP2 local award rules in direction.css are removed.

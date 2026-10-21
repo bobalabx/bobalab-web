@@ -31,3 +31,5 @@
   `.bl-pearl.pp-avatar { box-shadow: 0 0 0 4px color-mix(in srgb, var(--dir-dot) 32%, transparent); }` (in `src/components/people/people.css`). If WP0 wants this for every avatar, add a `bl-pearl--halo` modifier to `components.css` with the same rule.
 - Blocking? No. WP4 computes the colour locally (`src/components/people/model.ts → avatarSwatch`).
 - Test that proves it: `tests/unit/people-page/model.test.ts` "avatar colour" (deterministic, in `DEFAULT_SWATCH_ORDER`, spreads over ≥ 4 swatches, uses the direction colour when present).
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): `avatarSwatch()` lives in src/lib/content/people.ts; PersonCard and the home People strip use it; WP4's model re-exports it. The optional halo modifier is rejected for WP0 — only the People page uses it, so it stays in people.css.

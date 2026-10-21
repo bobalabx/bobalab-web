@@ -22,3 +22,5 @@
   (The Haas link moves to the PI record, WP5 request 2.)
 - Blocking? no. Until then the page shows both; nothing is wrong, only repeated.
 - Test that proves it: `/about/` shows the email once in `main` outside the fact sheet's `mailto` (visual check of `test-results/WP5/about-*.png`).
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20).

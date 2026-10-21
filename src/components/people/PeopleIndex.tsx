@@ -225,7 +225,11 @@ export function PeopleIndex({ content }: { content: Content }) {
           </noscript>
           <PeopleFilters
             roleOptions={m.roleOptions.map(({ value, label }) => ({ value, label }))}
-            directionOptions={m.directionOptions.map(({ value, label }) => ({ value, label }))}
+            directionOptions={m.directionOptions.map(({ value, label, swatch }) => ({
+              value,
+              label,
+              swatch,
+            }))}
             all={m.all.map((i) => i.meta)}
           >
             {list}

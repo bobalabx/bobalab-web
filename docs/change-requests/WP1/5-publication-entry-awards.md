@@ -14,5 +14,8 @@
 
   Then WP1 passes `showAwards={false}` in `src/components/home/HomeSections.tsx` and deletes the `.hm-sec .bl-pub__awards { display: none; }` work-around in `src/components/home/home.css`.
   (Optional, nicer: `showAwards="count"` renders one muted line "7 awards" linking to the paper page.)
+
 - Blocking? no. Work-around in `src/components/home/home.css` (CSS `display: none`, so the list is also hidden from assistive tech).
 - Test that proves it: on `/`, `section[aria-labelledby="h-pubs"] .bl-pub__awards` has count 0 (not merely hidden); `/publications/` still shows the awards.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20). `PublicationEntry` has `showAwards` (default true); `HomeSections.tsx` passes `showAwards={false}`; the home.css `display: none` work-around is removed.

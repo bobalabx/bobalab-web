@@ -12,3 +12,5 @@
   (Relative URL so it resolves against `metadataBase`, which includes the base path. Pages that set their own `alternates.canonical` through `pageMetadata()` replace the whole `alternates` object, so `pageMetadata()` in `src/lib/seo/metadata.ts` should merge the same `types` entry; otherwise only pages without their own canonical keep it.)
 - Blocking? no.
 - Test that proves it: `curl -s http://localhost:3100/ | grep 'application/rss+xml'` finds one `<link rel="alternate">` on home, research, publications and people pages.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): `FEED_ALTERNATE_TYPES` in metadata.ts, used by the root layout and merged by `pageMetadata()`.

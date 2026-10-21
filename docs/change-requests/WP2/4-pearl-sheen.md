@@ -23,3 +23,5 @@
 
 - Blocking? No. WP2 overrides it locally for the direction cards only (`.rs-grid--dirs .bl-pearl--gloss::before` in `src/components/direction/direction.css`); remove that block once this lands.
 - Test that proves it: on `/research/`, the computed `background-image` of `.bl-direction-card .bl-pearl::before` is a radial gradient and `border-top-width` is `0px`; visual check that card pearls and `/research/{slug}/` hero pearls carry the same sheen.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20). `--pearl-sheen` in tokens.css (light 0.16 / dark 0.1); `.bl-pearl--gloss::before` is the radial sheen; figure.css `--f1-sheen` now reads `--pearl-sheen` (one token); the WP2 local override is removed.

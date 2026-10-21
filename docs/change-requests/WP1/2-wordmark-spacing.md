@@ -5,3 +5,5 @@
 - Proposed change: in the generator, place the first LAB glyph at the end of the last "A" advance minus the Plex Mono left side bearing of "L" (no extra tracking before the first glyph; keep +0.08 em between L-A-B), confirm LAB cap height = BOBA cap height, then `npm run brand:wordmark`.
 - Blocking? no.
 - Test that proves it: visual check of the hero h1 at 1366×768; the A→L gap should be ≤ the L→A gap.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20). `GAP` removed from `scripts/brand/build-wordmark.py`; the first L starts at the end of the A advance minus the Plex L left side bearing; regenerated with `npm run brand:wordmark` (and `npm run cms:config` for the admin logo). MEASURED in font units (cap height 100): A→L gap 0.96, L→A gap 23.2 (before: A→L 39.3).

@@ -25,3 +25,5 @@
      Future talks then appear under "Upcoming talks" on `/news/` automatically until the day after `event_date`.
 - Blocking? no (sections are hidden or render the text as typed).
 - Test that proves it: `npm run validate` stays at 0 errors; `tests/e2e/news.spec.ts` checks every item's event line and full dates; `/join/` shows the partners data panel once `data_statement` is set (`tests/e2e/pages.spec.ts` "Join › three audiences…").
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): item 3 (URAP route text) and item 4 (`event_date`/`location` on the five talk items, dates taken from the items' own summaries; flagged for confirmation in CONTENT-QUESTIONS F5). Items 1 and 2 are lab decisions, tracked as CONTENT-QUESTIONS G7 and G8.

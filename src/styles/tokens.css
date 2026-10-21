@@ -30,6 +30,8 @@
   --pearl-hi: #3a281d;
   --pearl-lo: #1a110c;
   --pearl-gloss: rgb(247 241 232 / 0.22);
+  /* Satin sheen: one soft radial ellipse, shared by Pearl and Fig. 1 (WP2 request 4). */
+  --pearl-sheen: rgb(255 248 238 / 0.16);
 
   /* §C4 type */
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
@@ -68,7 +70,7 @@
   --gutter: 16px;
   --content-max: 72rem;
   --prose-max: 66ch;
-  --header-h: 4rem;
+  --header-h: 4.3125rem; /* = .bl-header at >= 48rem: 44 px link + 2 x 12 px padding + 1 px border (WP5 request 9) */
 
   /* §C5 radius */
   --r-xs: 2px;
@@ -118,6 +120,7 @@
     --pearl-hi: #4a3829;
     --pearl-lo: #2a1e16;
     --pearl-gloss: rgb(243 236 226 / 0.18);
+    --pearl-sheen: rgb(255 248 238 / 0.1);
   }
 }
 

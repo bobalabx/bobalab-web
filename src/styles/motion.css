@@ -18,8 +18,6 @@
   --dur-page-exit: 150ms;
   --dur-page-enter: 210ms;
   --dur-morph: 420ms;
-  --dur-intro: 480ms;
-  --stagger-intro: 40ms;
   --dur-slide: 400ms;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-emph: cubic-bezier(0.2, 0, 0, 1);
@@ -57,6 +55,22 @@
 @keyframes bl-via-blur {
   30% {
     filter: blur(3px);
+  }
+}
+
+/* Morph companions (WP1 request 6): every Fig. 1 pearl carries a pearl-{slug} name, so
+   on a pearl click the OTHER pearls become exit-only groups (and, coming back, enter-only
+   ones). Let them follow the page swap instead of lingering 420 ms over the destination.
+   Reduced motion still wins (the !important rules below set them to 0 s). */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="reduce"])::view-transition-old(.pearl-morph):only-child {
+    animation-duration: var(--dur-page-exit);
+    animation-timing-function: var(--ease-in);
+  }
+  :root:not([data-motion="reduce"])::view-transition-new(.pearl-morph):only-child {
+    animation-duration: var(--dur-page-enter);
+    animation-delay: var(--dur-page-exit);
+    animation-timing-function: var(--ease-out);
   }
 }
 
@@ -160,31 +174,12 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Intro "settle" (§E3, D-02 #1): first home view per session only.
- * PrePaintScript sets <html data-intro> and removes it after 1 s.
- * Figure groups set style="--i: <slot index 0..7>".
+ * Intro (D-02a): first home view per session only. PrePaintScript sets
+ * <html data-intro> and removes it after 2 s; the Fig. 1 intro itself (sink,
+ * halo bloom, seed spread on `.f1-group`) lives in WP1's figure.css. The
+ * brief's generic `.pearl-group` settle was retired (WP1 request 3).
  * ------------------------------------------------------------------------- */
-@keyframes bl-settle {
-  0% {
-    opacity: 0;
-    transform: translateY(-14px);
-  }
-  70% {
-    opacity: 1;
-    transform: translateY(2px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
-  :root[data-intro]:not([data-motion="reduce"]) .pearl-group {
-    animation: bl-settle var(--dur-intro) var(--ease-settle) both;
-    animation-delay: calc(var(--i, 0) * var(--stagger-intro));
-  }
-
   /* Generic press feedback for controls that opt in. */
   :root:not([data-motion="reduce"]) .press:active {
     transform: scale(0.98);

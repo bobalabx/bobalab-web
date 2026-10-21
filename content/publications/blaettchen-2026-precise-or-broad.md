@@ -14,7 +14,7 @@ as_of: "2026-04"
 links:
   pdf: https://www.dropbox.com/scl/fi/ehetta55hl48yberpqmao/Precise-or-Broad-2026.pdf?rlkey=76belsk6wovmd5p8f7skel9tz&dl=0
 presentations:
-  - event: CHI 2025 Workshop on Human-AI Interaction for Augmented Reasoning (poster), Yokohama, 2025-04-26
+  - event: CHI 2025 Workshop on Human-AI Interaction for Augmented Reasoning (poster), Yokohama, Apr 26, 2025
     year: 2025
     url: https://aireasoning.media.mit.edu/
   - event: EC 2025 Workshop on Human-AI Collaboration

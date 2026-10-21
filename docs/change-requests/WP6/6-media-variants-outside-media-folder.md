@@ -8,3 +8,5 @@
   - `Img.tsx` reads the manifest from the new path; `public/uploads/` then holds only what editors uploaded.
 - Blocking? no (no images are uploaded yet; `manifest.json` is the only stray file today).
 - Test that proves it: after `npm run media` with a sample upload, `/admin/local.html` → Media lists only the uploaded original; `npm run media -- --check` and the Img unit tests pass.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): variants and the manifest go to public/media/ (served at `/media/…`); public/uploads/ holds only uploads; Img.tsx, asset-budget.mjs, ARCHITECTURE §5 and the WP7/WP8 unit tests follow.

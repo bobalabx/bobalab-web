@@ -10,3 +10,5 @@
   ```
 - Blocking? no.
 - Test that proves it: `npm run validate` stays at 0 errors; `/about/` fact sheet lists "Haas faculty profile" first.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20).

@@ -28,3 +28,5 @@
 
 - Blocking? No (semantics only; Google has no Person rich result, brief §G3).
 - Test that proves it: `tests/unit/foundation` JSON-LD test: `personNode({ links: { cv: "https://x/cv.pdf", orcid: "https://orcid.org/0" } …}).sameAs` equals `["https://orcid.org/0"]`, and `worksFor.name === site.long_name`. WP4's e2e (`tests/e2e/people.spec.ts`, "PI profile") keeps passing unchanged.
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20): identity links only (haas, website, scholar, orcid, linkedin, github); `worksFor` is typed and named with `site.long_name`.

@@ -13,3 +13,5 @@
   `grid-template-columns: minmax(0, 1fr)` on `.pub-head` alone does NOT fix it (measured: still 321) because of `justify-items: start`. The same pattern (a display-size heading inside a `justify-items: start` grid or a flex row) is worth a glance in the project, news and direction headers, although none of today's titles trigger it.
 - Blocking? no (1.4 px of sideways scroll on one page today). WP8's new reflow test fails until it lands.
 - Test that proves it: `A11Y_SAMPLE=1000 npx playwright test tests/e2e/a11y-sitewide.spec.ts -g "reflow" --project=chromium` on the dev server ("no horizontal scrolling at 320 CSS px on any page").
+
+Status: Applied in integration commit "integration: apply change requests" (2026-10-20).

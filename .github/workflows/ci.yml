@@ -140,11 +140,12 @@ jobs:
           for i in $(seq 1 30); do curl -sf "$BASE_URL/" > /dev/null && exit 0; sleep 1; done
           cat serve.log; exit 1
       - name: Playwright (Chromium + WebKit)
-        # Not here: kit.spec.ts needs `next dev` with NEXT_PUBLIC_KIT=1 (WP0) and
-        # cms-local.spec.ts needs `next dev` + decap-server (WP6): both are local
-        # checks (docs/HANDOVER.md §10). a11y-sitewide.spec.ts runs in the a11y job.
+        # kit.spec.ts skips its kit checks here (the export has no kit page) but keeps
+        # the data-intro check. Not here: cms-local.spec.ts needs `next dev` +
+        # decap-server (WP6), a local check (docs/HANDOVER.md §10).
+        # a11y-sitewide.spec.ts runs in the a11y job.
         run: |
-          mapfile -t specs < <(ls tests/e2e/*.spec.ts | grep -v -e '/kit\.spec\.ts$' -e '/cms-local\.spec\.ts$' -e '/a11y-sitewide\.spec\.ts$')
+          mapfile -t specs < <(ls tests/e2e/*.spec.ts | grep -v -e '/cms-local\.spec\.ts$' -e '/a11y-sitewide\.spec\.ts$')
           npx playwright test "${specs[@]}"
       - if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

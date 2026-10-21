@@ -8,7 +8,7 @@ authors:
   - name: Clare Snyder
     url: https://claresny.github.io/
 type: journal
-venue: Proceedings of the ACM on Human-Computer Interaction (CSCW 2025)
+venue: Proceedings of the ACM on Human-Computer Interaction
 year: 2025
 date_online: "2025-05-02"
 volume: "9"
@@ -20,7 +20,10 @@ links:
   pdf: https://parksinchaisri.github.io/files/paper-chatgpt.pdf
   ssrn: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4700354
   publisher: https://dl.acm.org/doi/10.1145/3711026
-presentations: []
+presentations:
+  - event: CSCW 2025, Bergen
+    year: 2025
+    url: https://cscw.acm.org/2025/index.php/program-overview-3/
 press: []
 awards: []
 directions:

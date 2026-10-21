@@ -58,7 +58,7 @@ export function subscribeMotion(cb: () => void): () => void {
  * Pre-paint script body (runs synchronously in <head> before first paint):
  * 1. apply the stored motion preference;
  * 2. on the first home view of the browser session, set <html data-intro>
- *    (removed after 1 s) so the intro "settle" plays once (§E3).
+ *    (removed after 2 s) so the Fig. 1 intro plays once (D-02a, WP1 request 3).
  */
 export function prePaintSource(basePath: string): string {
   const b = JSON.stringify(basePath.replace(/\/+$/, ""));
@@ -68,6 +68,6 @@ export function prePaintSource(basePath: string): string {
     `try{var b=${b},p=location.pathname;` +
     `if((p===b+"/"||p===b+"/index.html"||p===b)&&!sessionStorage.getItem(${JSON.stringify(INTRO_STORAGE_KEY)})){` +
     `sessionStorage.setItem(${JSON.stringify(INTRO_STORAGE_KEY)},"1");d.setAttribute("data-intro","");` +
-    `setTimeout(function(){d.removeAttribute("data-intro")},1000)}}catch(e){}})();`
+    `setTimeout(function(){d.removeAttribute("data-intro")},2000)}}catch(e){}})();`
   );
 }

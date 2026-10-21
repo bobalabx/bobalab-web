@@ -12,3 +12,5 @@
 - Test that proves it: `npm run media:check` exits 0 on the current tree; `npm run import:content` without arguments prints the usage line and exits 2.
 
 Applied in the WP0/WP7 review commit ("review: …", 2026-10-20).
+
+Status: Applied already, in the WP0/WP7 review commit.
