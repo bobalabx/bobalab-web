@@ -1,0 +1,86 @@
+/**
+ * /news/ (brief §D10, R3 §7.8): "Upcoming talks" computed from event_date ≥
+ * build date (America/Los_Angeles), then every item newest first under year
+ * headings, each with its full date ("Oct 20, 2026") and type badge.
+ */
+import type { Metadata } from "next";
+import { getContent } from "@/lib/content/load";
+import { groupByYear, newsYear, upcomingNews } from "@/lib/content/queries";
+import { pageMetadata } from "@/lib/seo/metadata";
+import { NewsItem } from "@/components/ui/NewsItem";
+import { PageHeader } from "@/components/pages/PageHeader";
+import { UpcomingTalks } from "@/components/news/UpcomingTalks";
+import { FeedLink, withFeedAlternate } from "@/components/news/FeedLink";
+import "@/components/news/news.css";
+
+export function generateMetadata(): Metadata {
+  const { site } = getContent();
+  return withFeedAlternate(
+    pageMetadata({
+      title: "News",
+      description: `Papers, talks, awards and other news from ${site.name}, newest first.`,
+      path: "/news/",
+    }),
+    site.name,
+  );
+}
+
+const yearAnchor = (year: number | null) => `year-${year ?? "undated"}`;
+
+export default function NewsPage() {
+  const c = getContent();
+  const upcoming = upcomingNews(c);
+  const years = groupByYear(c.news, newsYear);
+
+  return (
+    <div className="bl-container pg">
+      <PageHeader
+        title="News"
+        lead={`Papers, talks, awards and other news from ${c.site.name}, newest first.`}
+      >
+        <div className="nw-tools">
+          <FeedLink siteName={c.site.name} />
+          {years.length > 1 ? (
+            <nav className="nw-years" aria-label="News by year">
+              <span className="nw-years__label" aria-hidden="true">
+                Jump to
+              </span>
+              <ul>
+                {years.map((g) => (
+                  <li key={g.year ?? "undated"}>
+                    <a href={`#${yearAnchor(g.year)}`}>{g.year ?? "Undated"}</a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ) : null}
+        </div>
+      </PageHeader>
+
+      <UpcomingTalks items={upcoming} />
+
+      {years.length === 0 ? <p className="nw-empty">There is no news yet.</p> : null}
+
+      {years.map((g) => {
+        const id = yearAnchor(g.year);
+        return (
+          <section key={id} className="nw-year" aria-labelledby={id}>
+            <div className="nw-year__head">
+              <h2 id={id}>{g.year ?? "Undated"}</h2>
+              <p className="nw-year__count">
+                {g.items.length} {g.items.length === 1 ? "item" : "items"}
+              </p>
+            </div>
+            <ol className="nw-list">
+              {g.items.map((n) => (
+                <li key={n.slug}>
+                  <NewsItem item={n} as="h3" />
+                </li>
+              ))}
+            </ol>
+          </section>
+        );
+      })}
+    </div>
+  );
+}
