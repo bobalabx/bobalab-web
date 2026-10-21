@@ -108,21 +108,32 @@
   }
 }
 
-/* Tablet: who-we-are | what-we-do side by side, then the full-width figure. */
+/* Tablet: who-we-are | what-we-do side by side, then the full-width figure.
+   Both columns hang from one top line (the wordmark cap meets the mission's first
+   line), and the mission is set a step smaller than on desktop so the plate starts
+   about 70 px higher at 1024 px (y ≈ 345 with the preview badge) and the first row of
+   pearls and labels is in the first screen at 1024×768 (VIS-09). */
 @media (min-width: 46em) and (max-width: 77.99em) {
   .hm-hero {
-    gap: var(--s-6);
+    gap: var(--s-5);
     padding-top: var(--s-5);
   }
   .hm-id {
     max-width: none;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
     column-gap: var(--s-7);
-    align-items: end;
+    align-items: start;
+  }
+  .hm-ident {
+    /* The wordmark's ink starts a few px under its box; match the mission's cap line. */
+    padding-top: 0.3rem;
+  }
+  .hm-lead {
+    gap: var(--s-4);
   }
   .hm-mission {
     max-width: none;
-    font-size: clamp(1.5rem, 5.6cqi, 2rem);
+    font-size: clamp(1.375rem, 4.6cqi, 1.75rem);
   }
 }
 /* Desktop: identity on the content column, figure 7fr (never under 46rem). */

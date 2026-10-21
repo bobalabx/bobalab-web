@@ -17,6 +17,29 @@ const items = (page: Page) => page.locator(".f1-item");
 const capOn = (page: Page) => page.locator(".f1-cap-layer.is-on");
 const hydrated = (page: Page) => page.waitForSelector(".f1-plate[data-live]");
 
+/**
+ * The key that moves focus through links in this browser, probed on a blank
+ * page: "Tab" (Chromium), "Alt+Tab" (WebKit on macOS), or
+ * null when neither reaches a link: Playwright's WebKit on Windows (MEASURED
+ * 2026-10-20, Playwright 1.64) only Tab-focuses buttons (verify request ci-docs-1).
+ */
+async function linkTabKey(page: Page): Promise<string | null> {
+  const probe = await page.context().newPage();
+  try {
+    await probe.setContent('<button>b</button><a href="#x">a</a>');
+    for (const key of ["Tab", "Alt+Tab"]) {
+      await probe.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+      for (let i = 0; i < 2; i++) {
+        await probe.keyboard.press(key);
+        if (await probe.evaluate(() => document.activeElement?.tagName === "A")) return key;
+      }
+    }
+    return null;
+  } finally {
+    await probe.close();
+  }
+}
+
 test.use({ viewport: { width: 1366, height: 768 } });
 
 test("DOM contract: one labelled nav, one <ol role=list> of real links, unique VT names", async ({
@@ -71,15 +94,24 @@ test("keyboard: Tab order 01→0N, focus updates the caption, Esc resets", async
   await skipIntro(page);
   await page.goto("/");
   await hydrated(page);
+  const tabKey = await linkTabKey(page);
+  if (!tabKey) {
+    test.info().annotations.push({
+      type: "keyboard",
+      description:
+        "Tab does not reach links in this browser (Playwright WebKit on Windows): each figure link is focused by script; the Tab order itself is checked in Chromium",
+    });
+  }
   const n = await items(page).count();
   const first = items(page).first().locator("a");
   // Tab until the first figure link is focused.
-  for (let k = 0; k < 40; k++) {
-    await page.keyboard.press("Tab");
+  for (let k = 0; tabKey && k < 40; k++) {
+    await page.keyboard.press(tabKey);
     if (await first.evaluate((el) => el === document.activeElement)) break;
   }
   for (let i = 0; i < n; i++) {
     const li = items(page).nth(i);
+    if (!tabKey) await li.locator("a").focus();
     await expect(li.locator("a")).toBeFocused();
     const slug = await li.getAttribute("data-slug");
     await expect(li).toHaveClass(/is-on/);
@@ -90,7 +122,7 @@ test("keyboard: Tab order 01→0N, focus updates the caption, Esc resets", async
       return `${cs.outlineStyle} ${cs.outlineWidth}`;
     });
     expect(ring).toBe("solid 2px");
-    if (i < n - 1) await page.keyboard.press("Tab");
+    if (tabKey && i < n - 1) await page.keyboard.press(tabKey);
   }
   await page.keyboard.press("Escape");
   await expect(capOn(page)).toHaveAttribute("data-cap", "legend");
@@ -273,4 +305,65 @@ test("reduced motion: every view-transition animation is ≤ 120 ms (§E10.5)", 
   await expect.poll(async () => (await vtLog(page)).length).toBeGreaterThan(0);
   for (const e of await vtLog(page)) expect(Number(e.split("|")[1]), e).toBeLessThanOrEqual(120);
   await ctx.close();
+});
+
+test("inactive pearls stay opaque on a light plate; only glow, halo and seeds dim (VIS-10)", async ({
+  browser,
+}) => {
+  for (const colorScheme of ["light", "dark"] as const) {
+    const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 }, colorScheme });
+    const page = await ctx.newPage();
+    await skipIntro(page);
+    await page.goto("/");
+    await hydrated(page);
+    const on = items(page).nth(1);
+    const box = (await on.locator(".f1-pearl").boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 3 });
+    await expect(on).toHaveClass(/is-on/);
+    await page.waitForTimeout(400); // --dur-base fade
+    const off = await items(page)
+      .nth(0)
+      .evaluate((li) => {
+        const cs = (s: string) => getComputedStyle(li.querySelector(s)!);
+        const pearl = li.querySelector(".f1-pearl")!;
+        return {
+          pearl: cs(".f1-pearl").opacity,
+          glow: getComputedStyle(pearl, "::after").opacity,
+          // §G2: only transform and opacity animate (no filter).
+          transitions: cs(".f1-pearl").transitionProperty,
+          halo: cs(".f1-halo").opacity,
+          seeds: cs(".f1-seeds").opacity,
+        };
+      });
+    expect(off.transitions).not.toMatch(/filter/);
+    if (colorScheme === "light") {
+      expect(off.pearl).toBe("1");
+      expect(off.glow).toBe("0.3");
+    } else {
+      expect(off.pearl).toBe("0.78");
+      expect(off.glow).toBe("1");
+    }
+    expect(off.halo).toBe("0.35");
+    expect(off.seeds).toBe("0.45");
+    await ctx.close();
+  }
+});
+
+test("draft marking: when every direction is a draft, one summary badge, none per row (VIS-03)", async ({
+  page,
+}) => {
+  await skipIntro(page);
+  for (const width of [1366, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto("/");
+    const n = Number(await page.locator(".f1-plate").getAttribute("data-n"));
+    const drafts = await page.locator(".f1-foot-draft").count();
+    test.skip(!drafts, "no draft directions in this build");
+    const summary = (await page.locator(".f1-foot-draft").innerText()).trim();
+    if (summary.includes(`all ${n} directions`) || summary.includes("this direction")) {
+      await expect(page.locator(".f1-item .bl-badge")).toHaveCount(0);
+      await expect(page.locator(".f1-cap-layer .bl-badge")).toHaveCount(0);
+    }
+    await expect(page.locator(".f1-foot-draft .bl-badge--draft")).toBeVisible();
+  }
 });

@@ -65,6 +65,10 @@ export function PearlFigure({ model, labName, headingId = "dirs-h" }: PearlFigur
     plateVars["--f1-D"] = template.diameter;
   }
   const asOf = formatDate(model.asOf);
+  // Draft marking (D-03): when every direction is a draft, the foot's one summary
+  // badge ("applies to all N directions") says it once; per-row and per-caption
+  // badges appear only when drafts and reviewed directions are mixed (VIS-03).
+  const markEach = model.draftCount > 0 && model.draftCount < model.n;
 
   return (
     <section className={listOnly ? "f1 f1--list" : "f1"} aria-labelledby={headingId}>
@@ -89,7 +93,9 @@ export function PearlFigure({ model, labName, headingId = "dirs-h" }: PearlFigur
               <p className="f1-cap-b">
                 Each pearl is a research direction
                 {!listOnly && (
-                  <span className="f1-in-fig">; each dot is one paper with a public version</span>
+                  <span className="f1-in-fig">
+                    ; each dot is one paper with a public version or a documented talk
+                  </span>
                 )}
                 .
               </p>
@@ -110,7 +116,7 @@ export function PearlFigure({ model, labName, headingId = "dirs-h" }: PearlFigur
                   {it.summary && <p className="f1-cap-b">{it.summary}</p>}
                   <p className="f1-cap-m">
                     <span>{metaLine(it)}</span>
-                    {it.draft && <DraftBadge />}
+                    {it.draft && markEach && <DraftBadge />}
                   </p>
                 </div>
               ))}
@@ -148,7 +154,7 @@ export function PearlFigure({ model, labName, headingId = "dirs-h" }: PearlFigur
                   </span>
                   <span className="f1-count">{plural(it.papers, "paper")}</span>
                 </Link>
-                {it.draft && <DraftBadge />}
+                {it.draft && markEach && <DraftBadge />}
                 {dotplot && model.yearRange && (
                   <span className="f1-track" aria-hidden="true">
                     {trackDots(it.years, model.yearRange).map((d, k) => (
@@ -186,8 +192,8 @@ export function PearlFigure({ model, labName, headingId = "dirs-h" }: PearlFigur
               {!listOnly && (
                 <span className="f1-in-fig">
                   {dotplot
-                    ? "Each dot is one paper with a public version, by year"
-                    : "= 1 paper with a public version"}
+                    ? "Each dot is one paper with a public version or a documented talk, by year"
+                    : "= 1 paper with a public version or a documented talk"}
                   {" · "}
                 </span>
               )}

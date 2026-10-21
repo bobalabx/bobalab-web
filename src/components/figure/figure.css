@@ -67,11 +67,28 @@
   width: var(--D);
   height: var(--D);
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 88%, var(--f1-glow) 0, transparent 62%),
-    radial-gradient(circle at 46% 40%, var(--pearl-hi) 0, var(--pearl) 52%, var(--pearl-lo) 100%);
+  /* Own stacking context: the glow layer (::after, z-index -1) paints over this
+     background and under the sheen and the index, as when both were one background. */
+  isolation: isolate;
+  background: radial-gradient(
+    circle at 46% 40%,
+    var(--pearl-hi) 0,
+    var(--pearl) 52%,
+    var(--pearl-lo) 100%
+  );
   box-shadow: inset 0 0 0 1px var(--f1-rim);
   color: var(--pearl-index);
+}
+/* Direction glow at the base of the body. A layer of its own so an inactive pearl
+   can lose it by opacity alone (VIS-10; §G2: only transform and opacity animate). */
+.f1-pearl::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 88%, var(--f1-glow) 0, transparent 62%);
+  pointer-events: none;
 }
 /* Satin sheen: one ellipse 34% × 14% of D, centred at (30%, 22%), rotated −35°. No bezel. */
 .f1-pearl::before {
@@ -478,6 +495,22 @@
   outline-offset: -2px;
 }
 
+/* Wide list (container 40–46em, e.g. iPad portrait): two columns of rows, so the
+   plate is not a narrow list with an empty right half (VIS-09). DOM order stays
+   01, 02 / 03, 04, row-major like the figure. The 46em figure-mode switch (§E2)
+   is unchanged; the unnamed .f1--list container never matches. */
+@container f1 (40em <= width < 46em) {
+  .f1-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--s-5);
+  }
+  /* Close the last row in both columns. */
+  .f1-item:nth-last-child(2):nth-child(odd) {
+    border-bottom: 1px solid var(--hairline);
+  }
+}
+
 /* Dot-plot track: hidden in list mode. */
 .f1-track,
 .f1-axis {
@@ -581,13 +614,26 @@
 
   /* Active and inactive (no wash; judge fix 6). */
   .f1-pearl,
+  .f1-pearl::after,
   .f1-halo,
   .f1-ring,
   .f1-seeds {
     transition: opacity var(--dur-base) linear;
   }
-  .f1-plate[data-active] .f1-item:not(.is-on) .f1-pearl {
-    opacity: 0.78;
+  /* Light plate: an espresso body at .78 over cream turns milky grey-taupe and reads
+     as "disabled" (VIS-10, the JUDGE.md .55 problem). Inactive bodies stay opaque and
+     only lose most of their direction glow; halo, seeds and orbit carry the dim. */
+  .f1-plate[data-active] .f1-item:not(.is-on) .f1-pearl::after {
+    opacity: 0.3;
+  }
+  @media (prefers-color-scheme: dark) {
+    /* Dark plate: the body at .78 stays dark, so keep JUDGE.md's value. */
+    .f1-plate[data-active] .f1-item:not(.is-on) .f1-pearl {
+      opacity: 0.78;
+    }
+    .f1-plate[data-active] .f1-item:not(.is-on) .f1-pearl::after {
+      opacity: 1;
+    }
   }
   .f1-plate[data-active] .f1-item:not(.is-on) .f1-seeds {
     opacity: 0.45;
@@ -870,6 +916,7 @@
     background: CanvasText;
   }
   .f1-pearl::before,
+  .f1-pearl::after,
   .f1-halo,
   .f1-plate::after {
     display: none;

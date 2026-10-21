@@ -187,3 +187,38 @@ test("axe: forced colours, with a direction active", async ({ browser }) => {
   expect(results.violations.map((v) => v.id)).toEqual([]);
   await ctx.close();
 });
+
+test("tablet hero: columns share a top line; iPad portrait list uses two columns (VIS-09)", async ({
+  page,
+}) => {
+  const sizes: Array<[number, number]> = [
+    [1024, 768],
+    [768, 1024],
+  ];
+  for (const [width, height] of sizes) {
+    await page.setViewportSize({ width, height });
+    await page.goto("/");
+    await page.evaluate(() => document.fonts.ready);
+    const g = await page.evaluate(() => {
+      const r = (s: string) => document.querySelector(s)?.getBoundingClientRect() ?? null;
+      return { wm: r(".hm-wm")!, mission: r(".hm-mission"), plate: r(".f1-plate") };
+    });
+    if (g.mission) {
+      expect(Math.abs(g.wm.top - g.mission.top), `top line at ${width}`).toBeLessThanOrEqual(12);
+    }
+    if (!g.plate) continue;
+    // The plate starts early enough for the first row of pearls to be in the first screen.
+    expect(g.plate.top, `plate top at ${width}`).toBeLessThanOrEqual(height === 768 ? 380 : 420);
+    const mode = await page
+      .locator(".f1-plate")
+      .evaluate((el) => getComputedStyle(el).getPropertyValue("--f1-mode").trim());
+    if (mode === "list" && (await page.locator(".f1-item").count()) >= 2) {
+      const tops = await page
+        .locator(".f1-item")
+        .evaluateAll((els) =>
+          els.slice(0, 2).map((e) => Math.round(e.getBoundingClientRect().top)),
+        );
+      expect(tops[0], "rows 01 and 02 side by side").toBe(tops[1]);
+    }
+  }
+});
