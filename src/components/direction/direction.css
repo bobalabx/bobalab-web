@@ -1,0 +1,666 @@
+/*
+ * Research index and direction pages (WP2; brief §D4–§D5, §C9).
+ * Prefixes: dr- (direction page + shared section layout), rs- (research index).
+ * Colours only from tokens; direction colours via [data-swatch] roles
+ * (--dir-band light tint / computed dark band, --dir-text, --dir-dot).
+ * Unlayered on purpose (loaded after globals), with single-class selectors.
+ */
+
+/* ---------- Shared bits ------------------------------------------------- */
+.dr-arrow-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-height: 44px;
+  font-weight: 600;
+}
+.dr-arrow-link .bl-icon {
+  transition: translate var(--dur-fast) var(--ease-out);
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="reduce"]) .dr-arrow-link:hover .bl-icon {
+    translate: 3px 0;
+  }
+}
+.dr-sep {
+  color: var(--ink-muted);
+}
+
+.dr-crumbs ol,
+.pj-crumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0.5em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* The separator trails its crumb, so a wrapped line never starts with "/".
+   The second `content` (alt text "") keeps it silent for screen readers. */
+.dr-crumbs li:not(:last-child)::after,
+.pj-crumbs li:not(:last-child)::after {
+  content: "/";
+  content: "/" / "";
+  margin-left: 0.5em;
+  color: var(--ink-muted);
+}
+.dr-crumbs a,
+.pj-crumbs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink);
+}
+
+/* ---------- Direction header band (§D5.1) ------------------------------ */
+.dr-band {
+  background: var(--dir-band);
+  border-bottom: 1px solid var(--hairline);
+}
+.dr-band__inner {
+  display: grid;
+  gap: var(--s-4);
+  padding-block: var(--s-3) var(--s-7);
+}
+.dr-band__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 var(--s-5);
+  font-family: var(--font-data);
+  font-size: var(--fs-mono);
+  letter-spacing: var(--tracking-mono);
+  font-weight: 500;
+  color: var(--ink);
+}
+.dr-crumbs [aria-current] {
+  color: var(--ink-muted);
+}
+.dr-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  min-height: 44px;
+  color: var(--ink);
+}
+.dr-back__icon {
+  rotate: 180deg;
+}
+.dr-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--s-3);
+  align-items: center;
+  max-width: 64rem;
+}
+.dr-hero__pearl {
+  /* The pearl box is 1.5 D square; pull it left so the pearl body, not its halo, aligns with the text column. */
+  margin-left: calc(var(--gutter) * -0.5);
+  line-height: 0;
+}
+.dr-hero__text {
+  display: grid;
+  gap: var(--s-3);
+  min-width: 0;
+  justify-items: start;
+}
+.dr-title {
+  max-width: 22ch;
+}
+.dr-question {
+  max-width: 42rem;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  color: var(--ink);
+}
+.dr-status {
+  font-family: var(--font-data);
+  font-size: var(--fs-mono);
+  line-height: var(--lh-mono);
+  letter-spacing: var(--tracking-mono);
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+.dr-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+@media (min-width: 48rem) {
+  .dr-hero {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--s-6);
+  }
+  .dr-hero__pearl {
+    margin-left: calc(var(--s-5) * -1);
+  }
+  .dr-band__inner {
+    padding-block: var(--s-4) var(--s-7);
+  }
+}
+/* Wide screens: the hero shares the section grid below (14rem label column +
+   --s-7 gap), so the h1, question and status line start on the same vertical
+   as every section body. The pearl's margin box (1.5 D − 1.5rem ≤ 13.5rem)
+   fits the label column at the largest D (10rem). */
+@media (min-width: 64rem) {
+  .dr-hero {
+    grid-template-columns: 14rem minmax(0, 1fr);
+    column-gap: var(--s-7);
+    max-width: none;
+  }
+  .dr-hero__text {
+    max-width: 47rem;
+  }
+}
+
+/* ---------- Body and sections ------------------------------------------ */
+.dr-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.dr-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--s-4);
+  padding-block: var(--s-7);
+  border-top: 1px solid var(--hairline);
+}
+.dr-body > .dr-section:first-child,
+.dr-archived + .dr-section,
+.pj-hero + .dr-section {
+  border-top: 0;
+}
+.dr-section__head {
+  display: grid;
+  gap: var(--s-1);
+  align-content: start;
+}
+.dr-section__title {
+  font-size: var(--fs-xl);
+  line-height: var(--lh-xl);
+}
+.dr-section__aside {
+  color: var(--ink-muted);
+}
+.dr-section__body {
+  min-width: 0;
+  max-width: 52rem;
+}
+@media (min-width: 64rem) {
+  .dr-section {
+    grid-template-columns: 14rem minmax(0, 1fr);
+    column-gap: var(--s-7);
+  }
+}
+
+.dr-prose {
+  max-width: var(--prose-max);
+}
+
+.dr-archived {
+  margin-top: var(--s-6);
+  max-width: 52rem;
+  padding: var(--s-4) var(--s-5);
+  border: 1px dashed var(--rule);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+@media (min-width: 64rem) {
+  /* Sits on the section-body column, like the h1 above and the text below. */
+  .dr-archived {
+    margin-left: calc(14rem + var(--s-7));
+  }
+}
+
+/* What we've found */
+.dr-findings {
+  display: grid;
+  gap: var(--s-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dr-finding {
+  padding-left: var(--s-4);
+  border-left: 2px solid var(--dir-text);
+}
+.dr-finding__text {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  max-width: 60ch;
+}
+.dr-finding__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-1) var(--s-2);
+  margin-top: var(--s-2);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-sm);
+}
+
+/* Key figure */
+.dr-figure {
+  margin: 0;
+  display: grid;
+  gap: var(--s-3);
+}
+.dr-figure__img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+.dr-figure__caption {
+  font-size: var(--fs-sm);
+  line-height: var(--lh-sm);
+  color: var(--ink-muted);
+  max-width: 66ch;
+}
+.dr-figure__shows {
+  display: grid;
+  gap: var(--s-1);
+  padding: var(--s-4);
+  background: var(--paper-alt);
+  border-radius: var(--r-md);
+  max-width: 66ch;
+}
+
+/* Projects with seed-dot bullets (§C9) */
+.dr-projects {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dr-project {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  column-gap: var(--s-4);
+  padding-block: var(--s-4);
+}
+.dr-project:first-child {
+  padding-top: 0;
+}
+.dr-project + .dr-project {
+  border-top: 1px solid var(--hairline);
+}
+.dr-project__dot {
+  margin-top: calc((var(--fs-lg) * var(--lh-lg) - 10px) / 2);
+}
+.dr-project__body {
+  display: grid;
+  gap: var(--s-2);
+  min-width: 0;
+  justify-items: start;
+}
+.dr-project__title {
+  font-family: var(--font-text);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  font-weight: 600;
+}
+.dr-project__title a {
+  color: var(--ink);
+  text-decoration-color: var(--hairline);
+}
+.dr-project__title a:hover {
+  text-decoration-color: var(--accent);
+}
+.dr-project__summary {
+  max-width: 62ch;
+}
+
+/* Publications */
+.dr-pubs > .bl-pub:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+.dr-seeall {
+  margin-top: var(--s-2);
+}
+.dr-wip {
+  margin-top: var(--s-6);
+  padding: var(--s-5);
+  background: var(--paper-alt);
+  border-radius: var(--r-md);
+}
+.dr-pubs + .dr-wip,
+.dr-seeall + .dr-wip {
+  margin-top: var(--s-6);
+}
+.dr-section__body > .dr-wip:first-child {
+  margin-top: 0;
+}
+.dr-wip__title {
+  font-family: var(--font-text);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  font-weight: 600;
+}
+.dr-wip__note {
+  margin-top: var(--s-1);
+}
+.dr-wip__list {
+  display: grid;
+  gap: var(--s-3);
+  margin: var(--s-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.dr-wip__list li {
+  display: grid;
+  gap: 2px;
+  justify-items: start;
+}
+.dr-wip__link {
+  color: var(--ink);
+  font-weight: 500;
+  text-decoration-color: var(--rule);
+}
+.dr-wip__link:hover {
+  color: var(--ink);
+  text-decoration-color: var(--accent);
+}
+
+/* People */
+.dr-people {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: var(--s-6) var(--s-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Methods & data */
+.dr-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dr-methods li {
+  padding: 0.3rem 0.85rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-pill);
+  background: var(--paper-alt);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-sm);
+}
+
+/* Work with us */
+.dr-work {
+  display: grid;
+  gap: var(--s-4);
+  padding: var(--s-5);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-left: 4px solid var(--dir-text);
+  border-radius: var(--r-md);
+}
+.dr-work__lead {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  font-weight: 500;
+}
+.dr-work__list {
+  display: grid;
+  gap: var(--s-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dr-work__item {
+  display: grid;
+  gap: var(--s-1);
+}
+.dr-work__item-title {
+  font-weight: 600;
+}
+.dr-work__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+}
+.dr-work__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3) var(--s-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dr-work__email {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  min-height: 44px;
+}
+
+/* More directions rail (§D5.10) */
+.dr-rail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--s-4);
+  padding-block: var(--s-7) var(--s-5);
+  border-top: 1px solid var(--hairline);
+}
+@media (min-width: 64rem) {
+  .dr-rail {
+    grid-template-columns: 14rem minmax(0, 1fr);
+    column-gap: var(--s-7);
+    align-items: start;
+  }
+}
+.dr-rail__title {
+  font-size: var(--fs-xl);
+  line-height: var(--lh-xl);
+}
+/* Even tiles: 3 siblings fill one row, 4 (from an archived page) still fit one
+   row at desktop width instead of leaving an orphan; one column on phones. */
+.dr-rail__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.5rem), 1fr));
+  gap: var(--s-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dr-rail__list > li {
+  display: grid;
+  min-width: 0;
+}
+.dr-rail__link {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: 64px;
+  padding: var(--s-2) var(--s-4) var(--s-2) var(--s-3);
+  box-sizing: border-box;
+  height: 100%;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.dr-rail__link:hover {
+  border-color: var(--dir-text);
+  color: var(--ink);
+}
+.dr-rail__link:hover .dr-rail__label {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+}
+.dr-rail__text {
+  display: grid;
+  min-width: 0;
+}
+.dr-rail__label {
+  font-weight: 600;
+  line-height: 1.3;
+}
+.dr-rail__count {
+  font-family: var(--font-data);
+  font-size: var(--fs-mono);
+  letter-spacing: var(--tracking-mono);
+  color: var(--ink-muted);
+}
+
+.dr-updated {
+  padding-block: var(--s-4) 0;
+}
+
+/* ---------- Research index (§D4) --------------------------------------- */
+.rs-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--s-8);
+  padding-block: var(--s-7) 0;
+}
+.rs-head {
+  display: grid;
+  gap: var(--s-4);
+  justify-items: start;
+}
+.rs-head__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--s-6);
+}
+.rs-block {
+  display: grid;
+  gap: var(--s-5);
+  min-width: 0;
+}
+.rs-block__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-2) var(--s-5);
+}
+.rs-block__title {
+  font-size: var(--fs-2xl);
+  line-height: var(--lh-2xl);
+}
+.rs-block__intro {
+  margin-top: calc(var(--s-3) * -1);
+}
+.rs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: var(--s-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 48rem) {
+  .rs-grid--dirs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.rs-grid > li {
+  display: grid;
+  min-width: 0;
+}
+.rs-status {
+  display: grid;
+  gap: var(--s-4);
+}
+.rs-status + .rs-status {
+  margin-top: var(--s-5);
+}
+.rs-status__title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  font-family: var(--font-text);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  font-weight: 600;
+}
+.rs-status__count {
+  font-weight: 500;
+}
+
+/* Direction-card pearls use the same satin sheen as the direction-page pearls
+   (WP1 DirectionPearl, DECISIONS D-02a) instead of WP0's stroked crescent, so a
+   card's pearl and the hero it leads to look like one object. Remove once
+   docs/change-requests/WP2/4-pearl-sheen.md lands. (Forced colours: WP0 hides
+   the ::before.) */
+.rs-grid--dirs .bl-pearl--gloss::before {
+  inset: auto;
+  left: 13%;
+  top: 15%;
+  width: 34%;
+  height: 14%;
+  border: 0;
+  border-radius: 50%;
+  transform: none;
+  rotate: -35deg;
+  background: radial-gradient(closest-side, rgb(255 248 238 / 0.16), transparent);
+}
+@media (prefers-color-scheme: dark) {
+  .rs-grid--dirs .bl-pearl--gloss::before {
+    background: radial-gradient(closest-side, rgb(255 248 238 / 0.1), transparent);
+  }
+}
+
+/* Earlier (archived) directions: same card, quieter than the live ones. */
+.rs-grid--earlier .bl-card {
+  background: transparent;
+}
+
+/* Awards read as a quiet ruled list, exactly as on /publications/ (WP3's
+   local rule), and long names wrap at 320 px (shared .bl-badge is nowrap).
+   Remove once WP0 applies docs/change-requests/WP3/1-awards-in-list-entries.md
+   (supersedes docs/change-requests/WP2/1-badge-wrap-awards.md). */
+.dr-pubs .bl-pub__awards {
+  display: grid;
+  gap: var(--s-1);
+}
+.dr-pubs .bl-pub__awards > li {
+  position: relative;
+  min-width: 0;
+  padding-left: 1.15rem;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-sm);
+}
+.dr-pubs .bl-pub__awards > li::before {
+  content: "";
+  position: absolute;
+  left: 0.1rem;
+  top: 0.4em;
+  width: 0.55rem;
+  height: 0.55rem;
+  box-sizing: border-box;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+}
+.dr-pubs .bl-pub__awards .bl-badge {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: normal;
+}
+@media (forced-colors: active) {
+  .dr-pubs .bl-pub__awards > li::before {
+    border-color: CanvasText;
+  }
+}

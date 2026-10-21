@@ -1,0 +1,249 @@
+/*
+ * Project index and project page (WP2; brief §D6). Prefix pj-.
+ * Shares the section layout (.dr-section…) and grids (.rs-grid) from
+ * src/components/direction/direction.css.
+ */
+
+/* ---------- Index ------------------------------------------------------- */
+.pj-filter__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-3) var(--s-5);
+  margin-bottom: var(--s-7);
+  padding-bottom: var(--s-4);
+  border-bottom: 1px solid var(--hairline);
+}
+.pj-filter__bar .bl-chips {
+  min-width: 0;
+  max-width: 100%;
+}
+.pj-filter__count {
+  padding-bottom: 0.6rem;
+}
+/* The no-JS <noscript><style> must not become an empty grid row (its style
+   still applies when the element is not rendered). */
+.rs-page > noscript {
+  display: none;
+}
+/* `hidden` must win over the grid display of list items and groups. */
+.pj-filter [hidden] {
+  display: none !important;
+}
+.pj-groups {
+  display: grid;
+  gap: var(--s-8);
+}
+.pj-group {
+  display: grid;
+  gap: var(--s-5);
+  min-width: 0;
+}
+.pj-group__head {
+  display: grid;
+  gap: var(--s-1);
+  justify-items: start;
+}
+.pj-group__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+}
+.pj-group__title {
+  font-size: var(--fs-2xl);
+  line-height: var(--lh-2xl);
+}
+.pj-group__title a {
+  color: var(--ink);
+  text-decoration-color: var(--hairline);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.15em;
+}
+.pj-group__title a:hover {
+  text-decoration-color: var(--accent);
+}
+.pj-group__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+  color: var(--ink-muted);
+}
+
+/* ---------- Project page head (§D6.1–2) -------------------------------- */
+.pj-head {
+  border-bottom: 1px solid var(--hairline);
+}
+.pj-head__inner {
+  display: grid;
+  gap: var(--s-3);
+  justify-items: start;
+  padding-block: var(--s-4) var(--s-7);
+}
+.pj-crumbs {
+  font-size: var(--fs-sm);
+  line-height: var(--lh-sm);
+  color: var(--ink-muted);
+}
+.pj-crumbs [aria-current] {
+  color: var(--ink-muted);
+}
+/* "● PROJECT": the primary direction's flat dot (§C9), as on the index group heads. */
+.pj-head__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  margin-top: var(--s-2);
+}
+.pj-title {
+  max-width: 28ch;
+}
+.pj-summary {
+  max-width: 46rem;
+  font-weight: 400;
+}
+.pj-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+  color: var(--ink-muted);
+}
+
+/* Hero figure (§D6.3) */
+.pj-hero {
+  margin: var(--s-6) 0 0;
+  display: grid;
+  gap: var(--s-3);
+  max-width: 60rem;
+}
+.pj-hero__img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--r-md);
+  border: 1px solid var(--hairline);
+}
+
+/* Team (§D6.6) */
+.pj-team {
+  display: grid;
+  gap: var(--s-5);
+}
+.pj-team__members {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: var(--s-4) var(--s-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Avatar sits beside the name, not centred on a multi-line role. */
+.pj-member {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+}
+.pj-member > :first-child {
+  flex: none;
+  margin-top: 0.15rem;
+}
+.pj-member__text {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  min-width: 0;
+}
+.pj-member__name {
+  font-weight: 600;
+}
+.pj-member__name a {
+  color: var(--ink);
+}
+.pj-team__group {
+  display: grid;
+  gap: var(--s-2);
+}
+.pj-team__label {
+  font-family: var(--font-text);
+  font-size: var(--fs-base);
+  line-height: var(--lh-base);
+  font-weight: 600;
+}
+.pj-team__plain,
+.pj-funding {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pj-team__plain li + li,
+.pj-funding li + li {
+  margin-top: var(--s-1);
+}
+
+/* Outputs (§D6.7) */
+.pj-subtitle {
+  font-family: var(--font-text);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  font-weight: 600;
+  margin-bottom: var(--s-3);
+}
+.pj-materials + .dr-pubs {
+  margin-top: var(--s-6);
+}
+.pj-materials + .dr-wip {
+  margin-top: var(--s-6);
+}
+.pj-news > .bl-news:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* ---------- Compact rows (research index) ------------------------------ */
+.pj-rows {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: var(--s-7);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--hairline);
+}
+@media (min-width: 56rem) {
+  .pj-rows {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.pj-row {
+  display: grid;
+  gap: var(--s-1);
+  align-content: start;
+  justify-items: start;
+  padding-block: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--hairline);
+}
+.pj-row__title {
+  font-weight: 600;
+  line-height: var(--lh-sm);
+  font-size: var(--fs-base);
+}
+.pj-row__title a {
+  display: inline-block;
+  padding-block: 2px;
+  color: var(--ink);
+  text-decoration-color: var(--hairline);
+}
+.pj-row__title a:hover {
+  text-decoration-color: var(--accent);
+}
+.pj-row__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-1) var(--s-4);
+  color: var(--ink-muted);
+}
+.pj-row__meta:empty {
+  display: none;
+}
