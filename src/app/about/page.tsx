@@ -5,7 +5,7 @@
  */
 import type { Metadata } from "next";
 import { getContent } from "@/lib/content/load";
-import { clipDescription, pageMetadata } from "@/lib/seo/metadata";
+import { pageMetadata } from "@/lib/seo/metadata";
 import { organizationLd } from "@/lib/seo/jsonld";
 import { JsonLd } from "@/components/ui/JsonLd";
 import { DraftBadge } from "@/components/ui/Badge";
@@ -13,17 +13,20 @@ import { DateText } from "@/components/ui/DateText";
 import { Prose } from "@/components/ui/Prose";
 import { PageHeader } from "@/components/pages/PageHeader";
 import { LabFacts } from "@/components/pages/LabFacts";
+import { aboutDescription } from "@/components/pages/aboutDescription";
 
 const FALLBACK_TITLE = "About";
 
 export function generateMetadata(): Metadata {
-  const { pages, site } = getContent();
+  const { pages, site, people } = getContent();
   // The <title> stays "About · BOBALAB"; the h1 uses the page's own title.
   return pageMetadata({
     title: FALLBACK_TITLE,
-    description:
-      clipDescription(pages.about?.intro) ??
-      `${site.name}, the ${site.long_name}, ${site.affiliation_text}: mission, principal investigator and contact.`,
+    description: aboutDescription({
+      site,
+      pages,
+      hasPi: people.some((p) => p.role === "pi"),
+    }),
     path: "/about/",
   });
 }

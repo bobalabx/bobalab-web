@@ -48,11 +48,7 @@ export default function NotFound() {
                   <span>
                     <span className="pg-dirs__title">{d.title}</span>
                     {d.question ? <span className="pg-dirs__q">{d.question}</span> : null}
-                    {d.draft ? (
-                      <span className="pg-dirs__q">
-                        <DraftBadge />
-                      </span>
-                    ) : null}
+                    <DraftBadge show={d.draft} line />
                   </span>
                 </Link>
               </li>

@@ -16,7 +16,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { clearContentCache, getContent } from "@/lib/content/load";
 import { formatDate } from "@/lib/content/dates";
 import JoinPage from "@/app/join/page";
-import AboutPage from "@/app/about/page";
+import AboutPage, { generateMetadata as aboutMetadata } from "@/app/about/page";
 import AccessibilityPage from "@/app/accessibility/page";
 import PrivacyPage from "@/app/privacy/page";
 import NewsPage from "@/app/news/page";
@@ -81,6 +81,22 @@ describe.skipIf(!present)("WP5 pages in a production build (drafts excluded)", (
     if (pi) expect(html).toContain(pi.name);
     expect(html).toContain('"@type":"ResearchOrganization"');
     if (!c.pages.about) expect(html).not.toContain('class="prose"');
+  });
+
+  it("About: the meta description only promises sections the page renders (CON-15)", () => {
+    const c = getContent();
+    const html = renderToStaticMarkup(<AboutPage />);
+    const description = String(aboutMetadata().description ?? "");
+    expect(description.length).toBeGreaterThan(0);
+    expect(description.length).toBeLessThanOrEqual(160);
+    if (!c.pages.about?.intro) {
+      const showsMission = html.includes('id="about-mission"');
+      expect(description.includes("mission")).toBe(showsMission);
+      expect(description.includes("principal investigator")).toBe(
+        c.people.some((p) => p.role === "pi"),
+      );
+      expect(description.endsWith("contact.")).toBe(true);
+    }
   });
 
   it("Accessibility and Privacy: a heading and a contact even before the statements are published", () => {
