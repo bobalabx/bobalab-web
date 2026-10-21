@@ -1,0 +1,249 @@
+# Quality gates for every pull request (brief §G5; WP8).
+#
+# Job names are stable: rulesets and branch protection match them by name.
+# `validate-content` is the ruleset's REQUIRED check (docs/SETUP-PRODUCTION.md):
+# it runs on every PR with no path filter, so it always reports, including on
+# the Decap CMS branches (cms/<collection>/<slug>).
+#
+# Actions are pinned by full commit SHA (brief §G4); the comment names the tag.
+# Dependabot (.github/dependabot.yml) proposes updates for both the SHA and the comment.
+
+name: CI
+
+on:
+  pull_request:
+  merge_group:
+  # Also runnable by hand or by deploy.yml (for the published-slugs PR, whose
+  # events do not trigger workflows because GITHUB_TOKEN created it).
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  validate-content:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Content schemas, relations, consent and limits (brief §F3)
+        run: npm run validate
+      - name: Upload types and sizes (jpg/png/webp/gif/pdf; ≤ 10 MB; images ≤ 2 MB)
+        run: node scripts/perf/asset-budget.mjs uploads
+
+  lint-typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      # next-env.d.ts and the route types are generated (git-ignored); typegen
+      # writes them without a full build.
+      - run: npx next typegen
+      - run: npm run typecheck
+
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run test
+
+  build:
+    # Linux on purpose: Windows exports misname prefetch files (DECISIONS D-07, Next #85374).
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Image variants (WebP 480/960 + manifest)
+        run: npm run media
+      - name: Preview export (drafts included; used by e2e and a11y)
+        run: |
+          npm run build:preview
+          mv out out-preview
+      - name: Production export (drafts excluded; what deploy.yml ships)
+        run: npm run build
+      - name: Export contract (404.html, admin/, sitemap, robots, no drafts or unlisted people)
+        run: node scripts/perf/export-check.mjs out
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site
+          path: out
+          retention-days: 3
+          if-no-files-found: error
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site-preview
+          path: out-preview
+          retention-days: 3
+          if-no-files-found: error
+
+  e2e:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BASE_URL: http://127.0.0.1:4173
+      E2E_STATIC: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site-preview
+          path: out-preview
+      - run: npx playwright install --with-deps chromium webkit
+      - name: Serve the export like GitHub Pages
+        run: |
+          node scripts/serve-out.mjs --dir out-preview --port 4173 > serve.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf "$BASE_URL/" > /dev/null && exit 0; sleep 1; done
+          cat serve.log; exit 1
+      - name: Playwright (Chromium + WebKit)
+        # Not here: kit.spec.ts needs `next dev` with NEXT_PUBLIC_KIT=1 (WP0) and
+        # cms-local.spec.ts needs `next dev` + decap-server (WP6): both are local
+        # checks (docs/HANDOVER.md §10). a11y-sitewide.spec.ts runs in the a11y job.
+        run: |
+          mapfile -t specs < <(ls tests/e2e/*.spec.ts | grep -v -e '/kit\.spec\.ts$' -e '/cms-local\.spec\.ts$' -e '/a11y-sitewide\.spec\.ts$')
+          npx playwright test "${specs[@]}"
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
+          if-no-files-found: ignore
+
+  a11y:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BASE_URL: http://127.0.0.1:4173
+      E2E_STATIC: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site-preview
+          path: out-preview
+      - run: npx playwright install --with-deps chromium
+      - name: Serve the export like GitHub Pages
+        run: |
+          node scripts/serve-out.mjs --dir out-preview --port 4173 > serve.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf "$BASE_URL/" > /dev/null && exit 0; sleep 1; done
+          cat serve.log; exit 1
+      - name: axe (wcag2a, wcag2aa, wcag21aa, wcag22aa) on every page, light and dark, figure and list modes
+        run: npx playwright test tests/e2e/a11y-sitewide.spec.ts --project=chromium
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: a11y-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
+          if-no-files-found: ignore
+
+  links:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: out
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site-preview
+          path: out-preview
+      - name: Internal links and fragments (production and preview exports)
+        # linkinator.config.json skips every non-local URL; external links are links-weekly.yml.
+        run: |
+          node scripts/serve-out.mjs --dir out --port 4173 > serve.log 2>&1 &
+          node scripts/serve-out.mjs --dir out-preview --port 4174 > serve-preview.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:4173/ > /dev/null && curl -sf http://127.0.0.1:4174/ > /dev/null && break; sleep 1; done
+          status=0
+          npx linkinator http://127.0.0.1:4173/ --config linkinator.config.json || status=1
+          npx linkinator http://127.0.0.1:4174/ --config linkinator.config.json || status=1
+          exit $status
+
+  budgets:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: out
+      - name: Client JS per page (B from docs/PERF-BASELINE.md; §G2)
+        run: node scripts/perf/js-budget.mjs out --measure-baseline
+      - name: Fonts, home transfer and headshots (§G2)
+        run: node scripts/perf/asset-budget.mjs out out

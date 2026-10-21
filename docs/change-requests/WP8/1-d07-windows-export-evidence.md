@@ -1,0 +1,14 @@
+# WP8 request 1: correct the D-07 record — Next #85374 DOES reproduce on Windows with 16.4.2
+
+- File(s): `docs/ARCHITECTURE.md` §7 (WP0), `docs/DECISIONS.md` D-07 (orchestrator), `README.md` scripts table (WP0)
+- Why: ARCHITECTURE §7 says "no file names with backslashes in `out/`; per-route segment files are written as nested folders (e.g. `out/kit/__next.kit/__PAGE__.txt`) … issue #85374 did not reproduce". The nested folder **is** the bug on Windows. MEASURED 2026-10-20 by WP8:
+  - `node_modules/next/dist/export/index.js` collects segment files with `path.relative` (backslashes on Windows) and `convertSegmentPathToStaticExportFilename` only replaces `/`, so the name is `__next.kit\__PAGE__.txt`; `path.join` on Windows splits it into the folder `__next.kit/` + `__PAGE__.txt`.
+  - The client builds the URL with the same function on `/kit/__PAGE__` → requests `/kit/__next.kit.__PAGE__.txt` (`client/components/segment-cache/cache.js`).
+  - Browser probe (Chromium, copy of WP0's `out/` with `kit/` copied to `research/`, served by `scripts/serve-out.mjs`, hover + click "Research" on home): **before** the fix `404 /research/__next.kit.__PAGE__.txt` followed by a fallback fetch of `/research/index.txt`; **after** `scripts/fix-win-export.mjs` `200 /research/__next.kit.__PAGE__.txt` and no fallback. So on a Windows build every client navigation into a nested route loses its segment prefetch.
+  - WP0's earlier check saw "no 404s for existing routes" because only `/` and `/kit/` existed and nothing linked to `/kit/` with prefetch.
+- Proposed change:
+  - ARCHITECTURE §7, replace the paragraph with: "Observed on Windows 11 with Next 16.4.2 (2026-10-20): the export writes each nested page's segment files into a folder (`out/kit/__next.kit/__PAGE__.txt`) instead of the dotted name the client requests (`out/kit/__next.kit.__PAGE__.txt`), so prefetches 404 and navigations fall back to the full `index.txt` (MEASURED by WP8; Next #85374). `scripts/fix-win-export.mjs` (run by `scripts/build.mjs` on win32) moves every file in an `out/**/__next.*/` folder to `<folder>.<sub>.<file>` and removes the folder; it is idempotent and a no-op on Linux exports (`tests/unit/wp8/fix-win-export.test.ts`). CI deploys build on ubuntu-latest regardless. `scripts/perf/export-check.mjs` fails a build that still has such folders."
+  - DECISIONS D-07: change "UNKNOWN whether still present in 16.4.2" to "MEASURED present in 16.4.2 (nested `__next.*` folders; WP8 browser probe 2026-10-20)".
+  - README scripts table: drop "(WP8, not yet written)" from `serve:out` and `perf`; add a row `node scripts/perf/export-check.mjs` · `node scripts/perf/asset-budget.mjs` · `node scripts/perf/lighthouse.mjs` (see `docs/HANDOVER.md` §10).
+- Blocking? no.
+- Test that proves it: `npx vitest run --config vitest.config.ts tests/unit/wp8/fix-win-export.test.ts` (uses Next's own `convertSegmentPathToStaticExportFilename` to compute the names the client requests).

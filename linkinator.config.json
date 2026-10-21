@@ -1,0 +1,15 @@
+{
+  "recurse": true,
+  "concurrency": 8,
+  "timeout": 20000,
+  "redirects": "allow",
+  "checkFragments": true,
+  "skip": [
+    "^(?!https?://(127\\.0\\.0\\.1|localhost)(:\\d+)?(/|$))",
+    "/admin/",
+    "/_none/",
+    "^mailto:",
+    "^tel:"
+  ],
+  "verbosity": "error"
+}

@@ -1,0 +1,26 @@
+# Code owners (brief §F5; decision H-6; WP8).
+#
+# GitHub requests a review from these teams on every pull request that touches
+# a matching path. Reviews are REQUIRED only if the protect-main ruleset turns
+# on "Require review from Code Owners" (the H-6 review gate; see
+# docs/SETUP-PRODUCTION.md §B4). A team must have write access to the repo for
+# its entry to count. Pull request authors cannot approve their own PRs, so a
+# maintainer who edits content needs a second maintainer (docs/HANDOVER.md §4).
+#
+# Replace "bobalab-berkeley" if the organization has another name. The last
+# matching line wins.
+
+# Everything: the web maintainers.
+*                         @bobalab-berkeley/web-maintainers
+
+# Content edited through Decap (cms/* branches): maintainers review what editors publish.
+/content/                 @bobalab-berkeley/web-maintainers
+/public/uploads/          @bobalab-berkeley/web-maintainers
+
+# Build, CI/CD, CMS configuration and the vendored Decap bundle.
+/.github/                 @bobalab-berkeley/web-maintainers
+/public/admin/            @bobalab-berkeley/web-maintainers
+/cms/                     @bobalab-berkeley/web-maintainers
+/scripts/                 @bobalab-berkeley/web-maintainers
+/package.json             @bobalab-berkeley/web-maintainers
+/package-lock.json        @bobalab-berkeley/web-maintainers

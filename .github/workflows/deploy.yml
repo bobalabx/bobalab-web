@@ -1,0 +1,163 @@
+# Build the production export on Linux and publish it to GitHub Pages
+# (brief §F4 step 6, §F5; DECISIONS D-03, D-07; WP8).
+#
+# Triggers:
+#   - push to main (an editor's Publish in Decap merges a PR into main);
+#   - a DAILY rebuild at an off-peak minute, so date-derived states
+#     (upcoming talks, alumni) stay current. Static export has no ISR:
+#     "revalidation" is always a full rebuild. GitHub disables schedules in a
+#     public repo after 60 days without activity: docs/HANDOVER.md §6;
+#   - workflow_dispatch (by hand, or from an external cron; see HANDOVER).
+#
+# Pipeline: npm ci → validate → uploads check → media → next build → export
+# check → upload-pages-artifact → deploy-pages → record published slugs (D-05).
+# Actions are pinned by full commit SHA (brief §G4).
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # 11:17 UTC = 04:17 in Berkeley during daylight time (03:17 in winter);
+    # not on the hour, when GitHub delays or drops scheduled runs.
+    - cron: "17 11 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deployment at a time; never cancel a deployment in progress.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      # Reads the Pages site: origin (custom domain or <org>.github.io) and base path
+      # ("" for the <org>.github.io repo or a custom domain, "/<repo>" for a project site).
+      - id: pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - id: site
+        # Repository variables override: SITE_URL (e.g. https://bobalab.haas.berkeley.edu)
+        # and BASE_PATH ("/" forces the root).
+        name: Site URL and base path
+        env:
+          VAR_SITE_URL: ${{ vars.SITE_URL }}
+          VAR_BASE_PATH: ${{ vars.BASE_PATH }}
+          PAGES_ORIGIN: ${{ steps.pages.outputs.origin }}
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: |
+          site_url="${VAR_SITE_URL:-$PAGES_ORIGIN}"
+          base_path="${VAR_BASE_PATH:-$PAGES_BASE_PATH}"
+          [ "$base_path" = "/" ] && base_path=""
+          echo "site_url=$site_url" >> "$GITHUB_OUTPUT"
+          echo "base_path=$base_path" >> "$GITHUB_OUTPUT"
+          echo "Building for ${site_url}${base_path}/" >> "$GITHUB_STEP_SUMMARY"
+      - run: npm ci
+      - name: Validate content (same rules as the required PR check)
+        run: npm run validate
+      - name: Upload types and sizes
+        run: node scripts/perf/asset-budget.mjs uploads
+      - name: Image variants (WebP 480/960 + manifest)
+        run: npm run media
+      - name: Production export (drafts excluded)
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ steps.site.outputs.site_url }}
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.site.outputs.base_path }}
+      - name: Export contract (404.html, admin/, sitemap, robots, no drafts or unlisted people)
+        run: node scripts/perf/export-check.mjs out
+        env:
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.site.outputs.base_path }}
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  # D-05: content/.published-slugs.json lists every slug with a public page, so
+  # the validator can demand a redirect when one disappears. The build never
+  # modifies tracked content (docs/ARCHITECTURE.md §3), so after a successful
+  # deploy this job records the list and, when it changed, opens (or updates) a
+  # PR from the branch automation/published-slugs. main is protected, so it
+  # never pushes to main. A PR opened with GITHUB_TOKEN does not trigger
+  # workflows, so the job starts ci.yml on the branch itself (workflow_dispatch
+  # is allowed); the required check then reports on the PR's head commit.
+  record-slugs:
+    needs: deploy
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci
+      - run: npm run slugs:record
+      - id: pr
+        name: Propose the updated list as a pull request
+        # Needs Settings → Actions → General → "Allow GitHub Actions to create
+        # and approve pull requests" (docs/SETUP-PRODUCTION.md §B). If that is
+        # off, the step warns and the list is attached to the run instead.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: automation/published-slugs
+        run: |
+          git add content/.published-slugs.json
+          if git diff --cached --quiet; then
+            echo "Published slugs unchanged." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$BRANCH"
+          git commit -m "chore(content): record published slugs after deploy ${GITHUB_SHA::7}"
+          git push --force origin "$BRANCH"
+          if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')" = "0" ]; then
+            gh pr create --base main --head "$BRANCH" \
+              --title "Record published slugs" \
+              --body "Automated after deploy of ${GITHUB_SHA}. Updates content/.published-slugs.json so the validator can require a redirect when a published page disappears (DECISIONS D-05). Merge when the checks are green; nothing on the site changes."
+          fi
+          gh workflow run ci.yml --ref "$BRANCH"
+          echo "Published slugs changed: PR from $BRANCH opened or updated." >> "$GITHUB_STEP_SUMMARY"
+      - if: steps.pr.outcome == 'failure'
+        run: echo "::warning title=Published slugs::Could not open the PR; download the artifact and commit content/.published-slugs.json by hand."
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: published-slugs
+          path: content/.published-slugs.json
+          retention-days: 30
+          include-hidden-files: true
