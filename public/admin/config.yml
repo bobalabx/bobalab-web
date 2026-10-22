@@ -5,7 +5,7 @@ backend:
   name: github
   repo: bobalabx/bobalab-web
   branch: main
-  base_url: https://bobalab-cms-auth.REPLACE-ME.workers.dev
+  base_url: https://bobalab-cms-auth.bobalabx-034.workers.dev
   auth_endpoint: auth
   auth_scope: public_repo
   squash_merges: true

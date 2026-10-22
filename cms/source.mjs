@@ -35,7 +35,7 @@ export const backend = {
   repo: "bobalabx/bobalab-web",
   branch: "main",
   // The lab's OAuth bridge (forked sveltia-cms-auth Worker on Cloudflare).
-  base_url: "https://bobalab-cms-auth.REPLACE-ME.workers.dev",
+  base_url: "https://bobalab-cms-auth.bobalabx-034.workers.dev",
   auth_endpoint: "auth",
   // Public repo: the token may only touch public repositories. Use "repo" if the repo goes private.
   auth_scope: "public_repo",
