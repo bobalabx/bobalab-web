@@ -9,8 +9,6 @@ findings: []
 draft: false
 ---
 
-This direction asks how people build skill while they work alongside algorithms, so far mostly on gig and delivery platforms.
+So far most of this work comes from gig and delivery platforms. A published study uses more than a million delivery orders to follow how couriers' speed and punctuality change with experience, and how their use of the app's job recommendations shifts as they gain it. A working paper studies how a platform should offer jobs when workers can turn offers down and get better at the work at different rates that the platform cannot see in advance; it proposes learning algorithms and tests them on delivery-platform data.
 
-A published study uses more than a million delivery orders to follow how couriers' speed and punctuality change with experience, and how their use of the app's job recommendations shifts as they gain it. A working paper studies how a platform should offer jobs when workers can turn offers down and get better at the work at different rates that the platform cannot see in advance; it proposes learning algorithms and tests them on delivery-platform data.
-
-Two related items are listed by title only until the lab describes them: a second working paper on SSRN, Dispatching to Develop, and work in progress on whether skill learned in one job carries over to another.
+Newer work includes a second working paper on SSRN, _Dispatching to Develop_, and work in progress on whether skill learned in one job carries over to another.

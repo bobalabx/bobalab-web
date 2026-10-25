@@ -9,8 +9,6 @@ findings: []
 draft: false
 ---
 
-This direction studies when flexible workers choose to work and how platforms pay, motivate and staff them.
-
 A published study uses ride-hailing data to model drivers' decisions to start and stop working, looking at pay alongside habits such as earnings targets and the momentum of a long shift. A working paper combines one platform's records with public New York City trip data to estimate how drivers split their time between competing apps, and uses the estimates to compare pay designs such as hourly guarantees, streak bonuses and wage floors.
 
-Two works in progress are listed by title only: one on designing and sequencing incentives for platform workers, and one on staffing fluid teams in a fragmented labor market. Park Sinchaisri's doctoral dissertation on managing the gig economy is also filed here.
+Work in progress looks at designing and sequencing incentives for platform workers, and at staffing fluid teams in a fragmented labor market. Park Sinchaisri's 2021 doctoral dissertation at the University of Pennsylvania, on managing the gig economy, belongs to this line too.

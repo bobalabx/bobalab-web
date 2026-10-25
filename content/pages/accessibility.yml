@@ -3,13 +3,13 @@ intro: We want everyone to be able to use this site.
 body: |
   ## Our target
 
-  This site aims to conform to the Web Content Accessibility Guidelines (WCAG) 2.2 at level AA.
+  We aim for this site to meet the Web Content Accessibility Guidelines (WCAG) 2.2 at level AA.
 
   ## How the site is built
 
   - Every page works without JavaScript and with a keyboard alone.
-  - The research figure on the home page has a plain list alternative with the same information.
-  - Motion is gentle and optional. The site follows your device's reduced-motion setting, and the "Reduce motion" control in the footer, or the pause button on the figure, turns animation off.
+  - The research figure on the home page is built on a plain list of the research directions, with each direction's counts and shared papers written out. Every paper it draws is also listed, by year, on the Publications page.
+  - Motion is brief and optional: nothing moves in a loop. The site follows your device's reduced-motion setting, and the "Reduce motion" switch in the footer turns animation off.
   - Color is never the only way information is shown, and text meets contrast requirements in light and dark mode.
   - Images have text alternatives.
 

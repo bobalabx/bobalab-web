@@ -9,8 +9,6 @@ findings: []
 draft: false
 ---
 
-This direction collects studies of generative and agentic AI in professional work.
-
 A published study follows K-12 teachers as they use ChatGPT on their own tasks and sorts the kinds of help they ask for. A working paper treats lesson preparation as a choice among tasks and draws on a year-long case study of teachers to examine how generative AI changes their productivity. A game-theoretic preprint models a professional advisor whose clients can also consult a personal AI.
 
-Three further items are listed by title only, because no abstract has been reviewed yet: a preprint on where an AI assistant's memory of its user breaks down, a submitted paper on when an AI agent in a service workflow should act, ask or defer, and work in progress on how AI changes which tasks people plan and which they carry out.
+A second preprint asks where an AI assistant's memory of its user breaks down, and a submitted paper asks when an AI agent in a service workflow should act, ask or defer. Work in progress studies how AI changes which tasks people plan and which they carry out.

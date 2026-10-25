@@ -1,8 +1,17 @@
 # Editing the BOBALAB website
 
-This guide is for lab members who edit the website through the content manager (Decap CMS) at **`/admin/`** on the live site, for example `https://bobalab-berkeley.github.io/admin/`. You do not need to know Git or code. Maintainers set up the system once (`docs/SETUP-PRODUCTION.md`) and look after it (`docs/HANDOVER.md`).
+This guide is for lab members who edit the website through the content manager (Decap CMS) at **`/admin/`** on the live site, today `https://bobalabx.github.io/bobalab-web/admin/`. You do not need to know Git or code. Maintainers set up the system once (`docs/SETUP-PRODUCTION.md`) and look after it (`docs/HANDOVER.md`).
 
-Contents: [1. Sign in](#1-sign-in) · [2. Drafts and review](#2-drafts-and-review) · [3. Publish: wait for the green check](#3-publish-wait-for-the-green-check) · [4. Consent rules](#4-consent-rules-people-photos-emails) · [5. Images and alt text](#5-images-and-alt-text) · [6. Research directions: order, colours, archiving](#6-research-directions-order-colours-archiving) · [7. Archive instead of deleting](#7-archive-instead-of-deleting) · [8. Undo a publish (Revert)](#8-undo-a-publish-revert) · [9. Per-term checklist](#9-per-term-checklist) · [10. PDF accessibility checklist](#10-pdf-accessibility-checklist) · [11. Practice on your own computer](#11-practice-on-your-own-computer-no-account) · [12. Tips and known quirks](#12-tips-and-known-quirks)
+Contents: [1. Sign in](#1-sign-in) · [2. Drafts and review](#2-drafts-and-review) · [3. Publish: wait for the green check](#3-publish-wait-for-the-green-check) · [4. Consent rules](#4-consent-rules-people-photos-emails) · [5. Images and alt text](#5-images-and-alt-text) · [6. Research directions: order, colours, archiving](#6-research-directions-order-colours-archiving) · [7. Archive instead of deleting](#7-archive-instead-of-deleting) · [8. Undo a publish (Revert)](#8-undo-a-publish-revert) · [9. Per-term checklist](#9-per-term-checklist) · [10. PDF accessibility checklist](#10-pdf-accessibility-checklist) · [11. Practice on your own computer](#11-practice-on-your-own-computer-no-account) · [12. Tips and known quirks](#12-tips-and-known-quirks) · [13. How Fig. 1 is made from your entries](#13-how-fig-1-is-made-from-your-entries) · [14. Study-design figures](#14-study-design-figures-plate_verified) · [15. Links for lab members](#15-links-for-lab-members) · [16. Writing for the site](#16-writing-for-the-site)
+
+> **Redesign, October 2026 (DECISIONS D-13).** The site now looks different, but what you edit is almost the same. Here is what changed for editors:
+>
+> - Type and status show as plain words, not as boxed badges or pills. You fill in the same fields.
+> - Lists are ruled rows, not cards.
+> - A person without a consented photo gets a square with their initials.
+> - Fig. 1 on the home page draws one line per research direction (section 13).
+> - Publications have one new checkbox, **Study-design figure checked by the authors** (section 14).
+> - Status provenance ("reported by the lab") is printed once per page as a footnote, so never type it into a field or a body (section 16).
 
 ---
 
@@ -13,20 +22,20 @@ Contents: [1. Sign in](#1-sign-in) · [2. Drafts and review](#2-drafts-and-revie
 3. The CMS keeps your sign-in in this browser. On a shared or public computer, use the account menu (top right) → **Log out** when you finish.
 4. If sign-in fails ("Not found" or a blank pop-up), you are probably not in the team yet, or the pop-up was blocked. Allow pop-ups for the site and try again.
 
-What you can change: News, Publications, People, Research directions, Projects, Opportunities, the fixed Pages (Home texts, Join, About, Accessibility, Privacy) and site Settings.
+What you can change: News, Publications, People, Research directions, Projects, Opportunities, the fixed Pages (Home texts, Join, About, Accessibility, Privacy) and site Settings (including the links for lab members, section 15).
 
 ## 2. Drafts and review
 
 There are **two different things called "draft"**. Keep them apart:
 
-|                                         | Where                                            | What it means                                                                                                                                                                                                          |
-| --------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Workflow draft**                      | The **Workflow** tab: Drafts → In review → Ready | Your change is saved but **not published**. It lives on its own branch with a pull request on GitHub. Nothing on the site changes.                                                                                     |
-| **"Draft · pending lab review" switch** | A field in every entry                           | The entry **is** published to the repository, but the live site leaves it out. Preview builds show it with a "Draft · pending lab review" badge. Imported content that the lab has not checked yet has this switch on. |
+|                                         | Where                                            | What it means                                                                                                                                                                                                            |
+| --------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Workflow draft**                      | The **Workflow** tab: Drafts → In review → Ready | Your change is saved but **not published**. It lives on its own branch with a pull request on GitHub. Nothing on the site changes.                                                                                       |
+| **"Draft · pending lab review" switch** | A field in every entry                           | The entry **is** published to the repository, but the live site leaves it out. Preview builds show it with the words "Draft · pending lab review". Imported content that the lab has not checked yet has this switch on. |
 
 The normal path:
 
-1. Open a collection, click its **＋** button (for example **＋ Publication**, **＋ News item**, **＋ Person**) or an existing entry, and edit. The right-hand pane is a **preview** styled like the site (news, people, publications and research directions show the site's own card; it is an approximation of the live page).
+1. Open a collection, click its **＋** button (for example **＋ Publication**, **＋ News item**, **＋ Person**) or an existing entry, and edit. The right-hand pane is a **preview** styled like the site (news, people, publications and research directions show the site's own list row; it is an approximation of the live page).
 2. Click **Save**. This creates a workflow draft. You can come back and keep editing.
 3. When the text is ready, set the status to **In review** (top bar, or drag the card on the Workflow board). A maintainer or the PI reviews it. If the lab requires an approval, they approve the pull request on github.com.
 4. Move it to **Ready**, then **Publish** (section 3).
@@ -63,7 +72,7 @@ The site shows people only with their consent (lab decision D-06). The switches 
 | Switch                           | Off (the default)                                                             | On                                                                     |
 | -------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | **Listed (consented to appear)** | The person is **never shown or linked anywhere**, not even in preview builds. | The person may appear on People, as a linked author, in project teams. |
-| **Photo consent**                | The photo is not shown; a pearl with initials is shown instead.               | The uploaded photo is shown.                                           |
+| **Photo consent**                | The photo is not shown; a square with the person's initials is shown instead. | The uploaded photo is shown, cropped to a square.                      |
 | **Email public**                 | The email is not shown.                                                       | The email is shown as a link.                                          |
 | **Now at public**                | "Now at …" (alumni) is not shown.                                             | It is shown.                                                           |
 
@@ -85,25 +94,26 @@ Rules:
 - **Alt text is required whenever an image is set** (the CMS will not save without it). Write one sentence that says what the image shows and why it matters, as you would describe it on the phone:
   - Good: "Line chart: couriers' delivery times fall over their first 200 orders, faster for those who follow recommendations."
   - Good (headshot): "Portrait of Jane Doe."
+- **Headshots** are shown as squares, so the edges of a wide or tall photo are cut off. Upload a head-and-shoulders photo with the face near the middle.
   - Avoid: "image", "figure 1", "photo.jpg", or repeating the caption word for word. Do not start with "Image of".
 - For charts, put the key takeaway in the alt text and the details in the caption or "What this shows".
 - Rich-text bodies cannot hold images; use the image fields (Figure, Hero image, Teaser image, Image), which enforce alt text.
 
 ## 6. Research directions: order, colours, archiving
 
-The research directions are the pearls of Fig. 1 on the home page.
+The research directions are the lines of Fig. 1 on the home page. Each line ends in a black pearl at the "now" rule (section 13). The CMS hints still say "pearls"; they mean the same thing.
 
-**Reorder the pearls.** Go to **Settings → Site → Direction order**. Each item shows the direction's address (for example `ai-at-work`, the file name of the direction). Drag an item by its handle (the two lines at the top of the item), or use the keyboard: press Tab until the handle is focused (a screen reader announces "Reorder “ai-at-work”, item 2 of 4"), then press the **Up** or **Down arrow** key once per step; the focus stays on the item and its new position is announced. Then save and publish. The order lives in this one list on purpose: changing it never needs edits to several direction entries at once. Each live direction must appear exactly once (the CMS will not save a direction listed twice); archived directions are left out.
+**Reorder the lines (pearls).** Go to **Settings → Site → Direction order**. Each item shows the direction's address (for example `ai-at-work`, the file name of the direction). Drag an item by its handle (the two lines at the top of the item), or use the keyboard: press Tab until the handle is focused (a screen reader announces "Reorder “ai-at-work”, item 2 of 4"), then press the **Up** or **Down arrow** key once per step; the focus stays on the item and its new position is announced. Then save and publish. The order lives in this one list on purpose: changing it never needs edits to several direction entries at once. Each live direction must appear exactly once (the CMS will not save a direction listed twice); archived directions are left out.
 
 **Remove an item** with the **×** at its top right. An item that opens as an empty choice is a direction that has been archived: remove it.
 
 **Add a direction.** Create it under Research directions (fill in the **short label** first: it becomes the address), then add it to **Direction order**. Up to 8 directions fit; with 7–8, consider **Settings → Site → Fig. 1 layout: Dot plot**.
 
-**Choose a colour.** Each direction needs its **own** colour: the CMS will not save a colour that another live (not archived) direction already uses. The preview shows the pearl, the header band, the colours the other live directions use, and a warning when a colour is easy to confuse for colour-blind readers, with the direction that uses the other colour of the pair (if any):
+**Choose a colour.** Each direction needs its **own** colour: the CMS will not save a colour that another live (not archived) direction already uses. The colour is a data colour: it draws the direction's line in Fig. 1 and the short line segment next to the direction's name on papers, projects and news. Links and headings stay black. The preview shows the colour, the colours the other live directions use, and a warning when a colour is easy to confuse for colour-blind readers, with the direction that uses the other colour of the pair (if any):
 
-- Use the six main colours first: Butterfly pea (blue), Oolong (amber), Lychee (rose), Matcha (green), Jasmine (teal), Black sesame (charcoal).
-- Taro (violet) and Thai tea (orange) are **reserve** colours.
-- Avoid these pairs: **Taro with Butterfly pea**, **Thai tea with Oolong**, **Matcha with Thai tea**.
+- The four live directions use Butterfly pea (blue), Lychee (rose), Matcha (green) and Oolong (brown). These four were retuned for the redesign and checked against each other for colour-blind readers.
+- Jasmine (teal) and Black sesame (charcoal) are used by the two archived directions. Taro (violet) and Thai tea (orange) are **reserve** colours.
+- Easy-to-confuse pairs (recomputed 2026-10-24): **Jasmine** with Black sesame, Butterfly pea, Lychee or Matcha; **Thai tea** with Matcha, Lychee or Oolong; **Taro** with Butterfly pea or Black sesame. In short: a fifth live direction should not use Jasmine or Thai tea, and Taro conflicts with Butterfly pea.
 - The automatic check warns about shared or confusable colours; fix it before launch.
 
 **Archive a direction** instead of deleting it (section 7): set **Status: Archived**, set **Archived on** (e.g. `2026-10`), save and publish; then open **Settings → Site**, remove it from **Direction order** (×), save and publish. It leaves Fig. 1, but its page stays with a dated "Archived" note and it is listed under "Earlier and related research".
@@ -139,7 +149,7 @@ At the **start of each term** (PI or a maintainer):
 - [ ] **Offboard leavers:** remove departed members from the GitHub organisation and teams; check the Workflow board for their unfinished drafts (finish, hand over or discard them).
 - [ ] **People:** add new members only with consent (section 4); set **End** dates for people who left; ask leavers about "Now at" and email consent; check photos still have consent.
 - [ ] **Opportunities and Join page:** update each opportunity's **Status** and **As of** date (URAP rounds open and close every term); make sure nothing says "open" without a dated source.
-- [ ] **Publications:** refresh statuses (revisions, acceptances) and their **As of** dates; add new papers and preprints; check that working papers have **Status source**.
+- [ ] **Publications:** refresh statuses (revisions, acceptances) and their **As of** dates; add new papers and preprints; check that working papers have **Status source**; turn on **Study-design figure checked by the authors** only for figures an author has approved (section 14).
 - [ ] **News:** add the term's talks and awards; past events stop showing "Upcoming" automatically after the next rebuild.
 - [ ] **Directions:** confirm the order and colours; archive directions the lab no longer pursues.
 - [ ] **Accessibility and Privacy pages:** review the text and update **Last reviewed**.
@@ -182,3 +192,55 @@ Maintainers and curious editors can try the content manager without a GitHub acc
 - **Drag announcements for screen readers.** When you drag an item with the mouse, the spoken messages name the item and its position. Lists cannot be reordered with Space and the arrow keys as the built-in instructions of the drag library suggest; use the Up and Down arrow keys on the focused handle (section 6). The tags of multi-select fields (for example a project's Research directions, where the first is the project's home direction) can be dragged with the mouse; without a mouse, remove the tags with their × and add them again in the order you want.
 - The content manager works best on a laptop or desktop. In windows narrower than 800 pixels (phones), the editor shows the form only, without the preview pane and the "Check for Preview" button. Use a laptop to review and publish.
 - Something broken or unclear? Tell a maintainer, or open an issue on the repository.
+
+## 13. How Fig. 1 is made from your entries
+
+Nobody draws Fig. 1 by hand. Every build draws it again from the content, so it updates a few minutes after you publish. What it shows comes from these fields:
+
+| What you see in Fig. 1                                                                | Where it comes from                                                                                                                                                                                                                                              |
+| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| One horizontal line per research direction, top to bottom                             | The live directions in **Settings → Site → Direction order** (section 6). Archived directions are left out. Draft directions appear only in preview builds.                                                                                                      |
+| The line's colour and its label                                                       | The direction's **Colour** and **Short label** (at most 28 characters).                                                                                                                                                                                          |
+| A filled dot on a line, at a year                                                     | A publication that lists the direction under **Research directions** and **counts as a paper**: it has a **DOI**, or an SSRN, arXiv, PDF or publisher link, or a **presentation** with a source link. Its **Year** places it. Order within a year means nothing. |
+| A short vertical link joining two dots                                                | A counted paper with two research directions appears on both lines, and the link joins them.                                                                                                                                                                     |
+| Where a line starts                                                                   | The direction's earliest counted paper.                                                                                                                                                                                                                          |
+| The black pearl at the "now" rule                                                     | The direction today. Clicking it (or its label) opens the direction's page.                                                                                                                                                                                      |
+| Open rings after the "now" rule                                                       | Work in progress: entries tagged with the direction that do not count as a paper yet (no public version and no documented talk). They are not placed by date.                                                                                                    |
+| The counts beside each label ("4 papers, 2 in progress") and "As of …" in the caption | Counted from the same entries on the day of the build.                                                                                                                                                                                                           |
+
+To get a paper onto the figure, add its public link or DOI (or a presentation with its source link), its **Year** and at least one **Research direction**, then publish. To move a direction's line, change **Direction order**. Without JavaScript, and for screen readers, the same counts and the publications list carry the same information.
+
+## 14. Study-design figures (`plate_verified`)
+
+Some papers have a **study-design figure**: a small diagram of how the study was set up (for example the virtual-kitchen experiment in Bastani et al. 2026). These figures are written in code by a maintainer, one per paper. They show design facts only, never results, and each one names its source. You cannot draw one in the CMS. Ask a maintainer if a paper should have one.
+
+Each publication has a checkbox, **Study-design figure checked by the authors** (`plate_verified` in the file):
+
+- **Off** (the default): the figure appears only in **preview builds**, so the authors can check it. The live site does not show it.
+- **On**: the live site shows the figure on the paper's page (today the only page that shows study-design figures).
+- Turn it on **only after an author of the paper has checked the drawing** against the paper and said it is right. Keep that email; do not paste it into the site. If an author later finds a mistake, turn the box off and publish at once, then ask a maintainer to fix the drawing.
+- The checkbox does nothing for a paper without a figure.
+
+## 15. Links for lab members
+
+**Settings → Site → Links for lab members** holds links to internal tools, such as the lab scheduler. They appear in the **Lab members** column of the site footer, next to the "Reduce motion" switch, and at the top of the People page.
+
+- **Link text:** short, for example "Lab scheduler" (at most 40 characters).
+- **Address:** a full address starting with `https://`.
+- **Description (optional):** one line on what the link is for and who can use it, for example "Weekly lab meeting scheduling (lab members sign in with Google)."
+- These links are **public**: anyone can see them in the footer and in the repository. Only add tools that ask for a sign-in themselves. Never add a link that works for anyone who has it, such as a shared document's "anyone with the link" URL.
+- If the list is empty, the footer column is headed "Display" and holds only the "Reduce motion" switch.
+
+## 16. Writing for the site
+
+The redesign follows one rule for words: say what the lab does, plainly, and let the fields carry status and provenance.
+
+- **Status goes in fields, not in prose.** Use **Status**, **Status note**, **As of** and **Status source**. The site prints the status as plain words ("Major revision at Manufacturing & Service Operations Management") and adds **one footnote per page** when a status is the lab's own report. Never type "reported by the lab", "status not confirmed" or "as of the last check" into a body or summary.
+- **Don't describe the site or the pipeline.** Avoid sentences such as "This direction collects…", "listed by title only", "filed here so that…" or "no abstract has been reviewed yet". If an item has no summary, leave the summary empty; the page lists its title and status.
+- **Direction bodies** (80–150 words) start with the research itself. The page already opens "Why it matters" with the direction's one-line summary, so don't repeat it. Describe what each paper studies. Leave findings to the Findings list, which needs an evidence label and a paper.
+- **Write sentences, not tags.** Say "a submitted paper asks when…", not "when… (a submitted paper)". The lists under the text already show each item's type and status.
+- **Vary the wording between pages.** If every direction ends "Newer work includes…", readers notice the template. Only call work "newer" or "later" when the dates show it.
+- **Credit co-authors.** Don't write "Park Sinchaisri carried out" a paper that has other authors; name the paper or the lab instead. Project collaborators whose "Consent to be shown" is off are hidden on project pages (section 4), so don't name them in running text either; the author lists on paper pages are citations and stay as published.
+- **Name the lab sparingly.** The home page and the header already name BOBALAB. In the mission, the About text and the Join texts, write "we" or "the lab".
+- **No arrows, emoji or all-caps labels** in titles or summaries. The site adds its own link styling.
+- **Only facts with a source.** Do not round a talk that was "announced" into one that was "given", or a "submitted" paper into an "accepted" one. If you are unsure, ask the PI and leave the cautious wording.
