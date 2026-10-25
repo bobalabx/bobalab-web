@@ -19,7 +19,7 @@ export const CORE_LIGHT = {
   muted: "#50564F",
   rule: "#80877F",
   hairline: "#D9DCD6",
-  /** D-14: the tea inside the homepage cup drawing only (never a page or panel background). */
+  /** D-14/D-15: the flat panel behind the homepage pearl figure only (never a page or band background). */
   tea: "#F4ECE2",
   /** D-14: the literal dark-mode tea (tokens.css `--tea-dark`; `--tea` switches to it in dark mode). */
   "tea-dark": "#211C17",

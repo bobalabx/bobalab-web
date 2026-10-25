@@ -7,7 +7,7 @@
  * in-figure Pause button and the 01–0N numerals are gone (D-13 item 6, RC-7).
  * D-14: the figure lives at /research/#map (the "Explore" band, with its
  * one-sentence key); the arrival plays once per session when it scrolls into
- * view, under the figure's session key "bobalab-intro" (the homepage cup has its own).
+ * view, under the figure's session key "bobalab-intro" (the homepage pearls have their own key).
  * Runs against BASE_URL (shared dev server).
  */
 import { expect, test, type Page } from "@playwright/test";

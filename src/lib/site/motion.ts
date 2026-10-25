@@ -7,7 +7,7 @@
 export const MOTION_STORAGE_KEY = "bobalab-motion";
 /** Fig. 1's arrival on /research/#map has played this session (set by FigureIsland). */
 export const INTRO_STORAGE_KEY = "bobalab-intro";
-/** D-14: the homepage cup's settle-once intro (CupIsland CUP_INTRO_KEY). */
+/** D-14/D-15: the homepage pearls' settle-once intro (PearlsIsland PEARLS_INTRO_KEY; the key keeps its D-14 name, change request pearls-3). */
 export const CUP_INTRO_STORAGE_KEY = "bobalab-cup-intro";
 export const MOTION_EVENT = "bobalab-motion-change";
 
@@ -61,7 +61,7 @@ export function subscribeMotion(cb: () => void): () => void {
  * Pre-paint script body (runs synchronously in <head> before first paint):
  * 1. apply the stored motion preference;
  * 2. on the first home view of the browser session, set <html data-cup-intro>
- *    so the homepage cup's pearls settle once from the first frame (D-14, R11;
+ *    so the homepage pearls settle once from the first frame (D-15, PearlsIsland; D-14 R11;
  *    change requests home-1 and home-6). The attribute is removed 1.2 s after
  *    `load`, which waits for the stylesheets, so a slow first load never cuts
  *    the settle short.

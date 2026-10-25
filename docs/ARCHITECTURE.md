@@ -17,7 +17,7 @@ content/  ──read.ts──► RawContent ──validate.ts──► issues (n
 
 ## 2. Layout contract (`src/app/layout.tsx`, WP0)
 
-- `<html lang="en" suppressHydrationWarning>` carries the font variables. `data-motion="reduce"` and (first home view of the session) `data-cup-intro` are set pre-paint by `PrePaintScript` (inline `<head>` script).
+- `<html lang="en" suppressHydrationWarning>` carries the font variables. `data-motion="reduce"` and (first home view of the session; the homepage pearls, D-15) `data-cup-intro` are set pre-paint by `PrePaintScript` (inline `<head>` script).
 - `<body>`: `SkipLink` → `PreviewRibbon` (preview builds only) → `SiteHeader` → **`<main id="main" tabIndex={-1}>{children}</main>`** → `SiteFooter` → `RouteFocus`.
 - **Pages must not render their own `<main>`.** Each page renders exactly one `<h1 tabIndex={-1}>`; `RouteFocus` focuses it after client-side navigation (not on first load).
 - Metadata: root `title.template` is `"%s · BOBALAB"`; pages call `pageMetadata({ title, description, path })` from `src/lib/seo/metadata.ts`. `metadataBase` = `NEXT_PUBLIC_SITE_URL` → `site.site_url` → `https://bobalab-berkeley.github.io`, plus the base path.
@@ -125,9 +125,9 @@ Errors fail CI (`validate-content`); warnings print. Each code has a fixture tes
 - **Layers**: tokens/base → `@layer base`; prose + primitives → `@layer components` (Tailwind utilities can override); `motion.css` and `forced-colors.css` unlayered (always win).
 - **Fonts** `src/fonts/index.ts` (next/font/local): **one file**, `archivo-latin-wdth-normal.woff2` (wdth 62–125 × wght 100–900, latin; 88.0 KiB preloaded), variable `--font-archivo`, declared with `font-stretch: 62% 125%`. Body wdth 100 / 400; h2–h4 600; condensed 68 / 700 for the h1, lane labels and year headings (`.t-display`, `.t-cond`, `.t-year`). DOI and BibTeX use the system `--font-mono` stack (`code`, `pre`, `.doi`, `.bibtex`); nothing else is monospace (`--font-data` resolves to Archivo with tabular figures). The latin subset has no `→`; links carry no arrows anyway.
 - **Layout primitives** (`base.css`): `.bl-container`; `.bl-grid` with `__label`, `__track`, `__full` (the label-column grid every page uses); `.bl-ledger` (+ `--major` 2 px, `--closed`); `.bl-sec` (section rhythm); `.bl-sec-h`; `.bl-seg` (16 × 2 px direction segment); `.t-lead`, `.t-sm`/`.t-meta`, `.t-muted`, `.t-num`. `.t-mono` and `.t-eyebrow` keep their names but render plain Archivo meta (no mono, no caps, no tracking).
-- **Motion** `src/styles/motion.css`: tokens `--ease-settle` (the critically damped `linear(…)` of IDENTITY-RESEARCH §5), `--ease-steep`, `--ease-diffuse` and durations; every view-transition rule: `.pearl-morph` (420 ms on the settle curve, no blur, z-index 10), root page swap (opacity only: 150 ms out, 210 ms in after 150 ms), `.page-swap`, `.band-fade`, `.nav-forward` / `.nav-back` (60 px slide landing on the settle curve), anchored `site-header`, `::view-transition { pointer-events: none }`, morph companions (WP1 request 6); opt-in `.bl-steep` (filter results) and `.bl-settle` (6 px arrival). Fig. 1's arrival (D-14) is plate-scoped: `FigureIsland` sets `.f1-plate[data-intro="wait"]` while the map is below the fold and `"play"` when its top clears the bottom 30 % of the viewport, once per session (`sessionStorage["bobalab-intro"]`), never on a figure already painted; a figure already on screen at mount is counted as seen. The homepage cup's settle-once intro is `<html data-cup-intro>`, set pre-paint on the first home view of the session and removed 1.2 s after `load` (change requests home-1, home-6). Reduced motion (OS **or** `data-motion="reduce"`) → VT 0 s, root ≤ 120 ms opacity crossfade, every transition 0 ms. Transform animations must sit in `@media (prefers-reduced-motion: no-preference) { :root:not([data-motion="reduce"]) … }`. Nothing loops, so no Pause control is needed.
+- **Motion** `src/styles/motion.css`: tokens `--ease-settle` (the critically damped `linear(…)` of IDENTITY-RESEARCH §5), `--ease-steep`, `--ease-diffuse` and durations; every view-transition rule: `.pearl-morph` (420 ms on the settle curve, no blur, z-index 10), root page swap (opacity only: 150 ms out, 210 ms in after 150 ms), `.page-swap`, `.band-fade`, `.nav-forward` / `.nav-back` (60 px slide landing on the settle curve), anchored `site-header`, `::view-transition { pointer-events: none }`, morph companions (WP1 request 6); opt-in `.bl-steep` (filter results) and `.bl-settle` (6 px arrival). Fig. 1's arrival (D-14) is plate-scoped: `FigureIsland` sets `.f1-plate[data-intro="wait"]` while the map is below the fold and `"play"` when its top clears the bottom 30 % of the viewport, once per session (`sessionStorage["bobalab-intro"]`), never on a figure already painted; a figure already on screen at mount is counted as seen. The homepage pearls' settle-once intro (D-15) is `<html data-cup-intro>` (name kept from D-14), set pre-paint on the first home view of the session and removed 1.2 s after `load` (change requests home-1, home-6). Reduced motion (OS **or** `data-motion="reduce"`) → VT 0 s, root ≤ 120 ms opacity crossfade, every transition 0 ms. Transform animations must sit in `@media (prefers-reduced-motion: no-preference) { :root:not([data-motion="reduce"]) … }`. Nothing loops, so no Pause control is needed.
 - **VT names** `src/lib/vt.ts`: `pearlVtName(slug)`, `VT.morph` etc., `TRANSITION.pearlOpen/…` for `<Link transitionTypes>`, `PAGE_ENTER_EXIT` for page-level `<ViewTransition enter exit>`. One mounted element per `pearl-{slug}` name; decorative pearls carry none.
-- **Motion preference** `src/lib/site/motion.ts`: `setMotionPreference()`, `motionReduced()`, `subscribeMotion()` (storage key `bobalab-motion`, event `bobalab-motion-change`); the footer switch uses them. Intro flags: `sessionStorage["bobalab-intro"]` (Fig. 1 on /research/#map, set by FigureIsland) and `"bobalab-cup-intro"` (the homepage cup, D-14; set by the pre-paint script or CupIsland).
+- **Motion preference** `src/lib/site/motion.ts`: `setMotionPreference()`, `motionReduced()`, `subscribeMotion()` (storage key `bobalab-motion`, event `bobalab-motion-change`); the footer switch uses them. Intro flags: `sessionStorage["bobalab-intro"]` (Fig. 1 on /research/#map, set by FigureIsland) and `"bobalab-cup-intro"` (the homepage pearls, D-15; name kept from D-14; set by the pre-paint script or PearlsIsland).
 
 ## 5. Components (WP0-owned; import, do not edit — file a change request)
 
@@ -262,18 +262,27 @@ What the FOUNDATION package changed, and where it deviates from D-13 or from the
     spans are separate nodes and stay as typed) and the plain display fields the loader exposes
     (including news and project titles). Stored content, publication titles (they feed APA and
     BibTeX), URLs, DOIs and slugs are never converted.
-15. **Homepage cup (HOME, D-14).** `src/app/page.tsx` renders `HomeHero` (statement h1 at
+15. **Homepage pearls (HOME, D-15).** `src/app/page.tsx` renders `HomeHero` (statement h1 at
     `--t-display`, the who line from `homeWho(c)`, the why line from `pages/home.why` falling
-    back to `mission`, two links) and `HomeSections` (new papers beside news, then people).
-    `src/components/cup/`: `geometry.ts` lays out 3, 4 or 5 live directions plus an empty state;
-    `BobaCup.tsx` (server) draws the line cup on `--tea` with the pearls, leader lines and
-    underlined labels, and renders an `<ol>` of links to `/research/<slug>/` without JS;
-    `CupIsland.tsx` (client, ≈1.5 KB gz) turns the labels into buttons, raises one pearl at a time
-    (`homeQuestion`, one finding or "A first read", "Explore …"), names the risen pearl
-    `pearl-{slug}` only while it is up, tints the wordmark O via `<html data-cup-open>`, and
-    closes on Esc, a second pick or a click outside (never a scroll). `homePearls(c)` in
-    `queries.ts` picks each first read (newest published paper whose main direction it is, never
-    the same paper twice). Matcha text never sits on `--tea` (4.37:1); direction-coloured text
-    sits on white.
+    back to `mission`, two links) with `HomePearls` (`src/components/pearls/`) on the right (below
+    the text on phones), then `HomeSections` (new papers beside news, then people; no counts).
+    `src/lib/pearls/` holds the original Fig. 1 slot templates for 2–8 directions
+    (`templates.ts`), the seed fill order with the ±75° cap (`seeds.ts`), and the model
+    (`model.ts`: `buildPearls`, `countsLine`). `HomePearls.tsx` (server) draws a flat `--tea`
+    panel. It holds one `<nav aria-label="Research directions"><ol>` of real links, each with a
+    matte tapioca body (`.pl-body`, the `pearl-{slug}` morph source, whose halo is a box-shadow
+    shared with DirectionPearl "hero" via `halo.css`), a hairline orbit with one
+    direction-coloured seed per counted paper, an underlined label and a muted count. Under the
+    links sit the caption (one sentence, plus one hidden layer per direction with its
+    `homeQuestion` and counts) and the quiet link to `/research/#map`. Figure mode starts at a
+    36em container; below that, and for 1 or more than 8 directions, the pearls form a compact
+    2-column grid. `PearlsIsland.tsx` (client, about 1 KB gz) swaps the caption on hover (80 ms
+    intent) or focus, sets `.is-on` / `[data-active]` (lift ≤ 3 px and ≤ 1.05, halo ×1.45, seed
+    bloom 10 %, the other pearls' orbit and seeds dimmed, never text), tints the header wordmark
+    O through `<html data-pearl-on>` + `--pearl-o`, resets on Esc, and keeps the settle-once
+    intro (`data-cup-intro`, see Motion) alive on the figure for 1.6 s. There is no idle motion,
+    parallax or Pause button. Matcha text never sits on `--tea` (4.37:1); direction-coloured
+    text sits on white. (`homePearls(c)` in `queries.ts` is the D-14 cup's reveal model, unused
+    since D-15.)
 
 Known gaps: Archivo has no italic file, so `<cite>` and `<em>` render a synthesised oblique (P3 sets venues upright).

@@ -1,7 +1,8 @@
 /*
  * BOBALAB design tokens: the "Lines" system (DECISIONS D-13; prototype
  * docs/redesign/prototypes/p3/p3.css), plus the two D-14 additions for the
- * homepage boba cup: --t-display (home h1 only) and --tea (cup fill only).
+ * homepage: --t-display (home h1 only) and --tea (since D-15 the flat panel behind
+ * the homepage pearl figure only).
  * Hex values must match src/lib/content/palette.ts (unit-tested).
  *
  * Ink on white. Colour encodes research directions and nothing else: there is
@@ -26,12 +27,12 @@
   --hairline: #d9dcd6;
   --hair: var(--hairline);
 
-  /* D-14 "the boba cup": the tea inside the homepage cup drawing, and NOTHING else
-   * (never a page, band or panel background: the page stays ink on white).
+  /* D-14/D-15: the flat panel behind the homepage pearl figure, and NOTHING else
+   * (never a page or band background, and no other panel: the page stays ink on white).
    * --tea is mode-aware; --tea-dark is the literal dark value. Contrast on tea
    * (palette.test): ink 15.86 / 13.92, muted 6.44 / 7.29, rule 3.15 / 4.21, live
    * direction tones ≥ 4.37 (light) / ≥ 6.15 (dark). Matcha deep on tea is 4.37, so
-   * direction-coloured TEXT must not sit on the tea; pearls and leader lines may. */
+   * direction-coloured TEXT must not sit on the tea; pearls, seeds and underlines may. */
   --tea: #f4ece2;
   --tea-dark: #211c17;
 

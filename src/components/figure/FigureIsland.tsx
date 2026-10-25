@@ -13,7 +13,7 @@
  *
  * Arrival (D-14: the figure now lives below the fold on /research/#map): once per
  * browser session (sessionStorage INTRO_STORAGE_KEY "bobalab-intro", the figure's
- * documented key; the homepage cup has its own "bobalab-cup-intro"), when the
+ * documented key; the homepage pearls have their own key, "bobalab-cup-intro"), when the
  * plate's top clears the bottom 30 % of the viewport (so the arrival is seen
  * rather than spent on the plate's first pixel row), the papers
  * arrive year by year (figure.css, plate[data-intro]). Only a plate that is

@@ -59,7 +59,7 @@ export function featuredFindings(c: Content): FindingView[] {
 }
 
 // ---------------------------------------------------------------------------
-// Homepage (D-14 "the boba cup"; docs/simplify/JUDGE.md R1, R7)
+// Homepage (D-14, D-15; docs/simplify/JUDGE.md R1, R7)
 
 /** The question a direction's pearl shows on the homepage: `home_question`, else `question`. */
 export function homeQuestion(
@@ -134,7 +134,7 @@ export function homeHeroCopy(c: Content): HomeHeroCopy {
   };
 }
 
-/** One pearl in the homepage cup (R7: at most three items in its reveal). */
+/** One homepage pearl with its D-14 reveal (R7). Unused by the D-15 figure (src/lib/pearls/model.ts); kept with its unit tests. */
 export interface HomePearl {
   direction: DirectionView;
   /** `home_question`, else `question`. */

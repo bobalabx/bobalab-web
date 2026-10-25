@@ -207,7 +207,7 @@ test("map: 'Explore' band after the ledger, before projects and earlier research
     order.includes(id),
   );
   expect(order).toEqual(present);
-  // Full bleed in the --band tint (never --tea, the homepage cup's only).
+  // Full bleed in the --band tint (never --tea, the homepage pearl panel's only).
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
     const box = (await map.boundingBox())!;

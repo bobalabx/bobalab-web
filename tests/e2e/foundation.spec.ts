@@ -51,15 +51,13 @@ test("pearl morph: the travelling pearl paints above the page-swap groups, below
   await skipIntro(page);
   await page.context().addInitScript(recordGroupZ);
   await page.goto("/");
-  // D-14 (change request home-4): the homepage morph source is the risen cup pearl,
-  // whose wrapper carries pearl-{slug} only while it is up.
-  await page.waitForSelector(".cup-stage[data-js]");
-  const li = page.locator(".cup-item").first();
-  const explore = li.locator(".cup-panel a[href^='/research/']");
+  // D-15 (change request pearls-1): the homepage morph source is the pearl itself
+  // (.pl-body, named pearl-{slug}); its link opens the direction.
+  await page.waitForSelector(".pl[data-js]");
+  const explore = page.locator(".pl-item").first().locator("a.pl-link");
   const slug = (await explore.getAttribute("href"))!.split("/")[2]!;
   await page.evaluate(async (s) => void (await fetch(`/research/${s}/`)), slug);
   await page.waitForTimeout(1500);
-  await li.locator(".cup-lab").click(); // the pearl rises and takes the name pearl-{slug}
   await explore.focus();
   await page.keyboard.press("Enter");
   await page.waitForURL(`**/research/${slug}/`);

@@ -298,8 +298,9 @@
   }
 }
 
-/* The DirectionPearl drawn as P3's flat disc: no halo, orbit, seeds or numeral
-   (D-13 item 6), whatever the figure package's defaults are. */
+/* The DirectionPearl drawn as a flat disc: no orbit, seeds or numeral (D-13 item 6),
+   whatever the figure package's defaults are. The halo comes from
+   src/components/pearls/halo.css (D-15), whose hero rule outranks the box-shadow below. */
 .dr-f2__pearl .f1-dp {
   --D: 100%;
   width: 100%;
@@ -878,7 +879,7 @@
 }
 
 /* ---------- The map band (/research/#map, DECISIONS D-14) ----------
-   Full bleed in the existing --band tint (--tea is the homepage cup's only), the
+   Full bleed in the existing --band tint (--tea is the homepage pearl panel's only), the
    section rhythm of .dr-section above and below it. The heading takes the label
    column and the key the content column inside PearlFigure (.f1-head). */
 .rs-map {

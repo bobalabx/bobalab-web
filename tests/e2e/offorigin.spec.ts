@@ -8,7 +8,7 @@
  *     view) and link prefetches (hover);
  *   - no cookies; browser storage holds only the documented keys
  *     (localStorage "bobalab-motion"; sessionStorage "bobalab-intro" and the
- *     homepage cup's "bobalab-cup-intro", privacy page);
+ *     homepage pearls' "bobalab-cup-intro", privacy page);
  *   - against a static export (E2E_STATIC=1): no same-origin 4xx while
  *     navigating client-side through the header (this is how Next #85374's
  *     misnamed prefetch files show up), and the CSP <meta> is present.

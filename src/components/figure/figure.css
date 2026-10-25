@@ -493,7 +493,7 @@
 
 /* ---- arrival: papers arrive year by year on the settle curve (once per session) ----
    FigureIsland drives it on the plate (sessionStorage "bobalab-intro", the figure's
-   key; the homepage cup has "bobalab-cup-intro"): data-intro="wait" while the figure is still below
+   key; the homepage pearls have their own key, "bobalab-cup-intro"): data-intro="wait" while the figure is still below
    the fold (marks held invisible, never anything already painted), "play" when it
    scrolls into view; removed after 2 s. Without JS, or with motion reduced, the
    attribute is never set and the figure is drawn at rest. */

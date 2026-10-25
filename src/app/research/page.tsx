@@ -1,6 +1,6 @@
 /**
  * Research index `/research/` (brief §D4; DECISIONS D-04 archived directions;
- * redesign D-13 in P3's grammar; D-14 "the boba cup" moves Fig. 1 here):
+ * redesign D-13 in P3's grammar; D-14 moves Fig. 1 here; the homepage figure is the D-15 pearl cluster):
  *   1. condensed h1, derived counts in the label column, a lede naming the
  *      directions;
  *   2. the live directions as a ruled ledger (title, question, counts);
