@@ -83,3 +83,23 @@ Before/after images are in [`after/`](after/):
 4. **Small choices:**
    - keep the per-direction mini timelines off the `/research/` list (they duplicate the map);
    - whether "All directions" should point to `/research/#map`.
+
+## Update, 2026-10-25: owner feedback round
+
+- **Hero figure (D-15).** The owner preferred the original pearl figure, so the cup is replaced by the first site's pearl cluster: halos, hairline orbit, paper dots and the hover question. It is polished to the current style: flat tea panel, matte pearls, no gloss or numerals, no looping motion.
+  - The text column, below-the-fold sections and `/research/#map` are unchanged.
+  - Before/after: `after/d15-home-desktop.jpg`, `d15-home-mobile.jpg`, `d15-hover.jpg`, `d15-dark-desktop.jpg`.
+- **People counts** were removed from `/people/` and the homepage.
+- **Copy sweep (commit `b6b380f`).** The text of all 81 pages was re-read by two editor reviewers and then a fresh one. Generated-sounding text was removed at the source:
+  - stats written as sentences;
+  - "as reported by the lab" footnotes and daggers;
+  - "This direction was last updated…";
+  - robotic meta descriptions;
+  - "Status not confirmed" rows.
+  - No facts changed. Changes to the lab's own wording are logged as C-1…C-64 in `../CONTENT-QUESTIONS.md`.
+- **Majors.** Five alumni majors confirmed from their own public pages were added. Probable and unknown majors are listed in `../CONTENT-QUESTIONS.md` → "Majors to collect".
+- **Tests after this round:**
+  - unit: 826 passed;
+  - Playwright on the export: Chromium 221 and WebKit 218 passed, 0 failed (two provenance tests were merged into one "no provenance marks" test);
+  - axe: 0 violations;
+  - budgets: met.
