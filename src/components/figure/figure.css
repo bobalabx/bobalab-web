@@ -10,9 +10,15 @@
  * inside them resolve where they are used, so one formula serves every context.
  * Data-dependent switches (packed columns, strips) are container queries written
  * by PearlFigure from geometry.ts; the strip layout below 48rem is there too.
+ *
+ * Ground: --f1-ground is the colour the figure sits on (gaps cut into lines and
+ * dimmed dots mix with it); --f1-zone fills the stretch after "now". On the page
+ * (white) the zone is the band; in the /research map band (D-14) they swap.
  */
 
 .f1 {
+  --f1-ground: var(--paper);
+  --f1-zone: var(--band);
   container: f1 / inline-size;
   margin-top: 40px;
 }
@@ -105,7 +111,7 @@
 .f1-item {
   display: grid;
   grid-template-columns: var(--lab) minmax(0, 1fr);
-  min-height: 5.375rem;
+  min-height: var(--f1-lane-h, 5.375rem);
 }
 .f1-item + .f1-item {
   border-top: 1px solid var(--hairline);
@@ -209,7 +215,7 @@
   left: calc(var(--x) - 4px);
   width: 8px;
   height: 8px;
-  background: var(--paper);
+  background: var(--f1-ground);
 }
 .f1-seg {
   position: absolute;
@@ -282,7 +288,7 @@
   height: 0.875rem;
   border: 1.75px solid var(--dir);
   border-radius: 50%;
-  background: var(--paper);
+  background: var(--f1-zone);
 }
 .f1-ln,
 .f1-seg,
@@ -297,8 +303,8 @@
    through). Same 30 % strength as the dimmed lines. */
 .f1-plate .f1-dot.dim {
   opacity: 1;
-  background: color-mix(in srgb, var(--dir) 30%, var(--paper));
-  outline-color: color-mix(in srgb, var(--ink) 30%, var(--paper));
+  background: color-mix(in srgb, var(--dir) 30%, var(--f1-ground));
+  outline-color: color-mix(in srgb, var(--ink) 30%, var(--f1-ground));
 }
 
 /* The zone after "now" and the dashed "now" rule (P3 .zone, .now). */
@@ -313,7 +319,7 @@
   right: 0;
   top: calc(1.875rem + var(--rule-heavy));
   bottom: var(--rule-heavy);
-  background: var(--band);
+  background: var(--f1-zone);
 }
 .f1-body::after {
   content: "";
@@ -394,34 +400,143 @@
   margin-top: 6px;
 }
 
-/* ---- arrival: papers arrive year by year on the settle curve (once per session) ---- */
+/* ---- the map variant (/research/#map, DECISIONS D-14) ------------------------
+   Heading in the label column, the one-sentence key beside it (B's inline key),
+   then the plate. Sits in the full-bleed band of research/page.tsx: the figure's
+   ground is the band and the zone after "now" is the page white (B). */
+.f1--map {
+  /* A section of the page, not its hero: the band's heading (--t-h2) stays the
+     largest text in the band, so the lane names step down from the D-13 hero
+     size (still Archivo condensed, as the prototypes' maps had them) and the
+     lanes tighten. Tokens, so the strip layout's own rules still apply. */
+  --t-lane: 1.375rem;
+  --f1-lane-h: 4.5rem;
+  margin-top: 0;
+}
+.f1-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 12px;
+  margin-bottom: 28px;
+}
+/* Heading beside the key only where the label column is wide enough for it
+   (18rem); in the 12.5rem tablet column it broke into four lines. */
+@media (min-width: 64rem) {
+  .f1-head {
+    grid-template-columns: var(--lab) minmax(0, 1fr);
+    align-items: start;
+  }
+  .f1-head > :first-child {
+    padding-right: var(--s-5);
+  }
+}
+/* "Point at…" only where there is a pointer that can point. */
+@media (hover: none) {
+  .f1-hint {
+    display: none;
+  }
+}
+.f1-key {
+  max-width: 62ch;
+  margin: 0;
+  padding-top: 4px;
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  color: var(--ink);
+}
+.f1-k {
+  display: inline-block;
+  margin: 0 6px 0 2px;
+  vertical-align: -1px;
+}
+.f1-k--dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.f1-k--tw {
+  width: 8px;
+  height: 8px;
+  margin-inline: 4px 8px;
+  border-radius: 50%;
+  background: var(--ink);
+  outline: 1.5px solid var(--ink);
+  outline-offset: 2px;
+}
+.f1-k--link {
+  width: 0;
+  height: 14px;
+  margin-inline: 4px 7px;
+  border-left: 1.5px solid var(--ink);
+  vertical-align: -2px;
+}
+.f1-k--pearl {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ink);
+  vertical-align: -3px;
+}
+.f1-k--ring {
+  box-sizing: border-box;
+  width: 11px;
+  height: 11px;
+  border: 1.75px solid var(--ink);
+  border-radius: 50%;
+}
+/* The live readout swaps into a slot of three lines: the short caption is shorter
+   than a paper's readout, and the slot must not change height (no layout shift). */
+.f1--map .f1-cap {
+  min-height: 3lh;
+}
+
+/* ---- arrival: papers arrive year by year on the settle curve (once per session) ----
+   FigureIsland drives it on the plate (sessionStorage "bobalab-intro", the figure's
+   key; the homepage cup has "bobalab-cup-intro"): data-intro="wait" while the figure is still below
+   the fold (marks held invisible, never anything already painted), "play" when it
+   scrolls into view; removed after 2 s. Without JS, or with motion reduced, the
+   attribute is never set and the figure is drawn at rest. */
 @media (prefers-reduced-motion: no-preference) {
-  :root[data-intro]:not([data-motion="reduce"]) .f1-dot {
+  :root:not([data-motion="reduce"])
+    .f1-plate[data-intro="wait"]
+    :is(.f1-dot, .f1-ln, .f1-seg, .f1-yr, .f1-pearl-at, .f1-ring, .f1-wip-l),
+  :root:not([data-motion="reduce"]) .f1-plate[data-intro="wait"] .f1-body::after {
+    opacity: 0;
+    transition: none;
+  }
+  :root:not([data-motion="reduce"]) .f1-plate[data-intro="play"] .f1-dot {
     animation: f1-pop 260ms var(--ease-settle) var(--t) both;
   }
-  :root[data-intro]:not([data-motion="reduce"]) .f1-ln {
+  :root:not([data-motion="reduce"]) .f1-plate[data-intro="play"] .f1-ln {
     transform-origin: left center;
     animation: f1-grow-x var(--dur) linear var(--t) both;
   }
-  :root[data-intro]:not([data-motion="reduce"]) .f1-seg {
+  :root:not([data-motion="reduce"]) .f1-plate[data-intro="play"] .f1-seg {
     transform-origin: top center;
     animation: f1-grow-y 160ms var(--ease-out) var(--t) both;
   }
-  :root[data-intro]:not([data-motion="reduce"]) .f1-seg[data-part="up"] {
+  :root:not([data-motion="reduce"]) .f1-plate[data-intro="play"] .f1-seg[data-part="up"] {
     transform-origin: bottom center;
   }
-  :root[data-intro]:not([data-motion="reduce"]) .f1-yr {
+  :root:not([data-motion="reduce"]) .f1-plate[data-intro="play"] .f1-yr {
     animation: f1-fade 200ms linear calc(var(--k) * 60ms + 60ms) both;
   }
-  :root[data-intro]:not([data-motion="reduce"]) .f1-body::after {
+  :root:not([data-motion="reduce"]) .f1-plate[data-intro="play"] .f1-body::after {
     transform-origin: top center;
     animation: f1-grow-y 360ms var(--ease-out) both;
   }
-  :root[data-intro]:not([data-motion="reduce"]) .f1-pearl-at {
+  :root:not([data-motion="reduce"]) .f1-plate[data-intro="play"] .f1-pearl-at {
     animation: f1-settle 400ms var(--ease-settle) var(--t) both;
   }
-  :root[data-intro]:not([data-motion="reduce"]) :is(.f1-ring, .f1-wip-l) {
+  :root:not([data-motion="reduce"]) .f1-plate[data-intro="play"] :is(.f1-ring, .f1-wip-l) {
     animation: f1-fade 200ms linear calc(var(--end) + 200ms) both;
+  }
+}
+@media print {
+  .f1-plate[data-intro] * {
+    opacity: 1 !important;
+    animation: none !important;
   }
 }
 @keyframes f1-pop {
@@ -455,9 +570,16 @@
 @media (forced-colors: active) {
   .f1-dot,
   .f1-dot::after,
-  .f1-pearl {
+  .f1-pearl,
+  .f1-k--dot,
+  .f1-k--tw,
+  .f1-k--pearl {
     forced-color-adjust: none;
     background: CanvasText;
+  }
+  .f1-k--link,
+  .f1-k--ring {
+    border-color: CanvasText;
   }
   .f1-dp--quiet .f1-pearl,
   .f1-gap,

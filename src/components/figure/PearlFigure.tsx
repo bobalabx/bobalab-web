@@ -14,7 +14,15 @@
  *   - a figcaption under the plate whose first layer is the caption and whose other
  *     layers (hidden) are the live captions the island swaps in (aria-live="off").
  * Below 48rem (and wherever the lanes cannot fit) each lane becomes a strip
- * (geometry.ts LIST_CSS). The client island adds linked highlighting only.
+ * (geometry.ts LIST_CSS). The client island adds linked highlighting and the
+ * once-per-session arrival.
+ *
+ * The map variant (DECISIONS D-14, JUDGE.md "Where the timeline moves"): with a
+ * `heading` the figure is /research/#map. It renders the heading beside a
+ * one-sentence key with inline glyphs (B's key) and shrinks the caption to its
+ * facts; the key sits inside the `f1` container, so its wording follows the
+ * same container queries as the marks (links → twin rings when packed, "named
+ * under each line" in the strip layout).
  */
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
@@ -41,6 +49,11 @@ export interface PearlFigureProps {
   model: FigureModel;
   /** @deprecated Unused: the caption names the lab's directions, not the lab. */
   labName?: string;
+  /**
+   * The section heading of the map variant (/research/#map). When given, the
+   * figure renders it with the one-sentence key and a short caption.
+   */
+  heading?: ReactNode;
 }
 
 function Track({ lane, model }: { lane: FigureLane; model: FigureModel }) {
@@ -163,15 +176,93 @@ function Caption({ model }: { model: FigureModel }) {
   );
 }
 
-export function PearlFigure({ model }: PearlFigureProps) {
+/** A glyph of the key: the mark it names, drawn small (decorative). */
+function K({ k }: { k: "dot" | "link" | "tw" | "pearl" | "ring" }) {
+  return <i className={`f1-k f1-k--${k}`} aria-hidden="true" />;
+}
+
+/**
+ * The map's one-sentence key (JUDGE.md "Where the timeline moves", B's inline
+ * key): dot = a paper by year; vertical link (twin ring when packed; named
+ * under each line in strips) = a paper shared by two directions; pearl = now;
+ * open ring = work in progress. Each clause appears only when the data draws it.
+ */
+function Key({ model }: { model: FigureModel }) {
+  const shared = model.papers.some((p) => p.lanes.length > 1);
+  const wip = model.lanes.some((l) => l.wip.length > 0);
+  const kinds = model.maxShare > 2 ? "more than one direction" : "two directions";
+  return (
+    <p className="f1-key">
+      One line per direction: each <K k="dot" />
+      dot is a paper, placed by year
+      {shared && (
+        <>
+          <span className="f1-cap-d">
+            ;{" "}
+            <span className="f1-cv-l">
+              a <K k="link" />
+              vertical link joins a paper shared by {kinds}
+            </span>
+            <span className="f1-cv-r">
+              a <K k="tw" />
+              ringed dot is a paper shared by {kinds}, drawn on each of their lines
+            </span>
+          </span>
+          <span className="f1-cap-m">
+            ; papers shared with another direction are named under each line
+          </span>
+        </>
+      )}
+      {wip ? (
+        <>
+          ; the <K k="pearl" />
+          pearl marks now, and <K k="ring" />
+          open rings after it are work in progress.
+        </>
+      ) : (
+        <>
+          ; the <K k="pearl" />
+          pearl marks now.
+        </>
+      )}
+    </p>
+  );
+}
+
+/** The map's caption: only what the key does not say. */
+function ShortCaption({ model }: { model: FigureModel }) {
+  const merged = model.merged > 0 ? model.bins[0] : undefined;
+  return (
+    <>
+      <b>Figure 1.</b> Papers in the lab’s {numberWord(model.n)} research{" "}
+      {model.n === 1 ? "direction" : "directions"} with a public version or a documented talk, by
+      year. {merged && `The first column group covers ${merged.from} to ${merged.to}. `}
+      Order within a year is not meaningful.
+      <span className="f1-cap-d f1-hint"> Point at a line, a dot or a ring to name it.</span> As of{" "}
+      {formatDate(model.asOf)}.
+    </>
+  );
+}
+
+export function PearlFigure({ model, heading }: PearlFigureProps) {
   const listOnly = model.state !== "figure";
   const geo = { cols: model.cols, bins: model.bins.length, wipMax: model.wipMax };
   const markEach = model.draftCount > 0 && model.draftCount < model.n;
   const label = (slug: string) => model.lanes.find((l) => l.slug === slug)?.label ?? slug;
 
   return (
-    <div className={listOnly ? "f1 f1--list" : "f1"}>
+    <div
+      className={["f1", listOnly && "f1--list", heading != null && "f1--map"]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <style>{figureCss(geo, listOnly)}</style>
+      {heading != null && (
+        <div className="f1-head">
+          {heading}
+          <Key model={model} />
+        </div>
+      )}
       <figure
         className="f1-plate"
         data-n={model.n}
@@ -248,7 +339,7 @@ export function PearlFigure({ model }: PearlFigureProps) {
         <figcaption className="f1-caption">
           <span className="f1-cap" aria-live="off">
             <span className="f1-cap-layer is-on" data-cap="legend">
-              <Caption model={model} />
+              {heading != null ? <ShortCaption model={model} /> : <Caption model={model} />}
             </span>
             {!listOnly && (
               <>

@@ -10,8 +10,77 @@
  *     announced; the links and rows carry the same text);
  *   - Esc, leaving, or blurring resets. Touch and the strip layout are left alone.
  * Clicking a pearl follows its lane's link. Sets data-live on the plate once wired.
+ *
+ * Arrival (D-14: the figure now lives below the fold on /research/#map): once per
+ * browser session (sessionStorage INTRO_STORAGE_KEY "bobalab-intro", the figure's
+ * documented key; the homepage cup has its own "bobalab-cup-intro"), when the
+ * plate's top clears the bottom 30 % of the viewport (so the arrival is seen
+ * rather than spent on the plate's first pixel row), the papers
+ * arrive year by year (figure.css, plate[data-intro]). Only a plate that is
+ * entirely off screen when the island mounts is held back ("wait"), so nothing
+ * already painted ever disappears. A plate that is on screen at mount (a load of
+ * /research/#map) counts as seen: the key is set, so returning to the page later
+ * in the session (Back, whose scroll is restored after the island mounts) never
+ * blanks the figure the visitor has already read and replays it. With motion
+ * reduced, storage blocked or no IntersectionObserver the figure stays at rest.
  */
 import { useEffect, useRef } from "react";
+import { INTRO_STORAGE_KEY, motionReduced, subscribeMotion } from "@/lib/site/motion";
+/** Longest arrival (figure.css timings stay within it); the attribute is removed after. */
+const INTRO_MS = 2000;
+/** Bottom share of the viewport (%) the plate's top must clear before it arrives. */
+const SEEN_SHARE = 30;
+
+const markSeen = () => {
+  try {
+    sessionStorage.setItem(INTRO_STORAGE_KEY, "1");
+  } catch {
+    // storage blocked: the arrival may play once more on a later view
+  }
+};
+
+function arrival(plate: HTMLElement): () => void {
+  const noop = () => {};
+  if (motionReduced() || typeof IntersectionObserver === "undefined") return noop;
+  try {
+    if (sessionStorage.getItem(INTRO_STORAGE_KEY)) return noop;
+  } catch {
+    return noop;
+  }
+  const r = plate.getBoundingClientRect();
+  if (r.bottom > 0 && r.top < window.innerHeight) {
+    markSeen();
+    return noop;
+  }
+  let timer = 0;
+  plate.dataset.intro = "wait";
+  // The root is the viewport minus its bottom SEEN_SHARE: the plate arrives once its
+  // top has risen past that line (or, if shorter, once it is wholly above it), so
+  // that part of it is on screen. Any plate can reach the line, so none stays held.
+  const io = new IntersectionObserver(
+    (entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      io.disconnect();
+      markSeen();
+      plate.dataset.intro = "play";
+      timer = window.setTimeout(() => delete plate.dataset.intro, INTRO_MS);
+    },
+    { rootMargin: `0px 0px -${SEEN_SHARE}% 0px` },
+  );
+  io.observe(plate);
+  const stop = () => {
+    io.disconnect();
+    clearTimeout(timer);
+    delete plate.dataset.intro;
+  };
+  const unsub = subscribeMotion(() => {
+    if (motionReduced()) stop();
+  });
+  return () => {
+    unsub();
+    stop();
+  };
+}
 
 function wire(plate: HTMLElement): () => void {
   const D = document;
@@ -140,7 +209,13 @@ export function FigureIsland() {
   const ref = useRef<HTMLElement>(null);
   useEffect(() => {
     const plate = ref.current?.closest<HTMLElement>(".f1-plate");
-    return plate ? wire(plate) : undefined;
+    if (!plate) return undefined;
+    const unwire = wire(plate);
+    const unarrive = arrival(plate);
+    return () => {
+      unarrive();
+      unwire();
+    };
   }, []);
   return <i ref={ref} hidden />;
 }

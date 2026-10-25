@@ -1,14 +1,19 @@
 /**
  * Fig. 1 "Lines" behaviour (DECISIONS D-13; prototype p3/fig.js; JUDGE refinements
  * 3–5 and 12): DOM contract, lanes vs strips, packed columns, linked highlighting
- * (lede ↔ lane ↔ dot ↔ ledger row; other lines dim to 0.3, pearls never dim),
- * the fixed-height live caption, keyboard and Esc, the finite arrival, reduced
- * motion, the pearl morph and focus on the destination h1. The in-figure Pause
- * button and the 01–0N numerals are gone (D-13 item 6, RC-7).
+ * (external [data-dir] / [data-f1-row] hooks ↔ lane ↔ dot; other lines dim to 0.3,
+ * pearls never dim), the fixed-height live caption, keyboard and Esc, the finite
+ * arrival, reduced motion, the pearl morph and focus on the destination h1. The
+ * in-figure Pause button and the 01–0N numerals are gone (D-13 item 6, RC-7).
+ * D-14: the figure lives at /research/#map (the "Explore" band, with its
+ * one-sentence key); the arrival plays once per session when it scrolls into
+ * view, under the figure's session key "bobalab-intro" (the homepage cup has its own).
  * Runs against BASE_URL (shared dev server).
  */
 import { expect, test, type Page } from "@playwright/test";
 
+/** Where the figure lives (D-14). Loading at the anchor puts it on screen at once. */
+const MAP = "/research/#map";
 const skipIntro = async (page: Page) =>
   page.context().addInitScript(() => {
     try {
@@ -26,6 +31,37 @@ const mode = (page: Page) =>
   plate(page).evaluate((el) => getComputedStyle(el).getPropertyValue("--f1-mode").trim());
 const opacity = (page: Page, sel: string) =>
   page.locator(sel).evaluateAll((els) => els.map((e) => getComputedStyle(e).opacity));
+
+/**
+ * The island's outside hooks ([data-dir] lights a lane, [data-f1-row] lights a
+ * paper's dots). /research/ has no element that carries them today, so the
+ * contract is exercised with two fixture elements added while the HTML parses,
+ * before hydration (the island binds hooks when it wires up). React 19 skips
+ * foreign nodes at the end of <body> when it hydrates.
+ */
+const addHooks = (page: Page) =>
+  page.context().addInitScript(() => {
+    const mo = new MutationObserver(() => {
+      const items = document.querySelectorAll<HTMLElement>(".f1-item");
+      const dots = document.querySelectorAll<HTMLElement>(".f1-dot");
+      if (!document.body || items.length < 2 || !document.querySelector(".f1-caption")) return;
+      mo.disconnect();
+      const box = document.createElement("div");
+      box.id = "t-hooks";
+      box.style.cssText =
+        "position:fixed;left:0;bottom:0;z-index:9;display:flex;gap:16px;padding:8px;background:Canvas;color:CanvasText";
+      const dir = document.createElement("a");
+      dir.href = "#t";
+      dir.textContent = "direction hook";
+      dir.dataset.dir = items[1]!.dataset.slug!;
+      const row = document.createElement("p");
+      row.textContent = "paper hook";
+      row.dataset.f1Row = dots[dots.length - 1]!.dataset.s!;
+      box.append(dir, row);
+      document.body.append(box);
+    });
+    mo.observe(document, { childList: true, subtree: true });
+  });
 
 /**
  * The key that moves focus through links in this browser, probed on a blank
@@ -55,7 +91,28 @@ test("DOM contract: one labelled nav of real links with counts, one pearl per la
   page,
 }) => {
   await skipIntro(page);
-  await page.goto("/");
+  await page.goto(MAP);
+  // D-14: the map section on /research, open by default (no disclosure), in the band.
+  const map = page.locator("section#map");
+  await expect(map).toHaveCount(1);
+  await expect(map).toHaveAttribute("aria-labelledby", "map-h");
+  await expect(map.locator("h2#map-h")).toHaveText(/^Explore: how the \w+ directions connect$/);
+  await expect(map.locator("details, summary")).toHaveCount(0);
+  await expect(map.locator("figure.f1-plate")).toBeVisible();
+  const band = await page.evaluate(() => {
+    const probe = document.createElement("i");
+    probe.style.color = "var(--band)";
+    document.body.append(probe);
+    const want = getComputedStyle(probe).color;
+    probe.remove();
+    return [getComputedStyle(document.getElementById("map")!).backgroundColor, want];
+  });
+  expect(band[0]).toBe(band[1]);
+  // The one-sentence key above the plate names the marks.
+  const key = map.locator(".f1-key");
+  await expect(key).toHaveCount(1);
+  await expect(key).toContainText("dot is a paper, placed by year");
+  await expect(key).toContainText("pearl marks now");
   const fig = page.locator("figure.f1-plate");
   await expect(fig).toHaveCount(1);
   await expect(fig.locator("figcaption")).toContainText("Figure 1.");
@@ -103,7 +160,7 @@ test("lanes from 48rem (links drawn at 1366, packed with twin rings at 768); str
   page,
 }) => {
   await skipIntro(page);
-  await page.goto("/");
+  await page.goto(MAP);
   expect(await mode(page)).toBe("fig");
   const segs = page.locator(".f1-seg");
   const shared = await segs.count();
@@ -145,7 +202,7 @@ test("keyboard: Tab order follows the lanes; focus lights a lane, other lines di
   page,
 }) => {
   await skipIntro(page);
-  await page.goto("/");
+  await page.goto(MAP);
   await hydrated(page);
   const tabKey = await linkTabKey(page);
   if (!tabKey) {
@@ -197,11 +254,12 @@ test("keyboard: Tab order follows the lanes; focus lights a lane, other lines di
   await expect(page.locator(".f1-plate .dim")).toHaveCount(0);
 });
 
-test("linked highlighting: a dot names its paper and lights its ledger row; a row lights its dots; a lede word lights its lane", async ({
+test("linked highlighting: a dot names its paper and lights its hooked row; a row hook lights its dots; a direction hook lights its lane", async ({
   page,
 }) => {
   await skipIntro(page);
-  await page.goto("/");
+  await addHooks(page);
+  await page.goto(MAP);
   await hydrated(page);
   // A dot.
   const dot = page.locator(".f1-dot").last();
@@ -218,18 +276,17 @@ test("linked highlighting: a dot names its paper and lights its ledger row; a ro
   await page.mouse.move(2, 2);
   await expect(liveCap(page)).toHaveCount(0);
 
-  // A ledger row.
+  // A paper hook (a publication row elsewhere on a page).
   const r = page.locator("[data-f1-row]").first();
+  await expect(r).toHaveCount(1);
   const rs = (await r.getAttribute("data-f1-row"))!;
   await r.hover();
-  if (await page.locator(`.f1-dot[data-s="${rs}"]`).count()) {
-    await expect(page.locator(`.f1-dot[data-s="${rs}"]`).first()).toHaveClass(/big/);
-    await expect(r).toHaveClass(/is-hl/);
-  }
+  await expect(page.locator(`.f1-dot[data-s="${rs}"]`).first()).toHaveClass(/big/);
+  await expect(r).toHaveClass(/is-hl/);
   await page.mouse.move(2, 2);
 
-  // A lede direction word.
-  const word = page.locator(".hm-dl[data-dir]").nth(1);
+  // A direction hook (a direction word elsewhere on a page).
+  const word = page.locator("#t-hooks [data-dir]");
   const d = (await word.getAttribute("data-dir"))!;
   await word.hover();
   await expect(page.locator(`.f1-item[data-slug="${d}"]`)).toHaveClass(/is-on/);
@@ -243,7 +300,7 @@ test("a pearl is a pointer target for its lane: hover lights it, click opens the
   page,
 }) => {
   await skipIntro(page);
-  await page.goto("/");
+  await page.goto(MAP);
   await hydrated(page);
   const li = items(page).nth(1);
   const slug = (await li.getAttribute("data-slug"))!;
@@ -253,50 +310,93 @@ test("a pearl is a pointer target for its lane: hover lights it, click opens the
   await page.waitForURL(`**/research/${slug}/`);
 });
 
-test("intro: papers arrive once per session, finitely, within 2 s; reduced motion: nothing runs", async ({
+test("intro: papers arrive once per session when the map scrolls into view, finitely, within 2 s; reduced motion: nothing runs", async ({
   browser,
 }) => {
-  const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 } });
-  const page = await ctx.newPage();
-  await page.goto("/", { waitUntil: "commit" });
-  await page.waitForSelector(".f1-dot");
-  expect(await page.evaluate(() => document.documentElement.hasAttribute("data-intro"))).toBe(true);
-  const t = await page.evaluate(() =>
+  const plateAnims = () =>
     document
       .getAnimations()
-      .filter((a) => (a.effect as KeyframeEffect | null)?.target instanceof Element)
-      .filter((a) => ((a.effect as KeyframeEffect).target as Element).closest(".f1-plate"))
-      .map((a) => a.effect!.getComputedTiming()),
+      .filter((a) => {
+        const el = (a.effect as KeyframeEffect | null)?.target;
+        return el instanceof Element && el.closest(".f1-plate");
+      })
+      .map((a) => a.effect!.getComputedTiming());
+  const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+  const page = await ctx.newPage();
+  await page.goto("/research/");
+  await page.waitForSelector(".f1-plate[data-live]");
+  // Below the fold: held back (never anything already on screen), nothing running.
+  await expect(page.locator(".f1-plate")).toHaveAttribute("data-intro", "wait");
+  expect(await page.evaluate(plateAnims)).toHaveLength(0);
+  // The homepage's gate is untouched: the root never gets data-intro here.
+  expect(await page.evaluate(() => document.documentElement.hasAttribute("data-intro"))).toBe(
+    false,
   );
+  // Its first rows peeking in at the bottom of the screen do not spend the arrival:
+  // it waits until the plate's top has cleared the bottom 30 % of the viewport.
+  await page.evaluate(() => {
+    const p = document.querySelector(".f1-plate")!;
+    window.scrollBy(0, p.getBoundingClientRect().top - window.innerHeight * 0.85);
+  });
+  await page.waitForTimeout(300);
+  await expect(page.locator(".f1-plate")).toHaveAttribute("data-intro", "wait");
+  await page.evaluate(() => document.getElementById("map")!.scrollIntoView());
+  await expect(page.locator(".f1-plate")).toHaveAttribute("data-intro", "play");
+  const t = await page.evaluate(plateAnims);
   expect(t.length).toBeGreaterThan(0);
   for (const x of t) {
     expect(x.iterations).not.toBe(Infinity);
     expect(Number(x.endTime)).toBeLessThanOrEqual(2000);
   }
   await page.waitForTimeout(2300);
-  await page.goto("/");
-  await page.waitForSelector(".f1-dot");
-  expect(await page.evaluate(() => document.documentElement.hasAttribute("data-intro"))).toBe(
-    false,
-  );
-  expect(
-    await page.evaluate(
-      () =>
-        document.getAnimations().filter((a) => {
-          const el = (a.effect as KeyframeEffect | null)?.target;
-          return el instanceof Element && el.closest(".f1-plate");
-        }).length,
-    ),
-  ).toBe(0);
+  await expect(page.locator(".f1-plate")).not.toHaveAttribute("data-intro", /.*/);
+  expect(await page.evaluate(() => sessionStorage.getItem("bobalab-intro"))).toBe("1");
+  // Second view in the session: at rest from the first frame.
+  await page.goto("/research/");
+  await page.waitForSelector(".f1-plate[data-live]");
+  await expect(page.locator(".f1-plate")).not.toHaveAttribute("data-intro", /.*/);
+  await page.evaluate(() => document.getElementById("map")!.scrollIntoView());
+  await page.waitForTimeout(150);
+  expect(await page.evaluate(plateAnims)).toHaveLength(0);
   await ctx.close();
+
+  // Arriving at the anchor: the figure is on screen before the island runs, so it
+  // is drawn at rest (no flash of an empty figure), and that counts as seen: going
+  // to a direction and coming Back (the scroll is restored after the island mounts)
+  // never blanks the figure the visitor has already read to replay it.
+  const hash = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+  const hp = await hash.newPage();
+  await hp.goto(MAP);
+  await hp.waitForSelector(".f1-plate[data-live]");
+  await expect(hp.locator(".f1-plate")).not.toHaveAttribute("data-intro", /.*/);
+  expect(await hp.evaluate(() => sessionStorage.getItem("bobalab-intro"))).toBe("1");
+  await hp.locator(".f1-item a.f1-link").first().click();
+  await hp.waitForURL(/\/research\/[a-z0-9-]+\/$/);
+  await expect(hp.locator("main h1")).toBeFocused();
+  await hp.goBack();
+  await hp.waitForURL(/\/research\/(#map)?$/);
+  await hp.waitForSelector(".f1-plate[data-live]");
+  for (let i = 0; i < 8; i++) {
+    expect(await hp.locator(".f1-plate").getAttribute("data-intro")).toBeNull();
+    expect(
+      await hp
+        .locator(".f1-plate .f1-dot")
+        .first()
+        .evaluate((d) => getComputedStyle(d).opacity),
+    ).toBe("1");
+    await hp.waitForTimeout(100);
+  }
+  await hash.close();
 
   const rm = await browser.newContext({
     viewport: { width: 1366, height: 768 },
     reducedMotion: "reduce",
   });
   const p2 = await rm.newPage();
-  await p2.goto("/"); // first visit: the intro would play without the gate
-  await p2.waitForSelector(".f1-plate");
+  await p2.goto("/research/"); // first visit: the intro would play without the gate
+  await p2.waitForSelector(".f1-plate[data-live]");
+  await expect(p2.locator(".f1-plate")).not.toHaveAttribute("data-intro", /.*/);
+  await p2.evaluate(() => document.getElementById("map")!.scrollIntoView());
   await p2.waitForTimeout(300);
   const running = await p2.evaluate(
     () =>
@@ -338,8 +438,16 @@ test("Enter opens the direction, the pearl morph group exists, focus lands on h1
 }) => {
   await skipIntro(page);
   await page.context().addInitScript(recordViewTransitions);
-  await page.goto("/");
+  const errors: string[] = [];
+  page.on("console", (m) => {
+    if (m.type() === "error") errors.push(m.text());
+  });
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto(MAP);
   await hydrated(page);
+  // The map's pearls are this page's only morph sources: one per lane, none in the ledger.
+  await expect(page.locator(".f1-pearl")).toHaveCount(await items(page).count());
+  await expect(page.locator(".rs-dirs :is(.f1-pearl, .f1-dp)")).toHaveCount(0);
   const li = items(page).first();
   const slug = (await li.getAttribute("data-slug"))!;
   // Warm the destination so it renders in the same commit (dev compiles on demand).
@@ -356,6 +464,8 @@ test("Enter opens the direction, the pearl morph group exists, focus lands on h1
       .poll(async () => (await vtLog(page)).map((e) => e.split("|")[0]))
       .toContain(`::view-transition-group(pearl-${slug})`);
   }
+  // One element per pearl-{slug} name on each side: a duplicate aborts the transition.
+  expect(errors.filter((e) => /view-transition|duplicate|same name/i.test(e))).toEqual([]);
 });
 
 test("reduced motion: every view-transition animation is ≤ 120 ms (§E10.5)", async ({
@@ -369,7 +479,7 @@ test("reduced motion: every view-transition animation is ≤ 120 ms (§E10.5)", 
   });
   await ctx.addInitScript(recordViewTransitions);
   const page = await ctx.newPage();
-  await page.goto("/");
+  await page.goto(MAP);
   await hydrated(page);
   const li = items(page).nth(1);
   const slug = (await li.getAttribute("data-slug"))!;
@@ -394,7 +504,7 @@ test("forced colours: dots, lines and pearls take system colours; lanes keep the
   });
   const page = await ctx.newPage();
   await skipIntro(page);
-  await page.goto("/");
+  await page.goto(MAP);
   const c = await page.evaluate(() => {
     const cs = (s: string) => getComputedStyle(document.querySelector(s)!);
     // The system colour itself: WebKit emulates only the media query, so author
@@ -428,13 +538,39 @@ test("forced colours: dots, lines and pearls take system colours; lanes keep the
   await ctx.close();
 });
 
+test("touch screens: the caption does not ask to point at marks (hover: none); a mouse gets the hint", async ({
+  browser,
+}) => {
+  for (const touch of [false, true]) {
+    const ctx = await browser.newContext({
+      viewport: { width: 1024, height: 768 },
+      hasTouch: touch,
+      isMobile: touch,
+    });
+    const page = await ctx.newPage();
+    await skipIntro(page);
+    await page.goto(MAP);
+    expect(await mode(page)).toBe("fig");
+    const canHover = await page.evaluate(() => matchMedia("(hover: hover)").matches);
+    expect(canHover, "emulated pointer").toBe(!touch);
+    const hint = page.locator("#map .f1-hint");
+    await expect(hint).toHaveCount(1);
+    if (touch) await expect(hint).toBeHidden();
+    else await expect(hint).toBeVisible();
+    // The rest of the caption stays: what counts as a paper, and the date.
+    await expect(page.locator("#map figcaption")).toContainText("Figure 1.");
+    await expect(page.locator("#map figcaption")).toContainText("As of");
+    await ctx.close();
+  }
+});
+
 test("draft marking: when every direction is a draft, one summary badge, none per lane (VIS-03)", async ({
   page,
 }) => {
   await skipIntro(page);
   for (const width of [1366, 390]) {
     await page.setViewportSize({ width, height: 844 });
-    await page.goto("/");
+    await page.goto(MAP);
     const n = Number(await plate(page).getAttribute("data-n"));
     const drafts = await page.locator(".f1-foot-draft").count();
     test.skip(!drafts, "no draft directions in this build");

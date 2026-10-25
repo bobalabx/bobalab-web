@@ -820,11 +820,22 @@
     grid-template-columns: minmax(0, 1fr) max-content 13rem;
     column-gap: 24px;
   }
+  /* Live rows: no strip (the map draws their papers), so title | counts. */
+  .rs-dir:not(.rs-dir--strip) {
+    grid-template-columns: minmax(0, 1fr) 13rem;
+  }
   .rs-dir__counts {
     padding-top: 4px;
   }
   .rs-strip {
     margin-top: 2px;
+  }
+  /* With the strip column gone there is room for the counts on one line
+     ("6 papers, 2 in progress and 5 projects" no longer orphans "projects"). */
+  @media (min-width: 80rem) {
+    .rs-dir:not(.rs-dir--strip) {
+      grid-template-columns: minmax(0, 1fr) 16rem;
+    }
   }
   .rs-axis {
     display: grid;
@@ -864,6 +875,28 @@
   font-weight: 400;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+}
+
+/* ---------- The map band (/research/#map, DECISIONS D-14) ----------
+   Full bleed in the existing --band tint (--tea is the homepage cup's only), the
+   section rhythm of .dr-section above and below it. The heading takes the label
+   column and the key the content column inside PearlFigure (.f1-head). */
+.rs-map {
+  margin-top: var(--sec-gap);
+  padding-block: clamp(40px, 6vw, 72px);
+  background: var(--band);
+}
+.rs-map .f1 {
+  --f1-ground: var(--band);
+  --f1-zone: var(--paper);
+}
+.rs-map__title {
+  text-wrap: balance;
+}
+@media (forced-colors: active) {
+  .rs-map {
+    border-block: 1px solid CanvasText;
+  }
 }
 
 /* ---------- Motion: Figure 2 arrives (finite; transform/opacity only) ----------

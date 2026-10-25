@@ -1,17 +1,18 @@
 /**
  * /research/ and /research/{direction}/ (brief §D4–§D5, §E5; redesign D-13 after
- * docs/redesign/prototypes/p3/research.html).
+ * docs/redesign/prototypes/p3/research.html; D-14 moves Fig. 1 to /research/#map,
+ * "Explore: how the N directions connect", in a full-bleed band after the ledger).
  * Runs against BASE_URL (default: the shared dev server http://localhost:3100,
  * drafts included). Routes are discovered from the rendered index, so the spec
  * follows whatever content the server has.
  *   npx playwright test tests/e2e/research.spec.ts
- * Screenshots: test-results/redesign-research/.
+ * Screenshots: test-results/simplify-research/.
  */
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
-const SHOTS = "test-results/redesign-research";
+const SHOTS = "test-results/simplify-research";
 const VIEWPORTS = [
   { name: "1366", width: 1366, height: 768 },
   { name: "390", width: 390, height: 844 },
@@ -124,18 +125,161 @@ test("index: live directions in editorial order, archived under 'Earlier and rel
   if (order.includes("Active") && order.includes("Completed")) {
     expect(order.indexOf("Active")).toBeLessThan(order.indexOf("Completed"));
   }
-  // Strips (wide): one width for every row of a list, year-bin labels that never touch.
+  // D-14: the live ledger draws no strips (the map draws the same papers).
+  await expect(
+    page.locator('section[aria-labelledby="rs-directions"] :is(.rs-strip, .rs-axis)'),
+  ).toHaveCount(0);
+  // Earlier research keeps its strips (not on the map): one width for every row,
+  // year-bin labels that never touch.
   await page.setViewportSize({ width: 1440, height: 900 });
-  const strips = await page
-    .locator('section[aria-labelledby="rs-directions"] .rs-strip')
-    .evaluateAll((ss) => ss.map((s) => Math.round(s.getBoundingClientRect().width)));
-  expect(new Set(strips).size).toBe(1);
-  const labels = await page
-    .locator('section[aria-labelledby="rs-directions"] .rs-axis__track > span')
-    .evaluateAll((ls) => ls.map((l) => l.getBoundingClientRect().toJSON() as DOMRect));
-  expect(labels.map((l) => l.width).every((w) => w > 0)).toBe(true);
-  for (let i = 1; i < labels.length; i++)
-    expect(labels[i]!.left, "axis labels overlap").toBeGreaterThanOrEqual(labels[i - 1]!.right);
+  // With the strip column gone, a live row's counts sit on one line at 1440.
+  const countLines = await page
+    .locator('section[aria-labelledby="rs-directions"] .rs-dir__counts')
+    .evaluateAll((cs) =>
+      cs.map((c) => {
+        const r = document.createRange();
+        r.selectNodeContents(c);
+        return new Set([...r.getClientRects()].map((x) => Math.round(x.top))).size;
+      }),
+    );
+  expect(countLines).toEqual(live.map(() => 1));
+  if (archived.length) {
+    const strips = await page
+      .locator('section[aria-labelledby="rs-earlier"] .rs-strip')
+      .evaluateAll((ss) => ss.map((s) => Math.round(s.getBoundingClientRect().width)));
+    expect(strips).toHaveLength(archived.length);
+    expect(new Set(strips).size).toBe(1);
+    const labels = await page
+      .locator('section[aria-labelledby="rs-earlier"] .rs-axis__track > span')
+      .evaluateAll((ls) => ls.map((l) => l.getBoundingClientRect().toJSON() as DOMRect));
+    expect(labels.map((l) => l.width).every((w) => w > 0)).toBe(true);
+    for (let i = 1; i < labels.length; i++)
+      expect(labels[i]!.left, "axis labels overlap").toBeGreaterThanOrEqual(labels[i - 1]!.right);
+  }
+});
+
+test("map: 'Explore' band after the ledger, before projects and earlier research; full bleed; one lane per live direction", async ({
+  page,
+}) => {
+  const { live } = await discover(page);
+  test.skip(!live.length, "no live directions: no map");
+  const map = page.locator("main section#map");
+  await expect(map).toHaveCount(1);
+  await expect(map).toHaveAttribute("aria-labelledby", "map-h");
+  const h2 = map.locator("h2#map-h");
+  if (live.length > 1)
+    await expect(h2).toHaveText(
+      /^Explore: how the (two|three|four|five|six|seven|eight|\d+) directions connect$/,
+    );
+  else await expect(h2).toHaveText("Explore: every paper by year");
+  // Open by default: no disclosure, the figure is drawn.
+  await expect(map.locator("details")).toHaveCount(0);
+  await expect(map.locator("figure.f1-plate")).toBeVisible();
+  // One key sentence above the plate; the caption below says only the rest.
+  const key = map.locator(".f1-key");
+  await expect(key).toHaveCount(1);
+  const keyText = (await key.innerText()).trim();
+  expect(keyText.split(/[.!?](\s|$)/).filter((x) => x.trim()).length, keyText).toBe(1);
+  // …and it comes before the plate.
+  expect(
+    await map.evaluate((m) =>
+      Boolean(
+        m.querySelector(".f1-key")!.compareDocumentPosition(m.querySelector("figure")!) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+      ),
+    ),
+  ).toBe(true);
+  await expect(map.locator("figcaption")).not.toContainText("Lines follow the lab");
+  // Lanes: one per live direction, in the ledger's order, each a link to its page.
+  const lanes = await map
+    .locator(".f1-item a.f1-link")
+    .evaluateAll((as) =>
+      as.map((a) => (a.getAttribute("href") ?? "").replace(/^\/research\/|\/$/g, "")),
+    );
+  expect(lanes).toEqual(live);
+  // Order of sections: directions → map → projects → earlier research.
+  const order = await page.evaluate(() =>
+    [...document.querySelectorAll("main section[aria-labelledby]")]
+      .map((s) => s.getAttribute("aria-labelledby"))
+      .filter((id) => ["rs-directions", "map-h", "rs-projects", "rs-earlier"].includes(id!)),
+  );
+  const present = ["rs-directions", "map-h", "rs-projects", "rs-earlier"].filter((id) =>
+    order.includes(id),
+  );
+  expect(order).toEqual(present);
+  // Full bleed in the --band tint (never --tea, the homepage cup's only).
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    const box = (await map.boundingBox())!;
+    const vw = await page.evaluate(() => document.documentElement.clientWidth);
+    expect(Math.round(box.x)).toBe(0);
+    expect(Math.round(box.width)).toBe(vw);
+  }
+  const bg = await page.evaluate(() => {
+    const probe = (v: string) => {
+      const i = document.createElement("i");
+      i.style.color = `var(${v})`;
+      document.body.append(i);
+      const c = getComputedStyle(i).color;
+      i.remove();
+      return c;
+    };
+    return {
+      map: getComputedStyle(document.getElementById("map")!).backgroundColor,
+      band: probe("--band"),
+      tea: probe("--tea"),
+    };
+  });
+  expect(bg.map).toBe(bg.band);
+  expect(bg.map).not.toBe(bg.tea);
+  // The head links reach the map.
+  await expect(page.locator('.rs-head__links a[href="#map"]')).toHaveCount(1);
+  // A section, not the page's hero: the band's h2 is its largest text (the lane
+  // names step down from the D-13 hero size). Heading beside the key only where
+  // the 18rem label column holds it; stacked above it on tablets and phones.
+  for (const [width, beside] of [
+    [1440, true],
+    [768, false],
+    [390, false],
+  ] as const) {
+    await page.setViewportSize({ width, height: 900 });
+    const g = await map.evaluate((m) => {
+      const px = (el: Element) => parseFloat(getComputedStyle(el).fontSize);
+      const h = m.querySelector("#map-h")!;
+      const k = m.querySelector(".f1-key")!.getBoundingClientRect();
+      const hr = h.getBoundingClientRect();
+      return {
+        h2: px(h),
+        lane: Math.max(...[...m.querySelectorAll(".f1-label")].map(px)),
+        keyTop: k.top,
+        keyLeft: k.left,
+        hTop: hr.top,
+        hBottom: hr.bottom,
+        hRight: hr.right,
+        hLines: Math.round(hr.height / (parseFloat(getComputedStyle(h).lineHeight) || px(h) * 1.2)),
+      };
+    });
+    expect(g.lane, `${width}: lane names below the band heading`).toBeLessThan(g.h2);
+    if (beside) {
+      expect(Math.abs(g.keyTop - g.hTop), `${width}: key beside the heading`).toBeLessThan(12);
+      expect(g.keyLeft).toBeGreaterThanOrEqual(g.hRight - 1);
+    } else {
+      expect(g.keyTop, `${width}: key below the heading`).toBeGreaterThanOrEqual(g.hBottom - 1);
+    }
+    expect(g.hLines, `${width}: heading lines`).toBeLessThanOrEqual(2);
+  }
+});
+
+test("map: exactly one pearl per direction on the page, all in the map (the morph sources)", async ({
+  page,
+}) => {
+  const { live } = await discover(page);
+  test.skip(live.length < 2, "the map draws lanes from two directions");
+  await expect(page.locator("main .f1-pearl")).toHaveCount(live.length);
+  await expect(page.locator("#map .f1-pearl")).toHaveCount(live.length);
+  await expect(
+    page.locator(".rs-dirs :is(.f1-pearl, .f1-dp, .rs-strip__pearl)").first(),
+  ).toHaveCount(0);
 });
 
 // ---------------------------------------------------------------------------
@@ -328,12 +472,12 @@ test("rail: nav-forward / nav-back transition types, focus lands on the h1", asy
   expect(errors.filter((e) => /ViewTransition|same name|duplicate/i.test(e))).toEqual([]);
 });
 
-test("pearl click from Fig. 1 lands focus on the direction h1 (pearl-open)", async ({ page }) => {
-  await open(page, "/");
-  const link = page
-    .locator('main a[href^="/research/"][href$="/"]:not([href="/research/"])')
-    .first();
-  test.skip((await link.count()) === 0, "home figure not available on this server yet");
+test("lane click on the /research map lands focus on the direction h1 (pearl-open)", async ({
+  page,
+}) => {
+  await open(page, "/research/#map");
+  const link = page.locator("#map a.f1-link").first();
+  test.skip((await link.count()) === 0, "no map on this server");
   const href = (await link.getAttribute("href"))!;
   await recordTransitions(page);
   await link.click();
@@ -343,8 +487,9 @@ test("pearl click from Fig. 1 lands focus on the direction h1 (pearl-open)", asy
   if (vt) expect((await recorded(page)).some((t) => t.includes("pearl-open"))).toBe(true);
   // Reverse: "All directions" carries pearl-close.
   await recordTransitions(page);
+  const back = (await page.locator(".dr-back").getAttribute("href"))!;
   await page.locator(".dr-back").click();
-  await page.waitForURL((u) => u.pathname === "/");
+  await page.waitForURL((u) => u.pathname === back);
   await expect.poll(async () => (await recorded(page)).length).toBeGreaterThan(vt ? 0 : -1);
   if (vt) expect((await recorded(page)).some((t) => t.includes("pearl-close"))).toBe(true);
 });
@@ -393,6 +538,17 @@ test("no-JS: direction page and index render fully", async ({ browser }) => {
   const ctx = await browser.newContext({ javaScriptEnabled: false });
   const page = await ctx.newPage();
   const { live } = await discover(page);
+  // The map is server-rendered: every lane a real link, every mark drawn at rest.
+  await page.evaluate(() => document.getElementById("map")?.scrollIntoView());
+  if (live.length > 1) await expect(page.locator("#map a.f1-link")).toHaveCount(live.length);
+  await expect(page.locator("#map .f1-plate")).not.toHaveAttribute("data-intro", /.*/);
+  if (await page.locator("#map .f1-dot").count())
+    expect(
+      await page
+        .locator("#map .f1-dot")
+        .first()
+        .evaluate((d) => getComputedStyle(d).opacity),
+    ).toBe("1");
   await open(page, `/research/${live[0]}/`);
   await expect(page.locator("main h1")).toBeVisible();
   await expect(page.locator(".dr-status")).toBeVisible();
