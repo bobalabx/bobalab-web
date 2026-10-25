@@ -84,6 +84,15 @@ test("index: one h1, groups in §D9 order, people sorted role → rank → last 
   }
 });
 
+// D-15 (owner): no count sentence under the title ("1 principal investigator, 1
+// master's student, 23 undergraduate RAs and 25 alumni."); the groups carry the people.
+test("index: no people-count sentence in the page header", async ({ page }) => {
+  await open(page, "/people/");
+  await expect(page.locator(".pp-summary")).toHaveCount(0);
+  const header = await page.locator("main h1").evaluate((h) => h.parentElement!.innerText);
+  expect(header).not.toMatch(/\d+ (principal investigators?|master|undergraduate|alumni|PhD)/i);
+});
+
 test("index: alumni derive from `end`, collapsed <details> grouped by end year", async ({
   page,
 }) => {

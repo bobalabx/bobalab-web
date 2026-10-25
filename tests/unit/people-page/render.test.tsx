@@ -208,12 +208,16 @@ describe("People index without anything to filter", () => {
     }
   });
 
-  it("omits the summary line when it would only repeat the single group heading", () => {
-    const c = load("n1");
-    const groups = new Set(c.people.map((p) => (p.isAlumni ? "alumni" : p.role)));
-    const html = renderToStaticMarkup(<PeopleIndex content={c} />);
-    if (groups.size === 1) expect(html).not.toContain('class="pp-summary"');
-    else expect(html).toContain('class="pp-summary"');
+  // D-15 (change request pearls-2): no count sentence at any group count; only
+  // the empty state ("No one is listed yet.") keeps the .pp-summary class.
+  it.each([
+    ["n1", false],
+    ["consent-edge-cases", false],
+    ["consent-edge-cases", true],
+  ] as const)("never prints a count summary line (%s, preview %s)", (set, preview) => {
+    const html = renderToStaticMarkup(<PeopleIndex content={load(set, preview)} />);
+    expect(html).not.toMatch(/class="pp-summary">\d/);
+    expect(html).not.toMatch(/class="pp-summary">(?!No one is listed yet\.)/);
   });
 });
 

@@ -99,19 +99,6 @@ function MaybeCount({
   );
 }
 
-/** "Undergraduate RAs" → "undergraduate RAs"; "PhD students" stays (an initialism). */
-function lowerFirst(label: string): string {
-  return /^[A-Z][a-z]/.test(label) ? label[0]!.toLowerCase() + label.slice(1) : label;
-}
-
-/** "1 principal investigator, 1 master's student, 23 undergraduate RAs and 25 alumni." */
-export function summarySentence(parts: Array<{ count: number; label: string }>): string {
-  const words = parts.map((s) => `${s.count} ${lowerFirst(s.label)}`);
-  const list =
-    words.length > 1 ? `${words.slice(0, -1).join(", ")} and ${words[words.length - 1]}` : words[0];
-  return `${list}.`;
-}
-
 export function PeopleIndex({ content }: { content: Content }) {
   const m = buildPeopleIndex(content);
   const f = m.showFilters;
@@ -214,12 +201,8 @@ export function PeopleIndex({ content }: { content: Content }) {
   return (
     <div className="bl-container pg pp-page">
       <PageHeader title="People">
-        {/* With a single group the summary would only repeat its heading. */}
-        {m.summary.length > 1 ? (
-          <p className="pp-summary">{summarySentence(m.summary)}</p>
-        ) : m.summary.length === 0 ? (
-          <p className="pp-summary">No one is listed yet.</p>
-        ) : null}
+        {/* D-15: no count sentence (the groups below carry the people); only the empty state. */}
+        {m.summary.length === 0 ? <p className="pp-summary">No one is listed yet.</p> : null}
         {/* Internal tools for lab members (site.yml member_links), e.g. the lab scheduler. */}
         {content.site.member_links.length > 0 ? (
           <p className="pp-members">
