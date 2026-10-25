@@ -397,8 +397,15 @@ test("forced colours: dots, lines and pearls take system colours; lanes keep the
   await page.goto("/");
   const c = await page.evaluate(() => {
     const cs = (s: string) => getComputedStyle(document.querySelector(s)!);
+    // The system colour itself: WebKit emulates only the media query, so author
+    // colours (body ink) are not replaced there, while CanvasText still resolves.
+    const probe = document.createElement("span");
+    probe.style.color = "CanvasText";
+    document.body.append(probe);
+    const canvasText = getComputedStyle(probe).color;
+    probe.remove();
     return {
-      text: getComputedStyle(document.body).color,
+      text: canvasText,
       dot: cs(".f1-dot").backgroundColor,
       pearl: cs(".f1-pearl").backgroundColor,
       line: cs(".f1-ln").borderTopColor,

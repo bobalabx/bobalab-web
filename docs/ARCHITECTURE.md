@@ -239,7 +239,8 @@ What the FOUNDATION package changed, and where it deviates from D-13 or from the
     single "† Reported by the lab." note. Wording pending PI sign-off (D-13 item 7).
 14. **Typographic quotes (integration, change request content-4a).** `src/lib/content/typeset.ts`
     turns straight quotes into typographic ones at render time only: Markdoc text nodes (code
-    spans are separate nodes and stay as typed) and the plain display fields the loader exposes.
-    Stored content, titles that feed APA/BibTeX, URLs, DOIs and slugs are never converted.
+    spans are separate nodes and stay as typed) and the plain display fields the loader exposes
+    (including news and project titles). Stored content, publication titles (they feed APA and
+    BibTeX), URLs, DOIs and slugs are never converted.
 
 Known gaps: Archivo has no italic file, so `<cite>` and `<em>` render a synthesised oblique (P3 sets venues upright).

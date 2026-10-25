@@ -351,9 +351,20 @@ test("rich-text bodies: opening an entry changes nothing; an edit does; undoing 
   await tab.keyboard.press("ArrowLeft");
   await expect(tab.getByText("Unsaved changes", { exact: false })).toHaveCount(0);
   await tab.keyboard.press("End");
-  await tab.keyboard.type("Zq");
+  // The first change re-renders the form and can put the caret back where it was
+  // before End, so type one key, wait for the state change, then the second.
+  await tab.keyboard.type("Z");
   await expect(tab.getByText("Unsaved changes", { exact: false })).toBeVisible();
-  await expect(tab.frameLocator("iframe").first().locator(".cms-preview")).toContainText("yet.Zq");
+  await tab.keyboard.press("End");
+  await tab.keyboard.type("q");
+  // The body's last four characters, from the file (the copy changes over time).
+  const bodyEnd = fs
+    .readFileSync(path.join(ROOT, "content", "directions", "algorithmic-advice.md"), "utf8")
+    .trimEnd()
+    .slice(-4);
+  await expect(tab.frameLocator("iframe").first().locator(".cms-preview")).toContainText(
+    `${bodyEnd}Zq`,
+  );
   for (let i = 0; i < 2; i++) await tab.keyboard.press("Backspace");
   await expect(tab.getByText("Changes saved", { exact: false })).toBeVisible();
   await tab.close({ runBeforeUnload: false });

@@ -9,6 +9,7 @@ import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { buildContent, loadRawContent, type Content } from "@/lib/content/load";
 import { parseContentFiles, type VirtualFile } from "@/lib/content/read";
+import { typeset } from "@/lib/content/typeset";
 import {
   absolutizeHtml,
   buildRssFeed,
@@ -160,7 +161,8 @@ describe("RSS feed escaping", () => {
 
   it("round-trips the text (minus forbidden characters)", () => {
     const items = childrenNamed(channelOf(xml), "item");
-    expect(child(items[0]!, "title")!.text).toBe(stripInvalidXmlChars(hostile));
+    // News titles are display text: quotes arrive typographic (redesign content-4a).
+    expect(child(items[0]!, "title")!.text).toBe(typeset(stripInvalidXmlChars(hostile)));
     const encoded = child(items[0]!, "content:encoded")!.text;
     expect(encoded).toContain("&lt;script&gt;");
     expect(encoded).not.toContain("<script>");

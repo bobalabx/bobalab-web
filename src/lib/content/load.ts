@@ -257,6 +257,7 @@ export function buildContent(raw: RawContent, opts: BuildOptions): Content {
     const directionRefs = refDirs(p.directions);
     return {
       ...p,
+      title: ts(p.title),
       summary: ts(p.summary),
       directionRefs,
       primaryDirection: directionRefs[0],
@@ -298,6 +299,8 @@ export function buildContent(raw: RawContent, opts: BuildOptions): Content {
   const news: NewsView[] = keep(raw.entries.news)
     .map((n) => ({
       ...n,
+      // News and project titles never feed a citation, so they are display text too.
+      title: ts(n.title),
       summary: ts(n.summary),
       directionRefs: refDirs(n.directions),
       peopleRefs: n.people.map((s) => listedBySlug.get(s)).filter((x): x is PublicPerson => !!x),

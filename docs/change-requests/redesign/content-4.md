@@ -2,7 +2,7 @@
 
 > **Status (integration, 2026-10-24):**
 >
-> - **4a APPLIED.** `src/lib/content/typeset.ts`; Markdoc text nodes plus the loader's plain display fields (direction question, summary and findings; publication `in_brief`; project and news `summary`; opportunity `route`; home statement, mission and findings; text-page `intro`). Titles, citations, URLs and code are not converted. ARCHITECTURE §9 item 14; R-C6.
+> - **4a APPLIED.** `src/lib/content/typeset.ts`; Markdoc text nodes plus the loader's plain display fields (direction question, summary and findings; publication `in_brief`; project and news `title` and `summary`; opportunity `route`; home statement, mission and findings; text-page `intro`), plus the "Master’s student" role label. Publication titles (APA/BibTeX), citations, URLs and code are not converted. ARCHITECTURE §9 item 14; R-C6.
 > - **4b APPLIED** in `OpportunityCard.tsx` (exported `urlLabel`) and the CMS preview template; R-C4.
 > - **4c APPLIED:** "Join the lab" (page h1, `<title>`, CMS label and preview template); R-C5.
 > - **4d REJECTED for now:** P3 keeps "Why it matters"; the choice is the PI's (R-20).

@@ -46,7 +46,7 @@ export const ROLE_LABELS: Record<PersonRole, { one: string; group: string }> = {
   postdoc: { one: "Postdoctoral scholar", group: "Postdocs" },
   phd: { one: "PhD student", group: "PhD students" },
   "predoc-staff": { one: "Pre-doc / research staff", group: "Pre-docs & research staff" },
-  masters: { one: "Master's student", group: "Master's students" },
+  masters: { one: "Master’s student", group: "Master’s students" },
   undergrad: { one: "Undergraduate RA", group: "Undergraduate RAs" },
   affiliate: { one: "Affiliate", group: "Affiliates & collaborators" },
 };
