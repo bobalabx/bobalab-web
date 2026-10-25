@@ -1,9 +1,9 @@
 /**
  * Fig. 1 draft marking (DECISIONS D-03; verify finding VIS-03): when every
- * direction is a draft, the plate says so once in its foot ("applies to all N
- * directions") and no row or caption repeats the badge; per-row badges appear
- * only when drafts and reviewed directions are mixed. Also pins the D-05 key
- * wording (CON-10): dots count talk-only papers too.
+ * direction is a draft, the figcaption says so once ("applies to all N
+ * directions") and no lane repeats the badge; per-lane badges appear only when
+ * drafts and reviewed directions are mixed. Also pins the D-05 caption wording
+ * (CON-10): dots count papers with a documented talk too.
  */
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -37,27 +37,26 @@ const model = (set: string): FigureModel =>
   buildFigure(buildContent(loadRawContent(path.join(FIX, set)), { preview: true, today: TODAY }));
 
 const withDrafts = (m: FigureModel, isDraft: (i: number) => boolean): FigureModel => {
-  const items = m.items.map((it, i) => ({ ...it, draft: isDraft(i) }));
-  return { ...m, items, draftCount: items.filter((it) => it.draft).length };
+  const lanes = m.lanes.map((l, i) => ({ ...l, draft: isDraft(i) }));
+  return { ...m, lanes, draftCount: lanes.filter((l) => l.draft).length };
 };
 
-const render = (m: FigureModel) => renderToStaticMarkup(<PearlFigure model={m} labName="LAB" />);
+const render = (m: FigureModel) => renderToStaticMarkup(<PearlFigure model={m} />);
 const count = (html: string, re: RegExp) => (html.match(re) ?? []).length;
 const BADGE = /bl-badge--draft/g;
 
 describe("Fig. 1 draft badges", () => {
   const base = model("n4");
 
-  it("all drafts: exactly one badge, in the foot summary", () => {
+  it("all drafts: exactly one badge, in the caption's summary", () => {
     const html = render(withDrafts(base, () => true));
     expect(count(html, BADGE)).toBe(1);
     expect(html).toMatch(/f1-foot-draft[\s\S]*applies to[\s\S]*all 4 directions/);
   });
 
-  it("mixed: each draft row and its caption carry a badge, plus the summary", () => {
+  it("mixed: each draft lane carries a badge, plus the summary", () => {
     const html = render(withDrafts(base, (i) => i === 0));
-    // 1 row + 1 active caption + 1 foot summary.
-    expect(count(html, BADGE)).toBe(3);
+    expect(count(html, BADGE)).toBe(2);
     expect(html).toContain("1 of 4 directions");
   });
 
@@ -65,9 +64,8 @@ describe("Fig. 1 draft badges", () => {
     expect(count(render(withDrafts(base, () => false)), BADGE)).toBe(0);
   });
 
-  it("the key says dots include papers with a documented talk (D-05)", () => {
+  it("the caption says dots include papers with a documented talk (D-05)", () => {
     const html = render(withDrafts(base, () => false));
-    expect(html).toContain("= 1 paper with a public version or a documented talk");
-    expect(html).toContain("each dot is one paper with a public version or a documented talk");
+    expect(html).toContain("Each filled dot is a paper with a public version or a documented talk");
   });
 });

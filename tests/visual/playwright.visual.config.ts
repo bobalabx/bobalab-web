@@ -1,15 +1,15 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * WP1 visual QA (home + Fig. 1). Runs against an already running server
+ * Home + Fig. 1 visual QA (redesign). Runs against an already running server
  * (default: the shared dev server http://localhost:3100); it never starts one.
  *   npx playwright test -c tests/visual/playwright.visual.config.ts
- * Screenshots land in test-results/WP1/.
+ * Screenshots land in test-results/redesign-home/.
  */
 export default defineConfig({
   testDir: ".",
   testMatch: /.*\.visual\.ts$/,
-  outputDir: "../../test-results/WP1/pw",
+  outputDir: "../../test-results/redesign-home/pw",
   fullyParallel: false,
   workers: 1,
   reporter: "list",

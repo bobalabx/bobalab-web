@@ -1,952 +1,489 @@
 /*
- * Fig. 1, the Pearl Figure (brief §E; DECISIONS D-02, D-02a; docs/design/JUDGE.md).
- * Hybrid "c-halo × b-orbit": c-expressive structure, halo, intro and destination
- * re-bloom; b-living hairline orbit, float amplitude and caption rule.
- * Removed on purpose: plate wash, continuous seed orbit, inset bezel.
+ * Fig. 1 "Lines" and the direction pearl (DECISIONS D-13; prototype
+ * docs/redesign/prototypes/p3/p3.css "Figure 1: lines").
  *
- * Colours come from src/styles/tokens.css (core tokens + [data-swatch] roles).
- * Every transform animation sits inside the motion-last gate:
- *   @media (prefers-reduced-motion: no-preference) { :root:not([data-motion="reduce"]) … }
- * Class prefix f1- (the global `.pearl-group` intro in motion.css is not used).
+ * Geometry: src/lib/figure/geometry.ts documents the formulas. Three contexts
+ * evaluate them: .f1-body (the zone and the "now" rule, offset by the label
+ * column), .f1-axis__t (year labels) and each .f1-track (the lane's marks). Each
+ * declares --tw (its track width, as a percentage of its containing block) and
+ * --ox (its offset), then the shared --f1-* custom properties below. Percentages
+ * inside them resolve where they are used, so one formula serves every context.
+ * Data-dependent switches (packed columns, strips) are container queries written
+ * by PearlFigure from geometry.ts; the strip layout below 48rem is there too.
  */
-
-/* ===================================================================== *
- * 1. Pearl material (shared by the figure and DirectionPearl)
- * ===================================================================== */
-
-.f1-item,
-.f1-dp {
-  --f1-glow: color-mix(in srgb, var(--dir-deep) 45%, transparent);
-  --f1-rim: transparent;
-  --f1-sheen: var(--pearl-sheen); /* one token with WP0's Pearl (WP2 request 4) */
-  --f1-seed: var(--dir-seed);
-  --f1-halo-a: 38%;
-}
-/* Halo alpha per swatch, so the four core halos read with equal weight (JUDGE.md). */
-:is(.f1-item, .f1-dp)[data-swatch="butterfly-pea"] {
-  --f1-halo-a: 44%;
-}
-:is(.f1-item, .f1-dp)[data-swatch="lychee"] {
-  --f1-halo-a: 34%;
-}
-:is(.f1-item, .f1-dp)[data-swatch="matcha"] {
-  --f1-halo-a: 38%;
-}
-:is(.f1-item, .f1-dp)[data-swatch="oolong"] {
-  --f1-halo-a: 30%;
-}
-:is(.f1-item, .f1-dp)[data-swatch="jasmine"] {
-  --f1-halo-a: 34%;
-}
-:is(.f1-item, .f1-dp)[data-swatch="black-sesame"] {
-  --f1-halo-a: 40%;
-}
-:is(.f1-item, .f1-dp)[data-swatch="taro"] {
-  --f1-halo-a: 38%;
-}
-:is(.f1-item, .f1-dp)[data-swatch="thai-tea"] {
-  --f1-halo-a: 30%;
-}
-@media (prefers-color-scheme: dark) {
-  .f1-item,
-  .f1-dp,
-  :is(.f1-item, .f1-dp)[data-swatch] {
-    --f1-glow: color-mix(in srgb, var(--dir-light) 30%, transparent);
-    --f1-rim: color-mix(in srgb, var(--pearl-rim) 60%, transparent);
-    /* Judge fix 15: seeds >= 3:1 against the dark plate (light tone at 55%: 3.5–4.1:1). */
-    --f1-seed: color-mix(in srgb, var(--dir-light) 55%, var(--plate));
-    --f1-halo-a: 26%;
-  }
-}
-
-.f1-pearl {
-  position: relative;
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: var(--D);
-  height: var(--D);
-  border-radius: 50%;
-  /* Own stacking context: the glow layer (::after, z-index -1) paints over this
-     background and under the sheen and the index, as when both were one background. */
-  isolation: isolate;
-  background: radial-gradient(
-    circle at 46% 40%,
-    var(--pearl-hi) 0,
-    var(--pearl) 52%,
-    var(--pearl-lo) 100%
-  );
-  box-shadow: inset 0 0 0 1px var(--f1-rim);
-  color: var(--pearl-index);
-}
-/* Direction glow at the base of the body. A layer of its own so an inactive pearl
-   can lose it by opacity alone (VIS-10; §G2: only transform and opacity animate). */
-.f1-pearl::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 88%, var(--f1-glow) 0, transparent 62%);
-  pointer-events: none;
-}
-/* Satin sheen: one ellipse 34% × 14% of D, centred at (30%, 22%), rotated −35°. No bezel. */
-.f1-pearl::before {
-  content: "";
-  position: absolute;
-  left: 13%;
-  top: 15%;
-  width: 34%;
-  height: 14%;
-  border-radius: 50%;
-  rotate: -35deg;
-  background: radial-gradient(closest-side, var(--f1-sheen), transparent);
-  pointer-events: none;
-}
-.f1-idx {
-  position: relative;
-  font-family: var(--font-data);
-  font-weight: 500;
-  font-size: max(0.75rem, calc(var(--D) * 0.13));
-  line-height: 1;
-  letter-spacing: 0.04em;
-  padding-left: 0.04em;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Halo: colour identity at rest (never tints the pearl). */
-.f1-halo {
-  --hw: calc(var(--D) * 1.55);
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: var(--hw);
-  height: var(--hw);
-  margin: calc(var(--hw) / -2) 0 0 calc(var(--hw) / -2);
-  border-radius: 50%;
-  pointer-events: none;
-  opacity: 0.8;
-  background: radial-gradient(
-    closest-side,
-    color-mix(in oklab, var(--dir-light) var(--f1-halo-a), transparent) 55%,
-    color-mix(in oklab, var(--dir-light) calc(var(--f1-halo-a) * 0.3), transparent) 80%,
-    transparent
-  );
-}
-
-/* Hairline orbit (b) and seeds: flat dots on the ring, capped at ±75°. */
-.f1-orbit {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 0;
-  height: 0;
-}
-.f1-ring {
-  --rr: calc(var(--D) * 0.64);
-  position: absolute;
-  left: calc(var(--rr) * -1);
-  top: calc(var(--rr) * -1);
-  width: calc(var(--rr) * 2);
-  height: calc(var(--rr) * 2);
-  border-radius: 50%;
-  border: 1px solid var(--hairline);
-  box-sizing: border-box;
-  opacity: 0.7;
-}
-.f1-seeds {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 0;
-  height: 0;
-}
-.f1-seed {
-  --ss: max(6px, calc(var(--D) * 0.11));
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: var(--ss);
-  height: var(--ss);
-  margin: calc(var(--ss) / -2) 0 0 calc(var(--ss) / -2);
-  border-radius: 50%;
-  background: var(--f1-seed);
-  transform: rotate(var(--a)) translateY(calc(var(--D) * -0.64));
-}
-
-/* ===================================================================== *
- * 2. DirectionPearl (direction header "hero" and sibling "rail")
- * ===================================================================== */
-
-.f1-dp {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-  flex: none;
-  vertical-align: middle;
-}
-.f1-dp--hero {
-  --D: clamp(7.5rem, 5.5rem + 5vw, 10rem);
-  width: calc(var(--D) * 1.5);
-  height: calc(var(--D) * 1.5);
-}
-.f1-dp--hero .f1-seed {
-  --ss: max(8px, calc(var(--D) * 0.085));
-}
-.f1-dp--rail {
-  --D: 40px;
-  width: var(--D);
-  height: var(--D);
-}
-.f1-dp--rail .f1-idx {
-  font-size: 0.75rem;
-}
-
-/* ===================================================================== *
- * 3. Fig. 1 section, plate, header row, caption, foot row
- * ===================================================================== */
 
 .f1 {
   container: f1 / inline-size;
-  min-width: 0;
-  font-size: 1rem;
-}
-/* n = 1 or n > 8 (§E9): list mode at every width. An unnamed container never
-   matches the `@container f1` figure-mode rules below. */
-.f1--list {
-  container-name: none;
+  margin-top: 40px;
 }
 .f1-plate {
-  --f1-mode: list;
-  --D: 44px;
-  position: relative;
+  --f1-mode: fig;
   margin: 0;
-  /* Content starts 16 px in; list-mode crop marks span 6–14 px, so they never touch it. */
-  padding: var(--s-4) var(--s-4) var(--s-3);
-  background: var(--plate);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-md);
-}
-/* Crop marks ON the plate corners (judge fix 9): inset 6 px / 8 px long in list mode,
-   inset 8 px / 10 px long in figure mode (where the plate padding is 24–32 px). */
-.f1-plate::after {
-  --c: color-mix(in oklab, var(--rule) 55%, var(--plate));
-  --l: 8px;
-  content: "";
-  position: absolute;
-  inset: 6px;
-  pointer-events: none;
-  background:
-    linear-gradient(var(--c), var(--c)) 0 0 / var(--l) 1px,
-    linear-gradient(var(--c), var(--c)) 0 0 / 1px var(--l),
-    linear-gradient(var(--c), var(--c)) 100% 0 / var(--l) 1px,
-    linear-gradient(var(--c), var(--c)) 100% 0 / 1px var(--l),
-    linear-gradient(var(--c), var(--c)) 0 100% / var(--l) 1px,
-    linear-gradient(var(--c), var(--c)) 0 100% / 1px var(--l),
-    linear-gradient(var(--c), var(--c)) 100% 100% / var(--l) 1px,
-    linear-gradient(var(--c), var(--c)) 100% 100% / 1px var(--l);
-  background-repeat: no-repeat;
-}
-.f1-head {
-  display: grid;
-  gap: var(--s-3);
-}
-.f1-h {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--fs-xl);
-  line-height: var(--lh-xl);
-  letter-spacing: -0.005em;
 }
 
-/* Live caption: every state stacked in one grid cell, so the plate never changes height. */
+.f1-body {
+  position: relative;
+  --tw: (100% - var(--lab));
+  --ox: var(--lab);
+}
+.f1-axis__t,
+.f1-track {
+  --tw: 100%;
+  --ox: 0px;
+  --r: 0.4375rem;
+}
+.f1-body,
+.f1-axis__t,
+.f1-track {
+  --f1-W: (var(--tw) - 1rem);
+  --f1-Z: clamp(var(--f1-zmin), var(--f1-W) * 0.24, var(--f1-zmax));
+  --f1-cw: clamp(0.75rem, (var(--f1-W) - var(--f1-Z) - var(--f1-G)) / var(--f1-cols), 4rem);
+  --f1-nx: calc(var(--ox) + 1rem + var(--f1-cols) * var(--f1-cw) + var(--f1-G) + 1.25rem);
+}
+/* Centre of column --c in bin --k. */
+.f1-dot,
+.f1-ln,
+.f1-gap,
+.f1-seg {
+  --x: calc(var(--ox) + 1rem + (var(--c) + 0.5) * var(--f1-cw) + var(--k) * 1rem);
+}
+
+/* ---- year axis ------------------------------------------------------------ */
+.f1-axis {
+  display: grid;
+  grid-template-columns: var(--lab) minmax(0, 1fr);
+  height: 1.875rem;
+  font-size: var(--t-meta);
+  line-height: 1.25rem;
+}
+.f1-axis__t {
+  grid-column: 2;
+  position: relative;
+}
+.f1-yr {
+  position: absolute;
+  top: 0;
+  left: calc(var(--ox) + 1rem + var(--c0) * var(--f1-cw) + var(--k) * 1rem + 3px);
+  width: calc(var(--m) * var(--f1-cw) - 6px);
+  display: flex;
+  justify-content: center;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 3px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.f1-yr-a {
+  display: none;
+}
+.f1-now-l,
+.f1-wip-l {
+  position: absolute;
+  top: 0;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.f1-now-l {
+  left: var(--f1-nx);
+  translate: -50% 0;
+}
+.f1-wip-l {
+  left: calc(var(--f1-nx) + 2.0625rem);
+}
+
+/* ---- lanes ---------------------------------------------------------------- */
+.f1-nav {
+  margin: 0;
+}
+.f1-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: var(--rule-heavy) solid var(--ink);
+  border-bottom: var(--rule-heavy) solid var(--ink);
+}
+.f1-item {
+  display: grid;
+  grid-template-columns: var(--lab) minmax(0, 1fr);
+  min-height: 5.375rem;
+}
+.f1-item + .f1-item {
+  border-top: 1px solid var(--hairline);
+}
+.f1-lab {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 8px 16px 8px 0;
+}
+.f1-name {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+}
+.f1-link {
+  display: inline;
+  color: var(--muted);
+  text-decoration: none;
+}
+.f1-label {
+  display: block;
+  padding-block: 4px 2px;
+  color: var(--ink);
+  font-stretch: var(--wdth-cond);
+  font-weight: 700;
+  font-size: var(--t-lane);
+  line-height: 1;
+  text-wrap: balance;
+  transition: color var(--dur-base);
+}
+.f1-link:hover .f1-label,
+.f1-item.is-on .f1-label {
+  color: var(--dir);
+}
+/* One focus ring around the whole lane label (the link's label and count lines). */
+.f1-link:focus-visible {
+  outline: none;
+}
+.f1-name:has(.f1-link:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+.f1-link:hover .f1-count {
+  text-decoration: underline 1px var(--rule);
+  text-underline-offset: 0.18em;
+}
+.f1-name .bl-badge {
+  margin-left: 4px;
+}
+.f1-shares {
+  margin: 0;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+}
+/* The shares sentence is drawn by the links in the lanes; screen readers still get it. */
+@media (min-width: 48rem) {
+  .f1-shares {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* ---- marks in a lane's track ---------------------------------------------- */
+.f1-track {
+  position: relative;
+  min-width: 0;
+}
+.f1-y {
+  display: none;
+  padding: 0 6px 0 8px;
+  font-size: var(--t-meta);
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.f1-y--first {
+  padding-left: 0;
+}
+.f1-ln {
+  position: absolute;
+  top: calc(50% - 0.5px);
+  left: var(--x);
+  width: calc(var(--f1-nx) - var(--x));
+  height: 0;
+  border-top: 1px solid var(--dir);
+}
+.f1-gap {
+  position: absolute;
+  top: calc(50% - 4px);
+  left: calc(var(--x) - 4px);
+  width: 8px;
+  height: 8px;
+  background: var(--paper);
+}
+.f1-seg {
+  position: absolute;
+  left: calc(var(--x) - 0.5px);
+  width: 0;
+  border-left: 1px solid var(--ink);
+}
+.f1-seg[data-part="down"] {
+  top: calc(50% + var(--r));
+  bottom: 0;
+}
+.f1-seg[data-part="through"] {
+  top: -1px;
+  bottom: 0;
+}
+.f1-seg[data-part="up"] {
+  top: -1px;
+  bottom: calc(50% + var(--r));
+}
+.f1-dot {
+  position: absolute;
+  top: calc(50% - var(--r));
+  left: calc(var(--x) - var(--r));
+  width: calc(2 * var(--r));
+  height: calc(2 * var(--r));
+  border-radius: 50%;
+  background: var(--dir);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    opacity var(--dur-base) ease-out,
+    background-color var(--dur-base) ease-out,
+    outline-color var(--dur-base) ease-out;
+}
+/* A larger pointer target than the dot itself. */
+.f1-dot::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+}
+/* The strip layout's disc (LIST_CSS shows it). */
+.f1-dot::after {
+  content: "";
+  display: none;
+  position: absolute;
+  left: 4px;
+  top: 5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--dir);
+}
+.f1-dot.big {
+  transform: scale(1.25);
+}
+.f1-pearl-at {
+  position: absolute;
+  top: calc(50% - 1.0625rem);
+  left: calc(var(--f1-nx) - 1.0625rem);
+  width: 2.125rem;
+  height: 2.125rem;
+  cursor: pointer;
+}
+.f1-ring {
+  position: absolute;
+  top: calc(50% - 0.4375rem);
+  left: calc(var(--f1-nx) + 2.0625rem + var(--j) * 1.375rem);
+  box-sizing: border-box;
+  width: 0.875rem;
+  height: 0.875rem;
+  border: 1.75px solid var(--dir);
+  border-radius: 50%;
+  background: var(--paper);
+}
+.f1-ln,
+.f1-seg,
+.f1-ring {
+  transition: opacity var(--dur-base) ease-out;
+}
+.f1-plate .dim {
+  opacity: 0.3;
+}
+/* A dimmed dot is a pale disc, not a see-through one: a lit line it sits on must
+   not show through it (with opacity, other papers on the lit line read as struck
+   through). Same 30 % strength as the dimmed lines. */
+.f1-plate .f1-dot.dim {
+  opacity: 1;
+  background: color-mix(in srgb, var(--dir) 30%, var(--paper));
+  outline-color: color-mix(in srgb, var(--ink) 30%, var(--paper));
+}
+
+/* The zone after "now" and the dashed "now" rule (P3 .zone, .now). */
+.f1-body::before,
+.f1-body::after {
+  pointer-events: none;
+}
+.f1-body::before {
+  content: "";
+  position: absolute;
+  left: var(--f1-nx);
+  right: 0;
+  top: calc(1.875rem + var(--rule-heavy));
+  bottom: var(--rule-heavy);
+  background: var(--band);
+}
+.f1-body::after {
+  content: "";
+  position: absolute;
+  left: calc(var(--f1-nx) - 0.75px);
+  top: calc(1.875rem - 4px);
+  bottom: 0;
+  border-left: 1.5px dashed var(--ink);
+}
+
+/* ---- the pearl ------------------------------------------------------------ */
+.f1-pearl {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.f1-dp {
+  --pd: 96px;
+  display: inline-block;
+  flex: none;
+  width: var(--pd);
+  height: var(--pd);
+  vertical-align: middle;
+}
+.f1-dp--rail {
+  --pd: 24px;
+}
+.f1-dp--quiet .f1-pearl {
+  box-sizing: border-box;
+  background: var(--band);
+  border: 1.5px solid var(--rule);
+}
+
+/* ---- caption ----------------------------------------------------------------- */
+.f1-caption {
+  margin-top: 14px;
+  max-width: 92ch;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+}
+.f1-caption b {
+  font-weight: 600;
+  color: var(--ink);
+}
+/* Layers share one cell: the caption sets the height; a live layer is clamped to it. */
 .f1-cap {
   display: grid;
-  max-width: 40rem;
 }
 .f1-cap-layer {
   grid-area: 1 / 1;
-  align-self: start;
-  padding-left: var(--s-3);
-  border-left: 2px solid var(--hairline);
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 100ms linear,
-    visibility 0s linear 100ms;
-}
-.f1-cap-layer.is-on {
-  opacity: 1;
-  visibility: visible;
-  transition:
-    opacity var(--dur-caption) var(--ease-out) 60ms,
-    visibility 0s;
-}
-.f1-cap-layer[data-swatch] {
-  border-left-color: var(--dir-text);
-}
-.f1-cap-t {
-  font-family: var(--font-text);
-  font-weight: 600;
-  font-size: 0.9375rem;
-  line-height: 1.4;
-  color: var(--ink);
-}
-.f1-cap-fig {
-  font-family: var(--font-data);
-  font-weight: 500;
-  font-size: var(--fs-mono);
-  letter-spacing: var(--tracking-mono);
-  color: var(--ink-muted);
-  margin-right: 0.5em;
-}
-.f1-cap-layer[data-swatch] .f1-cap-fig {
-  color: var(--dir-text);
-}
-.f1-cap-b {
-  margin-top: 2px;
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-  color: var(--ink-muted);
-  max-width: 60ch;
-}
-.f1-cap-m {
-  margin-top: var(--s-1);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-1) var(--s-3);
-  font-family: var(--font-data);
-  font-weight: 500;
-  font-size: var(--fs-mono);
-  line-height: var(--lh-mono);
-  letter-spacing: 0.04em;
-  color: var(--ink-muted);
+  min-width: 0;
 }
 .f1-cap-layer:not([data-cap="legend"]) {
+  align-self: start;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+.f1-cap-layer[hidden] {
   display: none;
 }
-.f1-in-fig {
+.f1-plate[data-live-cap] [data-cap="legend"] {
+  opacity: 0;
+}
+.f1-cap-m,
+.f1-cv-r {
   display: none;
-}
-
-/* Bottom row: key, date, counting rule, Pause/Play (judge fix 10). */
-.f1-foot {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s-2) var(--s-4);
-  margin-top: var(--s-3);
-  font-family: var(--font-data);
-  font-weight: 500;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  letter-spacing: 0.04em;
-  color: var(--ink-muted);
-}
-.f1-key {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-2);
-}
-.f1-key-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--rule);
-  flex: none;
 }
 .f1-foot-draft {
-  display: inline-flex;
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--s-2);
-}
-.f1-pause {
-  display: none;
-  align-items: center;
-  gap: 0.45rem;
-  min-height: 28px;
-  min-width: 24px;
-  margin-left: auto;
-  padding: 0.125rem 0.5rem;
-  border: 0;
-  border-radius: var(--r-xs);
-  background: transparent;
-  color: var(--ink);
-  font-family: var(--font-data);
-  font-weight: 500;
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  text-decoration: underline;
-  text-decoration-color: transparent;
-  text-underline-offset: 0.25em;
-}
-.f1-pause:hover {
-  text-decoration-color: currentColor;
-}
-.f1-pause svg {
-  width: 14px;
-  height: 14px;
-  flex: none;
-}
-.f1-pause[hidden] {
-  display: none !important;
+  gap: 6px;
+  margin-top: 6px;
 }
 
-/* ===================================================================== *
- * 4. List mode (default; container < 46em, §E6)
- * ===================================================================== */
-
-.f1-list {
-  list-style: none;
-  margin: var(--s-3) 0 0;
-  padding: 0;
-}
-/* Rules sit on the row (li), so a draft badge under the link stays inside its row. */
-.f1-item {
-  position: relative;
-  border-top: 1px solid var(--hairline);
-}
-.f1-item:last-child {
-  border-bottom: 1px solid var(--hairline);
-}
-.f1-link {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  column-gap: var(--s-4);
-  align-items: center;
-  min-height: 64px;
-  padding: 0.625rem 0.5rem;
-  color: var(--ink);
-  text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
-}
-.f1-link:hover {
-  color: var(--ink);
-  text-decoration: none;
-}
-.f1-group {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: var(--D);
-  height: var(--D);
-  grid-row: 1 / 3;
-}
-.f1-buoy {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-}
-.f1-plate .f1-halo {
-  --hw: calc(var(--D) * 1.5);
-}
-.f1-plate .f1-orbit {
-  display: none;
-}
-.f1-label {
-  position: relative;
-  align-self: end;
-  justify-self: start;
-  font-family: var(--font-text);
-  font-weight: 600;
-  font-size: var(--fs-base);
-  line-height: 1.3;
-}
-.f1-lt {
-  text-decoration-line: underline;
-  text-decoration-color: transparent;
-  text-decoration-thickness: 1.5px;
-  text-underline-offset: 0.22em;
-  transition: text-decoration-color var(--dur-fast);
-}
-.f1-arr {
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  margin-left: 0.3em;
-  vertical-align: -0.14em;
-}
-.f1-count {
-  align-self: start;
-  justify-self: start;
-  font-family: var(--font-data);
-  font-weight: 500;
-  font-size: var(--fs-mono);
-  line-height: var(--lh-mono);
-  letter-spacing: 0.04em;
-  color: var(--ink-muted);
-}
-.f1-item .bl-badge {
-  margin: 0 0 var(--s-2) calc(var(--D) + var(--s-4) + 0.5rem);
-}
-.f1-item.is-on .f1-lt,
-.f1-link:hover .f1-lt,
-.f1-link:focus-visible .f1-lt {
-  text-decoration-color: var(--dir-text);
-}
-.f1-link:focus-visible {
-  outline-offset: -2px;
-}
-
-/* Wide list (container 40–46em, e.g. iPad portrait): two columns of rows, so the
-   plate is not a narrow list with an empty right half (VIS-09). DOM order stays
-   01, 02 / 03, 04, row-major like the figure. The 46em figure-mode switch (§E2)
-   is unchanged; the unnamed .f1--list container never matches. */
-@container f1 (40em <= width < 46em) {
-  .f1-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: var(--s-5);
-  }
-  /* Close the last row in both columns. */
-  .f1-item:nth-last-child(2):nth-child(odd) {
-    border-bottom: 1px solid var(--hairline);
-  }
-}
-
-/* Dot-plot track: hidden in list mode. */
-.f1-track,
-.f1-axis {
-  display: none;
-}
-
-/* ===================================================================== *
- * 5. Figure mode (container >= 46em, §E2 slot templates)
- * ===================================================================== */
-
-@container f1 (width >= 46em) {
-  .f1-plate {
-    --f1-mode: fig;
-    --D: var(--f1-D, clamp(5rem, 14cqi, 6.5rem));
-    padding: var(--s-5) var(--s-6) var(--s-4);
-  }
-  .f1-plate::after {
-    --l: 10px;
-    inset: 8px;
-  }
-  .f1-in-fig {
-    display: revert;
-  }
-  .f1-cap-layer:not([data-cap="legend"]) {
-    display: block;
-  }
-  .f1-pause {
-    display: inline-flex;
-  }
-  .f1-list {
-    display: grid;
-    grid-template-columns: repeat(var(--f1-cols, 5), minmax(0, 1fr));
-    align-items: start;
-    margin-top: var(--s-4);
-  }
-  .f1-item {
-    grid-row: var(--row, auto);
-    grid-column: var(--col, auto) / span 2;
-    translate: calc(var(--D) * var(--dx, 0)) calc(var(--D) * var(--dy, 0));
-    border: 0;
-    /* The cell is taller than its content: only pearl, label and count take the pointer. */
-    pointer-events: none;
-  }
-  .f1-item:last-child {
-    border-bottom: 0;
-  }
-  .f1-item[data-row="2"],
-  .f1-item[data-row="3"] {
-    margin-top: calc(var(--D) * -0.25);
-  }
-  .f1-item .bl-badge {
-    display: none;
-  }
-  .f1-link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    min-height: 0;
-    padding: 0 0.25rem 0.5rem;
-  }
-  .f1-link :is(.f1-pearl, .f1-label, .f1-count) {
-    pointer-events: auto;
-  }
-  .f1-link:focus-visible {
-    outline: none;
-  }
-  .f1-link:focus-visible .f1-pearl {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 5px;
-  }
-  .f1-group {
-    width: calc(var(--D) * 1.44);
-    height: calc(var(--D) * 1.44);
-  }
-  .f1-plate .f1-orbit {
-    display: block;
-  }
-  .f1-plate .f1-halo {
-    --hw: calc(var(--D) * 1.55);
-  }
-  .f1-label {
-    align-self: center;
-    justify-self: center;
-    margin-top: 0.15rem;
-    font-size: 1rem;
-    line-height: 1.3;
-    max-width: 100%;
-    text-wrap: balance;
-  }
-  /* The arrow hangs outside the centring box (judge fix 12) but stays on the
-     label's last line: its 0.3em + 1em advance is cancelled by the right margin. */
-  .f1-arr {
-    margin-right: -1.3em;
-  }
-  .f1-count {
-    align-self: center;
-    justify-self: center;
-    margin-top: 0.1rem;
-  }
-
-  /* Active and inactive (no wash; judge fix 6). */
-  .f1-pearl,
-  .f1-pearl::after,
-  .f1-halo,
-  .f1-ring,
-  .f1-seeds {
-    transition: opacity var(--dur-base) linear;
-  }
-  /* Light plate: an espresso body at .78 over cream turns milky grey-taupe and reads
-     as "disabled" (VIS-10, the JUDGE.md .55 problem). Inactive bodies stay opaque and
-     only lose most of their direction glow; halo, seeds and orbit carry the dim. */
-  .f1-plate[data-active] .f1-item:not(.is-on) .f1-pearl::after {
-    opacity: 0.3;
-  }
-  @media (prefers-color-scheme: dark) {
-    /* Dark plate: the body at .78 stays dark, so keep JUDGE.md's value. */
-    .f1-plate[data-active] .f1-item:not(.is-on) .f1-pearl {
-      opacity: 0.78;
-    }
-    .f1-plate[data-active] .f1-item:not(.is-on) .f1-pearl::after {
-      opacity: 1;
-    }
-  }
-  .f1-plate[data-active] .f1-item:not(.is-on) .f1-seeds {
-    opacity: 0.45;
-  }
-  .f1-plate[data-active] .f1-item:not(.is-on) .f1-halo {
-    opacity: 0.35;
-  }
-  .f1-plate[data-active] .f1-item:not(.is-on) .f1-ring {
-    opacity: 0.4;
-  }
-  .f1-item.is-on .f1-halo {
-    opacity: 1;
-  }
-
-  /* --- Dot plot (C10): same <ol>, one row per direction on a shared year axis --- */
-  .f1-plate[data-figure="dotplot"] .f1-list {
-    display: grid;
-    grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
-    row-gap: var(--s-2);
-  }
-  .f1-plate[data-figure="dotplot"] .f1-item {
-    grid-row: auto;
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: subgrid;
-    align-items: center;
-    translate: none;
-    margin-top: 0;
-    pointer-events: auto;
-  }
-  .f1-plate[data-figure="dotplot"] .f1-link {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    column-gap: var(--s-3);
-    align-items: center;
-    text-align: left;
-    padding: var(--s-1) 0;
-  }
-  .f1-plate[data-figure="dotplot"] .f1-group {
-    --D: 3.5rem;
-    width: calc(var(--D) * 1.2);
-    height: calc(var(--D) * 1.2);
-  }
-  .f1-plate[data-figure="dotplot"] .f1-orbit {
-    display: none;
-  }
-  .f1-plate[data-figure="dotplot"] .f1-label,
-  .f1-plate[data-figure="dotplot"] .f1-count {
-    justify-self: start;
-  }
-  .f1-plate[data-figure="dotplot"] .f1-arr {
-    margin-right: 0;
-  }
-  .f1-plate[data-figure="dotplot"] .f1-label {
-    text-wrap: wrap;
-  }
-  .f1-plate[data-figure="dotplot"] .f1-track {
-    display: block;
-    position: relative;
-    height: 100%;
-    min-height: 2.5rem;
-    border-bottom: 1px solid var(--hairline);
-    margin-inline: 0.5rem;
-  }
-  .f1-track-dot {
-    position: absolute;
-    left: calc(var(--x) * 100%);
-    bottom: calc(0.5rem + var(--stack) * 12px);
-    width: 9px;
-    height: 9px;
-    margin-left: -4.5px;
-    border-radius: 50%;
-    background: var(--dir-dot);
-  }
-  .f1-plate[data-figure="dotplot"] .f1-axis {
-    display: grid;
-    grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
-    margin-top: var(--s-1);
-    font-family: var(--font-data);
-    font-size: 0.75rem;
-    letter-spacing: 0.04em;
-    color: var(--ink-muted);
-  }
-}
-
-/* Reduced-motion style of the active state (§E7): outline + underline. Figure mode
-   only; in list mode the whole row carries the focus ring. */
-@container f1 (width >= 46em) {
-  .f1-item.is-on .f1-pearl {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 3px;
-  }
-}
-
-/* ===================================================================== *
- * 6. Motion (motion-last gate, D-02 / JUDGE.md parameters)
- * ===================================================================== */
-
+/* ---- arrival: papers arrive year by year on the settle curve (once per session) ---- */
 @media (prefers-reduced-motion: no-preference) {
-  /* With motion, the lift + halo mark the active pearl; keyboard focus keeps its ring. */
-  :root:not([data-motion="reduce"]) .f1-item.is-on .f1-link:not(:focus-visible) .f1-pearl {
-    outline: none;
+  :root[data-intro]:not([data-motion="reduce"]) .f1-dot {
+    animation: f1-pop 260ms var(--ease-settle) var(--t) both;
   }
-  :root:not([data-motion="reduce"]) .f1-plate .f1-pearl {
-    transition:
-      transform var(--dur-fast) var(--ease-out),
-      translate var(--dur-fast) var(--ease-out),
-      opacity var(--dur-base) linear;
+  :root[data-intro]:not([data-motion="reduce"]) .f1-ln {
+    transform-origin: left center;
+    animation: f1-grow-x var(--dur) linear var(--t) both;
   }
-  :root:not([data-motion="reduce"]) .f1-plate .f1-item.is-on .f1-pearl {
-    transform: translateY(-3px) scale(1.05);
-    transition-duration: var(--dur-base), var(--dur-fast), var(--dur-base);
+  :root[data-intro]:not([data-motion="reduce"]) .f1-seg {
+    transform-origin: top center;
+    animation: f1-grow-y 160ms var(--ease-out) var(--t) both;
   }
-  :root:not([data-motion="reduce"]) .f1-plate .f1-link:active .f1-pearl {
-    transform: scale(0.98);
-    transition-duration: var(--dur-press);
+  :root[data-intro]:not([data-motion="reduce"]) .f1-seg[data-part="up"] {
+    transform-origin: bottom center;
   }
-  :root:not([data-motion="reduce"]) .f1-cap-layer {
-    transform: translateY(4px);
-    transition:
-      opacity 100ms linear,
-      transform 0s linear 100ms,
-      visibility 0s linear 100ms;
+  :root[data-intro]:not([data-motion="reduce"]) .f1-yr {
+    animation: f1-fade 200ms linear calc(var(--k) * 60ms + 60ms) both;
   }
-  :root:not([data-motion="reduce"]) .f1-cap-layer.is-on {
-    transform: none;
-    transition:
-      opacity var(--dur-caption) var(--ease-out) 60ms,
-      transform var(--dur-caption) var(--ease-out) 60ms,
-      visibility 0s;
+  :root[data-intro]:not([data-motion="reduce"]) .f1-body::after {
+    transform-origin: top center;
+    animation: f1-grow-y 360ms var(--ease-out) both;
   }
-
-  @container f1 (width >= 46em) {
-    /* Halo: active opacity 1 + scale 1.08, 400 ms. */
-    :root:not([data-motion="reduce"]) .f1-plate .f1-halo {
-      transition:
-        scale 400ms var(--ease-out),
-        opacity 300ms var(--ease-out),
-        translate var(--dur-fast) var(--ease-out);
-    }
-    :root:not([data-motion="reduce"]) .f1-plate .f1-item.is-on .f1-halo {
-      scale: 1.08;
-    }
-    /* Seed bloom: ring and orbit to 1.12, 320 ms, 20 ms per-seed stagger. */
-    :root:not([data-motion="reduce"]) .f1-plate .f1-ring {
-      transition:
-        scale 320ms ease-out,
-        opacity var(--dur-base) linear;
-    }
-    :root:not([data-motion="reduce"]) .f1-plate .f1-item.is-on .f1-ring {
-      scale: 1.12;
-    }
-    :root:not([data-motion="reduce"]) .f1-plate .f1-seed {
-      transition: transform 320ms ease-out calc(var(--k) * 20ms);
-    }
-    :root:not([data-motion="reduce"]) .f1-plate .f1-item.is-on .f1-seed {
-      transform: rotate(var(--a)) translateY(calc(var(--D) * -0.64 * 1.12));
-    }
-    /* Pointer parallax (fine pointers; island writes --mx/--my in −1…1). */
-    :root:not([data-motion="reduce"]) .f1-plate .f1-halo {
-      translate: calc(var(--mx, 0) * -2px) calc(var(--my, 0) * -2px);
-    }
-    :root:not([data-motion="reduce"]) .f1-plate .f1-pearl {
-      translate: calc(var(--mx, 0) * 2px) calc(var(--my, 0) * 2px);
-    }
-    :root:not([data-motion="reduce"]) .f1-plate .f1-orbit {
-      translate: calc(var(--mx, 0) * 4px) calc(var(--my, 0) * 4px);
-    }
-    /* Idle float: ±2.5 px, desynchronised; only once the island (and its Pause control) is live. */
-    :root:not([data-motion="reduce"]) .f1-plate[data-live]:not([data-figure="dotplot"]) .f1-group {
-      animation: f1-float var(--fp, 9s) ease-in-out var(--fd, 0s) infinite alternate;
-    }
-    :root:not([data-motion="reduce"]) .f1-plate[data-live]:is([data-off], [data-hid]) .f1-group {
-      animation-play-state: paused;
-    }
+  :root[data-intro]:not([data-motion="reduce"]) .f1-pearl-at {
+    animation: f1-settle 400ms var(--ease-settle) var(--t) both;
   }
-
-  /* Intro (first home view per session; one-shot in list mode too). Opacity reaches 1
-     within ~50 ms so pearls never pass through grey (judge fix 7). The island keeps
-     the plate's own data-intro alive until the longest intro has finished. */
-  :root:not([data-motion="reduce"]):is([data-intro]) .f1-plate .f1-group,
-  :root:not([data-motion="reduce"]) .f1-plate[data-intro] .f1-group {
-    animation: f1-sink 720ms calc(var(--i, 0) * 70ms) backwards;
-  }
-  @container f1 (width >= 46em) {
-    :root:not([data-motion="reduce"]):is([data-intro])
-      .f1-plate[data-live]:not([data-figure="dotplot"])
-      .f1-group,
-    :root:not([data-motion="reduce"])
-      .f1-plate[data-intro][data-live]:not([data-figure="dotplot"])
-      .f1-group {
-      animation:
-        f1-sink 720ms calc(var(--i, 0) * 70ms) backwards,
-        f1-float var(--fp, 9s) ease-in-out var(--fd, 0s) infinite alternate;
-    }
-  }
-  :root:not([data-motion="reduce"]):is([data-intro]) .f1-plate .f1-halo,
-  :root:not([data-motion="reduce"]) .f1-plate[data-intro] .f1-halo {
-    animation: f1-halo-in 640ms var(--ease-settle) calc(var(--i, 0) * 70ms + 220ms) backwards;
-  }
-  :root:not([data-motion="reduce"]):is([data-intro]) .f1-plate .f1-seed,
-  :root:not([data-motion="reduce"]) .f1-plate[data-intro] .f1-seed {
-    animation: f1-seed-in 380ms var(--ease-settle)
-      calc(var(--i, 0) * 70ms + 340ms + var(--k, 0) * 30ms) backwards;
-  }
-
-  /* Destination re-bloom (DirectionPearl bloomOnMount): halo, then seeds re-spread. */
-  :root:not([data-motion="reduce"]) .f1-dp[data-bloom] .f1-halo {
-    animation: f1-halo-in 640ms var(--ease-settle) 240ms backwards;
-  }
-  :root:not([data-motion="reduce"]) .f1-dp[data-bloom] .f1-seed {
-    animation: f1-seed-in 420ms var(--ease-settle) calc(340ms + var(--k, 0) * 35ms) backwards;
+  :root[data-intro]:not([data-motion="reduce"]) :is(.f1-ring, .f1-wip-l) {
+    animation: f1-fade 200ms linear calc(var(--end) + 200ms) both;
   }
 }
-
-.f1-axis-in {
-  display: flex;
-  justify-content: space-between;
-  margin: 0 0.5rem;
-}
-
-@keyframes f1-sink {
-  0% {
-    transform: translateY(-28px);
-    opacity: 0;
-    animation-timing-function: cubic-bezier(0.3, 0.5, 0.45, 1);
-  }
-  /* 7 % of 720 ms ≈ 50 ms: the pearl is opaque almost at once (no grey ghost). */
-  7% {
-    opacity: 1;
-  }
-  58% {
-    transform: translateY(4px);
-    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
-  }
-  80% {
-    transform: translateY(-1px);
-    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
-  }
-  100% {
-    transform: none;
-    opacity: 1;
-  }
-}
-@keyframes f1-float {
+@keyframes f1-pop {
   from {
-    translate: 0 -2.5px;
-  }
-  to {
-    translate: 0 2.5px;
+    transform: scale(0.6);
+    opacity: 0;
   }
 }
-@keyframes f1-halo-in {
+@keyframes f1-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes f1-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+@keyframes f1-fade {
   from {
     opacity: 0;
-    scale: 0.55;
   }
 }
-@keyframes f1-seed-in {
+@keyframes f1-settle {
   from {
-    opacity: 0;
-    transform: rotate(var(--a)) translateY(calc(var(--D) * -0.2)) scale(0.2);
+    transform: translateY(-6px);
   }
 }
 
-/* ===================================================================== *
- * 7. Forced colours (§E7). forced-colors.css already restyles .pearl / .seed.
- * ===================================================================== */
-
+/* ---- forced colours: position and labels carry the directions ---------------- */
 @media (forced-colors: active) {
+  .f1-dot,
+  .f1-dot::after,
   .f1-pearl {
     forced-color-adjust: none;
-    background: Canvas;
-    color: CanvasText;
-    border: 2px solid CanvasText;
-    box-shadow: none;
-  }
-  .f1-seed {
-    forced-color-adjust: none;
     background: CanvasText;
   }
-  .f1-pearl::before,
-  .f1-pearl::after,
-  .f1-halo,
-  .f1-plate::after {
-    display: none;
-  }
+  .f1-dp--quiet .f1-pearl,
+  .f1-gap,
   .f1-ring {
     forced-color-adjust: none;
-    border-color: GrayText;
-    opacity: 1;
+    background: Canvas;
   }
-  .f1-plate {
+  .f1-ln,
+  .f1-seg,
+  .f1-ring,
+  .f1-dot::before {
     border-color: CanvasText;
   }
-  .f1-cap-layer,
-  .f1-cap-layer[data-swatch] {
-    border-left-color: CanvasText;
+  .f1-dot.is-tw {
+    outline-color: CanvasText;
   }
-  .f1-key-dot,
-  .f1-track-dot {
-    forced-color-adjust: none;
-    background: CanvasText;
+  /* The same 30 % as the dimmed lines, from the system colours. */
+  .f1-plate .f1-dot.dim {
+    background: color-mix(in srgb, CanvasText 30%, Canvas);
+    outline-color: color-mix(in srgb, CanvasText 30%, Canvas);
   }
-  .f1-item.is-on .f1-pearl,
-  .f1-link:focus-visible .f1-pearl {
-    outline: 2px solid Highlight;
-    outline-offset: 3px;
-  }
-  .f1-plate[data-active] .f1-item:not(.is-on) :is(.f1-pearl, .f1-seeds, .f1-ring) {
-    opacity: 1;
-  }
-  .f1-pause {
-    border: 1px solid ButtonText;
+  /* Every label is LinkText already: the lit lane is underlined instead. */
+  .f1-link:hover .f1-label,
+  .f1-item.is-on .f1-label {
+    color: LinkText;
+    text-decoration: underline 2px;
+    text-underline-offset: 0.12em;
   }
 }

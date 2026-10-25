@@ -1,246 +1,146 @@
 "use client";
 /**
- * Fig. 1 client island (brief §E3–§E4, DECISIONS D-02/D-02a). It renders the
- * Pause/Play motion button and wires the server-rendered plate around it:
- *   - live caption + active state on hover (80 ms intent, fine pointers) and
- *     focus (no delay); reverts 300 ms after leave/blur; Esc resets;
- *   - bounded seed "stir" (±14°, 2.4 s) while active, eased back on leave;
- *   - pointer parallax (fine pointers; rAF only while values settle);
- *   - idle float switched on ([data-live]) and paused off-screen / hidden tab;
- *   - intro hand-off: keeps the plate's own data-intro alive until the intro ends.
- * Pause/Play writes the same preference as the footer MotionToggle
- * (localStorage "bobalab-motion" + <html data-motion>).
+ * Fig. 1 client island (DECISIONS D-13 item 6: linked highlighting). The figure
+ * draws without it; this only links the parts on pointer and keyboard focus:
+ *   - a direction (lane label, its pearl, or the lede's direction word) lights its
+ *     line and the papers it shares; every other line dims to 0.3 (pearls never dim);
+ *   - a paper (a dot, or its row in "Recent publications") lights its dots and its
+ *     ledger row; a ring names one piece of work in progress;
+ *   - the figcaption's live layer names what is lit (aria-live="off": nothing is
+ *     announced; the links and rows carry the same text);
+ *   - Esc, leaving, or blurring resets. Touch and the strip layout are left alone.
+ * Clicking a pearl follows its lane's link. Sets data-live on the plate once wired.
  */
-import { useEffect, useRef, useSyncExternalStore } from "react";
-import {
-  motionReduced,
-  readStoredMotion,
-  setMotionPreference,
-  subscribeMotion,
-  systemPrefersReducedMotion,
-} from "@/lib/site/motion";
+import { useEffect, useRef } from "react";
 
-const snap = () => (systemPrefersReducedMotion() ? "os" : readStoredMotion());
-const serverSnap = () => "ssr";
-
-type Stir = { a?: Animation };
-
-function wire(fig: HTMLElement): () => void {
+function wire(plate: HTMLElement): () => void {
   const D = document;
-  const R = D.documentElement;
-  const items = [...fig.querySelectorAll<HTMLElement>(".f1-item")];
-  const caps = new Map<string, HTMLElement>();
-  fig.querySelectorAll<HTMLElement>("[data-cap]").forEach((c) => caps.set(c.dataset.cap!, c));
-  const legend = caps.get("legend")!;
-  const fine = matchMedia("(hover: hover) and (pointer: fine)");
-  const figMode = () => getComputedStyle(fig).getPropertyValue("--f1-mode").trim() === "fig";
-  const stirs = new Map<HTMLElement, Stir>();
-  const timers: number[] = [];
   const off: Array<() => void> = [];
-  const on = <K extends keyof HTMLElementEventMap>(
-    el: HTMLElement | Document | Window,
-    type: K | string,
-    fn: (e: never) => void,
-  ) => {
-    el.addEventListener(type, fn as EventListener);
-    off.push(() => el.removeEventListener(type, fn as EventListener));
+  const on = (el: EventTarget, type: string, fn: (e: Event) => void) => {
+    el.addEventListener(type, fn);
+    off.push(() => el.removeEventListener(type, fn));
   };
-  let act = -1;
-  let tIn = 0;
-  let tOut = 0;
+  const all = (sel: string, root: ParentNode = plate) => [
+    ...root.querySelectorAll<HTMLElement>(sel),
+  ];
+  const caps = new Map(all("[data-cap]").map((c) => [c.dataset.cap!, c]));
+  const legend = caps.get("legend")!;
+  const marks = all("[data-ds]");
+  const fig = () => getComputedStyle(plate).getPropertyValue("--f1-mode").trim() === "fig";
   let shown = legend;
+  let lit: HTMLElement[] = [];
+  let timer = 0;
 
-  const show = (c: HTMLElement) => {
+  const show = (key: string) => {
+    const c = caps.get(key) ?? legend;
     if (c === shown) return;
-    shown.classList.remove("is-on");
-    c.classList.add("is-on");
+    if (shown !== legend) shown.hidden = true;
+    c.hidden = false;
     shown = c;
+    plate.toggleAttribute("data-live-cap", c !== legend);
   };
+  const reset = () => {
+    clearTimeout(timer);
+    marks.forEach((m) => m.classList.remove("dim", "big"));
+    lit.forEach((e) => e.classList.remove("is-on", "is-hl"));
+    lit = [];
+    delete plate.dataset.active;
+    show("legend");
+  };
+  const light = (els: HTMLElement[], cls: string) => {
+    els.forEach((e) => e.classList.add(cls));
+    lit.push(...els);
+  };
+  const dim = (f: (m: HTMLElement) => boolean) =>
+    marks.forEach((m) => m.classList.toggle("dim", f(m)));
+  const has = (m: HTMLElement, d: string) => m.dataset.ds!.split(" ").includes(d);
 
-  const stir = (li: HTMLElement, go: boolean) => {
-    const el = li.querySelector<HTMLElement>(".f1-seeds");
-    if (!el || !el.animate) return;
-    const s = stirs.get(el) ?? {};
-    stirs.set(el, s);
-    if (go) {
-      if (motionReduced() || !figMode()) return;
-      s.a?.cancel();
-      const k = (r: string) => ({ rotate: r, easing: "ease-in-out" });
-      s.a = el.animate([k("0deg"), k("14deg"), k("-14deg"), k("0deg")], {
-        duration: 2400,
-        iterations: Infinity,
-        direction: "alternate",
-      });
-    } else if (s.a) {
-      const r = getComputedStyle(el).rotate;
-      s.a.cancel();
-      s.a = motionReduced()
-        ? undefined
-        : el.animate([{ rotate: r === "none" ? "0deg" : r }, { rotate: "0deg" }], {
-            duration: 400,
-            easing: "ease-out",
-          });
-    }
+  const lane = (d: string) => {
+    reset();
+    dim((m) => !has(m, d));
+    light([...all(`.f1-item[data-slug="${d}"]`), ...all(`[data-dir="${d}"]`, D)], "is-on");
+    plate.dataset.active = d;
+    show(`d:${d}`);
   };
+  const paper = (s: string) => {
+    const dots = all(`.f1-dot[data-s="${s}"]`);
+    if (!dots.length) return;
+    reset();
+    const ds = dots[0]!.dataset.ds!.split(" ");
+    dim((m) => (m.dataset.s ? m.dataset.s !== s : m.dataset.w ? true : !ds.some((d) => has(m, d))));
+    dots.forEach((e) => e.classList.add("big"));
+    light(all(`[data-f1-row="${s}"]`, D), "is-hl");
+    plate.dataset.active = s;
+    show(`p:${s}`);
+  };
+  const wip = (w: string) => {
+    reset();
+    dim((m) => m.dataset.w !== w);
+    plate.dataset.active = w;
+    show(`w:${w}`);
+  };
+  const leave = () => {
+    clearTimeout(timer);
+    timer = window.setTimeout(reset, 120);
+  };
+  const ok = (e: Event) => (e as PointerEvent).pointerType !== "touch" && fig();
+  const laneOf = (el: Element | null) => el?.closest<HTMLElement>(".f1-item")?.dataset.slug;
 
-  const set = (i: number) => {
-    clearTimeout(tIn);
-    clearTimeout(tOut);
-    if (i === act) return;
-    if (act >= 0) {
-      items[act]!.classList.remove("is-on");
-      stir(items[act]!, false);
-    }
-    act = i;
-    if (i < 0) {
-      delete fig.dataset.active;
-      show(legend);
-      return;
-    }
-    const li = items[i]!;
-    fig.dataset.active = "";
-    li.classList.add("is-on");
-    show((figMode() && caps.get(li.dataset.slug!)) || legend);
-    stir(li, true);
-  };
-  const idxOf = (el: Element | null) => (el ? items.findIndex((li) => li.contains(el)) : -1);
-  const later = () => {
-    clearTimeout(tOut);
-    tOut = window.setTimeout(() => set(idxOf(D.activeElement)), 300);
-  };
-
-  items.forEach((li, i) => {
-    on(li, "pointerenter", (e: PointerEvent) => {
-      if (e.pointerType === "touch") return;
-      clearTimeout(tOut);
-      clearTimeout(tIn);
-      tIn = window.setTimeout(() => set(i), 80);
-    });
-    on(li, "pointerleave", () => {
-      clearTimeout(tIn);
-      later();
-    });
+  // Inside the plate: lanes (label or pearl), dots and rings.
+  on(plate, "pointerover", (e) => {
+    if (!ok(e)) return;
+    const t = e.target as HTMLElement;
+    clearTimeout(timer);
+    if (t.dataset.s && t.classList.contains("f1-dot")) paper(t.dataset.s);
+    else if (t.dataset.w) wip(t.dataset.w);
+    else if (t.closest(".f1-lab, .f1-pearl-at")) lane(laneOf(t)!);
   });
-  on(fig, "focusin", (e: FocusEvent) => set(idxOf(e.target as Element)));
-  on(fig, "focusout", later);
-  on(D, "keydown", (e: KeyboardEvent) => {
-    if (e.key === "Escape" && act >= 0) set(-1);
+  on(plate, "pointerout", (e) => {
+    if (ok(e)) leave();
   });
-
-  // Pointer parallax: halo −2 px, pearl +2 px, seeds +4 px (CSS), τ = 160 ms.
-  let tx = 0;
-  let ty = 0;
-  let px = 0;
-  let py = 0;
-  let raf = 0;
-  let last = 0;
-  const clamp = (v: number) => (v < -1 ? -1 : v > 1 ? 1 : v);
-  const write = () => {
-    fig.style.setProperty("--mx", px.toFixed(3));
-    fig.style.setProperty("--my", py.toFixed(3));
-  };
-  const tick = (t: number) => {
-    const k = 1 - Math.exp(-Math.max(0, t - last) / 160);
-    last = t;
-    px += (tx - px) * k;
-    py += (ty - py) * k;
-    const done = Math.abs(tx - px) + Math.abs(ty - py) < 0.002;
-    if (done) {
-      px = tx;
-      py = ty;
-    }
-    write();
-    raf = done ? 0 : requestAnimationFrame(tick);
-  };
-  const kick = () => {
-    if (!raf) {
-      last = performance.now();
-      raf = requestAnimationFrame(tick);
-    }
-  };
-  on(fig, "pointermove", (e: PointerEvent) => {
-    if (e.pointerType === "touch" || !fine.matches || motionReduced() || !figMode()) return;
-    const b = fig.getBoundingClientRect();
-    tx = clamp(((e.clientX - b.left) / b.width) * 2 - 1);
-    ty = clamp(((e.clientY - b.top) / b.height) * 2 - 1);
-    kick();
+  on(plate, "focusin", (e) => {
+    const d = laneOf(e.target as Element);
+    if (d && fig()) lane(d);
   });
-  on(fig, "pointerleave", () => {
-    tx = ty = 0;
-    kick();
+  on(plate, "focusout", leave);
+  on(plate, "click", (e) => {
+    const p = (e.target as Element).closest(".f1-pearl-at");
+    p?.closest(".f1-item")?.querySelector<HTMLAnchorElement>(".f1-link")?.click();
   });
 
-  // Motion preference changes (this button, the footer toggle, the OS).
-  const sync = () => {
-    if (!motionReduced()) return;
-    stirs.forEach((s) => s.a?.cancel());
-    cancelAnimationFrame(raf);
-    raf = 0;
-    tx = ty = px = py = 0;
-    write();
+  // Outside the plate: the lede's direction words and the publication rows.
+  const bind = (el: HTMLElement, go: () => void) => {
+    const enter = (e: Event) => {
+      if (e.type === "focusin" ? fig() : ok(e)) {
+        clearTimeout(timer);
+        go();
+      }
+    };
+    on(el, "pointerenter", enter);
+    on(el, "focusin", enter);
+    on(el, "pointerleave", leave);
+    on(el, "focusout", leave);
   };
-  off.push(subscribeMotion(sync));
+  all("[data-dir]", D).forEach((a) => bind(a, () => lane(a.dataset.dir!)));
+  all("[data-f1-row]", D).forEach((r) => bind(r, () => paper(r.dataset.f1Row!)));
+  on(D, "keydown", (e) => {
+    if ((e as KeyboardEvent).key === "Escape" && plate.dataset.active) reset();
+  });
 
-  // Idle float: on once the Pause control exists; paused off-screen and in hidden tabs.
-  fig.dataset.live = "";
-  const vis = () => fig.toggleAttribute("data-hid", D.hidden);
-  vis();
-  on(D, "visibilitychange", vis);
-  if ("IntersectionObserver" in window) {
-    const io = new IntersectionObserver(([e]) =>
-      fig.toggleAttribute("data-off", !e?.isIntersecting),
-    );
-    io.observe(fig);
-    off.push(() => io.disconnect());
-  }
-
-  // Intro hand-off: the pre-paint script drops <html data-intro> after 2 s; keep the
-  // plate's copy until the longest intro (n = 8, 12 seeds) has finished.
-  if (R.hasAttribute("data-intro")) {
-    fig.dataset.intro = "";
-    timers.push(window.setTimeout(() => delete fig.dataset.intro, 2000));
-  }
-
+  plate.dataset.live = "";
   return () => {
     off.forEach((f) => f());
-    timers.forEach(clearTimeout);
-    clearTimeout(tIn);
-    clearTimeout(tOut);
-    cancelAnimationFrame(raf);
-    stirs.forEach((s) => s.a?.cancel());
-    delete fig.dataset.live;
+    clearTimeout(timer);
+    reset();
+    delete plate.dataset.live;
   };
 }
 
 export function FigureIsland() {
-  const ref = useRef<HTMLButtonElement>(null);
-  const state = useSyncExternalStore(subscribeMotion, snap, serverSnap);
+  const ref = useRef<HTMLElement>(null);
   useEffect(() => {
-    const fig = ref.current?.closest<HTMLElement>(".f1-plate");
-    return fig ? wire(fig) : undefined;
+    const plate = ref.current?.closest<HTMLElement>(".f1-plate");
+    return plate ? wire(plate) : undefined;
   }, []);
-  const paused = state === "reduce";
-  return (
-    <button
-      ref={ref}
-      type="button"
-      className="f1-pause"
-      hidden={state === "ssr" || state === "os"}
-      onClick={() => setMotionPreference(!paused)}
-    >
-      <svg
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        focusable="false"
-      >
-        {paused ? <path d="M5 3.5v9l7-4.5z" /> : <path d="M5.5 3.5v9M10.5 3.5v9" />}
-      </svg>
-      {paused ? "Play motion" : "Pause motion"}
-    </button>
-  );
+  return <i ref={ref} hidden />;
 }

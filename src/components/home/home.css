@@ -1,367 +1,287 @@
 /*
- * Home page (brief §D3; DECISIONS D-02a layout note: Fig. 1 needs a 46em-wide
- * container, wider than the 5/12 column of the 72rem content box).
- *
- * Desktop (>= 78em): the hero's LEFT edge stays on the site's content column
- * (same x as the header wordmark and every section below); only the figure
- * bleeds into the right margin, by at most 8rem, like a wide figure in a paper.
- * Tablet (46–78em): identity and mission side by side above a full-width figure.
- * Phones: one column.
+ * Home (DECISIONS D-13; prototype docs/redesign/prototypes/p3/p3.css "home hero",
+ * "ledger", "news log"; P2 people lattice). Fig. 1 is styled in figure.css.
  */
 
-/* ---------- Hero -------------------------------------------------------- */
+/* ---- statement and lede (P3 .hero) ---------------------------------------- */
 .hm-hero {
-  --hm-col: max(var(--gutter), calc((100% - var(--content-max)) / 2));
-  width: 100%;
-  margin-inline: auto;
-  padding: var(--s-5) var(--gutter) var(--s-7);
-  box-sizing: border-box;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--s-6);
-}
-.hm-id {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--s-5);
-  align-content: center;
-  max-width: 40rem;
-}
-.hm-ident,
-.hm-lead {
-  container-type: inline-size;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  justify-items: start;
-  align-content: start;
-}
-.hm-ident {
-  gap: var(--s-3);
-}
-.hm-lead {
-  gap: var(--s-5);
+  padding-top: 40px;
 }
 .hm-h1 {
-  display: grid;
-  gap: 0.6rem;
-  justify-items: start;
-  font-size: inherit;
-  line-height: 1.2;
-}
-.hm-wm {
-  display: block;
-  color: var(--ink);
-}
-.hm-desc {
-  font-family: var(--font-text);
-  font-weight: 500;
-  font-size: var(--fs-base);
-  line-height: 1.35;
-  letter-spacing: 0.04em;
-  color: var(--ink-muted);
+  margin: 0;
+  font-stretch: var(--wdth-cond);
+  font-weight: 700;
+  font-size: var(--t-head);
+  line-height: 1.05;
+  letter-spacing: 0;
   text-wrap: balance;
+}
+.hm-h1:focus {
+  outline: none;
+}
+.hm-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 14px;
+  margin-top: 18px;
 }
 .hm-aff {
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-  color: var(--ink-muted);
+  order: 2;
+  margin: 0;
+  font-size: var(--t-meta);
+  line-height: 1.5;
+  color: var(--muted);
+}
+.hm-aff > span {
+  display: block;
+  max-width: 16rem;
   text-wrap: balance;
 }
-.hm-mission {
-  font-family: var(--font-display);
-  font-weight: 580;
-  font-size: clamp(1.375rem, 1rem + 1.4vw, 2.25rem);
-  line-height: 1.16;
-  letter-spacing: -0.01em;
-  text-wrap: balance;
-  max-width: 24ch;
-  color: var(--ink);
+.hm-lede {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  text-wrap: pretty;
 }
-.hm-mission-wrap {
-  display: grid;
-  gap: var(--s-2);
-  justify-items: start;
+.hm-lede .bl-badge {
+  vertical-align: 0.1em;
 }
-.hm-cta {
-  justify-self: start;
-  font-weight: 600;
-  text-decoration: none;
+@media (min-width: 40rem) {
+  .hm-lede {
+    font-size: var(--t-title);
+  }
 }
-.hm-cta .bl-icon {
-  transition: translate var(--dur-fast) var(--ease-out);
+@media (min-width: 48rem) {
+  .hm-row {
+    grid-template-columns: var(--lab) minmax(0, 1fr);
+  }
+  .hm-aff {
+    order: 0;
+    padding: 6px 32px 0 0;
+  }
 }
-
-/* Phones: keep the pearls inside the first screen (JUDGE.md "Mobile"). */
-@media (max-width: 45.99em) {
-  .hm-hero {
-    padding-top: var(--s-4);
-    gap: var(--s-5);
-  }
-  .hm-id {
-    gap: var(--s-4);
-  }
-  .hm-lead {
-    gap: var(--s-3);
-  }
-  .hm-h1 {
-    gap: 0.35rem;
-  }
+/* A direction word: its line segment, underlined in its own colour (P3 .dl). */
+.hm-dl {
+  white-space: nowrap;
+  text-decoration-color: var(--dir);
+}
+.hm-dl:hover,
+.hm-dl:focus-visible,
+.hm-dl.is-on {
+  text-decoration-color: var(--dir);
+  text-decoration-thickness: 2px;
+}
+.hm-dl .bl-seg {
+  margin-right: 5px;
 }
 
-/* Tablet: who-we-are | what-we-do side by side, then the full-width figure.
-   Both columns hang from one top line (the wordmark cap meets the mission's first
-   line), and the mission is set a step smaller than on desktop so the plate starts
-   about 70 px higher at 1024 px (y ≈ 345 with the preview badge) and the first row of
-   pearls and labels is in the first screen at 1024×768 (VIS-09). */
-@media (min-width: 46em) and (max-width: 77.99em) {
-  .hm-hero {
-    gap: var(--s-5);
-    padding-top: var(--s-5);
-  }
-  .hm-id {
-    max-width: none;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-    column-gap: var(--s-7);
-    align-items: start;
-  }
-  .hm-ident {
-    /* The wordmark's ink starts a few px under its box; match the mission's cap line. */
-    padding-top: 0.3rem;
-  }
-  .hm-lead {
-    gap: var(--s-4);
-  }
-  .hm-mission {
-    max-width: none;
-    font-size: clamp(1.375rem, 4.6cqi, 1.75rem);
-  }
-}
-/* Desktop: identity on the content column, figure 7fr (never under 46rem). */
-@media (min-width: 78em) {
-  .hm-hero {
-    padding-inline: var(--hm-col) max(var(--gutter), calc(var(--hm-col) - 8rem));
-    grid-template-columns: minmax(0, 5fr) minmax(min(46rem, 64%), 7fr);
-    column-gap: var(--s-7);
-    align-items: center;
-    padding-block: var(--s-5) var(--s-7);
-  }
-  .hm-mission {
-    font-size: clamp(1.625rem, 7.4cqi, 2.25rem);
-  }
-}
-
-/* No figure yet (0 live directions, §E9): a one-column hero; the note is a
-   small plate under the call to action, never a large empty box. */
-@media (min-width: 78em) {
-  .hm-hero--solo {
-    grid-template-columns: minmax(0, 1fr);
-    align-items: start;
-  }
-}
-@media (min-width: 46em) {
-  .hm-hero--solo .hm-id {
-    max-width: 56rem;
-  }
-}
-.hm-soon {
-  justify-self: start;
-  width: min(100%, 40rem);
-  box-sizing: border-box;
-  padding: var(--s-4) var(--s-5);
-  background: var(--plate);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-md);
-  display: grid;
-  gap: var(--s-1);
-}
-.hm-soon h2 {
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
-}
-
-/* ---------- Sections ---------------------------------------------------- */
-.hm-sections {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--s-8);
-  /* The footer brings its own top margin (--s-9). */
-  padding-bottom: 0;
-}
-@media (max-width: 45.99em) {
-  .hm-sections {
-    gap: var(--s-7);
-  }
-}
+/* ---- sections -------------------------------------------------------------- */
 .hm-sec {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  min-width: 0;
-  gap: var(--s-4);
+  margin-top: var(--sec-gap);
 }
-.hm-sec-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--s-2) var(--s-5);
+.hm-sec-h h2 {
+  margin: 0;
 }
+/* The way on, at the foot of the list (P1/P2 `.more`): what the full page holds. */
 .hm-more {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35em;
-  min-height: 2.75rem;
+  margin: 12px 0 0;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
   font-weight: 500;
 }
-.hm-list {
-  list-style: none;
+.hm-more a {
+  display: inline-block;
+  padding-block: 4px;
+  color: var(--ink);
+}
+.hm-soon h2 {
+  margin: 0 0 4px;
+}
+
+/* Recent publications: a hovered or focused row lights its dots in Fig. 1, and a
+   dot lights its row (P3 .row.hl). */
+.hm-pubs {
   margin: 0;
   padding: 0;
-}
-/* Entry lists (publications, news): each entry draws its top rule; close the last one. */
-.hm-rows > li:last-child > * {
+  list-style: none;
+  border-top: 1px solid var(--ink);
   border-bottom: 1px solid var(--hairline);
 }
-
-/* Meniscus rule: a hairline whose ends lift 4 px (§C9; once, home only). */
-.hm-meniscus {
-  display: block;
-  width: 100%;
-  height: 8px;
-  color: var(--hairline);
+.hm-pubs > li:first-child .bl-pub {
+  border-top: 0;
+}
+.hm-pubs > li {
+  position: relative;
+  z-index: 0;
+}
+.hm-pubs > li::before {
+  content: "";
+  position: absolute;
+  inset: 0 -14px;
+  z-index: -1;
+  background: var(--band);
+  opacity: 0;
+  transition: opacity var(--dur-fast) ease-out;
+}
+.hm-pubs > li.is-hl::before {
+  opacity: 1;
 }
 
-/* What we've learned */
-.hm-findings {
-  display: grid;
-  gap: var(--s-4);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-}
-.hm-finding {
-  display: grid;
-  gap: var(--s-3);
-  align-content: start;
-  padding: var(--s-5);
-  background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-md);
-}
+/* Findings (only when content has them). */
 .hm-finding-text {
-  font-family: var(--font-display);
-  font-weight: 560;
-  font-size: var(--fs-lg);
-  line-height: 1.35;
+  margin: 0;
+  max-width: 62ch;
+  font-size: var(--t-title);
+  line-height: 1.45;
 }
 .hm-finding-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--s-2) var(--s-4);
-  font-size: var(--fs-sm);
+  gap: 4px 16px;
+  margin-top: 8px;
+  font-size: var(--t-meta);
 }
 
-/* People strip */
+/* ---- people: square photos (P2 lattice) ------------------------------------ */
+/* Columns have a minimum width in rem, so enlarged text gives fewer, wider
+   columns instead of names and roles broken mid-word (WCAG 1.4.4). At the
+   default size: 3 columns on phones (320–390 px), 5–6 on tablets, 8 from 64rem. */
 .hm-people {
+  --hm-col: 5.25rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
-  gap: var(--s-5) var(--s-5);
+  grid-template-columns: repeat(auto-fill, minmax(var(--hm-col), 1fr));
+  gap: 22px 12px;
+  margin: 0;
+  padding: 18px 0 0;
+  list-style: none;
+  border-top: 1px solid var(--ink);
+}
+@media (min-width: 40rem) {
+  .hm-people {
+    --hm-col: 6.5rem;
+    gap: 24px 16px;
+  }
+}
+@media (min-width: 64rem) {
+  .hm-people {
+    /* Eight across at any desktop width (16 people = two full rows). */
+    --hm-col: max(6.5rem, (100% - 7 * 16px) / 8 - 1px);
+  }
+}
+.hm-people + .hm-join {
+  margin-top: 26px;
 }
 .hm-person {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  column-gap: var(--s-3);
-  align-items: center;
+  min-width: 0;
 }
-.hm-person .bl-pearl,
-.hm-person-photo {
-  grid-row: 1 / 4;
-  align-self: start;
+.hm-person p {
+  margin: 0;
+  border-bottom: 0;
 }
-.hm-person-photo {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+.hm-ph {
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--band);
+}
+.hm-ph img {
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
+.hm-ini {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--ink);
+}
 .hm-person-name {
-  font-family: var(--font-text);
+  margin-top: 10px !important;
   font-weight: 600;
-  font-size: var(--fs-base);
+  font-size: 1rem;
   line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 .hm-person-name a {
-  color: var(--ink);
   text-decoration-color: var(--rule);
 }
-.hm-person-name a:hover {
-  color: var(--accent-strong);
-}
 .hm-person-role {
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-  color: var(--ink-muted);
+  margin-top: 2px !important;
+  font-size: var(--t-meta);
+  line-height: 1.4;
+  color: var(--muted);
+  /* Only a word longer than its tile ("Undergraduate" with enlarged text on a
+     phone) is hyphenated; names never are. */
+  hyphens: auto;
+  hyphenate-limit-chars: 12 5 5;
 }
-.hm-person .bl-badge {
-  justify-self: start;
-  margin-top: var(--s-1);
+.hm-join {
+  margin: 0;
+  max-width: 72ch;
+  color: var(--muted);
 }
-.hm-people-more {
-  font-size: var(--fs-sm);
-  color: var(--ink-muted);
+.hm-join a {
+  color: var(--ink);
 }
 
-/* Work with us */
-.hm-work {
-  display: grid;
-  gap: var(--s-5);
-  padding: var(--s-6);
-  background: var(--paper-alt);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-md);
-}
-.hm-work-grid {
-  display: grid;
-  gap: var(--s-5);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-}
-.hm-work-group {
-  display: grid;
-  gap: var(--s-2);
-  align-content: start;
-}
-.hm-work-group h3 {
-  font-size: var(--fs-lg);
-  font-family: var(--font-text);
-  font-weight: 600;
-}
-.hm-work-group ul {
-  list-style: none;
+/* ---- news log (P3 .log) ----------------------------------------------------- */
+.hm-log {
   margin: 0;
   padding: 0;
-  display: grid;
-  gap: var(--s-2);
-}
-.hm-work-routes {
   list-style: none;
+  border-bottom: 1px solid var(--hairline);
+}
+.hm-log > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 2px;
+  padding: 11px 0;
+  border-top: 1px solid var(--hairline);
+}
+.hm-log > li:first-child {
+  border-top: 1px solid var(--ink);
+}
+.hm-log-date {
+  font-size: var(--t-meta);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.hm-log-title {
   margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-3);
 }
-.hm-work-routes .bl-cta {
-  font-weight: 600;
+.hm-log-title a {
+  text-decoration: none;
 }
-.hm-work-contact {
-  font-size: var(--fs-base);
+.hm-log-title a:hover {
+  text-decoration: underline 2px var(--ink);
+  text-underline-offset: 0.18em;
 }
-@media (max-width: 45.99em) {
-  .hm-work {
-    padding: var(--s-5);
+.hm-log .bl-tags {
+  color: var(--muted);
+  column-gap: 16px;
+}
+.hm-log .bl-tag {
+  color: var(--muted);
+}
+@media (min-width: 48rem) {
+  .hm-log > li {
+    grid-template-columns: 10rem minmax(0, 1fr) auto;
+    column-gap: 24px;
+    align-items: baseline;
+  }
+  .hm-log .bl-tags {
+    justify-content: flex-end;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="reduce"]) .hm-cta:hover .bl-icon {
-    translate: 3px 0;
+/* Phones: three rows of faces; the section link leads to everyone. */
+@media (max-width: 39.99rem) {
+  .hm-person:nth-child(n + 10) {
+    display: none;
   }
 }

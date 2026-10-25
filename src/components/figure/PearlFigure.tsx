@@ -1,20 +1,37 @@
 /**
- * Fig. 1, the Pearl Figure (brief §E, DECISIONS D-02a). Server-rendered from
- * the figure model: one <ol role="list"> of real links inside a labelled <nav>,
- * the same tree for every breakpoint (figure mode ≥ 46em container, list mode
- * below). The client island (FigureIsland) only adds the live caption, hover,
- * buoyancy, stir, Pause/Play and the intro hand-off; without JS the legend stays
- * and every link works.
+ * Fig. 1 "Lines" (DECISIONS D-13; prototype docs/redesign/prototypes/p3/index.html
+ * + fig.js, JUDGE.md refinements 3–5). Server-rendered from the figure model, so it
+ * draws without JavaScript:
+ *
+ *   - a year axis with "now" and "in progress";
+ *   - one lane per direction (<nav aria-label="Research directions"><ol role="list">),
+ *     each a real link whose accessible name ends in "N papers";
+ *   - in each lane's track: its line from the first paper to "now", gaps where a
+ *     link passes over it, link segments, one dot per paper, the pearl at "now"
+ *     (the morph source, <ViewTransition name="pearl-{slug}">, one per name) and
+ *     open rings for work in progress;
+ *   - the zone after "now" and the dashed "now" rule (pseudo-elements of .f1-body);
+ *   - a figcaption under the plate whose first layer is the caption and whose other
+ *     layers (hidden) are the live captions the island swaps in (aria-live="off").
+ * Below 48rem (and wherever the lanes cannot fit) each lane becomes a strip
+ * (geometry.ts LIST_CSS). The client island adds linked highlighting only.
  */
 import Link from "next/link";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { DraftBadge } from "@/components/ui/Badge";
-import { Icon } from "@/components/ui/icons";
+import { PUBLICATION_TYPE_LABELS } from "@/components/ui/labels";
 import { formatDate } from "@/lib/content/dates";
-import { pad2 } from "@/lib/content/directions";
-import { metaLine, plural, type FigureItem, type FigureModel } from "@/lib/figure/buildFigure";
+import {
+  joinAnd,
+  laneCounts,
+  numberWord,
+  sharesSentence,
+  type FigureLane,
+  type FigureModel,
+} from "@/lib/figure/buildFigure";
+import { figureCss, plateVars } from "@/lib/figure/geometry";
 import { pearlVtName, TRANSITION } from "@/lib/vt";
-import { Halo, PearlBody, SeedOrbit } from "./parts";
+import { PearlBody } from "./parts";
 import { FigureIsland } from "./FigureIsland";
 import "./figure.css";
 
@@ -22,200 +39,276 @@ type Vars = CSSProperties & Record<`--${string}`, string | number>;
 
 export interface PearlFigureProps {
   model: FigureModel;
-  /** Lab short name for the caption ("Research directions of BOBALAB."). */
-  labName: string;
-  /** id of the section heading (aria-labelledby). */
-  headingId?: string;
+  /** @deprecated Unused: the caption names the lab's directions, not the lab. */
+  labName?: string;
 }
 
-function itemVars(it: FigureItem, i: number): Vars {
-  const v: Vars = {
-    "--i": i,
-    "--fp": `${it.float.period}s`,
-    "--fd": `${it.float.delay}s`,
-  };
-  if (it.slot) {
-    v["--row"] = it.slot.row;
-    v["--col"] = it.slot.col;
-    v["--dx"] = it.nudge.dx;
-    v["--dy"] = it.nudge.dy;
-  }
-  return v;
-}
-
-/** Year → 0…1 position on the shared dot-plot axis, with a per-year stack index. */
-function trackDots(years: number[], range: [number, number]) {
-  const [lo, hi] = range;
-  const span = Math.max(1, hi - lo);
-  const seen = new Map<number, number>();
-  return years.map((y) => {
-    const stack = seen.get(y) ?? 0;
-    seen.set(y, stack + 1);
-    return { year: y, x: hi === lo ? 0.5 : (y - lo) / span, stack };
+function Track({ lane, model }: { lane: FigureLane; model: FigureModel }) {
+  const firstDot = lane.dots.find((d) => d.col === lane.first);
+  const items: ReactNode[] = [];
+  let year = 0;
+  lane.dots.forEach((d) => {
+    if (d.year !== year) {
+      items.push(
+        <span key={`y${d.year}`} className={year ? "f1-y" : "f1-y f1-y--first"}>
+          {d.year}
+        </span>,
+      );
+      year = d.year;
+    }
+    items.push(
+      <i
+        key={d.s}
+        className={d.twin ? "f1-dot is-tw" : "f1-dot"}
+        data-s={d.s}
+        data-ds={d.lanes.join(" ")}
+        style={{ "--c": d.col, "--k": d.bin, "--t": `${d.t}ms` } as Vars}
+      />,
+    );
   });
+  return (
+    <div className="f1-track" aria-hidden="true">
+      {firstDot && (
+        <span
+          className="f1-ln"
+          data-ds={lane.slug}
+          style={
+            {
+              "--c": firstDot.col,
+              "--k": firstDot.bin,
+              "--t": `${lane.lineT}ms`,
+              "--dur": `${Math.max(0, model.end - lane.lineT)}ms`,
+            } as Vars
+          }
+        />
+      )}
+      {lane.gaps.map((c) => {
+        const p = model.papers.find((x) => x.col === c);
+        return (
+          <span key={`g${c}`} className="f1-gap" style={{ "--c": c, "--k": p?.bin ?? 0 } as Vars} />
+        );
+      })}
+      {lane.segs.map((s) => {
+        const p = model.papers.find((x) => x.slug === s.s);
+        return (
+          <span
+            key={`s${s.s}`}
+            className="f1-seg"
+            data-part={s.part}
+            data-s={s.s}
+            data-ds={s.lanes.join(" ")}
+            style={{ "--c": s.col, "--k": p?.bin ?? 0, "--t": `${s.t}ms` } as Vars}
+          />
+        );
+      })}
+      {items}
+      <span
+        className="f1-pearl-at"
+        style={{ "--t": `${Math.max(0, model.end - 360) + (lane.index - 1) * 60}ms` } as Vars}
+      >
+        <PearlBody vtName={pearlVtName(lane.slug)} />
+      </span>
+      {lane.wip.map((w, j) => (
+        <i
+          key={w.slug}
+          className="f1-ring"
+          data-w={w.slug}
+          data-ds={w.lanes.join(" ")}
+          style={{ "--j": j } as Vars}
+        />
+      ))}
+    </div>
+  );
 }
 
-export function PearlFigure({ model, labName, headingId = "dirs-h" }: PearlFigureProps) {
-  const { items, template } = model;
+function Caption({ model }: { model: FigureModel }) {
+  const shared = model.papers.some((p) => p.lanes.length > 1);
+  const wip = model.lanes.some((l) => l.wip.length > 0);
+  const kinds = model.maxShare > 2 ? "more than one direction" : "two directions";
+  const merged = model.merged > 0 ? model.bins[0] : undefined;
+  return (
+    <>
+      <b>Figure 1.</b> Papers in the lab’s {numberWord(model.n)} research{" "}
+      {model.n === 1 ? "direction" : "directions"}, by year. Each filled dot is a paper with a
+      public version or a documented talk;{" "}
+      <span className="f1-cap-d">
+        {shared ? (
+          <>
+            <span className="f1-cv-l">
+              a vertical link joins a paper that belongs to {kinds}
+              {model.passesOver ? ", passing over any line between them" : ""}
+            </span>
+            <span className="f1-cv-r">
+              a ringed dot is a paper that belongs to {kinds} and appears on each of their lines
+            </span>
+            .
+          </>
+        ) : (
+          "each line starts at its direction’s first paper."
+        )}{" "}
+        {merged && `The first column group covers ${merged.from} to ${merged.to}. `}
+        Order within a year is not meaningful.
+        {wip &&
+          " Open rings after the “now” line are work in progress, in no particular order."}{" "}
+        Lines follow the lab’s own order of directions. Point at a line or a dot to name it.
+      </span>
+      <span className="f1-cap-m">
+        the large disc marks the direction today
+        {wip ? ", and open rings after it are work in progress, in no particular order" : ""}.
+        {shared && " Papers shared with another direction are named under each line."} Order within
+        a year is not meaningful.
+      </span>{" "}
+      As of {formatDate(model.asOf)}.
+    </>
+  );
+}
+
+export function PearlFigure({ model }: PearlFigureProps) {
   const listOnly = model.state !== "figure";
-  const dotplot = model.mode === "dotplot" && !listOnly;
-  const plateVars: Vars = {};
-  if (template && !dotplot) {
-    plateVars["--f1-cols"] = template.columns;
-    plateVars["--f1-D"] = template.diameter;
-  }
-  const asOf = formatDate(model.asOf);
-  // Draft marking (D-03): when every direction is a draft, the foot's one summary
-  // badge ("applies to all N directions") says it once; per-row and per-caption
-  // badges appear only when drafts and reviewed directions are mixed (VIS-03).
+  const geo = { cols: model.cols, bins: model.bins.length, wipMax: model.wipMax };
   const markEach = model.draftCount > 0 && model.draftCount < model.n;
+  const label = (slug: string) => model.lanes.find((l) => l.slug === slug)?.label ?? slug;
 
   return (
-    <section className={listOnly ? "f1 f1--list" : "f1"} aria-labelledby={headingId}>
+    <div className={listOnly ? "f1 f1--list" : "f1"}>
+      <style>{figureCss(geo, listOnly)}</style>
       <figure
         className="f1-plate"
-        aria-label={`Fig. 1, research directions of ${labName}`}
         data-n={model.n}
-        data-template={template && !dotplot ? `t${template.n}` : undefined}
-        data-kind={template?.kind}
-        data-figure={dotplot ? "dotplot" : listOnly ? "list" : "cluster"}
-        style={plateVars}
+        data-figure={listOnly ? "list" : "lines"}
+        data-cols={model.cols}
+        data-merged={model.merged || undefined}
+        style={{ ...plateVars(geo), "--end": `${model.end}ms` } as Vars}
       >
-        <figcaption className="f1-head">
-          <h2 id={headingId} className="f1-h">
-            Research directions
-          </h2>
-          <div className="f1-cap" aria-live="off">
-            <div className="f1-cap-layer is-on" data-cap="legend">
-              <p className="f1-cap-t">
-                <span className="f1-cap-fig">Fig. 1</span>Research directions of {labName}.
-              </p>
-              <p className="f1-cap-b">
-                Each pearl is a research direction
-                {!listOnly && (
-                  <span className="f1-in-fig">
-                    ; each dot is one paper with a public version or a documented talk
-                  </span>
-                )}
-                .
-              </p>
-            </div>
-            {!listOnly &&
-              items.map((it) => (
-                <div
-                  key={it.slug}
-                  className="f1-cap-layer"
-                  data-cap={it.slug}
-                  data-swatch={it.swatch}
-                  aria-hidden="true"
-                >
-                  <p className="f1-cap-t">
-                    <span className="f1-cap-fig">{pad2(it.index)}</span>
-                    {it.label}
-                  </p>
-                  {it.summary && <p className="f1-cap-b">{it.summary}</p>}
-                  <p className="f1-cap-m">
-                    <span>{metaLine(it)}</span>
-                    {it.draft && markEach && <DraftBadge />}
-                  </p>
-                </div>
-              ))}
-          </div>
-        </figcaption>
-
-        <nav aria-label="Research directions">
-          <ol role="list" className="f1-list">
-            {items.map((it, i) => (
-              <li
-                key={it.slug}
-                className="f1-item"
-                data-slot={i + 1}
-                data-row={it.slot?.row}
-                data-swatch={it.swatch}
-                data-slug={it.slug}
-                style={itemVars(it, i)}
-              >
-                <Link
-                  href={it.href}
-                  className="f1-link"
-                  transitionTypes={[TRANSITION.pearlOpen]}
-                  aria-describedby={it.summary ? `d-${it.slug}` : undefined}
-                >
-                  <span className="f1-group" aria-hidden="true">
-                    <span className="f1-buoy">
-                      <Halo />
-                      {!dotplot && <SeedOrbit papers={it.papers} />}
-                      <PearlBody index={it.index} vtName={pearlVtName(it.slug)} />
-                    </span>
-                  </span>
-                  <span className="f1-label">
-                    <span className="f1-lt">{it.label}</span>
-                    <Icon name="arrow-right" className="f1-arr" />
-                  </span>
-                  <span className="f1-count">{plural(it.papers, "paper")}</span>
-                </Link>
-                {it.draft && markEach && <DraftBadge />}
-                {dotplot && model.yearRange && (
-                  <span className="f1-track" aria-hidden="true">
-                    {trackDots(it.years, model.yearRange).map((d, k) => (
-                      <i
-                        key={k}
-                        className="f1-track-dot"
-                        style={{ "--x": d.x, "--stack": d.stack } as Vars}
-                      />
-                    ))}
-                  </span>
-                )}
-                {it.summary && (
-                  <p id={`d-${it.slug}`} hidden>
-                    {it.summary}
-                  </p>
-                )}
-              </li>
-            ))}
-          </ol>
-        </nav>
-        {dotplot && model.yearRange && (
+        <div className="f1-body">
           <div className="f1-axis" aria-hidden="true">
-            <span />
-            <span className="f1-axis-in">
-              <span>{model.yearRange[0]}</span>
-              <span>{model.yearRange[1]}</span>
-            </span>
-          </div>
-        )}
-
-        <div className="f1-foot">
-          <span className="f1-key">
-            {!listOnly && !dotplot && <i className="f1-key-dot f1-in-fig" aria-hidden="true" />}
-            <span>
-              {!listOnly && (
-                <span className="f1-in-fig">
-                  {dotplot
-                    ? "Each dot is one paper with a public version or a documented talk, by year"
-                    : "= 1 paper with a public version or a documented talk"}
-                  {" · "}
+            <div className="f1-axis__t">
+              {model.bins.map((b, k) => (
+                <span
+                  key={b.label}
+                  className="f1-yr"
+                  data-narrow={b.cols <= 2 ? "" : undefined}
+                  style={{ "--c0": b.col0, "--m": b.cols, "--k": k } as Vars}
+                >
+                  <span className="f1-yr-a">’</span>
+                  {b.from === b.to ? (
+                    <>
+                      <span className="f1-yr-c">{String(b.from).slice(0, 2)}</span>
+                      {String(b.from).slice(2)}
+                    </>
+                  ) : (
+                    <>
+                      <span className="f1-yr-c">{String(b.from).slice(0, 2)}</span>
+                      {String(b.from).slice(2)}–<span className="f1-yr-a">’</span>
+                      <span className="f1-yr-c">{String(b.to).slice(0, 2)}</span>
+                      {String(b.to).slice(2)}
+                    </>
+                  )}
                 </span>
-              )}
-              counts as of {asOf}
+              ))}
+              <span className="f1-now-l">now</span>
+              {model.wipMax > 0 && <span className="f1-wip-l">in progress</span>}
+            </div>
+          </div>
+          <nav className="f1-nav" aria-label="Research directions">
+            <ol role="list" className="f1-list">
+              {model.lanes.map((l) => {
+                const [count, rest] = laneCounts(l);
+                const shares = sharesSentence(l.shares);
+                return (
+                  <li key={l.slug} className="f1-item" data-slug={l.slug} data-swatch={l.swatch}>
+                    <div className="f1-lab">
+                      <p className="f1-name">
+                        <Link
+                          href={l.href}
+                          className="f1-link"
+                          transitionTypes={[TRANSITION.pearlOpen]}
+                        >
+                          <span className="f1-label">{l.label}</span>
+                          <span className="vh">, </span>
+                          <span className="f1-count">{count}</span>
+                        </Link>
+                        {rest && <span className="f1-more">{rest}</span>}
+                        {l.draft && markEach && (
+                          <>
+                            {" "}
+                            <DraftBadge />
+                          </>
+                        )}
+                      </p>
+                      {shares && <p className="f1-shares">{shares}</p>}
+                    </div>
+                    <Track lane={l} model={model} />
+                  </li>
+                );
+              })}
+            </ol>
+          </nav>
+        </div>
+        <figcaption className="f1-caption">
+          <span className="f1-cap" aria-live="off">
+            <span className="f1-cap-layer is-on" data-cap="legend">
+              <Caption model={model} />
             </span>
+            {!listOnly && (
+              <>
+                {model.lanes.map((l) => (
+                  <span
+                    key={l.slug}
+                    className="f1-cap-layer"
+                    data-cap={`d:${l.slug}`}
+                    aria-hidden="true"
+                    hidden
+                  >
+                    <b>{l.label}.</b> {l.question ?? l.summary ?? laneCounts(l).join("")}
+                  </span>
+                ))}
+                {model.papers.map((p) => (
+                  <span
+                    key={p.slug}
+                    className="f1-cap-layer"
+                    data-cap={`p:${p.slug}`}
+                    aria-hidden="true"
+                    hidden
+                  >
+                    <b>{p.title}.</b> {PUBLICATION_TYPE_LABELS[p.type]}, {p.year}.{" "}
+                    {p.lanes.length > 1 && `In ${joinAnd(p.lanes.map(label))}. `}
+                    {p.brief}
+                  </span>
+                ))}
+                {model.lanes
+                  .flatMap((l) => l.wip)
+                  .filter((w, i, a) => a.findIndex((x) => x.slug === w.slug) === i)
+                  .map((w) => (
+                    <span
+                      key={w.slug}
+                      className="f1-cap-layer"
+                      data-cap={`w:${w.slug}`}
+                      aria-hidden="true"
+                      hidden
+                    >
+                      <b>{w.title}.</b> In progress, {joinAnd(w.lanes.map(label))}.
+                    </span>
+                  ))}
+              </>
+            )}
           </span>
           {model.draftCount > 0 && (
             <span className="f1-foot-draft">
-              <DraftBadge />
+              <DraftBadge />{" "}
               <span>
                 applies to{" "}
-                {model.draftCount === model.n
-                  ? model.n === 1
+                {markEach
+                  ? `${model.draftCount} of ${model.n} directions`
+                  : model.n === 1
                     ? "this direction"
-                    : `all ${model.n} directions`
-                  : `${model.draftCount} of ${model.n} directions`}
+                    : `all ${model.n} directions`}
               </span>
             </span>
           )}
-          {!listOnly && <FigureIsland />}
-        </div>
+        </figcaption>
+        {!listOnly && <FigureIsland />}
       </figure>
-    </section>
+    </div>
   );
 }

@@ -1,32 +1,39 @@
 /**
- * Writes one static HTML page per fixture set for the Fig. 1 gallery
- * (brief §E10.1; screenshots and the overlap check are in gallery.visual.ts).
+ * Writes one static HTML page per fixture set for the Fig. 1 "Lines" gallery
+ * (screenshots and layout checks are in gallery.visual.ts).
  *
  * Each page is the real home page (src/app/page.tsx) rendered to static markup
- * with the site CSS and the real self-hosted fonts (inlined as data: URIs), so
- * the figure sits in the same hero columns as on the site at 1366 and 1024 px.
- * Extra pages:
+ * with the site CSS and the real self-hosted Archivo (inlined as a data: URI), so
+ * the figure sits in the real label-column grid at every width. No JS runs on
+ * these pages, which also stands in for the no-JS rendering (the figure draws
+ * without a script). Extra pages:
  *   - home-production / home-preview: the real content/ folder with drafts
- *     excluded / included (production = the state a `npm run build` ships);
- *   - n4-dotplot: figure_mode "dotplot" (C10);
- *   - n7-long-labels / n8-long-labels: the narrowest templates with 28-character
- *     labels, which must wrap to two lines without touching another pearl.
- * No JS runs on these pages (it also stands in for the no-JS rendering).
+ *     excluded / included;
+ *   - n7-long-labels / n8-long-labels: 28-character labels (the CMS maximum),
+ *     which wrap to two lines; lanes grow and links still join the dots;
+ *   - growth-2x / growth-4x / growth-8x: the real papers repeated with
+ *     "SYNTHETIC –" titles (test pages only), to exercise packed columns and the
+ *     overflow rule (oldest bins merged and packed per lane).
+ *   npx vitest run --config tests/visual/vitest.render.config.ts
  */
 import fs from "node:fs";
 import path from "node:path";
 import type { ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { afterAll, it } from "vitest";
-import { buildContent, clearContentCache, loadRawContent } from "@/lib/content/load";
-import { buildFigureModel } from "@/lib/figure/buildFigure";
+import { afterAll, expect, it } from "vitest";
+import {
+  buildContent,
+  clearContentCache,
+  loadRawContent,
+  type PublicationView,
+} from "@/lib/content/load";
+import { buildFigureModel, type FigureModel } from "@/lib/figure/buildFigure";
 import { PearlFigure } from "@/components/figure/PearlFigure";
-import { HomeHero } from "@/components/home/HomeHero";
 import HomePage from "@/app/page";
 
 const ROOT = process.cwd();
 const FIX = path.join(ROOT, "tests/fixtures/content");
-const OUT = path.join(ROOT, "test-results/WP1/gallery");
+const OUT = path.join(ROOT, "test-results/redesign-home/gallery");
 const TODAY = "2026-10-20";
 const CSS = [
   "src/styles/tokens.css",
@@ -36,11 +43,6 @@ const CSS = [
   "src/styles/forced-colors.css",
   "src/components/figure/figure.css",
   "src/components/home/home.css",
-];
-const FONTS: Array<[family: string, file: string, weight: string, cssVar: string]> = [
-  ["BL Fraunces", "fraunces-latin-wght-normal.woff2", "100 900", "--font-fraunces"],
-  ["BL Inter", "inter-latin-wght-normal.woff2", "100 900", "--font-inter"],
-  ["BL Plex Mono", "ibm-plex-mono-latin-500-normal.woff2", "500", "--font-plex-mono"],
 ];
 
 export const GALLERY_SETS = [
@@ -83,12 +85,14 @@ afterAll(() => {
 });
 
 function fontCss(): string {
-  const faces = FONTS.map(([family, file, weight]) => {
-    const b64 = fs.readFileSync(path.join(ROOT, "src/fonts", file)).toString("base64");
-    return `@font-face{font-family:"${family}";src:url(data:font/woff2;base64,${b64}) format("woff2");font-weight:${weight};font-style:normal;font-display:block}`;
-  });
-  const vars = FONTS.map(([family, , , v]) => `${v}:"${family}"`).join(";");
-  return `${faces.join("\n")}\n:root{${vars}}`;
+  const b64 = fs
+    .readFileSync(path.join(ROOT, "src/fonts/archivo-latin-wdth-normal.woff2"))
+    .toString("base64");
+  return (
+    `@font-face{font-family:"BL Archivo";src:url(data:font/woff2;base64,${b64}) format("woff2");` +
+    `font-weight:100 900;font-stretch:62% 125%;font-style:normal;font-display:block}\n` +
+    `:root{--font-archivo:"BL Archivo"}`
+  );
 }
 
 function page(title: string, body: string): string {
@@ -104,27 +108,39 @@ function renderHome(dir: string, preview: boolean): string {
   return renderToStaticMarkup(HomePage() as ReactElement);
 }
 
-/** Just the hero, with a hand-modified figure model (dot plot, long labels). */
-function renderHero(set: string, edit: (m: ReturnType<typeof buildFigureModel>) => void): string {
-  const c = buildContent(loadRawContent(path.join(FIX, set)), { preview: false, today: TODAY });
-  const model = buildFigureModel({
-    directions: c.directions,
-    countedPublications: c.countedPublications,
-    figureMode: c.site.figure_mode,
-    today: c.today,
-  });
-  edit(model);
+/** Just the figure, in the content column, from an edited model. */
+function renderFigure(model: FigureModel): string {
   return renderToStaticMarkup(
-    <div className="hm">
-      <HomeHero
-        labName={c.site.name}
-        longName={c.site.long_name}
-        affiliation={c.site.affiliation_text}
-        mission={c.pages.home?.mission}
-        figure={<PearlFigure model={model} labName={c.site.name} />}
-      />
+    <div className="bl-container hm">
+      <PearlFigure model={model} />
     </div>,
   );
+}
+
+const content = (dir: string) =>
+  buildContent(loadRawContent(dir), { preview: false, today: TODAY });
+
+/** The real papers repeated k times (titles marked SYNTHETIC; gallery pages only). */
+function growth(k: number): FigureModel {
+  const c = content(path.join(ROOT, "content"));
+  const pubs: PublicationView[] = [];
+  for (let i = 0; i < k; i++)
+    for (const p of c.countedPublications)
+      pubs.push({
+        ...p,
+        slug: i ? `${p.slug}-x${i}` : p.slug,
+        title: i ? `SYNTHETIC – ${p.title}` : p.title,
+      });
+  const directions = c.directions.map((d) => ({
+    ...d,
+    counts: { ...d.counts, papers: pubs.filter((p) => p.directions.includes(d.slug)).length },
+  }));
+  return buildFigureModel({
+    directions,
+    countedPublications: pubs,
+    inProgress: c.inProgress,
+    today: c.today,
+  });
 }
 
 it("renders the fixture gallery", () => {
@@ -145,24 +161,26 @@ it("renders the fixture gallery", () => {
     path.join(OUT, "home-preview.html"),
     page("Home, preview content", renderHome(path.join(ROOT, "content"), true)),
   );
-  fs.writeFileSync(
-    path.join(OUT, "n4-dotplot.html"),
-    page(
-      "Fig. 1 n4 dot plot",
-      renderHero("n4", (m) => {
-        m.mode = "dotplot";
-      }),
-    ),
-  );
   for (const set of ["n7", "n8"]) {
+    const c = content(path.join(FIX, set));
+    const m = buildFigureModel({
+      directions: c.directions,
+      countedPublications: c.countedPublications,
+      inProgress: c.inProgress,
+      today: c.today,
+    });
+    m.lanes.forEach((l, i) => (l.label = LONG_LABELS[i] ?? l.label));
     fs.writeFileSync(
       path.join(OUT, `${set}-long-labels.html`),
-      page(
-        `Fig. 1 ${set} long labels`,
-        renderHero(set, (m) => {
-          m.items.forEach((it, i) => (it.label = LONG_LABELS[i] ?? it.label));
-        }),
-      ),
+      page(`Fig. 1 ${set} long labels`, renderFigure(m)),
+    );
+  }
+  for (const k of [2, 4, 8]) {
+    const m = growth(k);
+    if (k === 8) expect(m.merged).toBeGreaterThan(0);
+    fs.writeFileSync(
+      path.join(OUT, `growth-${k}x.html`),
+      page(`Fig. 1 growth ${k}x`, renderFigure(m)),
     );
   }
 });

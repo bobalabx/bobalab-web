@@ -1,84 +1,120 @@
 /**
- * Home hero (brief §D3.1): wordmark h1 + descriptor, affiliation, mission,
- * "Explore our research →", and Fig. 1 (or its empty state, §E9).
- * Every fact comes from content (site.yml, pages/home.yml, directions).
+ * Home statement and lede (DECISIONS D-13; prototype p3/index.html `.hero`).
  *
- * Two groups so the tablet layout can sit them side by side without the
- * mission stretching the identity rows: .hm-ident (who we are) and .hm-lead
- * (what we do + the call to action). DOM order = reading order everywhere.
+ *   h1  the display statement (condensed, the only h1)
+ *   row the lab's name and affiliation in the label column (the lab name is
+ *       stated once on the page; the header wordmark is the home link), and the
+ *       lede in the track: the mission from content/pages/home.yml, then "The work
+ *       runs along four lines: …" with each direction name as a link that lights
+ *       its line in Fig. 1 (data-dir) and opens the direction (pearl morph).
  */
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { Wordmark } from "@/components/brand/Wordmark";
-import { WORDMARK } from "@/components/brand/wordmark-geometry";
+import { Fragment } from "react";
 import { DraftBadge } from "@/components/ui/Badge";
-import { Icon } from "@/components/ui/icons";
+import type { SwatchId } from "@/lib/content/palette";
+import { numberWord } from "@/lib/figure/buildFigure";
+import { TRANSITION } from "@/lib/vt";
 import "./home.css";
 
-/** Keep "University of California" together (judge fix 14). */
+/**
+ * The display line until content/pages/home.yml carries `statement`
+ * (change request home-1). P3's paraphrase of the mission; the PI confirms the
+ * wording (JUDGE refinement 8, NOTES known issue 11).
+ */
+export const HOME_STATEMENT = "How people learn to work with algorithms";
+
+/** Keep "University of California" together (non-breaking spaces). */
 export function affiliationText(text: string): string {
-  return text.replace(/University of California/g, "University of California");
+  return text.replace(/University of California/g, "University of California");
 }
 
 /**
- * Wordmark height: the type-scale clamp, but never wider than its column
- * (.hm-ident is an inline-size container), so the hero never overflows.
+ * "Haas School of Business, University of California, Berkeley" → two address
+ * lines at the first comma: ["Haas School of Business", "University of California,
+ * Berkeley"]. The line break stands in for the comma (P3 `.aff`); the comma stays
+ * in the text for screen readers (visually hidden).
  */
-const [, , WM_W, WM_H] = WORDMARK.viewBox;
-const WM_FIT_CQI = Math.floor((100 / (WM_W / WM_H)) * 100) / 100;
-export const HERO_WORDMARK_HEIGHT = `min(clamp(2.75rem, 2rem + 3vw, 4.25rem), ${WM_FIT_CQI}cqi)`;
+export function splitFirst(text: string): string[] {
+  const i = text.indexOf(", ");
+  return i < 0 ? [text] : [text.slice(0, i), text.slice(i + 2)];
+}
+
+export interface LedeDirection {
+  slug: string;
+  label: string;
+  swatch: SwatchId;
+}
 
 export function HomeHero({
-  labName,
+  statement = HOME_STATEMENT,
   longName,
   affiliation,
   mission,
   missionDraft,
-  figure,
-  solo = false,
+  directions,
 }: {
-  labName: string;
+  statement?: string;
   longName: string;
   affiliation: string;
   mission?: string;
   missionDraft?: boolean;
-  figure: ReactNode;
-  /** No figure (0 live directions, §E9): one column, the note sits under the CTA. */
-  solo?: boolean;
+  /** Live directions in figure order (empty: no "lines" sentence). */
+  directions: LedeDirection[];
 }) {
+  const n = directions.length;
   return (
-    <div className={solo ? "hm-hero hm-hero--solo" : "hm-hero"}>
-      <div className="hm-id">
-        <div className="hm-ident">
-          <h1 className="hm-h1" tabIndex={-1}>
-            <Wordmark className="hm-wm" height={HERO_WORDMARK_HEIGHT} title={labName} />
-            <span className="hm-desc">{longName}</span>
-          </h1>
-          <p className="hm-aff">{affiliationText(affiliation)}</p>
-        </div>
-        <div className="hm-lead">
-          {mission && (
-            <div className="hm-mission-wrap">
-              <p className="hm-mission">{mission}</p>
-              <DraftBadge show={Boolean(missionDraft)} />
-            </div>
+    <section className="hm-hero" aria-labelledby="hm-h1">
+      <h1 id="hm-h1" className="hm-h1" tabIndex={-1}>
+        {statement}
+      </h1>
+      <div className="hm-row">
+        <p className="hm-aff">
+          <span>{longName}</span>{" "}
+          {splitFirst(affiliationText(affiliation)).map((part, i, all) => (
+            <span key={i}>
+              {part}
+              {i < all.length - 1 && <span className="vh">,</span>}{" "}
+            </span>
+          ))}
+        </p>
+        <p className="hm-lede">
+          {mission}
+          {mission && n > 0 && " "}
+          {n > 1 && <>The work runs along {numberWord(n)} lines: </>}
+          {n === 1 && <>The work runs along one line: </>}
+          {directions.map((d, i) => (
+            <Fragment key={d.slug}>
+              {i > 0 && (i === n - 1 ? " and " : ", ")}
+              <Link
+                href={`/research/${d.slug}/`}
+                className="hm-dl"
+                data-dir={d.slug}
+                data-swatch={d.swatch}
+                transitionTypes={[TRANSITION.pearlOpen]}
+              >
+                <span className="bl-seg" aria-hidden="true" />
+                {d.label}
+              </Link>
+            </Fragment>
+          ))}
+          {n > 0 && "."}
+          {missionDraft && (
+            <>
+              {" "}
+              <DraftBadge />
+            </>
           )}
-          <Link href="/research/" className="bl-cta hm-cta">
-            Explore our research
-            <Icon name="arrow-right" />
-          </Link>
-        </div>
+        </p>
       </div>
-      {figure}
-    </div>
+    </section>
   );
 }
 
-/** §E9 n = 0: mission plus "Research directions coming soon" (no figure). */
-export function DirectionsComingSoon({ headingId = "dirs-h" }: { headingId?: string }) {
+/** No live directions: the lede stands alone and says the directions are coming. */
+export function DirectionsComingSoon() {
   return (
-    <section className="hm-soon" aria-labelledby={headingId}>
-      <h2 id={headingId}>Research directions</h2>
+    <section className="hm-soon bl-sec" aria-labelledby="dirs-h">
+      <h2 id="dirs-h">Research directions</h2>
       <p className="t-muted">Coming soon.</p>
     </section>
   );

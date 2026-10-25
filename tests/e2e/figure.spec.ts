@@ -1,8 +1,11 @@
 /**
- * Fig. 1 behaviour (brief §E1, §E3–§E7, §E10; DECISIONS D-02/D-02a):
- * DOM contract, keyboard order, live caption, Esc, hover intent, Pause/Play,
- * reduced motion, intro once per session, morph pseudo-element, focus on the
- * destination h1. Runs against BASE_URL (shared dev server).
+ * Fig. 1 "Lines" behaviour (DECISIONS D-13; prototype p3/fig.js; JUDGE refinements
+ * 3–5 and 12): DOM contract, lanes vs strips, packed columns, linked highlighting
+ * (lede ↔ lane ↔ dot ↔ ledger row; other lines dim to 0.3, pearls never dim),
+ * the fixed-height live caption, keyboard and Esc, the finite arrival, reduced
+ * motion, the pearl morph and focus on the destination h1. The in-figure Pause
+ * button and the 01–0N numerals are gone (D-13 item 6, RC-7).
+ * Runs against BASE_URL (shared dev server).
  */
 import { expect, test, type Page } from "@playwright/test";
 
@@ -14,14 +17,20 @@ const skipIntro = async (page: Page) =>
   });
 
 const items = (page: Page) => page.locator(".f1-item");
-const capOn = (page: Page) => page.locator(".f1-cap-layer.is-on");
+const plate = (page: Page) => page.locator(".f1-plate");
 const hydrated = (page: Page) => page.waitForSelector(".f1-plate[data-live]");
+/** The live caption layer in the slot, if any (the caption layer itself never hides). */
+const liveCap = (page: Page) =>
+  page.locator('.f1-cap-layer:not([hidden]):not([data-cap="legend"])');
+const mode = (page: Page) =>
+  plate(page).evaluate((el) => getComputedStyle(el).getPropertyValue("--f1-mode").trim());
+const opacity = (page: Page, sel: string) =>
+  page.locator(sel).evaluateAll((els) => els.map((e) => getComputedStyle(e).opacity));
 
 /**
  * The key that moves focus through links in this browser, probed on a blank
- * page: "Tab" (Chromium), "Alt+Tab" (WebKit on macOS), or
- * null when neither reaches a link: Playwright's WebKit on Windows (MEASURED
- * 2026-10-20, Playwright 1.64) only Tab-focuses buttons (verify request ci-docs-1).
+ * page: "Tab" (Chromium), "Alt+Tab" (WebKit on macOS), or null when neither
+ * reaches a link (Playwright's WebKit on Windows; verify request ci-docs-1).
  */
 async function linkTabKey(page: Page): Promise<string | null> {
   const probe = await page.context().newPage();
@@ -42,13 +51,14 @@ async function linkTabKey(page: Page): Promise<string | null> {
 
 test.use({ viewport: { width: 1366, height: 768 } });
 
-test("DOM contract: one labelled nav, one <ol role=list> of real links, unique VT names", async ({
+test("DOM contract: one labelled nav of real links with counts, one pearl per lane, no Pause, no numerals", async ({
   page,
 }) => {
   await skipIntro(page);
   await page.goto("/");
-  const fig = page.locator('figure[aria-label^="Fig. 1"]');
+  const fig = page.locator("figure.f1-plate");
   await expect(fig).toHaveCount(1);
+  await expect(fig.locator("figcaption")).toContainText("Figure 1.");
   const nav = fig.locator('nav[aria-label="Research directions"]');
   await expect(nav).toHaveCount(1);
   await expect(nav.locator('ol[role="list"]')).toHaveCount(1);
@@ -57,17 +67,29 @@ test("DOM contract: one labelled nav, one <ol role=list> of real links, unique V
   expect(n).toBeLessThanOrEqual(8);
   await expect(fig).toHaveAttribute("data-n", String(n));
   for (let i = 0; i < n; i++) {
-    const a = items(page).nth(i).locator("a");
-    const href = await a.getAttribute("href");
-    expect(href).toMatch(/^\/research\/[a-z0-9-]+\/$/);
-    // Name = label + count; numeral and arrow are hidden.
+    const li = items(page).nth(i);
+    const a = li.locator("a.f1-link");
+    await expect(a).toHaveAttribute("href", /^\/research\/[a-z0-9-]+\/$/);
+    // Name = label + count (the count stays inside the link, JUDGE item 3).
     await expect(a).toHaveAccessibleName(/\S.* \d+ papers?$/);
-    await expect(items(page).nth(i).locator(".f1-idx")).toHaveText(String(i + 1).padStart(2, "0"));
+    const count = Number((await a.locator(".f1-count").innerText()).match(/\d+/)![0]);
+    // One dot per counted paper with a year; never more dots than the count says.
+    const dots = await li.locator(".f1-dot").count();
+    expect(dots).toBeLessThanOrEqual(count);
+    if (dots < count)
+      test.info().annotations.push({
+        type: "figure",
+        description: `${count - dots} paper(s) without a year`,
+      });
+    // The marks are decorative; one pearl per lane (the morph source).
+    await expect(li.locator(".f1-track")).toHaveAttribute("aria-hidden", "true");
+    await expect(li.locator(".f1-pearl")).toHaveCount(1);
   }
-  await expect(fig.locator(".f1-group").first()).toHaveAttribute("aria-hidden", "true");
+  await expect(fig.locator(".f1-idx, .f1-pause, .f1-halo, .f1-seed")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /pause|play/i })).toHaveCount(0);
   // The caption announces nothing.
   await expect(fig.locator(".f1-cap")).toHaveAttribute("aria-live", "off");
-  // Exactly one element per pearl-{slug} name on the page.
+  // Exactly one element per pearl-{slug} view-transition name, also mid-render.
   await hydrated(page);
   const names = await page.evaluate(() =>
     [...document.querySelectorAll<HTMLElement>("*")]
@@ -77,20 +99,51 @@ test("DOM contract: one labelled nav, one <ol role=list> of real links, unique V
   expect(new Set(names).size).toBe(names.length);
 });
 
-test("figure mode at 1366 and list mode below 46em", async ({ page }) => {
+test("lanes from 48rem (links drawn at 1366, packed with twin rings at 768); strips below", async ({
+  page,
+}) => {
   await skipIntro(page);
   await page.goto("/");
-  const mode = () =>
-    page
-      .locator(".f1-plate")
-      .evaluate((el) => getComputedStyle(el).getPropertyValue("--f1-mode").trim());
-  expect(await mode()).toBe("fig");
+  expect(await mode(page)).toBe("fig");
+  const segs = page.locator(".f1-seg");
+  const shared = await segs.count();
+  if (shared) await expect(segs.first()).toBeVisible();
+  // Lanes keep one shared geometry: every pearl sits on the same "now" x.
+  const xs = await page
+    .locator(".f1-pearl")
+    .evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().left)));
+  expect(new Set(xs).size).toBe(1);
+  const dot = page.locator(".f1-dot").first();
+  expect((await dot.boundingBox())!.width).toBeCloseTo(14, 0);
+
+  await page.setViewportSize({ width: 768, height: 1024 });
+  expect(await mode(page)).toBe("fig");
+  expect((await dot.boundingBox())!.width).toBeCloseTo(10, 0);
+  if (shared) {
+    await expect(segs.first()).toBeHidden();
+    const tw = await page
+      .locator(".f1-dot.is-tw")
+      .first()
+      .evaluate((e) => getComputedStyle(e).outlineStyle);
+    expect(tw).toBe("solid");
+  }
+
   await page.setViewportSize({ width: 390, height: 844 });
-  expect(await mode()).toBe("list");
-  await expect(page.locator(".f1-pause")).toBeHidden();
+  expect(await mode(page)).toBe("list");
+  await expect(page.locator(".f1-axis")).toBeHidden();
+  await expect(page.locator(".f1-y").first()).toBeVisible();
+  await expect(page.locator(".f1-shares").first()).toBeVisible();
+  const p = (await page.locator(".f1-pearl").first().boundingBox())!;
+  expect(Math.round(p.width)).toBe(24);
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+  expect(overflow).toBeLessThanOrEqual(0);
 });
 
-test("keyboard: Tab order 01→0N, focus updates the caption, Esc resets", async ({ page }) => {
+test("keyboard: Tab order follows the lanes; focus lights a lane, other lines dim, pearls never dim; Esc resets", async ({
+  page,
+}) => {
   await skipIntro(page);
   await page.goto("/");
   await hydrated(page);
@@ -104,124 +157,156 @@ test("keyboard: Tab order 01→0N, focus updates the caption, Esc resets", async
   }
   const n = await items(page).count();
   const first = items(page).first().locator("a");
-  // Tab until the first figure link is focused.
-  for (let k = 0; tabKey && k < 40; k++) {
+  for (let k = 0; tabKey && k < 60; k++) {
     await page.keyboard.press(tabKey);
     if (await first.evaluate((el) => el === document.activeElement)) break;
   }
+  const height = (await page.locator(".f1-caption").boundingBox())!.height;
   for (let i = 0; i < n; i++) {
     const li = items(page).nth(i);
     if (!tabKey) await li.locator("a").focus();
     await expect(li.locator("a")).toBeFocused();
-    const slug = await li.getAttribute("data-slug");
+    const slug = (await li.getAttribute("data-slug"))!;
     await expect(li).toHaveClass(/is-on/);
-    await expect(capOn(page)).toHaveAttribute("data-cap", slug!);
-    // A visible 2 px focus ring on the pearl, also with motion on (§G1 2.4.7).
-    const ring = await li.locator(".f1-pearl").evaluate((el) => {
-      const cs = getComputedStyle(el);
-      return `${cs.outlineStyle} ${cs.outlineWidth}`;
-    });
+    await expect(plate(page)).toHaveAttribute("data-active", slug);
+    await expect(liveCap(page)).toHaveAttribute("data-cap", `d:${slug}`);
+    // Its own line is lit; every other lane's line is dimmed to 0.3.
+    await expect(li.locator(".f1-ln")).not.toHaveClass(/dim/);
+    await page.waitForTimeout(260);
+    const others = await page
+      .locator(`.f1-item:not([data-slug="${slug}"]) .f1-ln`)
+      .evaluateAll((els) => els.map((e) => getComputedStyle(e).opacity));
+    for (const o of others) expect(o).toBe("0.3");
+    expect(new Set(await opacity(page, ".f1-pearl"))).toEqual(new Set(["1"]));
+    // The live caption swaps in the same fixed-height slot.
+    expect(
+      Math.abs((await page.locator(".f1-caption").boundingBox())!.height - height),
+    ).toBeLessThan(1);
+    // A visible focus ring around the whole lane label (§G1 2.4.7).
+    const ring = await li
+      .locator(".f1-name")
+      .evaluate(
+        (el) => `${getComputedStyle(el).outlineStyle} ${getComputedStyle(el).outlineWidth}`,
+      );
     expect(ring).toBe("solid 2px");
     if (tabKey && i < n - 1) await page.keyboard.press(tabKey);
   }
   await page.keyboard.press("Escape");
-  await expect(capOn(page)).toHaveAttribute("data-cap", "legend");
-  await expect(page.locator(".f1-plate")).not.toHaveAttribute("data-active", "");
+  await expect(liveCap(page)).toHaveCount(0);
+  await expect(plate(page)).not.toHaveAttribute("data-active", /.+/);
+  await expect(page.locator(".f1-plate .dim")).toHaveCount(0);
 });
 
-test("hover: 80 ms intent, caption swap, revert 300 ms after leave", async ({ page }) => {
+test("linked highlighting: a dot names its paper and lights its ledger row; a row lights its dots; a lede word lights its lane", async ({
+  page,
+}) => {
+  await skipIntro(page);
+  await page.goto("/");
+  await hydrated(page);
+  // A dot.
+  const dot = page.locator(".f1-dot").last();
+  const s = (await dot.getAttribute("data-s"))!;
+  await dot.hover();
+  await expect(liveCap(page)).toHaveAttribute("data-cap", `p:${s}`);
+  await expect(page.locator(`.f1-dot[data-s="${s}"]`).first()).toHaveClass(/big/);
+  const row = page.locator(`[data-f1-row="${s}"]`);
+  if (await row.count()) await expect(row).toHaveClass(/is-hl/);
+  const other = page.locator(`.f1-dot:not([data-s="${s}"])`).first();
+  await expect(other).toHaveClass(/dim/);
+  // A dimmed dot is a pale, opaque disc: a lit line never shows through it.
+  await expect(other).toHaveCSS("opacity", "1");
+  await page.mouse.move(2, 2);
+  await expect(liveCap(page)).toHaveCount(0);
+
+  // A ledger row.
+  const r = page.locator("[data-f1-row]").first();
+  const rs = (await r.getAttribute("data-f1-row"))!;
+  await r.hover();
+  if (await page.locator(`.f1-dot[data-s="${rs}"]`).count()) {
+    await expect(page.locator(`.f1-dot[data-s="${rs}"]`).first()).toHaveClass(/big/);
+    await expect(r).toHaveClass(/is-hl/);
+  }
+  await page.mouse.move(2, 2);
+
+  // A lede direction word.
+  const word = page.locator(".hm-dl[data-dir]").nth(1);
+  const d = (await word.getAttribute("data-dir"))!;
+  await word.hover();
+  await expect(page.locator(`.f1-item[data-slug="${d}"]`)).toHaveClass(/is-on/);
+  await expect(word).toHaveClass(/is-on/);
+  await expect(liveCap(page)).toHaveAttribute("data-cap", `d:${d}`);
+  await page.mouse.move(2, 2);
+  await expect(page.locator(".f1-plate .dim")).toHaveCount(0);
+});
+
+test("a pearl is a pointer target for its lane: hover lights it, click opens the direction", async ({
+  page,
+}) => {
   await skipIntro(page);
   await page.goto("/");
   await hydrated(page);
   const li = items(page).nth(1);
-  const box = (await li.locator(".f1-pearl").boundingBox())!;
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 3 });
-  await expect(capOn(page)).toHaveAttribute("data-cap", (await li.getAttribute("data-slug"))!);
-  await page.mouse.move(2, 2);
-  await expect(capOn(page)).toHaveAttribute("data-cap", "legend", { timeout: 2000 });
+  const slug = (await li.getAttribute("data-slug"))!;
+  await li.locator(".f1-pearl").hover();
+  await expect(li).toHaveClass(/is-on/);
+  await li.locator(".f1-pearl").click();
+  await page.waitForURL(`**/research/${slug}/`);
 });
 
-test("Pause/Play writes the shared motion preference and stops the float", async ({ page }) => {
-  await skipIntro(page);
-  await page.goto("/");
-  await hydrated(page);
-  const btn = page.locator(".f1-pause");
-  await expect(btn).toHaveText(/Pause motion/);
-  const floating = () =>
-    page.evaluate(
-      () =>
-        document
-          .getAnimations()
-          .filter(
-            (a) =>
-              a.playState === "running" &&
-              (a.effect as KeyframeEffect | null)?.target instanceof Element &&
-              ((a.effect as KeyframeEffect).target as Element).classList.contains("f1-group"),
-          ).length,
-    );
-  expect(await floating()).toBeGreaterThan(0);
-  await btn.click();
-  await expect(page.locator("html")).toHaveAttribute("data-motion", "reduce");
-  expect(await page.evaluate(() => localStorage.getItem("bobalab-motion"))).toBe("reduce");
-  await expect(btn).toHaveText(/Play motion/);
-  expect(await floating()).toBe(0);
-  // The footer toggle reflects the same preference.
-  const sw = page.getByRole("switch", { name: /Reduce motion/ });
-  if (await sw.count()) await expect(sw).toHaveAttribute("aria-checked", "true");
-  await btn.click();
-  await expect(page.locator("html")).not.toHaveAttribute("data-motion", "reduce");
-  expect(await page.evaluate(() => localStorage.getItem("bobalab-motion"))).toBeNull();
-});
-
-test("reduced motion: no figure animation runs, outline marks the active pearl", async ({
+test("intro: papers arrive once per session, finitely, within 2 s; reduced motion: nothing runs", async ({
   browser,
 }) => {
-  const ctx = await browser.newContext({
-    viewport: { width: 1366, height: 768 },
-    reducedMotion: "reduce",
-  });
-  const page = await ctx.newPage();
-  await page.goto("/"); // first visit: intro would play without the gate
-  await page.waitForSelector(".f1-plate");
-  await page.waitForTimeout(300);
-  const running = await page.evaluate(
-    () =>
-      document.getAnimations().filter((a) => {
-        const t = (a.effect as KeyframeEffect | null)?.target;
-        return t instanceof Element && t.closest(".f1-plate");
-      }).length,
-  );
-  expect(running).toBe(0);
-  await expect(page.locator(".f1-pause")).toBeHidden();
-  await items(page).nth(0).locator("a").focus();
-  const outline = await items(page)
-    .nth(0)
-    .locator(".f1-pearl")
-    .evaluate((el) => getComputedStyle(el).outlineStyle);
-  expect(outline).toBe("solid");
-  await ctx.close();
-});
-
-test("intro plays on the first home view of a session only", async ({ browser }) => {
   const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 } });
   const page = await ctx.newPage();
   await page.goto("/", { waitUntil: "commit" });
-  await page.waitForSelector(".f1-plate");
-  const first = await page.evaluate(
-    () =>
-      document.documentElement.hasAttribute("data-intro") ||
-      document.querySelector(".f1-plate")!.hasAttribute("data-intro"),
+  await page.waitForSelector(".f1-dot");
+  expect(await page.evaluate(() => document.documentElement.hasAttribute("data-intro"))).toBe(true);
+  const t = await page.evaluate(() =>
+    document
+      .getAnimations()
+      .filter((a) => (a.effect as KeyframeEffect | null)?.target instanceof Element)
+      .filter((a) => ((a.effect as KeyframeEffect).target as Element).closest(".f1-plate"))
+      .map((a) => a.effect!.getComputedTiming()),
   );
-  expect(first).toBe(true);
+  expect(t.length).toBeGreaterThan(0);
+  for (const x of t) {
+    expect(x.iterations).not.toBe(Infinity);
+    expect(Number(x.endTime)).toBeLessThanOrEqual(2000);
+  }
   await page.waitForTimeout(2300);
-  await expect(page.locator(".f1-plate")).not.toHaveAttribute("data-intro", "");
   await page.goto("/");
-  await page.waitForSelector(".f1-plate");
+  await page.waitForSelector(".f1-dot");
   expect(await page.evaluate(() => document.documentElement.hasAttribute("data-intro"))).toBe(
     false,
   );
-  await expect(page.locator(".f1-plate")).not.toHaveAttribute("data-intro", "");
+  expect(
+    await page.evaluate(
+      () =>
+        document.getAnimations().filter((a) => {
+          const el = (a.effect as KeyframeEffect | null)?.target;
+          return el instanceof Element && el.closest(".f1-plate");
+        }).length,
+    ),
+  ).toBe(0);
   await ctx.close();
+
+  const rm = await browser.newContext({
+    viewport: { width: 1366, height: 768 },
+    reducedMotion: "reduce",
+  });
+  const p2 = await rm.newPage();
+  await p2.goto("/"); // first visit: the intro would play without the gate
+  await p2.waitForSelector(".f1-plate");
+  await p2.waitForTimeout(300);
+  const running = await p2.evaluate(
+    () =>
+      document.getAnimations().filter((a) => {
+        const el = (a.effect as KeyframeEffect | null)?.target;
+        return el instanceof Element && el.closest(".f1-plate");
+      }).length,
+  );
+  expect(running).toBe(0);
+  await rm.close();
 });
 
 /** Records "pseudo-element|duration+delay" for every view-transition animation. */
@@ -247,7 +332,7 @@ const recordViewTransitions = () => {
 };
 const vtLog = (page: Page) => page.evaluate(() => (window as unknown as { __vt: string[] }).__vt);
 
-test("Enter opens the direction, the morph pseudo-element exists, focus lands on h1", async ({
+test("Enter opens the direction, the pearl morph group exists, focus lands on h1", async ({
   page,
   browserName,
 }) => {
@@ -270,13 +355,6 @@ test("Enter opens the direction, the morph pseudo-element exists, focus lands on
     await expect
       .poll(async () => (await vtLog(page)).map((e) => e.split("|")[0]))
       .toContain(`::view-transition-group(pearl-${slug})`);
-    // The other pearls (exit-only groups) leave with the page (150 ms), never
-    // lingering over the destination for the 420 ms morph.
-    const others = (await vtLog(page)).filter(
-      (e) => e.startsWith("::view-transition-old(pearl-") && !e.includes(`(pearl-${slug})`),
-    );
-    expect(others.length).toBeGreaterThan(0);
-    for (const e of others) expect(Number(e.split("|")[1]), e).toBeLessThanOrEqual(150);
   }
 });
 
@@ -307,62 +385,55 @@ test("reduced motion: every view-transition animation is ≤ 120 ms (§E10.5)", 
   await ctx.close();
 });
 
-test("inactive pearls stay opaque on a light plate; only glow, halo and seeds dim (VIS-10)", async ({
+test("forced colours: dots, lines and pearls take system colours; lanes keep their labels", async ({
   browser,
 }) => {
-  for (const colorScheme of ["light", "dark"] as const) {
-    const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 }, colorScheme });
-    const page = await ctx.newPage();
-    await skipIntro(page);
-    await page.goto("/");
-    await hydrated(page);
-    const on = items(page).nth(1);
-    const box = (await on.locator(".f1-pearl").boundingBox())!;
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 3 });
-    await expect(on).toHaveClass(/is-on/);
-    await page.waitForTimeout(400); // --dur-base fade
-    const off = await items(page)
-      .nth(0)
-      .evaluate((li) => {
-        const cs = (s: string) => getComputedStyle(li.querySelector(s)!);
-        const pearl = li.querySelector(".f1-pearl")!;
-        return {
-          pearl: cs(".f1-pearl").opacity,
-          glow: getComputedStyle(pearl, "::after").opacity,
-          // §G2: only transform and opacity animate (no filter).
-          transitions: cs(".f1-pearl").transitionProperty,
-          halo: cs(".f1-halo").opacity,
-          seeds: cs(".f1-seeds").opacity,
-        };
-      });
-    expect(off.transitions).not.toMatch(/filter/);
-    if (colorScheme === "light") {
-      expect(off.pearl).toBe("1");
-      expect(off.glow).toBe("0.3");
-    } else {
-      expect(off.pearl).toBe("0.78");
-      expect(off.glow).toBe("1");
-    }
-    expect(off.halo).toBe("0.35");
-    expect(off.seeds).toBe("0.45");
-    await ctx.close();
-  }
+  const ctx = await browser.newContext({
+    viewport: { width: 1366, height: 768 },
+    forcedColors: "active",
+  });
+  const page = await ctx.newPage();
+  await skipIntro(page);
+  await page.goto("/");
+  const c = await page.evaluate(() => {
+    const cs = (s: string) => getComputedStyle(document.querySelector(s)!);
+    return {
+      text: getComputedStyle(document.body).color,
+      dot: cs(".f1-dot").backgroundColor,
+      pearl: cs(".f1-pearl").backgroundColor,
+      line: cs(".f1-ln").borderTopColor,
+    };
+  });
+  expect(c.dot).toBe(c.text);
+  expect(c.pearl).toBe(c.text);
+  expect(c.line).toBe(c.text);
+  await expect(items(page).first().locator(".f1-label")).toBeVisible();
+  // Every label is LinkText, so the lit lane is underlined instead of recoloured.
+  await hydrated(page);
+  await items(page).nth(1).locator("a").focus();
+  await expect(items(page).nth(1)).toHaveClass(/is-on/);
+  expect(
+    await items(page)
+      .nth(1)
+      .locator(".f1-label")
+      .evaluate((e) => getComputedStyle(e).textDecorationLine),
+  ).toBe("underline");
+  await ctx.close();
 });
 
-test("draft marking: when every direction is a draft, one summary badge, none per row (VIS-03)", async ({
+test("draft marking: when every direction is a draft, one summary badge, none per lane (VIS-03)", async ({
   page,
 }) => {
   await skipIntro(page);
   for (const width of [1366, 390]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/");
-    const n = Number(await page.locator(".f1-plate").getAttribute("data-n"));
+    const n = Number(await plate(page).getAttribute("data-n"));
     const drafts = await page.locator(".f1-foot-draft").count();
     test.skip(!drafts, "no draft directions in this build");
     const summary = (await page.locator(".f1-foot-draft").innerText()).trim();
     if (summary.includes(`all ${n} directions`) || summary.includes("this direction")) {
       await expect(page.locator(".f1-item .bl-badge")).toHaveCount(0);
-      await expect(page.locator(".f1-cap-layer .bl-badge")).toHaveCount(0);
     }
     await expect(page.locator(".f1-foot-draft .bl-badge--draft")).toBeVisible();
   }

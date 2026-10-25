@@ -1,65 +1,73 @@
 /**
- * Home sections after the hero (brief §D3.2–§D3.6), each rendered only when
- * content provides something to show (no placeholders).
+ * Home sections after Fig. 1 (DECISIONS D-13; prototype p3/index.html, with P2's
+ * people lattice, JUDGE refinement 8). Each renders only when content provides
+ * something to show (no placeholders). Section heads are a plain h2 (P3); lists
+ * are ruled ledgers. The way on is one line at the foot of the list that states
+ * what the page holds ("Publications: 17 papers, 8 in progress", P2 `.more`), not
+ * an "All N" link beside the heading (AUDIT: h2 + "All →" on every section).
  */
 import Link from "next/link";
 import type { ReactNode } from "react";
-import type { NewsView, OpportunityView, PublicationView } from "@/lib/content/load";
+import type { NewsView, PublicationView } from "@/lib/content/load";
 import type { FindingView } from "@/lib/content/queries";
 import type { PublicPerson } from "@/lib/content/people";
-import { ROLE_LABELS, initials } from "@/lib/content/people";
-import type { SwatchId } from "@/lib/content/palette";
+import { initials } from "@/lib/content/people";
+import { roleLine } from "@/components/people/model";
 import { PublicationEntry } from "@/components/ui/PublicationEntry";
-import { NewsItem } from "@/components/ui/NewsItem";
-import { PearlTag } from "@/components/ui/PearlTag";
+import { PearlTag, PearlTagList } from "@/components/ui/PearlTag";
 import { EvidenceLabel } from "@/components/ui/EvidenceLabel";
-import { DraftBadge } from "@/components/ui/Badge";
-import { Pearl } from "@/components/ui/Pearl";
+import { Badge, DraftBadge } from "@/components/ui/Badge";
+import { DateText } from "@/components/ui/DateText";
 import { Img } from "@/components/ui/Img";
-import { Icon } from "@/components/ui/icons";
-import { isExternalUrl } from "@/lib/site/paths";
 import "./home.css";
 
 function Section({
   id,
   title,
   more,
+  note,
   children,
+  className,
 }: {
   id: string;
   title: string;
+  /** The foot line: where the full list lives and what it holds. */
   more?: { href: string; label: string };
+  /** A note between the list and the foot line. */
+  note?: ReactNode;
   children: ReactNode;
+  className?: string;
 }) {
   return (
-    <section className="hm-sec" aria-labelledby={id}>
-      <div className="hm-sec-head">
+    <section className={["hm-sec", className].filter(Boolean).join(" ")} aria-labelledby={id}>
+      <div className="bl-sec-h hm-sec-h">
         <h2 id={id}>{title}</h2>
-        {more && (
-          <Link href={more.href} className="hm-more">
-            {more.label}
-            <Icon name="arrow-right" />
-          </Link>
-        )}
       </div>
       {children}
+      {note}
+      {more && (
+        <p className="hm-more">
+          <Link href={more.href}>{more.label}</Link>
+        </p>
+      )}
     </section>
   );
 }
 
-/** Meniscus rule (§C9): a hairline whose ends lift 4 px. Once, home only. */
-export function Meniscus() {
-  return (
-    <svg className="hm-meniscus" viewBox="0 0 400 8" preserveAspectRatio="none" aria-hidden="true">
-      <path
-        d="M0 1.5C40 6.5 80 6.5 200 6.5S360 6.5 400 1.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1"
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
-  );
+const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+
+/** "Publications: 17 papers, 8 in progress" (the lane-label wording of Fig. 1). */
+export function publicationsLine(papers: number, inProgress: number): string {
+  return `Publications: ${plural(papers, "paper")}${inProgress ? `, ${inProgress} in progress` : ""}`;
+}
+/** "People: 25 members, 25 alumni". */
+export function peopleLine(members: number, alumni: number): string {
+  return `People: ${plural(members, "member")}${alumni ? `, ${alumni} alumni` : ""}`;
+}
+/** "News: 19 items since 2023". */
+export function newsLine(total: number, since?: string): string {
+  const y = since?.slice(0, 4);
+  return `News: ${plural(total, "item")}${y && /^\d{4}$/.test(y) ? ` since ${y}` : ""}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -68,7 +76,7 @@ export function FindingsSection({ findings }: { findings: FindingView[] }) {
   if (!findings.length) return null;
   return (
     <Section id="h-findings" title="What we’ve learned">
-      <ul role="list" className="hm-list hm-findings">
+      <ul role="list" className="bl-ledger bl-ledger--closed hm-findings">
         {findings.map((f, i) => (
           <li key={i} className="hm-finding">
             <p className="hm-finding-text">{f.text}</p>
@@ -94,17 +102,27 @@ export function FindingsSection({ findings }: { findings: FindingView[] }) {
   );
 }
 
-export function PublicationsSection({ items }: { items: PublicationView[] }) {
+/** The newest papers; hovering or focusing a row lights its dots in Fig. 1. */
+export function PublicationsSection({
+  items,
+  total,
+  inProgress = 0,
+}: {
+  items: PublicationView[];
+  /** Counted publications (D-05). */
+  total: number;
+  inProgress?: number;
+}) {
   if (!items.length) return null;
   return (
     <Section
       id="h-pubs"
       title="Recent publications"
-      more={{ href: "/publications/", label: "All publications" }}
+      more={{ href: "/publications/", label: publicationsLine(total, inProgress) }}
     >
-      <ol role="list" className="hm-list hm-rows">
+      <ol role="list" className="hm-pubs">
         {items.map((p) => (
-          <li key={p.slug}>
+          <li key={p.slug} data-f1-row={p.slug}>
             <PublicationEntry pub={p} as="h3" showAwards={false} />
           </li>
         ))}
@@ -113,14 +131,40 @@ export function PublicationsSection({ items }: { items: PublicationView[] }) {
   );
 }
 
-export function NewsSection({ items }: { items: NewsView[] }) {
+/** A news log: date, title, directions (P3 `.log`). */
+export function NewsSection({
+  items,
+  total,
+  since,
+}: {
+  items: NewsView[];
+  total: number;
+  /** Date of the oldest item ("YYYY-MM-DD"). */
+  since?: string;
+}) {
   if (!items.length) return null;
   return (
-    <Section id="h-news" title="Latest news" more={{ href: "/news/", label: "All news" }}>
-      <ol role="list" className="hm-list hm-rows">
+    <Section id="h-news" title="News" more={{ href: "/news/", label: newsLine(total, since) }}>
+      <ol role="list" className="hm-log">
         {items.map((n) => (
           <li key={n.slug}>
-            <NewsItem item={n} as="h3" />
+            <DateText value={n.date} className="hm-log-date" />
+            <p className="hm-log-title">
+              <Link href={`/news/${n.slug}/`}>{n.title}</Link>
+              {n.upcoming && (
+                <>
+                  {" "}
+                  <Badge tone="accent">Upcoming</Badge>
+                </>
+              )}
+              {n.draft && (
+                <>
+                  {" "}
+                  <DraftBadge />
+                </>
+              )}
+            </p>
+            <PearlTagList items={n.directionRefs} linked={false} label={`Directions: ${n.title}`} />
           </li>
         ))}
       </ol>
@@ -128,137 +172,70 @@ export function NewsSection({ items }: { items: NewsView[] }) {
   );
 }
 
+/**
+ * The lab's own faces (P2 lattice; D-13 item 5): square photos, or a square
+ * initials tile where there is no consented photo. Then the routes to join.
+ */
 export function PeopleSection({
   people,
-  swatchOf,
-  max = 12,
+  max = 16,
+  alumni = 0,
+  email,
 }: {
   people: PublicPerson[];
-  swatchOf: (p: PublicPerson) => SwatchId | undefined;
   max?: number;
+  alumni?: number;
+  email?: string;
 }) {
   if (!people.length) return null;
   const shown = people.slice(0, max);
-  const rest = people.length - shown.length;
   return (
-    <Section id="h-people" title="People" more={{ href: "/people/", label: "Meet the lab" }}>
-      <ul role="list" className="hm-list hm-people">
+    <Section
+      id="h-people"
+      title="People"
+      more={{ href: "/people/", label: peopleLine(people.length, alumni) }}
+      note={
+        <p className="hm-join">
+          To work with the lab, see the notes for <Link href="/join/#students">Students & RAs</Link>{" "}
+          and for <Link href="/join/#partners">Partners & data collaborators</Link>
+          {email ? (
+            <>
+              , or email <a href={`mailto:${email}`}>{email}</a>.
+            </>
+          ) : (
+            "."
+          )}
+        </p>
+      }
+    >
+      <ul role="list" className="hm-people">
         {shown.map((p) => (
           <li key={p.slug} className="hm-person">
-            {p.photo ? (
-              // Consent-gated by the loader (D-06): photo is present only with photo_consent.
-              <Img
-                src={p.photo}
-                alt={p.photo_alt ?? ""}
-                width={44}
-                height={44}
-                className="hm-person-photo"
-              />
-            ) : (
-              <Pearl size="row" initials={initials(p.name)} swatch={swatchOf(p)} />
-            )}
+            <div className="hm-ph">
+              {p.photo ? (
+                // Consent-gated by the loader (D-06): photo is present only with photo_consent.
+                <Img
+                  src={p.photo}
+                  alt={p.photo_alt ?? ""}
+                  width={240}
+                  height={240}
+                  sizes="(min-width: 64rem) 120px, 30vw"
+                  className="hm-photo"
+                />
+              ) : (
+                <span className="hm-ini" aria-hidden="true">
+                  {initials(p.name)}
+                </span>
+              )}
+            </div>
             <p className="hm-person-name">
               {p.hasProfile ? <Link href={`/people/${p.slug}/`}>{p.name}</Link> : p.name}
             </p>
-            <p className="hm-person-role">{p.title || ROLE_LABELS[p.role].one}</p>
-            <DraftBadge show={p.draft} />
+            <p className="hm-person-role">{roleLine(p)}</p>
+            {p.draft && <DraftBadge />}
           </li>
         ))}
       </ul>
-      {rest > 0 && (
-        <p className="hm-people-more">
-          and {rest} more {rest === 1 ? "member" : "members"} on the{" "}
-          <Link href="/people/">People page</Link>.
-        </p>
-      )}
     </Section>
-  );
-}
-
-const AUDIENCE_HEADINGS: Record<OpportunityView["audience"], string> = {
-  students: "Students & RAs",
-  partners: "Partners & data collaborators",
-  "phd-postdoc": "PhD students & postdocs",
-  press: "Press",
-};
-const AUDIENCE_ORDER: OpportunityView["audience"][] = [
-  "students",
-  "partners",
-  "phd-postdoc",
-  "press",
-];
-
-function OpportunityLink({ o }: { o: OpportunityView }) {
-  const href = o.apply_url ?? o.url;
-  return (
-    <li>
-      {href ? (
-        <a href={href} rel={isExternalUrl(href) ? "noopener noreferrer" : undefined}>
-          {o.title}
-        </a>
-      ) : o.email ? (
-        <a href={`mailto:${o.email}`}>{o.title}</a>
-      ) : (
-        <span>{o.title}</span>
-      )}
-      {o.route && <span className="t-sm t-muted"> · {o.route}</span>} <DraftBadge show={o.draft} />
-    </li>
-  );
-}
-
-/**
- * The two routes of brief §D3.6. They point at the sections of /join/ (WP5:
- * #students, #partners), which always exist; they claim no opening. Open or
- * rolling opportunities from content are listed above them when there are any.
- */
-const WORK_ROUTES = [
-  { href: "/join/#students", label: "Students & RAs" },
-  { href: "/join/#partners", label: "Partners & data collaborators" },
-] as const;
-
-export function WorkWithUsSection({
-  opportunities,
-  email,
-}: {
-  opportunities: OpportunityView[];
-  email?: string;
-}) {
-  const groups = AUDIENCE_ORDER.map((a) => ({
-    audience: a,
-    items: opportunities.filter((o) => o.audience === a),
-  })).filter((g) => g.items.length);
-  return (
-    <section className="hm-sec hm-work" aria-labelledby="h-work">
-      <h2 id="h-work">Work with us</h2>
-      {groups.length > 0 && (
-        <div className="hm-work-grid">
-          {groups.map((g) => (
-            <div key={g.audience} className="hm-work-group">
-              <h3>{AUDIENCE_HEADINGS[g.audience]}</h3>
-              <ul role="list">
-                {g.items.map((o) => (
-                  <OpportunityLink key={o.slug} o={o} />
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      )}
-      <ul role="list" className="hm-work-routes">
-        {WORK_ROUTES.map((r) => (
-          <li key={r.href}>
-            <Link href={r.href} className="bl-cta bl-cta--quiet">
-              {r.label}
-              <Icon name="arrow-right" />
-            </Link>
-          </li>
-        ))}
-      </ul>
-      {email && (
-        <p className="hm-work-contact">
-          Or email the lab at <a href={`mailto:${email}`}>{email}</a>
-        </p>
-      )}
-    </section>
   );
 }

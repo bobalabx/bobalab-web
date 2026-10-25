@@ -2,7 +2,7 @@ import { defineConfig } from "vitest/config";
 import { fileURLToPath } from "node:url";
 
 /**
- * Renders Fig. 1 for every fixture set into static HTML (test-results/WP1/gallery/)
+ * Renders Fig. 1 for every fixture set into static HTML (test-results/redesign-home/gallery/)
  * so the slot templates can be screenshotted without a dev server per fixture:
  *   npx vitest run --config tests/visual/vitest.render.config.ts
  *   npx playwright test -c tests/visual/playwright.visual.config.ts -g gallery

@@ -1,301 +1,309 @@
-/** Fig. 1 layout units: slot templates, seed fill, and the figure model over fixtures. */
+/**
+ * Fig. 1 "Lines" model and geometry (DECISIONS D-13; P3 fig.js; JUDGE refinements
+ * 3–5): lanes in direction_order, one dot per counted paper with a year, links and
+ * gaps for shared papers, the shares sentence, the finite arrival, the geometry
+ * thresholds, and the overflow rule (merge the oldest bins, packed per lane).
+ */
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { buildContent, loadRawContent } from "@/lib/content/load";
+import { buildContent, loadRawContent, type Content } from "@/lib/content/load";
 import {
-  CLOCK_SLOTS,
-  SEED_ARC_MAX,
-  SEED_CAP,
-  STIR_DEG,
-  seedCount,
-  seedLayout,
-} from "@/lib/figure/seeds";
-import { TEMPLATES, templateFor, NUDGE_DX, NUDGE_DY } from "@/lib/figure/templates";
-import { buildFigure, buildFigureModel, figureState, metaLine } from "@/lib/figure/buildFigure";
+  buildFigure,
+  buildFigureModel,
+  figureState,
+  laneCounts,
+  numberWord,
+  sharesSentence,
+  type FigureInput,
+  type FigureModel,
+} from "@/lib/figure/buildFigure";
+import {
+  CW_MIN,
+  LIST_CSS,
+  PACK_AT,
+  PACKED_CSS,
+  REF_TRACK_W,
+  figureCss,
+  fitsAt,
+  pitch,
+  rawPitch,
+  trackFor,
+  zone,
+} from "@/lib/figure/geometry";
 
-const FIX = fileURLToPath(new URL("../../fixtures/content/", import.meta.url));
+const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
+const FIX = path.join(ROOT, "tests/fixtures/content");
 const TODAY = "2026-10-20";
-const load = (set: string, preview = false) =>
-  buildContent(loadRawContent(path.join(FIX, set)), { preview, today: TODAY });
+const load = (dir: string, preview = false): Content =>
+  buildContent(loadRawContent(dir), { preview, today: TODAY });
 
-describe("slot templates (brief §E2)", () => {
-  it("exist for n = 2…8 only", () => {
-    expect(templateFor(0)).toBeNull();
-    expect(templateFor(1)).toBeNull();
-    expect(templateFor(9)).toBeNull();
-    for (let n = 2; n <= 8; n++) expect(templateFor(n)?.slots).toHaveLength(n);
-  });
+/** Structural invariants every model must keep. */
+function checkModel(m: FigureModel, c: { directions: Content["directions"] }) {
+  expect(m.lanes.map((l) => l.slug)).toEqual(c.directions.map((d) => d.slug));
+  // Columns: unique per paper unless the bin is packed; bins cover them in order.
+  const unpacked = m.papers.filter((p) => !m.bins[p.bin]!.packed).map((p) => p.col);
+  expect(new Set(unpacked).size).toBe(unpacked.length);
+  let col = 0;
+  for (const b of m.bins) {
+    expect(b.col0).toBe(col);
+    col += b.cols;
+  }
+  expect(m.cols).toBe(col);
+  for (const p of m.papers) {
+    const b = m.bins[p.bin]!;
+    expect(p.col).toBeGreaterThanOrEqual(b.col0);
+    expect(p.col).toBeLessThan(b.col0 + b.cols);
+    expect(p.year).toBeGreaterThanOrEqual(b.from);
+    expect(p.year).toBeLessThanOrEqual(b.to);
+  }
+  for (const l of m.lanes) {
+    // A dot for every paper on the lane, never more than the lane's count.
+    expect(l.dots.length).toBeLessThanOrEqual(l.papers);
+    expect(l.dots.map((d) => d.s).sort()).toEqual(
+      m.papers
+        .filter((p) => p.lanes.includes(l.slug))
+        .map((p) => p.slug)
+        .sort(),
+    );
+    // Strip order: (year, slug).
+    const keys = l.dots.map((d) => `${d.year}:${d.s}`);
+    expect(keys).toEqual([...keys].sort());
+    expect(l.first).toBe(l.dots.length ? Math.min(...l.dots.map((d) => d.col)) : null);
+  }
+  // Links: a shared paper is "down" on its first lane, "up" on its last, "through" between.
+  const idx = new Map(m.lanes.map((l, i) => [l.slug, i]));
+  for (const p of m.papers.filter((x) => x.lanes.length > 1)) {
+    const li = p.lanes.map((s) => idx.get(s)!);
+    const lo = Math.min(...li);
+    const hi = Math.max(...li);
+    m.lanes.forEach((l, i) => {
+      const seg = l.segs.find((s) => s.s === p.slug);
+      if (i < lo || i > hi) expect(seg).toBeUndefined();
+      else expect(seg?.part).toBe(i === lo ? "down" : i === hi ? "up" : "through");
+      // A gap only where the link passes over another direction's drawn line.
+      const gap = l.gaps.includes(p.col);
+      if (gap) expect(p.lanes).not.toContain(l.slug);
+    });
+  }
+  // The arrival is finite and ends well inside the 2 s data-intro window.
+  expect(m.end).toBeLessThanOrEqual(1500);
+  for (const l of m.lanes) for (const d of l.dots) expect(d.t).toBeLessThanOrEqual(m.end);
+}
 
-  it("match the brief's table exactly", () => {
-    const table: Record<number, [number, Array<[number, number]>]> = {
-      2: [
-        4,
-        [
-          [1, 1],
-          [1, 3],
-        ],
-      ],
-      3: [
-        6,
-        [
-          [1, 1],
-          [1, 3],
-          [1, 5],
-        ],
-      ],
-      4: [
-        5,
-        [
-          [1, 1],
-          [1, 3],
-          [2, 2],
-          [2, 4],
-        ],
-      ],
-      5: [
-        6,
-        [
-          [1, 1],
-          [1, 3],
-          [1, 5],
-          [2, 2],
-          [2, 4],
-        ],
-      ],
-      6: [
-        7,
-        [
-          [1, 1],
-          [1, 3],
-          [1, 5],
-          [2, 2],
-          [2, 4],
-          [2, 6],
-        ],
-      ],
-      7: [
-        8,
-        [
-          [1, 1],
-          [1, 3],
-          [1, 5],
-          [1, 7],
-          [2, 2],
-          [2, 4],
-          [2, 6],
-        ],
-      ],
-      8: [
-        6,
-        [
-          [1, 1],
-          [1, 3],
-          [1, 5],
-          [2, 2],
-          [2, 4],
-          [3, 1],
-          [3, 3],
-          [3, 5],
-        ],
-      ],
-    };
-    for (const [n, [cols, slots]] of Object.entries(table)) {
-      const t = TEMPLATES[Number(n)]!;
-      expect(t.columns).toBe(cols);
-      expect(t.slots.map((s) => [s.row, s.col])).toEqual(slots);
-    }
-  });
-
-  it("uses the row template for n ≤ 3 and clusters above", () => {
-    expect(TEMPLATES[2]!.kind).toBe("row");
-    expect(TEMPLATES[3]!.kind).toBe("row");
-    for (let n = 4; n <= 8; n++) expect(TEMPLATES[n]!.kind).toBe("cluster");
-  });
-
-  it("keeps every 2-column slot inside the grid, with no two slots overlapping", () => {
-    for (let n = 2; n <= 8; n++) {
-      const t = TEMPLATES[n]!;
-      const taken = new Set<string>();
-      for (const s of t.slots) {
-        expect(s.col + 1).toBeLessThanOrEqual(t.columns);
-        for (const c of [s.col, s.col + 1]) {
-          const key = `${s.row}:${c}`;
-          expect(taken.has(key)).toBe(false);
-          taken.add(key);
-        }
-      }
-    }
-  });
-
-  it("orders slots row-major so DOM order = focus order = index", () => {
-    for (let n = 2; n <= 8; n++) {
-      const keys = TEMPLATES[n]!.slots.map((s) => s.row * 100 + s.col);
-      expect([...keys].sort((a, b) => a - b)).toEqual(keys);
-    }
-  });
-
-  it("has constant organic nudges for all 8 slots", () => {
-    expect(NUDGE_DX).toEqual([0, 0.06, -0.04, 0.03, -0.06, 0.05, -0.02, 0.04]);
-    expect(NUDGE_DY).toEqual([0, 0.08, -0.05, 0.1, -0.07, 0.04, 0.09, -0.03]);
-  });
-});
-
-describe("seeds (brief §E2 + JUDGE.md cap)", () => {
-  it("draws one dot per paper up to the cap", () => {
-    expect(seedCount(0)).toBe(0);
-    expect(seedCount(1)).toBe(1);
-    expect(seedCount(7)).toBe(7);
-    expect(seedCount(12)).toBe(12);
-    expect(seedCount(24)).toBe(SEED_CAP);
-    expect(seedCount(-3)).toBe(0);
-    expect(seedLayout(24)).toHaveLength(12);
-  });
-
-  it("fills clock slots 12, 1, 11, 2, 10 for small counts", () => {
-    expect(seedLayout(5).map((s) => s.angle)).toEqual([...CLOCK_SLOTS]);
-    expect(seedLayout(3).map((s) => s.angle)).toEqual([0, 30, -30]);
-  });
-
-  it("adding a paper (≤ 5) fills the next slot and moves nothing else", () => {
-    for (let n = 1; n < 5; n++) {
-      const a = seedLayout(n).map((s) => s.angle);
-      const b = seedLayout(n + 1).map((s) => s.angle);
-      expect(b.slice(0, n)).toEqual(a);
-    }
-  });
-
-  it("never places a seed beyond ±75° (±89° with the stir), for any count", () => {
-    for (let n = 0; n <= 30; n++) {
-      for (const s of seedLayout(n)) {
-        expect(Math.abs(s.angle)).toBeLessThanOrEqual(SEED_ARC_MAX);
-        expect(Math.abs(s.angle) + STIR_DEG).toBeLessThan(90);
-      }
-    }
-  });
-
-  it("spreads 6+ seeds evenly across −75°…+75°, distinct and symmetric", () => {
-    for (const n of [6, 7, 12]) {
-      const angles = seedLayout(n)
-        .map((s) => s.angle)
-        .sort((a, b) => a - b);
-      expect(angles[0]).toBe(-75);
-      expect(angles[angles.length - 1]).toBe(75);
-      expect(new Set(angles).size).toBe(n);
-      const step = angles[1]! - angles[0]!;
-      for (let i = 1; i < angles.length; i++)
-        expect(angles[i]! - angles[i - 1]!).toBeCloseTo(step, 1);
-    }
-  });
-
-  it("numbers the fill order k = 0…n-1, nearest 12 o'clock first", () => {
-    const seeds = seedLayout(7);
-    expect(seeds.map((s) => s.k)).toEqual([0, 1, 2, 3, 4, 5, 6]);
-    expect(seeds[0]!.angle).toBe(0);
-  });
-});
-
-describe("figure model over fixtures", () => {
-  it("maps n to the §E9 state", () => {
+describe("figure state", () => {
+  it("0 → empty, 1 → single (strips), 2–8 → figure, > 8 → overflow (strips)", () => {
     expect(figureState(0)).toBe("empty");
     expect(figureState(1)).toBe("single");
-    expect(figureState(2)).toBe("figure");
-    expect(figureState(8)).toBe("figure");
+    for (let n = 2; n <= 8; n++) expect(figureState(n)).toBe("figure");
     expect(figureState(9)).toBe("overflow");
   });
+});
 
-  it.each([
-    ["n0", 0, "empty"],
-    ["n1", 1, "single"],
-    ["n2", 2, "figure"],
-    ["n3", 3, "figure"],
-    ["n4", 4, "figure"],
-    ["n6", 6, "figure"],
-    ["n7", 7, "figure"],
-    ["n8", 8, "figure"],
-  ] as const)("%s → %i directions, state %s", (set, n, state) => {
-    const m = buildFigure(load(set));
-    expect(m.n).toBe(n);
-    expect(m.state).toBe(state);
-    expect(m.items.map((it) => it.index)).toEqual(Array.from({ length: n }, (_, i) => i + 1));
-    if (state === "figure") {
-      expect(m.template?.n).toBe(n);
-      m.items.forEach((it, i) => expect(it.slot).toEqual(m.template!.slots[i]));
-    } else {
-      expect(m.template).toBeNull();
-    }
-  });
+describe("model over the fixture sets and the real content", () => {
+  const sets = ["n0", "n1", "n2", "n3", "n4", "n6", "n7", "n8", "long-labels", "seeds-0-1-7-12-24"];
+  for (const set of sets) {
+    it(`${set}: lanes in direction order, dots, columns and links are consistent`, () => {
+      const c = load(path.join(FIX, set), true);
+      const m = buildFigure(c);
+      expect(m.n).toBe(c.directions.length);
+      checkModel(m, c);
+    });
+  }
 
-  it("excludes archived directions and (in production) drafts", () => {
-    const prod = load("n0");
-    const preview = load("n0", true);
-    expect(buildFigure(prod).n).toBe(0);
-    // n0 holds 2 draft directions: hidden in production, shown (with badges) in preview.
-    expect(buildFigure(preview).n).toBe(2);
-    expect(buildFigure(preview).draftCount).toBe(2);
-    for (const set of ["n4", "seeds-0-1-7-12-24"]) {
-      const c = load(set, true);
-      const slugs = buildFigure(c).items.map((it) => it.slug);
-      for (const a of c.archivedDirections) expect(slugs).not.toContain(a.slug);
-    }
-  });
-
-  it("derives seed counts from D-05 counted papers (0, 1, 7, 12, 24 → capped)", () => {
-    const c = load("seeds-0-1-7-12-24");
+  it("real content: lanes follow site.direction_order; counts are the loader's", () => {
+    const c = load(path.join(ROOT, "content"), true);
     const m = buildFigure(c);
-    for (const it of m.items) {
-      const d = c.getDirection(it.slug)!;
-      expect(it.papers).toBe(d.counts.papers);
-      expect(it.seeds).toBe(Math.min(12, d.counts.papers));
+    checkModel(m, c);
+    const order = c.site.direction_order.filter((s) => c.directions.some((d) => d.slug === s));
+    expect(m.lanes.map((l) => l.slug)).toEqual(order);
+    for (const l of m.lanes) {
+      const d = c.getDirection(l.slug)!;
+      expect(l.papers).toBe(d.counts.papers);
+      expect(l.inProgress).toBe(d.counts.inProgress);
+      expect(l.wip.length).toBe(d.counts.inProgress);
     }
-    expect(m.items.map((it) => it.papers).sort((a, b) => a - b)).toEqual([0, 1, 7, 12, 24]);
+    // Years are bins in ascending order; today's data fits without merging.
+    expect(m.bins.map((b) => b.from)).toEqual([...m.bins.map((b) => b.from)].sort());
+    expect(m.merged).toBe(0);
   });
+});
 
-  it("adding one paper changes only that direction's seeds", () => {
-    const c = load("n4");
-    const base = buildFigureModel({
-      directions: c.directions,
-      countedPublications: c.countedPublications,
-      today: TODAY,
-    });
-    const target = c.directions[1]!;
-    const extra = {
-      ...c.countedPublications[0]!,
-      slug: "extra-2026-paper",
-      directions: [target.slug],
-    };
-    const bumped = buildFigureModel({
-      directions: c.directions.map((d) =>
-        d.slug === target.slug ? { ...d, counts: { ...d.counts, papers: d.counts.papers + 1 } } : d,
-      ),
-      countedPublications: [...c.countedPublications, extra],
-      today: TODAY,
-    });
-    bumped.items.forEach((it, i) => {
-      const was = base.items[i]!;
-      if (it.slug === target.slug) expect(it.seeds).toBe(Math.min(12, was.seeds + 1));
-      else expect({ ...it }).toEqual({ ...was });
-    });
-  });
-
-  it("formats the caption meta line", () => {
-    expect(metaLine({ projects: 1, papers: 7, since: 2021 })).toBe(
-      "1 project · 7 papers · since 2021",
+describe("copy helpers", () => {
+  it("shares sentence, lane counts, number words", () => {
+    expect(sharesSentence([])).toBeNull();
+    expect(
+      sharesSentence([
+        { slug: "pw", label: "Platform Work", count: 3 },
+        { slug: "aa", label: "Algorithmic Advice", count: 1 },
+      ]),
+    ).toBe("Shares 3 papers with Platform Work and 1 with Algorithmic Advice.");
+    expect(sharesSentence([{ slug: "a", label: "AI at Work", count: 1 }])).toBe(
+      "Shares 1 paper with AI at Work.",
     );
-    expect(metaLine({ projects: 0, papers: 1 })).toBe("0 projects · 1 paper");
+    expect(laneCounts({ papers: 4, inProgress: 2 })).toEqual(["4 papers", ", 2 in progress"]);
+    expect(laneCounts({ papers: 1, inProgress: 0 })).toEqual(["1 paper", ""]);
+    expect(numberWord(4)).toBe("four");
+    expect(numberWord(12)).toBe("12");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Synthetic data for the geometry and the overflow rule.
+
+type Dir = FigureInput["directions"][number];
+type Pub = FigureInput["countedPublications"][number];
+const dir = (slug: string, i: number): Dir =>
+  ({
+    slug,
+    index: i + 1,
+    short_label: slug.toUpperCase(),
+    title: slug,
+    color: "matcha",
+    draft: false,
+    counts: { papers: 0, projects: 0, inProgress: 0 },
+  }) as unknown as Dir;
+const pub = (slug: string, year: number, directions: string[]): Pub =>
+  ({ slug, title: slug, year, type: "journal", directions }) as unknown as Pub;
+
+/** n papers spread over 4 lanes and `years` years, every 5th shared by two lanes. */
+function synthetic(n: number, years = 6): FigureInput {
+  const directions = ["a", "b", "c", "d"].map(dir);
+  const pubs: Pub[] = [];
+  for (let i = 0; i < n; i++) {
+    const lanes = i % 5 === 0 ? ["a", "c"] : [["a", "b", "c", "d"][i % 4]!];
+    pubs.push(pub(`p${String(i).padStart(3, "0")}`, 2010 + (i % years), lanes));
+  }
+  for (const d of directions)
+    (d.counts as { papers: number }).papers = pubs.filter((p) =>
+      p.directions.includes(d.slug),
+    ).length;
+  return { directions, countedPublications: pubs, today: TODAY };
+}
+
+describe("geometry", () => {
+  const g = { cols: 13, bins: 4, wipMax: 3 };
+
+  it("pitch is clamped to 12–64 px; thresholds invert the formula", () => {
+    expect(pitch(250, g)).toBe(CW_MIN);
+    expect(pitch(3000, { cols: 2, bins: 1, wipMax: 0 })).toBe(64);
+    for (const c of [CW_MIN, PACK_AT]) {
+      const t = trackFor(c, g);
+      expect(rawPitch(t, g)).toBeGreaterThanOrEqual(c - 0.01);
+      expect(rawPitch(t - 2, g)).toBeLessThan(c);
+    }
   });
 
-  it("reads figure_mode and builds a shared year axis for the dot plot", () => {
-    const c = load("n4");
-    const m = buildFigureModel({
-      directions: c.directions,
-      countedPublications: c.countedPublications,
-      figureMode: "dotplot",
-      today: TODAY,
-    });
-    expect(m.mode).toBe("dotplot");
-    const years = m.items.flatMap((it) => it.years);
-    if (years.length) expect(m.yearRange).toEqual([Math.min(...years), Math.max(...years)]);
-    else expect(m.yearRange).toBeNull();
+  it("today's 13 papers: links at a 1366 px viewport, packed at 768 px", () => {
+    expect(rawPitch(REF_TRACK_W, g)).toBeGreaterThanOrEqual(PACK_AT);
+    expect(rawPitch(768 - 48 - 200, g)).toBeLessThan(PACK_AT);
+    expect(fitsAt(768 - 48 - 200, g)).toBe(true);
+  });
+
+  it("the zone grows with the busiest lane's rings", () => {
+    expect(zone(0).zmin).toBe(140);
+    expect(zone(3).zmin).toBe(140);
+    expect(zone(12).zmin).toBeGreaterThan(140);
+    expect(zone(12).zmax).toBeGreaterThanOrEqual(zone(12).zmin);
+  });
+
+  it("the generated stylesheet: strips below 48rem, packed where it can occur, safe as <style> text", () => {
+    const css = figureCss(g, false);
+    expect(css).toContain(`@media (max-width:47.99rem){${LIST_CSS}}`);
+    expect(css).toContain(PACKED_CSS);
+    // Thresholds in rem (label column + track), so enlarged text moves them too.
+    expect(css).toMatch(
+      /@media \(min-width:48rem\) and \(max-width:63\.99rem\)\{@container f1 \(max-width:\d+(\.\d+)?rem\)/,
+    );
+    expect(css).not.toMatch(/[<>&"']/);
+    expect(figureCss(g, true)).toBe(LIST_CSS);
+    // Both switches are written for both desktop ranges (enlarged text reaches them).
+    expect(css.split(PACKED_CSS).length - 1).toBe(2);
+    expect(css.split(LIST_CSS).length - 1).toBe(3);
+  });
+});
+
+describe("overflow rule (P3 NOTES RC-19): merge the oldest bins, packed per lane", () => {
+  it("fits without merging up to the reference width", () => {
+    const m = buildFigureModel(synthetic(40));
+    expect(m.merged).toBe(0);
+    expect(m.cols).toBe(40);
+    checkModel(m, { directions: synthetic(40).directions as Content["directions"] });
+  });
+
+  it("past the reference width, the oldest years merge into one packed bin until it fits", () => {
+    const input = synthetic(120, 15);
+    const m = buildFigureModel(input);
+    checkModel(m, { directions: input.directions as Content["directions"] });
+    expect(m.merged).toBeGreaterThan(0);
+    // Years after the merged bin keep their own bins (the newest is never merged).
+    expect(m.bins.length).toBeGreaterThan(1);
+    const b = m.bins[0]!;
+    expect(b.packed).toBe(true);
+    expect(b.label).toBe(`${b.from}–${b.to}`);
+    expect(b.from).toBe(2010);
+    expect(m.bins.slice(1).every((x) => !x.packed && x.from === x.to)).toBe(true);
+    expect(fitsAt(REF_TRACK_W, { cols: m.cols, bins: m.bins.length, wipMax: m.wipMax })).toBe(true);
+    // Packing never puts two papers whose lane spans overlap in one column.
+    const idx = new Map(m.lanes.map((l, i) => [l.slug, i]));
+    const span = (lanes: string[]) => {
+      const li = lanes.map((s) => idx.get(s)!);
+      return [Math.min(...li), Math.max(...li)] as const;
+    };
+    const inBin = m.papers.filter((p) => p.bin === 0);
+    for (const p of inBin)
+      for (const q of inBin) {
+        if (p === q || p.col !== q.col) continue;
+        const [a, b2] = span(p.lanes);
+        const [c, d] = span(q.lanes);
+        expect(b2 < c || d < a).toBe(true);
+      }
+    expect(b.cols).toBeLessThan(inBin.length);
+  });
+
+  it("when merging the older years is not enough, every year is packed per lane and keeps its label", () => {
+    const input = synthetic(100, 2);
+    const m = buildFigureModel(input);
+    checkModel(m, { directions: input.directions as Content["directions"] });
+    expect(m.merged).toBe(0);
+    expect(m.bins.map((b) => b.label)).toEqual(["2010", "2011"]);
+    expect(m.bins.every((b) => b.packed)).toBe(true);
+    expect(fitsAt(REF_TRACK_W, { cols: m.cols, bins: m.bins.length, wipMax: m.wipMax })).toBe(true);
+  });
+
+  it("the newest year always keeps its own bin, even when nothing fits (strips take over)", () => {
+    for (const [n, years] of [
+      [400, 4],
+      [600, 6],
+      [300, 2],
+      [2000, 15],
+    ] as const) {
+      const input = synthetic(n, years);
+      const m = buildFigureModel(input);
+      checkModel(m, { directions: input.directions as Content["directions"] });
+      const last = m.bins[m.bins.length - 1]!;
+      expect(last.from).toBe(2010 + years - 1);
+      expect(last.to).toBe(last.from);
+      expect(m.bins.length).toBeGreaterThanOrEqual(2);
+      // Where the lanes cannot fit, the container query switches to strips.
+      const g = { cols: m.cols, bins: m.bins.length, wipMax: m.wipMax };
+      if (!fitsAt(REF_TRACK_W, g)) expect(trackFor(CW_MIN, g)).toBeGreaterThan(REF_TRACK_W);
+    }
+  });
+
+  it("merges only as many years as needed: more papers never merge fewer years", () => {
+    expect(buildFigureModel({ ...synthetic(160, 15), fitWidth: 100000 }).merged).toBe(0);
+    let last = 0;
+    for (const n of [40, 80, 120, 160, 200, 260]) {
+      const m = buildFigureModel(synthetic(n, 15));
+      expect(m.merged).toBeGreaterThanOrEqual(last);
+      last = m.merged;
+    }
+    expect(last).toBeGreaterThan(0);
+  });
+
+  it("many papers still arrive within the intro window", () => {
+    const m = buildFigureModel(synthetic(300, 12));
+    expect(m.end).toBeLessThanOrEqual(1500);
   });
 });
