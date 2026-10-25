@@ -36,7 +36,7 @@ window.BOBALAB_CMS = {
       postdoc: "Postdoctoral scholar",
       phd: "PhD student",
       "predoc-staff": "Pre-doc / research staff",
-      masters: "Master's student",
+      masters: "Master’s student",
       undergrad: "Undergraduate RA",
       affiliate: "Affiliate",
     },
