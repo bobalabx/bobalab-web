@@ -1,48 +1,76 @@
 /**
- * Pure helpers for the research pages (WP2; brief §D4–§D5, §E5). Everything
- * shown on a direction page is derived here from the loaded Content, so the
- * rules are unit-tested (tests/unit/direction/**) and never hard-coded in JSX.
+ * Pure helpers for the research pages (brief §D4–§D5, §E5; redesign D-13).
+ * Everything shown on a direction page is derived here from the loaded
+ * Content, so the rules are unit-tested (tests/unit/direction/**) and never
+ * hard-coded in JSX.
  */
-import type { Content, DirectionView, OpportunityView } from "@/lib/content/load";
+import type { Content, DirectionView, OpportunityView, ProjectView } from "@/lib/content/load";
+import type { PublicPerson } from "@/lib/content/people";
+import { comparePeople } from "@/lib/content/people";
 import { openOpportunities } from "@/lib/content/queries";
-import { CORE_DARK, CORE_LIGHT, blend, contrastRatio, swatchOf } from "@/lib/content/palette";
-import type { SwatchId } from "@/lib/content/palette";
 import { TRANSITION, type TransitionType } from "@/lib/vt";
 
 export const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
-/**
- * Header status line (§D5.1): "Active since 2021 · 3 projects · 5 papers",
- * computed from content. `active_since` is optional, so the first part is
- * dropped when the lab has not set it. Work in progress is counted separately
- * (D-05) and shown only when there is some.
- */
-export function directionStatusParts(
-  d: Pick<DirectionView, "status" | "active_since" | "counts">,
-): string[] {
-  const parts: string[] = [];
-  if (d.status === "emerging") {
-    parts.push(d.active_since ? `Emerging since ${d.active_since}` : "Emerging");
-  } else if (d.status === "active" && d.active_since) {
-    parts.push(`Active since ${d.active_since}`);
-  }
-  parts.push(plural(d.counts.projects, "project"), plural(d.counts.papers, "paper"));
-  if (d.counts.inProgress > 0) parts.push(`${d.counts.inProgress} in progress`);
-  return parts;
+const WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+/** Small counts in running prose are words ("the two directions"); larger ones stay numerals. */
+export const numberWord = (n: number) => WORDS[n] ?? String(n);
+
+/** "a", "a and b", "a, b and c" (the site's house style has no serial comma). */
+export function listJoin(items: readonly string[]): string {
+  if (items.length <= 1) return items.join("");
+  return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
 }
 
-export const directionStatusLine = (d: Parameters<typeof directionStatusParts>[0]) =>
-  directionStatusParts(d).join(" · ");
+/**
+ * The counts sentence in the direction header's label column (P3 `.side`):
+ * "4 papers, 1 in progress and 4 projects". Work in progress is counted
+ * separately (D-05) and named only when there is some.
+ */
+export function countsSentence(counts: DirectionView["counts"]): string {
+  const parts = [plural(counts.papers, "paper")];
+  if (counts.inProgress > 0) parts.push(`${counts.inProgress} in progress`);
+  parts.push(plural(counts.projects, "project"));
+  return listJoin(parts);
+}
 
-/** "See all in Publications →" keeps the direction filter (§D5.6; WP2 acceptance #5). */
+export interface SharedCount {
+  direction: DirectionView;
+  count: number;
+}
+
+/**
+ * Other directions this direction shares counted papers with, most shared
+ * first, then in editorial order (live directions before archived ones).
+ * Drives "Shares 3 papers with Platform Work and 1 with Algorithmic Advice."
+ */
+export function sharedWith(
+  c: Pick<Content, "directions" | "archivedDirections">,
+  d: Pick<DirectionView, "slug">,
+  papers: ReadonlyArray<{ directions: string[] }>,
+): SharedCount[] {
+  const all = [...c.directions, ...c.archivedDirections];
+  return all
+    .filter((o) => o.slug !== d.slug)
+    .map((o, i) => ({
+      direction: o,
+      count: papers.filter((p) => p.directions.includes(o.slug)).length,
+      i,
+    }))
+    .filter((x) => x.count > 0)
+    .sort((a, b) => b.count - a.count || a.i - b.i)
+    .map(({ direction, count }) => ({ direction, count }));
+}
+
+/** "See all in Publications" keeps the direction filter (§D5.6; WP2 acceptance #5). */
 export function publicationsHref(slug: string): string {
   return `/publications/?direction=${encodeURIComponent(slug)}`;
 }
 
 /**
- * Sibling rail transition type (§E5): moving to a higher index slides forward,
- * to a lower one slides back. From an archived direction (no index) every
- * sibling is "forward".
+ * "More directions" transition type (§E5): moving to a higher index slides
+ * forward, to a lower one slides back. From an archived direction (no index)
+ * every sibling is "forward".
  */
 export function railTransition(
   current: Pick<DirectionView, "index">,
@@ -53,39 +81,23 @@ export function railTransition(
 }
 
 /**
- * Header band colours (§C3): light mode = the swatch tint; dark mode = the
- * swatch's light tone at 10 % over the night paper, computed here (and in
- * tokens.css as --dir-band-d; the unit test checks both agree).
+ * People of a direction (§D5.8). Person records rarely carry their own
+ * `directions` (all are empty in October 2026), so the list is the listed team
+ * members of the direction's projects, plus anyone tagged with the direction
+ * directly. Current people first (PI, then by role and name), alumni last.
+ * Only people the loader already listed for this build are used (D-06).
  */
-export function bandColors(id: SwatchId) {
-  const s = swatchOf(id);
-  return {
-    light: {
-      band: s.tint,
-      ink: CORE_LIGHT.ink,
-      muted: CORE_LIGHT["ink-muted"],
-      link: CORE_LIGHT.accent,
-      deep: s.deep,
-    },
-    dark: {
-      band: blend(s.light, CORE_DARK.paper, 0.1),
-      ink: CORE_DARK.ink,
-      muted: CORE_DARK["ink-muted"],
-      link: CORE_DARK.accent,
-      deep: s.light,
-    },
-  };
-}
-
-/** Lowest text contrast on the band for a swatch (both modes); must stay ≥ 4.5. */
-export function bandMinContrast(id: SwatchId): number {
-  const b = bandColors(id);
-  return Math.min(
-    ...(["light", "dark"] as const).flatMap((m) => {
-      const x = b[m];
-      return [x.ink, x.muted, x.link, x.deep].map((fg) => contrastRatio(fg, x.band));
-    }),
-  );
+export function directionPeople(
+  c: Pick<Content, "people">,
+  d: Pick<DirectionView, "slug">,
+  projects: ReadonlyArray<Pick<ProjectView, "teamRefs">>,
+): PublicPerson[] {
+  const seen = new Map<string, PublicPerson>();
+  for (const p of projects) for (const m of p.teamRefs) seen.set(m.slug, m);
+  for (const p of c.people) if (p.directions.includes(d.slug)) seen.set(p.slug, p);
+  return [...seen.values()]
+    .filter((p) => p.listed)
+    .sort((a, b) => Number(a.isAlumni) - Number(b.isAlumni) || comparePeople(a, b));
 }
 
 /**

@@ -1,268 +1,638 @@
 /*
- * Project index and project page (WP2; brief §D6). Prefix pj-.
- * Shares the section layout (.dr-section…) and grids (.rs-grid) from
- * src/components/direction/direction.css.
+ * Projects: /projects/, /projects/{slug}/, the projects table on direction
+ * pages, the compact rows (research index, person profiles) and people rows
+ * (redesign D-13 after docs/redesign/prototypes/p3/project.html + p3.css).
+ * Ruled rows, plain words, one label-column grid; colour only on direction
+ * marks (`data-swatch` → --dir).
  */
 
-/* ---------- Index ------------------------------------------------------- */
-.pj-filter__bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--s-3) var(--s-5);
-  margin-bottom: var(--s-7);
-  padding-bottom: var(--s-4);
+/* ---------- Projects table (P3 `.pt`) ---------- */
+.pj-table {
+  border-top: 1px solid var(--ink);
   border-bottom: 1px solid var(--hairline);
 }
-.pj-filter__bar .bl-chips {
-  min-width: 0;
-  max-width: 100%;
-}
-.pj-filter__count {
-  padding-bottom: 0.6rem;
-}
-/* The no-JS <noscript><style> must not become an empty grid row (its style
-   still applies when the element is not rendered). */
-.rs-page > noscript {
+.pj-table__h {
   display: none;
 }
-/* `hidden` must win over the grid display of list items and groups. */
-.pj-filter [hidden] {
-  display: none !important;
+.pj-table__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.pj-groups {
-  display: grid;
-  gap: var(--s-8);
-}
-.pj-group {
-  display: grid;
-  gap: var(--s-5);
-  min-width: 0;
-}
-.pj-group__head {
-  display: grid;
-  gap: var(--s-1);
-  justify-items: start;
-}
-.pj-group__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6em;
-}
-.pj-group__title {
-  font-size: var(--fs-2xl);
-  line-height: var(--lh-2xl);
-}
-.pj-group__title a {
-  color: var(--ink);
-  text-decoration-color: var(--hairline);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 0.15em;
-}
-.pj-group__title a:hover {
-  text-decoration-color: var(--accent);
-}
-.pj-group__meta {
+.pj-table__row {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-2) var(--s-3);
-  color: var(--ink-muted);
+  align-items: baseline;
+  column-gap: 16px;
+  row-gap: 6px;
+  padding: 16px 0 18px;
 }
-
-/* Cards in a row share its height (equal-height grid). A card without a
-   summary used to end in ~150–200 px of blank card under its tags (VIS-11);
-   the direction tags now sit on the card's bottom edge, a consistent footer
-   line across the row, so the space reads as the card's body. */
-.rs-grid--projects .bl-card > .bl-tags {
-  margin-top: auto;
-}
-
-/* ---------- Project page head (§D6.1–2) -------------------------------- */
-.pj-head {
-  border-bottom: 1px solid var(--hairline);
-}
-.pj-head__inner {
-  display: grid;
-  gap: var(--s-3);
-  justify-items: start;
-  padding-block: var(--s-4) var(--s-7);
-}
-.pj-crumbs {
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-  color: var(--ink-muted);
-}
-.pj-crumbs [aria-current] {
-  color: var(--ink-muted);
-}
-/* "● PROJECT": the primary direction's flat dot (§C9), as on the index group heads. */
-.pj-head__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6em;
-  margin-top: var(--s-2);
-}
-/* A long single word must break at 320 px with WCAG 1.4.12 text spacing
-   instead of widening the page (A11Y-04; see .dr-title). */
-.pj-title {
-  max-width: 28ch;
-  overflow-wrap: anywhere;
-}
-.pj-summary {
-  max-width: 46rem;
-  font-weight: 400;
-}
-.pj-facts {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-2) var(--s-3);
-  color: var(--ink-muted);
-}
-
-/* Hero figure (§D6.3) */
-.pj-hero {
-  margin: var(--s-6) 0 0;
-  display: grid;
-  gap: var(--s-3);
-  max-width: 60rem;
-}
-.pj-hero__img {
-  width: 100%;
-  height: auto;
-  border-radius: var(--r-md);
-  border: 1px solid var(--hairline);
-}
-
-/* Team (§D6.6) */
-.pj-team {
-  display: grid;
-  gap: var(--s-5);
-}
-.pj-team__members {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
-  gap: var(--s-4) var(--s-5);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-/* Avatar sits beside the name, not centred on a multi-line role. */
-.pj-member {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--s-3);
-}
-.pj-member > :first-child {
-  flex: none;
-  margin-top: 0.15rem;
-}
-.pj-member__text {
-  display: grid;
-  justify-items: start;
-  gap: 2px;
-  min-width: 0;
-}
-.pj-member__name {
-  font-weight: 600;
-}
-.pj-member__name a {
-  color: var(--ink);
-}
-/* A member without a public record (CON-11): name only, no avatar. Indented
-   by the rail pearl (40 px) + gap so the names line up down the list. */
-.pj-member--plain {
-  padding-left: calc(40px + var(--s-3));
-}
-.pj-member--plain > :first-child {
-  margin-top: 0;
-}
-.pj-team__group {
-  display: grid;
-  gap: var(--s-2);
-}
-.pj-team__label {
-  font-family: var(--font-text);
-  font-size: var(--fs-base);
-  line-height: var(--lh-base);
-  font-weight: 600;
-}
-.pj-team__plain,
-.pj-funding {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.pj-team__plain li + li,
-.pj-funding li + li {
-  margin-top: var(--s-1);
-}
-
-/* Outputs (§D6.7) */
-.pj-subtitle {
-  font-family: var(--font-text);
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
-  font-weight: 600;
-  margin-bottom: var(--s-3);
-}
-.pj-materials + .dr-pubs {
-  margin-top: var(--s-6);
-}
-.pj-materials + .dr-wip {
-  margin-top: var(--s-6);
-}
-.pj-news > .bl-news:first-child {
-  border-top: 0;
-  padding-top: 0;
-}
-
-/* ---------- Compact rows (research index) ------------------------------ */
-.pj-rows {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  column-gap: var(--s-7);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.pj-table__row + .pj-table__row {
   border-top: 1px solid var(--hairline);
 }
-@media (min-width: 56rem) {
-  .pj-rows {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.pj-table__main {
+  flex: 1 0 100%;
+  min-width: 0;
+}
+.pj-n,
+.pj-st {
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  font-variant-numeric: tabular-nums;
+}
+.pj-n:empty {
+  display: none;
+}
+.pj-st:empty {
+  display: none;
+}
+.pj-st__y {
+  color: var(--muted);
+}
+.pj-st__y::before {
+  content: ", ";
+}
+.pj-st__y:first-child::before {
+  content: none;
+}
+.dr-project__title {
+  font-size: var(--t-title);
+  line-height: var(--lh-title);
+  font-weight: 600;
+  text-wrap: pretty;
+}
+.dr-project__title a {
+  text-decoration: none;
+}
+.dr-project__title a:hover {
+  text-decoration: underline 2px var(--ink);
+  text-underline-offset: 0.18em;
+}
+.dr-project__summary {
+  margin-top: 4px;
+  color: var(--muted);
+  max-width: 64ch;
+}
+.pj-also {
+  margin-top: 6px;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+}
+.pj-also a {
+  color: var(--ink);
+}
+.pj-also .bl-seg {
+  margin-right: 5px;
+}
+@media (min-width: 48rem) {
+  .pj-table__h,
+  .pj-table__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 5.5rem 5.5rem 7.5rem;
+    column-gap: 24px;
   }
+  .pj-table__h {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--hairline);
+    font-size: var(--t-meta);
+    line-height: var(--lh-meta);
+    color: var(--muted);
+  }
+  .pj-table__row {
+    align-items: start;
+  }
+  .pj-table__main {
+    flex: none;
+  }
+  .pj-n {
+    text-align: right;
+    padding-top: 4px;
+  }
+  .pj-n:empty,
+  .pj-st:empty {
+    display: block;
+  }
+  .pj-st {
+    padding-top: 4px;
+  }
+  /* Column heads sit on one baseline (the cells' 4 px step is for the rows). */
+  .pj-table__h > span {
+    padding-top: 0;
+  }
+  /* /projects/: one set of column heads, on the first group still shown. */
+  .pj-groups .pj-group:not([hidden]) ~ .pj-group .pj-table__h {
+    display: none;
+  }
+  .pj-st__y {
+    display: block;
+  }
+  .pj-st__y::before {
+    content: none;
+  }
+}
+
+/* ---------- Compact rows (research index, person profiles) ---------- */
+.pj-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--hairline);
 }
 .pj-row {
   display: grid;
-  gap: var(--s-1);
-  align-content: start;
-  justify-items: start;
-  padding-block: var(--s-3) var(--s-4);
-  border-bottom: 1px solid var(--hairline);
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 2px;
+  padding: 10px 0 11px;
+}
+.pj-row + .pj-row {
+  border-top: 1px solid var(--hairline);
 }
 .pj-row__title {
   font-weight: 600;
-  line-height: var(--lh-sm);
-  font-size: var(--fs-base);
 }
 .pj-row__title a {
-  display: inline-block;
-  padding-block: 2px;
-  color: var(--ink);
-  text-decoration-color: var(--hairline);
+  text-decoration: none;
 }
 .pj-row__title a:hover {
-  text-decoration-color: var(--accent);
+  text-decoration: underline 2px var(--ink);
+}
+.pj-row__title .bl-badge {
+  margin-left: 10px;
 }
 .pj-row__meta {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-1) var(--s-4);
-  color: var(--ink-muted);
+  column-gap: 16px;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
 }
-.pj-row__meta:empty {
+.pj-row__dir {
+  white-space: nowrap;
+}
+.pj-row__years {
+  font-variant-numeric: tabular-nums;
+}
+@media (min-width: 64rem) {
+  .pj-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 24px;
+    align-items: baseline;
+  }
+  .pj-row__meta {
+    justify-content: flex-end;
+  }
+}
+
+/* ---------- /projects/ ---------- */
+.pj-crumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+}
+.pj-crumbs li + li:not(.vh)::before {
+  content: "/";
+  margin: 0 0.5em;
+  color: var(--muted);
+}
+.pj-crumbs a {
+  color: var(--ink);
+  display: inline-block;
+  padding-block: 3px;
+}
+.pj-crumbs + h1 {
+  margin-top: 10px;
+}
+.pj-filter {
+  margin-top: 40px;
+}
+.pj-filter__bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 8px;
+  padding-bottom: 6px;
+}
+.pj-filter__count {
+  order: 2;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+}
+@media (min-width: 48rem) {
+  .pj-filter__bar {
+    grid-template-columns: var(--lab) minmax(0, 1fr);
+    align-items: baseline;
+  }
+  .pj-filter__count {
+    order: 0;
+    padding-right: var(--s-5);
+  }
+}
+.pj-groups > .pj-group:first-child {
+  margin-top: 40px;
+}
+.pj-group__title {
+  font-size: var(--t-h2);
+  line-height: 1.2;
+}
+.pj-group__title .bl-seg {
+  margin-right: 10px;
+  vertical-align: 0.3em;
+}
+.pj-group__title a {
+  text-decoration: none;
+}
+.pj-group__title a:hover {
+  text-decoration: underline 2px var(--ink);
+  text-underline-offset: 0.15em;
+}
+.pj-group__meta {
+  margin-top: 4px;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+}
+
+/* ---------- Project page head (P3 `.pj-head`, `dl.facts`) ---------- */
+.pj-head {
+  padding-top: 44px;
+}
+.pj-title {
+  max-width: 26em;
+  text-wrap: balance;
+}
+.pj-summary {
+  margin-top: 16px;
+}
+.pj-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 24px;
+  margin: 30px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--ink);
+  font-size: var(--t-meta);
+  line-height: 1.5;
+}
+.pj-facts dt {
+  font-weight: 600;
+}
+.pj-facts dd {
+  margin: 0;
+  color: var(--muted);
+}
+.pj-facts dd a,
+.pj-facts dd .bl-badge {
+  color: var(--ink);
+}
+.pj-facts .bl-tags {
+  flex-direction: column;
+}
+@media (min-width: 64rem) {
+  .pj-facts {
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  }
+}
+.pj-hero {
+  margin: 48px 0 0;
+}
+.pj-hero__img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.pj-hero__cap {
+  margin-top: 10px;
+  font-size: var(--t-meta);
+  color: var(--muted);
+}
+.pj-funding,
+.pj-team__plain {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pj-news {
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--hairline);
+}
+.pj-news > .bl-news:first-child {
+  border-top: 0;
+}
+
+/* ---------- Project line (P3 `.pl2`; Figure 1 of a project page) ----------
+   Mobile-first: dated list with a left rule. From 48rem: one grid whose rows
+   (year · notes · lanes · labels) every year column shares via subgrid. */
+.pjl-fig {
+  margin: 48px 0 0;
+}
+.pjl-lab,
+.pjl-lanes,
+.pjl-dots,
+.pjl-pearls {
   display: none;
+}
+.pjl-col {
+  padding: 4px 0 6px 14px;
+  border-left: 2px solid var(--ink);
+}
+.pjl-yr {
+  font-size: var(--t-meta);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 6px;
+}
+.pjl-note,
+.pjl-paper {
+  font-size: var(--t-meta);
+  line-height: 1.4;
+  padding-bottom: 12px;
+}
+.pjl-note time {
+  display: block;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.pjl-note a {
+  color: var(--ink);
+}
+.pjl-paper a {
+  font-weight: 600;
+}
+.pjl-paper > span:last-child {
+  display: block;
+  color: var(--muted);
+}
+.pjl-now {
+  position: relative;
+  padding: 4px 0 0 14px;
+  border-left: 2px dashed var(--ink);
+  min-height: 32px;
+}
+/* Phones: each paper's dots sit on the rail beside its label (one per
+   direction, stacked), so the caption's "dots are papers" holds here too. */
+@media (max-width: 47.99rem) {
+  .pjl-dots {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: relative;
+    left: -20px;
+    top: 4px;
+    width: 10px;
+    height: 0;
+  }
+  .pjl-dot {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--dir);
+  }
+  .pjl-tick {
+    display: none;
+  }
+}
+.pjl-nl {
+  font-size: var(--t-meta);
+  color: var(--muted);
+}
+.pjl-cap {
+  margin-top: 14px;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+  max-width: 92ch;
+}
+.pjl-cap b {
+  color: var(--ink);
+  font-weight: 600;
+}
+@media (min-width: 48rem) {
+  .pjl-fig {
+    --lane: 52px;
+  }
+  .pjl-grid {
+    display: grid;
+    grid-template-columns: var(--lab) var(--cols) 7rem;
+    grid-template-rows: auto auto calc(var(--lanes) * var(--lane)) auto;
+    /* 1 px ink, as in P3 `.pl2-g`: the page's 2 px budget (RC-4, at most two
+       heavy rules per viewport) belongs to the study plate that may follow. */
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+  }
+  .pjl-lab {
+    display: flex;
+    flex-direction: column;
+    grid-row: 3;
+    grid-column: 1;
+    padding-right: var(--s-5);
+  }
+  .pjl-lab span {
+    height: var(--lane);
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: var(--t-body);
+    line-height: 1.1;
+  }
+  .pjl-col {
+    grid-row: 1 / -1;
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-template-columns: repeat(var(--m), minmax(0, 1fr));
+    position: relative;
+    padding: 0;
+    border-left: 1px solid var(--hairline);
+  }
+  .pjl-yr {
+    grid-row: 1;
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 8px 12px 6px;
+  }
+  .pjl-lanes {
+    display: block;
+    grid-row: 3;
+    grid-column: 1 / -1;
+  }
+  .pjl-lanes i {
+    display: block;
+    position: relative;
+    height: var(--lane);
+  }
+  .pjl-lanes i::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(var(--lane) / 2);
+    height: 1px;
+    background: var(--dir);
+  }
+  .pjl-note {
+    grid-row: 2;
+    grid-column: var(--c);
+    align-self: end;
+    margin: 0 12px 10px;
+    padding: 0 0 0 10px;
+    border-left: 1px solid var(--rule);
+  }
+  .pjl-ev {
+    display: contents;
+  }
+  .pjl-dots {
+    display: block;
+    position: relative;
+    grid-row: 3;
+    grid-column: var(--c);
+  }
+  /* The dot sits on the 1 px rule its note and label hang from (P3 `.pl2`):
+     12 px margin + half the rule = 12.5 px into the event's column. */
+  .pjl-dot {
+    position: absolute;
+    left: calc(12.5px - 7px);
+    top: calc(var(--l) * var(--lane) + var(--lane) / 2 - 7px);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--dir);
+    z-index: 1;
+  }
+  .pjl-tick {
+    position: absolute;
+    left: 12px;
+    top: calc(var(--l0) * var(--lane) + var(--lane) / 2);
+    height: calc((var(--l1) - var(--l0)) * var(--lane));
+    width: 1px;
+    background: var(--ink);
+  }
+  .pjl-paper {
+    grid-row: 4;
+    grid-column: var(--c);
+    margin: 10px 12px 12px;
+    padding: 0 0 0 10px;
+    border-left: 1px solid var(--rule);
+  }
+  .pjl-now {
+    grid-row: 1 / -1;
+    display: grid;
+    grid-template-rows: subgrid;
+    padding: 0;
+    border-left: 0;
+    background: var(--band);
+    min-height: 0;
+  }
+  .pjl-now::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    border-left: 1.5px dashed var(--ink);
+  }
+  .pjl-nl {
+    grid-row: 1;
+    padding: 8px 10px 6px;
+  }
+  /* Each direction's pearl where its lane meets "now". */
+  .pjl-pearls {
+    display: block;
+    position: relative;
+    grid-row: 3;
+  }
+  .pjl-now b {
+    display: block;
+    position: absolute;
+    left: -12px;
+    top: calc(var(--l) * var(--lane) + var(--lane) / 2 - 12px);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--pearl);
+  }
+}
+@media (min-width: 64rem) {
+  .pjl-lab span {
+    font-stretch: var(--wdth-cond);
+    font-weight: 700;
+    font-size: var(--t-lane);
+    line-height: 1;
+  }
+}
+
+/* ---------- People rows (P3 `ol.ros`, square photos per D-13) ---------- */
+.pj-team__members {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ink);
+}
+.pj-member {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  column-gap: 16px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.pj-member__photo,
+.pj-member .pj-member__ini {
+  --pd: 56px;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  background: var(--band);
+}
+.pj-member__ini--blank {
+  display: block;
+}
+.pj-member__name {
+  display: block;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.pj-member__role {
+  display: block;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+}
+@media (min-width: 64rem) {
+  .pj-roster {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 32px;
+  }
+}
+.pj-team__group {
+  margin-top: 24px;
+}
+.pj-team__label {
+  font-size: var(--t-body);
+  line-height: 1.4;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+@media (forced-colors: active) {
+  .pjl-dot,
+  .pjl-tick,
+  .pjl-lanes i::before,
+  .pjl-now b {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+  .pjl-now {
+    background: Canvas;
+  }
 }

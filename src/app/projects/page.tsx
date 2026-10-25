@@ -1,22 +1,24 @@
 /**
- * Projects index `/projects/` (brief §D6): grouped by primary direction, each
- * project with its status chip. Without JS everything shows; a small chip
- * filter (status) enhances it.
+ * Projects index `/projects/` (brief §D6; redesign D-13): one ruled table per
+ * primary direction on the label-column grid (the direction's line segment
+ * and name in the label column, its projects as rows with papers, people and
+ * status). Without JS everything shows; with JS the status toggles
+ * (<button aria-pressed>, text style) filter the rows.
  */
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getContent } from "@/lib/content/load";
+import { formatDate } from "@/lib/content/dates";
 import { pageMetadata } from "@/lib/seo/metadata";
-import { ProjectCard } from "@/components/ui/ProjectCard";
-import { pad2 } from "@/lib/content/directions";
-import { Badge, DraftBadge } from "@/components/ui/Badge";
+import { DraftBadge } from "@/components/ui/Badge";
 import {
   PROJECT_STATUS_LABELS,
   groupProjectsByPrimaryDirection,
   statusesPresent,
 } from "@/components/projects/model";
 import { ProjectStatusFilter } from "@/components/projects/ProjectStatusFilter";
-import { plural } from "@/components/direction/model";
+import { ProjectLedger } from "@/components/projects/ProjectLedger";
+import { listJoin, plural } from "@/components/direction/model";
 import "@/components/direction/direction.css";
 import "@/components/projects/projects.css";
 
@@ -40,6 +42,10 @@ export default function ProjectsPage() {
     label: PROJECT_STATUS_LABELS[s],
     count: c.projects.filter((p) => p.status === s).length,
   }));
+  const byStatus = statuses.map(
+    (s) =>
+      `${c.projects.filter((p) => p.status === s).length} ${PROJECT_STATUS_LABELS[s].toLowerCase()}`,
+  );
 
   const list = (
     <div className="pj-groups">
@@ -49,37 +55,37 @@ export default function ProjectsPage() {
           <section
             key={g.id}
             aria-labelledby={g.id}
-            className="pj-group"
+            className="pj-group dr-section"
             data-group=""
             data-swatch={d?.color}
           >
-            <div className="pj-group__head">
-              <p className="t-eyebrow pj-group__eyebrow">
-                {d && <span className="bl-dot" aria-hidden="true" />}
-                <span>
-                  {d?.index != null
-                    ? `Direction ${pad2(d.index)}`
-                    : d
-                      ? "Earlier research"
-                      : "Not yet in a direction"}
-                </span>
-              </p>
+            <div className="dr-section__head pj-group__head">
               <h2 id={g.id} className="pj-group__title">
-                {d ? <Link href={`/research/${d.slug}/`}>{d.title}</Link> : "Other projects"}
+                {d && <span className="bl-seg" aria-hidden="true" />}
+                {d ? <Link href={`/research/${d.slug}/`}>{d.short_label}</Link> : "Other projects"}
               </h2>
               <p className="pj-group__meta">
-                <span className="t-mono">{plural(g.projects.length, "project")}</span>
-                {d?.status === "archived" && <Badge>Archived direction</Badge>}
-                {d?.draft && <DraftBadge />}
+                {plural(g.projects.length, "project")}
+                {d?.status === "archived"
+                  ? ", earlier research"
+                  : d
+                    ? null
+                    : ", not yet in a direction"}
+                {d?.draft && (
+                  <>
+                    {" "}
+                    <DraftBadge />
+                  </>
+                )}
               </p>
             </div>
-            <ul className="rs-grid rs-grid--projects" role="list">
-              {g.projects.map((p) => (
-                <li key={p.slug} data-status={p.status}>
-                  <ProjectCard project={p} as="h3" />
-                </li>
-              ))}
-            </ul>
+            <div className="dr-section__body">
+              <ProjectLedger
+                projects={g.projects}
+                currentSlug={d?.slug}
+                label={d ? `Projects in ${d.short_label}` : "Other projects"}
+              />
+            </div>
           </section>
         );
       })}
@@ -87,32 +93,40 @@ export default function ProjectsPage() {
   );
 
   return (
-    <div className="bl-container rs-page">
+    <div className="bl-container rs-page pj-index">
       <header className="rs-head">
         <nav aria-label="Breadcrumb" className="pj-crumbs">
           <ol role="list">
             <li>
               <Link href="/research/">Research</Link>
             </li>
-            <li aria-current="page">
+            <li aria-current="page" className="vh">
               <span>Projects</span>
             </li>
           </ol>
         </nav>
-        <h1 tabIndex={-1}>Projects</h1>
-        {c.projects.length > 0 ? (
-          <p className="t-lead bl-measure">
-            {plural(c.projects.length, "project")}, grouped by the research direction each one
-            belongs to first.
+        <h1 tabIndex={-1} className="rs-title">
+          Projects
+        </h1>
+        <div className="rs-head__row">
+          <p className="rs-head__side">
+            {c.projects.length > 0
+              ? `${listJoin(byStatus)}, as of ${formatDate(c.today, { long: true })}.`
+              : null}
           </p>
-        ) : (
-          <p className="t-lead bl-measure">Projects are coming soon.</p>
-        )}
+          {c.projects.length > 0 ? (
+            <p className="t-lead rs-lede">
+              By research direction. A project in more than one direction is listed under its first.
+            </p>
+          ) : (
+            <p className="t-lead rs-lede">Projects are coming soon.</p>
+          )}
+        </div>
       </header>
       {groups.length > 0 &&
         (statuses.length > 1 ? (
           <>
-            {/* Without JS the chips could not filter, so the bar is hidden and every
+            {/* Without JS the toggles could not filter, so the bar is hidden and every
                 project shows (§D6). With JS there is no layout shift. */}
             <noscript>
               <style>{NOSCRIPT_CSS}</style>

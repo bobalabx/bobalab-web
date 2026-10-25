@@ -2,11 +2,19 @@
  * Pure helpers for the project pages (WP2; brief §D4, §D6). Unit-tested in
  * tests/unit/direction/projects.test.ts.
  */
-import type { Content, DirectionView, ProjectView, PublicationView } from "@/lib/content/load";
+import type {
+  Content,
+  DirectionView,
+  NewsView,
+  ProjectView,
+  PublicationView,
+} from "@/lib/content/load";
 import type { FindingView } from "@/lib/content/queries";
 import type { MaterialKind, MaterialLink } from "@/components/ui/MaterialsRow";
 import type { ProjectEntry } from "@/lib/content/schema";
 import type { PublicPerson } from "@/lib/content/people";
+import { listJoin } from "@/components/direction/model";
+import { figureTypeWord, shortTitle } from "@/components/direction/f2model";
 
 export const PROJECT_STATUS_LABELS: Record<ProjectView["status"], string> = {
   active: "Active",
@@ -215,4 +223,211 @@ export function canonicalPaper(
     published.find((x) => x.type === "conference") ??
     published[0]
   );
+}
+
+// ---------------------------------------------------------------------------
+// Project page facts and the project line (redesign D-13; P3 `project.html`)
+
+/** "1 journal article and 2 working papers" (counted papers, D-05). */
+export function papersByType(
+  pubs: ReadonlyArray<
+    Pick<PublicationView, "type"> &
+      Partial<Pick<PublicationView, "doi" | "links" | "presentations">>
+  >,
+): string | null {
+  if (!pubs.length) return null;
+  const order: string[] = [];
+  const n = new Map<string, number>();
+  for (const p of pubs) {
+    const label = figureTypeWord(p).toLowerCase();
+    if (!n.has(label)) order.push(label);
+    n.set(label, (n.get(label) ?? 0) + 1);
+  }
+  return listJoin(
+    order.map((label) => {
+      const k = n.get(label)!;
+      return `${k} ${k === 1 ? label : pluralWord(label)}`;
+    }),
+  );
+}
+
+/** "2025 and 2026" · "2021, 2023 and 2026" · null when no paper has a year. */
+export function paperYears(pubs: ReadonlyArray<Pick<PublicationView, "year">>): string | null {
+  const ys = [...new Set(pubs.map((p) => p.year).filter((y): y is number => !!y))].sort();
+  return ys.length ? listJoin(ys.map(String)) : null;
+}
+
+/** The "Papers" fact: "2 working papers, 2025 and 2026"; "1 in progress" when none counts yet. */
+export function papersFact(p: Pick<ProjectView, "publicationRefs">): string | null {
+  const counted = p.publicationRefs.filter((x) => x.counted);
+  const wip = p.publicationRefs.length - counted.length;
+  const parts: string[] = [];
+  const types = papersByType(counted);
+  if (types) {
+    const years = paperYears(counted);
+    parts.push(years ? `${types}, ${years}` : types);
+  }
+  if (wip) parts.push(`${wip} in progress`);
+  return parts.length ? parts.join("; ") : null;
+}
+
+const pluralWord = (label: string) =>
+  label.endsWith("work in progress") ? label : label.replace(/(\w+)$/, (w) => `${w}s`);
+
+export interface LineLane {
+  slug: string;
+  short_label: string;
+  color: DirectionView["color"];
+}
+
+export interface LineNote {
+  kind: "news";
+  key: string;
+  date: string;
+  day: string;
+  title: string;
+  href: string;
+}
+
+export type LineEvent =
+  | {
+      kind: "paper";
+      key: string;
+      title: string;
+      fullTitle: string;
+      href: string;
+      meta: string;
+      /** Indexes into `lanes` where the paper's dot sits. */
+      lanes: number[];
+      /** Where the paper sits inside its year ('' = only the year is known). */
+      date: string;
+      /**
+       * The lab's news item about this paper from the same year (e.g. "posted on
+       * SSRN"): drawn in the paper's own column, above the lanes, so the dot
+       * and the dated note that explains it line up.
+       */
+      note?: LineNote;
+    }
+  | LineNote;
+
+export interface LineYear {
+  year: number;
+  events: LineEvent[];
+}
+
+export interface ProjectLineModel {
+  lanes: LineLane[];
+  years: LineYear[];
+  papers: number;
+  news: number;
+}
+
+const MONTHS_LONG = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+/** "2026-05-11" → "11 May" (the column already gives the year). */
+export function dayMonth(date: string): string {
+  const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?/.exec(date);
+  if (!m) return date;
+  const mon = MONTHS_LONG[Number(m[2]) - 1] ?? "";
+  return m[3] ? `${Number(m[3])} ${mon}` : mon;
+}
+
+const noteOf = (n: Pick<NewsView, "slug" | "date" | "title">): LineNote => ({
+  kind: "news",
+  key: n.slug,
+  date: String(n.date).slice(0, 10),
+  day: dayMonth(String(n.date)),
+  title: n.title,
+  href: `/news/${n.slug}/`,
+});
+
+/**
+ * The project line (P3 `project.html` Figure 1): one lane per project
+ * direction; each counted paper with a year is a dot on the lanes it belongs
+ * to; each news item about the project's papers is a dated note. Years are
+ * bins, and inside a year events run in date order, so left to right is
+ * earlier to later:
+ * - a paper's date is its `date_online` when that falls in its year, else the
+ *   date of the lab's news item about it from that year, which is then drawn
+ *   in the paper's column (P3: "Dispatching to Develop, 4 August, posted on
+ *   SSRN") instead of as a second, separate note;
+ * - papers with only a year come first in their bin (by title);
+ * - every remaining news item is a note in its own column.
+ * Notes and labels therefore never overlap. Returns null when there is
+ * nothing worth drawing (fewer than two events, or no dated paper): the facts
+ * row and the papers list carry those pages.
+ */
+export function projectLineModel(
+  p: Pick<ProjectView, "directionRefs" | "publicationRefs">,
+  news: ReadonlyArray<Pick<NewsView, "slug" | "date" | "title"> & { publications?: string[] }>,
+): ProjectLineModel | null {
+  const lanes: LineLane[] = p.directionRefs.map((d) => ({
+    slug: d.slug,
+    short_label: d.short_label,
+    color: d.color,
+  }));
+  if (!lanes.length) return null;
+  const papers = p.publicationRefs.filter((x) => x.counted && x.year);
+  if (!papers.length || papers.length + news.length < 2) return null;
+  const sortedNews = [...news].sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const used = new Set<string>();
+  const byYear = new Map<number, LineEvent[]>();
+  const push = (y: number, e: LineEvent) => byYear.set(y, [...(byYear.get(y) ?? []), e]);
+  for (const x of [...papers].sort((a, b) => a.title.localeCompare(b.title))) {
+    const year = x.year!;
+    const idx = lanes.map((l, i) => (x.directions.includes(l.slug) ? i : -1)).filter((i) => i >= 0);
+    const n = sortedNews.find(
+      (n) =>
+        !used.has(n.slug) &&
+        n.publications?.includes(x.slug) &&
+        Number(String(n.date).slice(0, 4)) === year,
+    );
+    if (n) used.add(n.slug);
+    const online =
+      x.date_online && Number(String(x.date_online).slice(0, 4)) === year
+        ? String(x.date_online)
+        : "";
+    push(year, {
+      kind: "paper",
+      key: x.slug,
+      title: shortTitle(x.title),
+      fullTitle: x.title,
+      href: `/publications/${x.slug}/`,
+      meta: figureTypeWord(x),
+      lanes: idx.length ? idx : [0],
+      date: online || (n ? String(n.date).slice(0, 10) : ""),
+      note: n ? noteOf(n) : undefined,
+    });
+  }
+  for (const n of sortedNews) {
+    const y = Number(String(n.date).slice(0, 4));
+    if (!y || used.has(n.slug)) continue;
+    push(y, noteOf(n));
+  }
+  // Stable sort: undated papers ('' sorts first) keep their title order.
+  const years = [...byYear.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([year, events]) => ({
+      year,
+      events: [...events].sort((a, b) => a.date.localeCompare(b.date)),
+    }));
+  return { lanes, years, papers: papers.length, news: news.length };
+}
+
+/** The newest news item about the project (the "Latest" fact), or null. */
+export function latestNews<T extends Pick<NewsView, "date">>(news: readonly T[]): T | null {
+  return [...news].sort((a, b) => String(b.date).localeCompare(String(a.date)))[0] ?? null;
 }

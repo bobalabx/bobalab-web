@@ -1,15 +1,16 @@
 /**
- * WP2: /projects/ and /projects/{slug}/ (brief §D6; WP2 acceptance #1, #6, #7, #9, #10).
+ * /projects/ and /projects/{slug}/ (brief §D6; redesign D-13 after
+ * docs/redesign/prototypes/p3/project.html).
  * Runs against BASE_URL (default: the shared dev server, drafts included).
  * Routes are discovered from the rendered index.
  *   npx playwright test tests/e2e/projects.spec.ts
- * Screenshots: test-results/WP2/.
+ * Screenshots: test-results/redesign-research/.
  */
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
-const SHOTS = "test-results/WP2";
+const SHOTS = "test-results/redesign-research";
 const VIEWPORTS = [
   { name: "1366", width: 1366, height: 768 },
   { name: "390", width: 390, height: 844 },
@@ -32,7 +33,7 @@ async function open(page: Page, path: string) {
 async function discover(page: Page) {
   await open(page, "/projects/");
   const slugs = await page
-    .locator(".pj-group .bl-card__title a")
+    .locator(".pj-group .dr-project__title a")
     .evaluateAll((as) =>
       as.map((a) => (a.getAttribute("href") ?? "").replace(/^\/projects\/|\/$/g, "")),
     );
@@ -84,13 +85,13 @@ test.describe("visual QA and axe", () => {
   }
 });
 
-test("index: grouped by primary direction in editorial order, each project once, with a status chip", async ({
+test("index: grouped by primary direction in editorial order, each project once, status only when it says something", async ({
   page,
 }) => {
   // Editorial order of live directions from /research/.
   await open(page, "/research/");
   const order = await page
-    .locator('section[aria-labelledby="rs-directions"] .bl-card__title a')
+    .locator('section[aria-labelledby="rs-directions"] .rs-dir__title a')
     .evaluateAll((as) => as.map((a) => a.getAttribute("href")));
   const { slugs } = await discover(page);
   expect(slugs.length).toBeGreaterThan(0);
@@ -101,14 +102,20 @@ test("index: grouped by primary direction in editorial order, each project once,
     .evaluateAll((as) => as.map((a) => a.getAttribute("href")));
   const liveGroups = groupHrefs.filter((h) => order.includes(h));
   expect(liveGroups).toEqual(order.filter((h) => liveGroups.includes(h)));
-  // Every card has a status badge.
-  const cards = page.locator(".pj-group .bl-card");
-  const n = await cards.count();
+  // Status is a plain word (no pills, no cards), and only when it is not the
+  // default: "Completed", "Paused", "Archived"; "Active" on 16 of 18 rows said
+  // nothing (P3 project row; AUDIT P1).
+  const rows = page.locator(".pj-group li[data-status]");
+  const n = await rows.count();
   for (let i = 0; i < n; i++) {
-    await expect(cards.nth(i).locator(".bl-badge").first()).toHaveText(
-      /Active|Completed|Paused|Archived/,
-    );
+    const status = await rows.nth(i).getAttribute("data-status");
+    const word = rows.nth(i).locator(".pj-st .bl-badge");
+    if (status === "active") await expect(word).toHaveCount(0);
+    else await expect(word).toHaveText(/Completed|Paused|Archived/);
   }
+  // One set of column heads for the whole index (wide screens), not one per group.
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await expect(page.locator(".pj-table__h:visible")).toHaveCount(1);
 });
 
 test("index: status chips filter the list and announce the count", async ({ page }) => {
@@ -173,6 +180,22 @@ test("detail: breadcrumb Research › Direction › Project, JSON-LD, team only 
       const res = await page.request.get(href!);
       expect(res.status(), href!).toBe(200);
     }
+    // Facts row: status always; papers and people when there are any.
+    await expect(page.locator(".pj-facts dt").first()).toHaveText("Status");
+    await expect(page.locator(".pj-facts .bl-badge").first()).toHaveText(
+      /Active|Completed|Paused|Archived/,
+    );
+    // The project line, when drawn: one event per dated paper and per news note.
+    if (await page.locator(".pjl-fig").count()) {
+      expect(await page.locator(".pjl-ev").count()).toBeGreaterThan(0);
+      for (const href of await page
+        .locator(".pjl-paper a")
+        .evaluateAll((as) => as.map((a) => a.getAttribute("href"))))
+        expect(href).toMatch(/^\/publications\/[a-z0-9-]+\/$/);
+      await expect(page.locator(".pjl-fig figcaption")).toContainText("Figure 1.");
+    }
+    // No cards, no pills: plain words and ruled rows only.
+    await expect(page.locator("main .bl-card")).toHaveCount(0);
     // Empty sections are hidden.
     const empties = await page
       .locator(".dr-section")
@@ -180,6 +203,30 @@ test("detail: breadcrumb Research › Direction › Project, JSON-LD, team only 
         (ss) => ss.filter((s) => !s.querySelector(".dr-section__body")?.textContent?.trim()).length,
       );
     expect(empties).toBe(0);
+  }
+});
+
+test("detail (phone): the project line's dots stay on the rail, so 'Dots are papers' holds", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await open(page, "/projects/");
+  const href = await page
+    .locator(".pj-group .dr-project__title a")
+    .evaluateAll((as) => as.map((a) => a.getAttribute("href")!));
+  for (const h of href) {
+    await open(page, h);
+    if (!(await page.locator(".pjl-fig").count())) continue;
+    await expect(page.locator(".pjl-fig figcaption")).toContainText("Dots are papers");
+    const dots = page.locator(".pjl-dot");
+    expect(await dots.count()).toBeGreaterThan(0);
+    for (const box of await dots.evaluateAll((ds) =>
+      ds.map((d) => d.getBoundingClientRect().toJSON() as DOMRect),
+    )) {
+      expect(box.width).toBeGreaterThan(0);
+      expect(box.left).toBeGreaterThanOrEqual(0);
+    }
+    return;
   }
 });
 
@@ -215,4 +262,56 @@ test("placeholder and unknown slugs are not pages", async ({ page }) => {
     expect(status, p).toBeGreaterThanOrEqual(400);
     expect(status === 404 || status === 500, `${p} → ${status}`).toBe(true);
   }
+});
+
+test("detail: the project line keeps its lanes aligned, its notes apart and in date order (wide)", async ({
+  page,
+}) => {
+  // Visits every project page; under a parallel run on the dev server 30 s is too tight.
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const { slugs } = await discover(page);
+  let checked = 0;
+  for (const slug of slugs) {
+    await open(page, `/projects/${slug}/`);
+    if (!(await page.locator(".pjl-fig").count())) continue;
+    checked++;
+    // Every dot sits on a lane line of its colour row (same y as some lane).
+    const ok = await page.evaluate(() => {
+      const lanes = [...document.querySelector(".pjl-col")!.querySelectorAll(".pjl-lanes i")].map(
+        (i) => i.getBoundingClientRect().top + i.getBoundingClientRect().height / 2,
+      );
+      return [...document.querySelectorAll(".pjl-dot")].every((d) => {
+        const r = d.getBoundingClientRect();
+        return lanes.some((y) => Math.abs(r.top + r.height / 2 - y) < 2);
+      });
+    });
+    expect(ok, slug).toBe(true);
+    // Notes and paper labels never overlap each other.
+    const boxes = await page
+      .locator(".pjl-note, .pjl-paper")
+      .evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON() as DOMRect));
+    for (let i = 0; i < boxes.length; i++)
+      for (let j = i + 1; j < boxes.length; j++) {
+        const a = boxes[i]!;
+        const b = boxes[j]!;
+        const hit =
+          a.left < b.right - 1 &&
+          b.left < a.right - 1 &&
+          a.top < b.bottom - 1 &&
+          b.top < a.bottom - 1;
+        expect(hit, `${slug}: labels ${i} and ${j} overlap`).toBe(false);
+      }
+    // Left to right is earlier to later: dated notes in each year run in date order.
+    const ordered = await page.evaluate(() =>
+      [...document.querySelectorAll(".pjl-col")].every((col) => {
+        const ts = [...col.querySelectorAll(".pjl-note time")]
+          .map((t) => ({ x: t.getBoundingClientRect().left, d: t.getAttribute("datetime") ?? "" }))
+          .sort((a, b) => a.x - b.x);
+        return ts.every((t, i) => i === 0 || ts[i - 1]!.d <= t.d);
+      }),
+    );
+    expect(ordered, `${slug}: notes out of date order`).toBe(true);
+  }
+  expect(checked).toBeGreaterThan(0);
 });

@@ -1,17 +1,17 @@
 /**
- * WP2: /research/ and /research/{direction}/ (brief §D4–§D5, §E5; WP2 acceptance).
+ * /research/ and /research/{direction}/ (brief §D4–§D5, §E5; redesign D-13 after
+ * docs/redesign/prototypes/p3/research.html).
  * Runs against BASE_URL (default: the shared dev server http://localhost:3100,
  * drafts included). Routes are discovered from the rendered index, so the spec
  * follows whatever content the server has.
  *   npx playwright test tests/e2e/research.spec.ts
- * Screenshots: test-results/WP2/.
+ * Screenshots: test-results/redesign-research/.
  */
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { SWATCHES, CORE_DARK, blend, hexToRgb, type SwatchId } from "../../src/lib/content/palette";
 
 const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
-const SHOTS = "test-results/WP2";
+const SHOTS = "test-results/redesign-research";
 const VIEWPORTS = [
   { name: "1366", width: 1366, height: 768 },
   { name: "390", width: 390, height: 844 },
@@ -35,7 +35,7 @@ async function discover(page: Page) {
   await open(page, "/research/");
   const slugsIn = async (sel: string) =>
     page
-      .locator(`${sel} .bl-card__title a`)
+      .locator(`${sel} .rs-dir__title a`)
       .evaluateAll((as) =>
         as.map((a) => (a.getAttribute("href") ?? "").replace(/^\/research\/|\/$/g, "")),
       );
@@ -124,12 +124,24 @@ test("index: live directions in editorial order, archived under 'Earlier and rel
   if (order.includes("Active") && order.includes("Completed")) {
     expect(order.indexOf("Active")).toBeLessThan(order.indexOf("Completed"));
   }
+  // Strips (wide): one width for every row of a list, year-bin labels that never touch.
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const strips = await page
+    .locator('section[aria-labelledby="rs-directions"] .rs-strip')
+    .evaluateAll((ss) => ss.map((s) => Math.round(s.getBoundingClientRect().width)));
+  expect(new Set(strips).size).toBe(1);
+  const labels = await page
+    .locator('section[aria-labelledby="rs-directions"] .rs-axis__track > span')
+    .evaluateAll((ls) => ls.map((l) => l.getBoundingClientRect().toJSON() as DOMRect));
+  expect(labels.map((l) => l.width).every((w) => w > 0)).toBe(true);
+  for (let i = 1; i < labels.length; i++)
+    expect(labels[i]!.left, "axis labels overlap").toBeGreaterThanOrEqual(labels[i - 1]!.right);
 });
 
 // ---------------------------------------------------------------------------
 // Direction page
 
-test("direction page: header, derived counts, see-all filter, sections, one name per pearl", async ({
+test("direction page: header, derived counts, Figure 2, see-all filter, sections, one pearl", async ({
   page,
 }) => {
   const { live } = await discover(page);
@@ -139,25 +151,22 @@ test("direction page: header, derived counts, see-all filter, sections, one name
     await expect(h1).toHaveCount(1);
     await expect(h1).toHaveAttribute("tabindex", "-1");
 
-    // Breadcrumb "Research / 0N" → /research/; "All directions" → Fig. 1.
-    const crumbs = page.locator('.dr-band nav[aria-label="Breadcrumb"]');
-    await expect(crumbs.locator('a[href="/research/"]')).toHaveText("Research");
-    await expect(crumbs.locator('[aria-current="page"]')).toContainText(/\d{2}/);
+    // Label column: "Research direction", the counts sentence, "All directions" → Fig. 1.
+    await expect(page.locator(".dr-kind")).toContainText("Research direction");
     await expect(page.locator(".dr-back")).toHaveAttribute("href", "/");
 
-    // Hero pearl present; every pearl slug on the page is unique (hero + rail).
-    await expect(page.locator(`.dr-band .f1-dp--hero[data-slug="${slug}"]`)).toHaveCount(1);
-    const slugs = await page
-      .locator(".f1-dp[data-slug]")
-      .evaluateAll((els) => els.map((e) => e.getAttribute("data-slug")));
-    expect(new Set(slugs).size).toBe(slugs.length);
-    expect(slugs.filter((s) => s === slug)).toHaveLength(1);
+    // Exactly one pearl on the page: Figure 2's, for this direction (the morph target).
+    await expect(page.locator(".f1-dp")).toHaveCount(1);
+    await expect(page.locator(`.dr-f2 .f1-dp[data-slug="${slug}"]`)).toHaveCount(1);
 
-    // Status line counts are derived and match what the page lists.
+    // Counts are derived and match what the page lists.
     const status = (await page.locator(".dr-status").textContent()) ?? "";
     const projects = Number(/(\d+) projects?/.exec(status)?.[1]);
     const papers = Number(/(\d+) papers?/.exec(status)?.[1]);
+    const wip = Number(/(\d+) in progress/.exec(status)?.[1] ?? 0);
     await expect(page.locator(".dr-project")).toHaveCount(projects);
+    await expect(page.locator(".dr-f2__p:not(.dr-f2__p--wip)")).toHaveCount(papers);
+    await expect(page.locator(".dr-f2__p--wip")).toHaveCount(wip);
     if (papers > 0) {
       const aside = await page
         .locator('section[aria-labelledby="publications"] .dr-section__aside')
@@ -166,6 +175,13 @@ test("direction page: header, derived counts, see-all filter, sections, one name
       const href = await page.locator(".dr-seeall a").getAttribute("href");
       expect(href).toBe(`/publications/?direction=${slug}`);
     }
+    // Every figure label is a link to the paper page; the figure is captioned.
+    for (const href of await page
+      .locator(".dr-f2__p:not(.dr-f2__p--wip) .dr-f2__t")
+      .evaluateAll((as) => as.map((a) => a.getAttribute("href"))))
+      expect(href).toMatch(/^\/publications\/[a-z0-9-]+\/$/);
+    await expect(page.locator(".dr-f2 figcaption")).toContainText("Figure 2.");
+
     // Empty sections are hidden: every section has content.
     const empties = await page
       .locator(".dr-section")
@@ -173,6 +189,9 @@ test("direction page: header, derived counts, see-all filter, sections, one name
         (ss) => ss.filter((s) => !s.querySelector(".dr-section__body")?.textContent?.trim()).length,
       );
     expect(empties).toBe(0);
+
+    // No pre-redesign hedges in the page chrome (D-13 item 7).
+    await expect(page.locator("main")).not.toContainText("Listed by title only");
 
     // ResearchProject JSON-LD.
     const ld = await page
@@ -187,41 +206,101 @@ test("direction page: header, derived counts, see-all filter, sections, one name
   }
 });
 
-test("header band uses the swatch tokens; the dark band is the computed blend", async ({
+test("Figure 2 geometry: the pearl sits on the line at now (wide); beside the h1, in view (phone)", async ({
   page,
 }) => {
   const { live } = await discover(page);
-  const slug = live[0]!;
-  for (const scheme of ["light", "dark"] as const) {
-    await page.emulateMedia({ colorScheme: scheme });
+  for (const slug of live) {
+    await page.setViewportSize({ width: 1440, height: 900 });
     await open(page, `/research/${slug}/`);
-    const band = page.locator(".dr-band");
-    const id = (await band.getAttribute("data-swatch")) as SwatchId;
-    const s = SWATCHES[id];
-    const expected = scheme === "light" ? s.tint : blend(s.light, CORE_DARK.paper, 0.1);
-    const bg = await band.evaluate((el) => getComputedStyle(el).backgroundColor);
-    const got = (bg.match(/\d+/g) ?? []).slice(0, 3).map(Number);
-    const want = hexToRgb(expected);
-    // tokens.css carries the brief's rounded hexes: allow ±1 per channel.
-    expect(
-      Math.max(...got.map((v, i) => Math.abs(v - want[i]!))),
-      `${id} ${scheme} ${bg}`,
-    ).toBeLessThanOrEqual(1);
+    const fit = await page.locator(".dr-f2").getAttribute("data-fit");
+    const pearl = (await page.locator(".dr-f2__pearl").boundingBox())!;
+    if (fit === "lines") {
+      const dots = await page
+        .locator(".dr-f2__dot")
+        .evaluateAll((ds) => ds.map((d) => d.getBoundingClientRect().toJSON()));
+      for (const d of dots) {
+        // Dots sit on one line through the pearl's centre, all before "now".
+        expect(Math.abs(d.y + d.height / 2 - (pearl.y + pearl.height / 2)), slug).toBeLessThan(2);
+        expect(d.x + d.width, slug).toBeLessThan(pearl.x + pearl.width / 2);
+      }
+      expect(Math.round(pearl.width)).toBe(96);
+      // The caption describes the stubs that are drawn, not the phone's "Also in" lines.
+      if (await page.locator(".dr-f2[data-shared]").count()) {
+        await expect(page.locator(".dr-f2__cap-w")).toBeVisible();
+        await expect(page.locator(".dr-f2__cap-l")).toBeHidden();
+      }
+    }
+    // Phone: the list layout; the pearl beside the h1, inside the first screen, clear of its text.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await open(page, `/research/${slug}/`);
+    const p2 = (await page.locator(".dr-f2__pearl").boundingBox())!;
+    const h1 = (await page.locator("main h1").boundingBox())!;
+    expect(p2.y + p2.height, slug).toBeLessThan(844);
+    expect(Math.abs(p2.y - h1.y), slug).toBeLessThan(24);
+    expect(p2.x, slug).toBeGreaterThan(h1.x + 100);
+    const overlap = await page.evaluate(() => {
+      const p = document.querySelector(".dr-f2__pearl")!.getBoundingClientRect();
+      const range = document.createRange();
+      range.selectNodeContents(document.querySelector(".dr-title")!);
+      return [...range.getClientRects()].some(
+        (r) => r.right > p.left && r.left < p.right && r.bottom > p.top && r.top < p.bottom,
+      );
+    });
+    expect(overlap, `${slug}: h1 text under the pearl`).toBe(false);
+    if (await page.locator(".dr-f2[data-shared]").count()) {
+      await expect(page.locator(".dr-f2__cap-l")).toBeVisible();
+      await expect(page.locator(".dr-f2__cap-w")).toBeHidden();
+    }
   }
 });
 
-test("archived direction: dated Archived note, no index, not in the main grid", async ({
+test("Figure 2 labels never collide (wide): 'Also in' labels clear the twin dots, years and each other", async ({
+  page,
+}) => {
+  const { live, archived } = await discover(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  for (const slug of [...live, ...archived]) {
+    await open(page, `/research/${slug}/`);
+    if (!(await page.locator('.dr-f2[data-fit="lines"]').count())) continue;
+    const hits = await page.evaluate(() => {
+      const r = (e: Element) => e.getBoundingClientRect();
+      const meets = (a: DOMRect, b: DOMRect) =>
+        a.left < b.right - 1 &&
+        b.left < a.right - 1 &&
+        a.top < b.bottom - 1 &&
+        b.top < a.bottom - 1;
+      const labels = [...document.querySelectorAll(".dr-f2 :is(.dr-f2__other, .dr-f2__lab)")].map(
+        r,
+      );
+      const marks = [
+        ...document.querySelectorAll(
+          ".dr-f2 :is(.dr-f2__tw, .dr-f2__dot, .dr-f2__ring, .dr-f2__yr)",
+        ),
+      ].map(r);
+      let n = 0;
+      for (let i = 0; i < labels.length; i++) {
+        for (let j = i + 1; j < labels.length; j++) if (meets(labels[i]!, labels[j]!)) n++;
+        for (const m of marks) if (meets(labels[i]!, m)) n++;
+      }
+      return n;
+    });
+    expect(hits, `${slug}: overlapping Figure 2 labels`).toBe(0);
+  }
+});
+
+test("archived direction: 'Earlier research' with its date, no pearl, not in the main list", async ({
   page,
 }) => {
   const { archived } = await discover(page);
   test.skip(!archived.length, "no archived directions in this content");
   await open(page, `/research/${archived[0]}/`);
-  await expect(page.locator(".dr-archived")).toContainText("Archived");
-  // No index (and so no Fig. 1 pearl to morph from): a quiet pearl without a numeral.
-  await expect(page.locator(".dr-band .f1-dp--hero")).toHaveCount(1);
-  await expect(page.locator(".dr-band .f1-idx")).toHaveCount(0);
-  await expect(page.locator(".dr-archived time")).toHaveCount(1);
-  await expect(page.locator('.dr-band [aria-current="page"]')).toHaveText("Earlier research");
+  await expect(page.locator(".dr-kind")).toContainText("Earlier research");
+  await expect(page.locator(".dr-kind time")).toHaveCount(1);
+  // No index and no Fig. 1 pearl to morph from: no pearl at all.
+  await expect(page.locator(".f1-dp")).toHaveCount(0);
+  await expect(page.locator(".dr-back")).toHaveAttribute("href", "/research/");
+  await expect(page.locator(".dr-f2 figcaption")).toContainText("Figure 1.");
 });
 
 test("rail: nav-forward / nav-back transition types, focus lands on the h1", async ({ page }) => {
@@ -283,21 +362,29 @@ test("forced colours: direction page and index have zero axe violations", async 
   expect(problems).toEqual([]);
 });
 
-test("hero re-bloom (bloomOnMount) is motion-gated", async ({ browser }) => {
+test("Figure 2 arrival is finite and motion-gated", async ({ browser }) => {
   for (const reducedMotion of ["no-preference", "reduce"] as const) {
-    const ctx = await browser.newContext({ reducedMotion });
+    const ctx = await browser.newContext({ reducedMotion, viewport: { width: 1440, height: 900 } });
     const page = await ctx.newPage();
     const { live } = await discover(page);
     await page.goto(`/research/${live[0]}/`);
-    const running = await page.evaluate(
-      () =>
-        document
-          .getAnimations()
-          .filter((a) => (a.effect as KeyframeEffect | null)?.target?.closest?.(".f1-dp--hero"))
-          .filter((a) => Number(a.effect?.getComputedTiming().duration ?? 0) > 0).length,
+    const anims = await page.evaluate(() =>
+      document
+        .getAnimations()
+        .filter((a) => (a.effect as KeyframeEffect | null)?.target?.closest?.(".dr-f2"))
+        .map((a) => {
+          const t = a.effect!.getComputedTiming();
+          return { iterations: Number(t.iterations), end: Number(t.endTime) };
+        }),
     );
-    if (reducedMotion === "reduce") expect(running).toBe(0);
-    else expect(running).toBeGreaterThan(0);
+    if (reducedMotion === "reduce") expect(anims).toHaveLength(0);
+    else {
+      expect(anims.length).toBeGreaterThan(0);
+      for (const a of anims) {
+        expect(Number.isFinite(a.iterations)).toBe(true);
+        expect(a.end).toBeLessThanOrEqual(2000);
+      }
+    }
     await ctx.close();
   }
 });
@@ -325,38 +412,30 @@ test("placeholder and unknown slugs are not pages", async ({ page }) => {
   }
 });
 
-test("wide screens: the hero text starts on the section-body vertical; rail tiles share a row", async ({
+test("wide screens: one label-column grid; Figure 2 stays inside the content column", async ({
   page,
 }) => {
   const { live, archived } = await discover(page);
   await page.setViewportSize({ width: 1366, height: 768 });
-  for (const slug of [live[0]!, ...archived]) {
+  for (const slug of [...live, ...archived]) {
     await open(page, `/research/${slug}/`);
-    const x = (sel: string) =>
+    const box = (sel: string) =>
       page
         .locator(sel)
         .first()
-        .evaluate((el) => Math.round(el.getBoundingClientRect().left));
-    expect(
-      Math.abs((await x(".dr-title")) - (await x(".dr-section__body"))),
-      slug,
-    ).toBeLessThanOrEqual(1);
-    // "All directions" ends on the container's right edge (same as the section rules).
-    const right = (sel: string) =>
-      page
-        .locator(sel)
-        .first()
-        .evaluate((el) => Math.round(el.getBoundingClientRect().right));
-    expect(
-      Math.abs((await right(".dr-back")) - (await right(".dr-section"))),
-      slug,
-    ).toBeLessThanOrEqual(1);
-    const tops = await page
-      .locator(".dr-rail__list > li")
-      .evaluateAll((lis) => [
-        ...new Set(lis.map((li) => Math.round(li.getBoundingClientRect().top))),
-      ]);
-    expect(tops.length, `${slug} rail rows`).toBeLessThanOrEqual(1);
+        .evaluate((el) => el.getBoundingClientRect().toJSON() as DOMRect);
+    // The h1 starts on the section-body vertical; the label column on the section heads'.
+    const title = await box(".dr-title");
+    const body = await box(".dr-section__body");
+    expect(Math.abs(title.left - body.left), slug).toBeLessThanOrEqual(1);
+    const side = await box(".dr-head__side");
+    const head = await box(".dr-section__head");
+    expect(Math.abs(side.left - head.left), slug).toBeLessThanOrEqual(1);
+    if (await page.locator(".dr-f2").count()) {
+      const track = await box(".dr-f2__track");
+      const sec = await box(".dr-section");
+      expect(track.right, slug).toBeLessThanOrEqual(sec.right + 1);
+    }
   }
 });
 

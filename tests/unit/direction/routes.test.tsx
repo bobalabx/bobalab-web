@@ -83,7 +83,7 @@ describe("generateStaticParams for the static export (WP2 #1)", () => {
 describe("direction page markup", () => {
   beforeEach(() => vi.resetModules());
 
-  it("one h1 (tabIndex -1), hero = morph target, rail names unique, derived counts, see-all filter", async () => {
+  it("one h1 (tabIndex -1), Figure 2 pearl = the only morph target, derived counts, see-all filter, More directions", async () => {
     useFixture("n4");
     const { getContent } = await import("@/lib/content/load");
     const c = getContent();
@@ -92,25 +92,42 @@ describe("direction page markup", () => {
       const out = await html(page.default({ params: Promise.resolve({ direction: d.slug }) }));
       expect(count(out, /<h1[\s>]/g)).toBe(1);
       expect(out).toMatch(/<h1 tabindex="-1"/i);
-      // Every pearl slug on the page appears on exactly one DirectionPearl.
+      // Exactly one DirectionPearl: Figure 2's pearl at "now", the morph target
+      // (no rail pearls any more), carrying this direction's slug.
       const slugs = [...out.matchAll(/class="f1-dp[^"]*"[^>]*data-slug="([^"]+)"/g)].map(
         (m) => m[1],
       );
-      expect(new Set(slugs).size).toBe(slugs.length);
-      expect(slugs[0]).toBe(d.slug);
-      expect(slugs.slice(1).sort()).toEqual(
+      const hasFigure = d.counts.papers + d.counts.inProgress > 0;
+      expect(slugs).toEqual(hasFigure ? [d.slug] : []);
+      // Figure 2: one column per counted paper and per work in progress, each paper linked.
+      if (hasFigure) {
+        expect(out).toContain('aria-labelledby="dr-f2-cap"');
+        expect(out).toContain("<b>Figure 2.</b>");
+        expect(count(out, /class="dr-f2__p"/g)).toBe(d.counts.papers);
+        expect(count(out, /class="dr-f2__p dr-f2__p--wip"/g)).toBe(d.counts.inProgress);
+        for (const p of c.countedPublications.filter((x) => x.directions.includes(d.slug)))
+          expect(out).toContain(`href="/publications/${p.slug}/"`);
+      }
+      // Counts sentence is derived from the loader counts.
+      expect(out).toContain(`${d.counts.projects} project`);
+      expect(out).toContain(`${d.counts.papers} paper`);
+      if (d.counts.papers > 0) expect(out).toContain(`href="/publications/?direction=${d.slug}"`);
+      // More directions: every other live direction once, sliding by index;
+      // "All directions" reverses the morph.
+      const rail = /<nav class="dr-rail[\s\S]*?<\/nav>/.exec(out)?.[0] ?? "";
+      const railHrefs = [...rail.matchAll(/href="\/research\/([a-z0-9-]+)\/"/g)].map((m) => m[1]);
+      expect(railHrefs.sort()).toEqual(
         c.directions
           .filter((x) => x.slug !== d.slug)
           .map((x) => x.slug)
           .sort(),
       );
-      // Status line is derived from the loader counts.
-      expect(out).toContain(`${d.counts.projects} project`);
-      expect(out).toContain(`${d.counts.papers} paper`);
-      if (d.counts.papers > 0) expect(out).toContain(`href="/publications/?direction=${d.slug}"`);
-      // Rail links slide by index; "All directions" reverses the morph.
-      expect(out).toMatch(/data-transition="nav-(forward|back)"/);
+      expect(rail).toMatch(/data-transition="nav-(forward|back)"/);
       expect(out).toContain('data-transition="pearl-close"');
+      // No pre-redesign kit: no tinted band, no numerals, no "This direction collects" hedges.
+      expect(out).not.toContain("dr-band");
+      expect(out).not.toContain("f1-idx");
+      expect(out).not.toMatch(/Listed by title only/i);
       // JSON-LD
       expect(out).toContain('"@type":"ResearchProject"');
       // Empty sections are hidden: fixture n4 has no findings and no people.
@@ -152,6 +169,36 @@ describe("project page markup", () => {
     expect(out).not.toMatch(/emery-hidden|Emery/);
     expect(out).not.toMatch(/indigo-draft|Indigo/);
     expect(out).toContain('"@type":"ResearchProject"');
+  });
+});
+
+describe("archived direction (real content)", () => {
+  beforeEach(() => vi.resetModules());
+
+  it("no pearl and no morph name, 'Earlier research' with its date, Figure 1 only when there is a line, back to /research/", async () => {
+    process.env.CONTENT_DIR = fileURLToPath(new URL("../../../content/", import.meta.url));
+    process.env.INCLUDE_DRAFTS = "0";
+    const { getContent } = await import("@/lib/content/load");
+    const c = getContent();
+    const page = await import("@/app/research/[direction]/page");
+    for (const d of c.archivedDirections) {
+      const out = await html(page.default({ params: Promise.resolve({ direction: d.slug }) }));
+      expect(out).not.toContain("f1-dp");
+      expect(out).toContain("<b>Earlier research</b>");
+      if (d.archived_on) expect(out).toMatch(/archived <time dateTime=/);
+      // A figure needs two or more items (a line); a lone paper is listed under Papers only.
+      const items = d.counts.papers + d.counts.inProgress;
+      if (items >= 2) {
+        expect(out).toContain("<b>Figure 1.</b>");
+        // No pearl at now, so the line stops at the last paper and the caption says why.
+        expect(out).toContain("The line ends at the last paper; the direction is archived.");
+        expect(out).not.toMatch(/class="dr-f2"[^>]*data-live/);
+      } else {
+        expect(out).not.toContain('class="dr-f2"');
+        if (d.counts.papers === 1) expect(out).toContain('class="dr-pubs"');
+      }
+      expect(out).toMatch(/<a href="\/research\/" class="dr-back"/);
+    }
   });
 });
 

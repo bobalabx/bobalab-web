@@ -1,12 +1,11 @@
 /**
- * Compact project rows for the research index (§D4 "Projects grouped by
- * status, each with direction tags"): title link, years and direction tags on
- * a ruled list, so the index stays scannable. Full cards live on /projects/.
+ * Compact project rows (research index, person profiles): a ruled one-line
+ * ledger of title link, the project's directions (16 px line segment + name)
+ * and its years. No tags, no boxes (D-13 item 5).
  */
 import Link from "next/link";
 import type { ProjectView } from "@/lib/content/load";
 import { DraftBadge } from "@/components/ui/Badge";
-import { PearlTagList } from "@/components/ui/PearlTag";
 import { projectYears } from "./model";
 
 export function CompactProjectList({
@@ -25,12 +24,17 @@ export function CompactProjectList({
           <li key={p.slug} className="pj-row">
             <p className="pj-row__title">
               <Link href={`/projects/${p.slug}/`}>{p.title}</Link>
+              <DraftBadge show={p.draft} line />
             </p>
-            <div className="pj-row__meta">
-              <PearlTagList items={p.directionRefs} label={`Research directions: ${p.title}`} />
-              {years && <span className="t-mono">{years}</span>}
-              <DraftBadge show={p.draft} />
-            </div>
+            <p className="pj-row__meta">
+              {p.directionRefs.map((d) => (
+                <span key={d.slug} className="pj-row__dir" data-swatch={d.color}>
+                  <span className="bl-seg" aria-hidden="true" />
+                  {d.short_label}
+                </span>
+              ))}
+              {years && <span className="pj-row__years">{years}</span>}
+            </p>
           </li>
         );
       })}

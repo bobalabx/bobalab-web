@@ -1,25 +1,22 @@
-/** WP2 direction helpers (src/components/direction/model.ts) over the fixture sets. */
-import fs from "node:fs";
+/** Direction helpers (src/components/direction/model.ts) over the fixture sets (redesign D-13). */
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { buildContent, loadRawContent } from "@/lib/content/load";
-import { CORE_DARK, SWATCHES, SWATCH_IDS, blend, hexToRgb } from "@/lib/content/palette";
 import { TRANSITION } from "@/lib/vt";
 import {
-  bandColors,
-  bandMinContrast,
-  directionStatusLine,
-  directionStatusParts,
+  countsSentence,
+  directionPeople,
   directionUpdatedDate,
+  listJoin,
   plural,
   publicationsHref,
   railTransition,
+  sharedWith,
   workWithUs,
 } from "@/components/direction/model";
 
 const FIX = fileURLToPath(new URL("../../fixtures/content/", import.meta.url));
-const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const load = (set: string, preview = false) =>
   buildContent(loadRawContent(path.join(FIX, set)), { preview, today: "2026-10-20" });
 
@@ -29,34 +26,69 @@ const counts = (projects: number, papers: number, inProgress = 0) => ({
   inProgress,
 });
 
-describe("status line (§D5.1, computed)", () => {
-  it("leads with 'Active since' only when the lab set active_since", () => {
-    expect(
-      directionStatusLine({ status: "active", active_since: 2021, counts: counts(3, 5) }),
-    ).toBe("Active since 2021 · 3 projects · 5 papers");
-    expect(directionStatusLine({ status: "active", counts: counts(1, 1) })).toBe(
-      "1 project · 1 paper",
-    );
+describe("header counts sentence (P3 .side; computed)", () => {
+  it("names papers, work in progress only when there is some, then projects", () => {
+    expect(countsSentence(counts(4, 4, 1))).toBe("4 papers, 1 in progress and 4 projects");
+    expect(countsSentence(counts(1, 1))).toBe("1 paper and 1 project");
+    expect(countsSentence(counts(0, 0))).toBe("0 papers and 0 projects");
   });
-  it("says Emerging for emerging directions and counts work in progress separately (D-05)", () => {
-    expect(
-      directionStatusParts({ status: "emerging", active_since: 2025, counts: counts(0, 0, 2) }),
-    ).toEqual(["Emerging since 2025", "0 projects", "0 papers", "2 in progress"]);
-    expect(directionStatusParts({ status: "emerging", counts: counts(2, 0) })[0]).toBe("Emerging");
-  });
-  it("archived directions show counts only (the dated note carries the status)", () => {
-    expect(
-      directionStatusLine({ status: "archived", active_since: 2016, counts: counts(2, 3) }),
-    ).toBe("2 projects · 3 papers");
+  it("lists without a serial comma", () => {
+    expect(listJoin([])).toBe("");
+    expect(listJoin(["a"])).toBe("a");
+    expect(listJoin(["a", "b"])).toBe("a and b");
+    expect(listJoin(["a", "b", "c"])).toBe("a, b and c");
   });
   it("matches the loader's derived counts on a fixture", () => {
     const c = load("n4");
     for (const d of c.directions) {
-      const line = directionStatusLine(d);
+      const line = countsSentence(d.counts);
       expect(line).toContain(plural(d.counts.projects, "project"));
       expect(line).toContain(plural(d.counts.papers, "paper"));
       const tagged = c.countedPublications.filter((p) => p.directions.includes(d.slug));
       expect(d.counts.papers).toBe(tagged.length);
+    }
+  });
+});
+
+describe("shared papers ('Shares 3 papers with …')", () => {
+  it("counts this direction's papers that other directions also list, most first", () => {
+    const c = load("n4");
+    for (const d of c.directions) {
+      const papers = c.countedPublications.filter((p) => p.directions.includes(d.slug));
+      const shared = sharedWith(c, d, papers);
+      expect(shared.every((s) => s.direction.slug !== d.slug && s.count > 0)).toBe(true);
+      for (const s of shared)
+        expect(s.count).toBe(papers.filter((p) => p.directions.includes(s.direction.slug)).length);
+      for (let i = 1; i < shared.length; i++)
+        expect(shared[i - 1]!.count).toBeGreaterThanOrEqual(shared[i]!.count);
+    }
+  });
+  it("breaks ties in editorial order and is empty when nothing is shared", () => {
+    const dirs = [{ slug: "a" }, { slug: "b" }, { slug: "c" }] as never[];
+    const c = { directions: dirs, archivedDirections: [] } as never;
+    const papers = [{ directions: ["a", "c"] }, { directions: ["a", "b"] }];
+    expect(sharedWith(c, { slug: "a" }, papers).map((s) => s.direction)).toEqual([
+      dirs[1],
+      dirs[2],
+    ]);
+    expect(sharedWith(c, { slug: "a" }, [{ directions: ["a"] }])).toEqual([]);
+  });
+});
+
+describe("direction people (derived from project teams)", () => {
+  it("unites the listed team members of the direction's projects, current before alumni, once each", () => {
+    const c = load("n4");
+    for (const d of c.directions) {
+      const projects = c.projects.filter((p) => p.directions.includes(d.slug));
+      const people = directionPeople(c, d, projects);
+      const expected = new Set([
+        ...projects.flatMap((p) => p.teamRefs.map((m) => m.slug)),
+        ...c.people.filter((p) => p.directions.includes(d.slug)).map((p) => p.slug),
+      ]);
+      expect(new Set(people.map((p) => p.slug))).toEqual(expected);
+      expect(people.length).toBe(expected.size);
+      const alumniAt = people.findIndex((p) => p.isAlumni);
+      if (alumniAt >= 0) expect(people.slice(alumniAt).every((p) => p.isAlumni)).toBe(true);
     }
   });
 });
@@ -68,35 +100,12 @@ describe("'See all in Publications' keeps the direction filter (WP2 #5)", () => 
   });
 });
 
-describe("rail transition types (§E5)", () => {
+describe("More directions transition types (§E5)", () => {
   it("higher index → nav-forward, lower → nav-back, archived → forward", () => {
     expect(railTransition({ index: 2 }, { index: 3 })).toBe(TRANSITION.navForward);
     expect(railTransition({ index: 3 }, { index: 1 })).toBe(TRANSITION.navBack);
     expect(railTransition({ index: null }, { index: 1 })).toBe(TRANSITION.navForward);
   });
-});
-
-describe("header band colours (WP2 #3: swatch tokens, computed dark band)", () => {
-  const tokens = fs.readFileSync(path.join(ROOT, "src/styles/tokens.css"), "utf8");
-  for (const id of SWATCH_IDS) {
-    it(`${id}: dark band = light tone at 10% over night, and tokens.css agrees`, () => {
-      const b = bandColors(id);
-      expect(b.light.band).toBe(SWATCHES[id].tint);
-      expect(b.dark.band).toBe(blend(SWATCHES[id].light, CORE_DARK.paper, 0.1));
-      // The brief's table (and tokens.css) rounds half-down in places: allow ±1 per channel.
-      const a = hexToRgb(b.dark.band);
-      const t = hexToRgb(SWATCHES[id].bandDark);
-      expect(Math.max(...a.map((v, i) => Math.abs(v - t[i]!)))).toBeLessThanOrEqual(1);
-      const block = new RegExp(
-        `\\[data-swatch="${id}"\\]\\s*\\{[^}]*--dir-band-d:\\s*(#[0-9a-f]{6})`,
-        "i",
-      );
-      expect(block.exec(tokens)?.[1]?.toUpperCase()).toBe(SWATCHES[id].bandDark.toUpperCase());
-    });
-    it(`${id}: every text colour on the band passes 4.5:1 in both modes`, () => {
-      expect(bandMinContrast(id)).toBeGreaterThanOrEqual(4.5);
-    });
-  }
 });
 
 describe("Work with us (§D5.9)", () => {

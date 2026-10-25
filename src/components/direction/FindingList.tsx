@@ -1,6 +1,6 @@
 /**
- * "What we've found" (§D5.3): lab-written finding sentences, each with an
- * evidence label and, when the paper is in this build, a link to it.
+ * "What we've found" (§D5.3): lab-written finding sentences as a ruled list,
+ * each with its evidence label and, when the paper is in this build, a link to it.
  */
 import Link from "next/link";
 import type { FindingView } from "@/lib/content/queries";
@@ -17,9 +17,7 @@ export function FindingList({ findings }: { findings: FindingView[] }) {
             <EvidenceLabel level={f.evidence} />
             {f.publication && (
               <>
-                <span className="dr-sep" aria-hidden="true">
-                  ·
-                </span>
+                {". "}
                 <Link href={`/publications/${f.publication.slug}/`}>
                   {f.publication.title}
                   {f.publication.year ? ` (${f.publication.year})` : ""}
