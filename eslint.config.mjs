@@ -24,6 +24,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "public/admin/**",
     "src/components/brand/wordmark-geometry.ts",
+    // Standalone design prototypes and research artefacts (not site code).
+    "docs/**",
   ]),
 ]);
 

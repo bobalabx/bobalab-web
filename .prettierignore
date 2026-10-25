@@ -10,6 +10,7 @@ src/components/brand/wordmark-geometry.ts
 tests/fixtures/content/**/*.md
 docs/research/
 docs/design/
+docs/redesign/
 docs/DECISIONS.md
 AGENTS.md
 CLAUDE.md
