@@ -52,6 +52,23 @@ describe.skipIf(!present)("WP5 pages in a production build (drafts excluded)", (
     expect(c.opportunities.every((o) => !o.draft)).toBe(true);
   });
 
+  it("Join: one footnote carries the shared as-of date and explains unconfirmed statuses (D-13 item 7)", () => {
+    const c = getContent();
+    const html = renderToStaticMarkup(<JoinPage />);
+    const unconfirmed = c.opportunities.filter((o) => !o.isOpen && o.status === "unknown");
+    // The hedge is never repeated as visible text: each unconfirmed row says it to
+    // screen readers only (visually hidden), and the page explains the dash once.
+    const visible = html.replace(/<span class="vh">[^<]*<\/span>/g, "");
+    expect(visible).not.toContain("Status not confirmed");
+    expect(html.match(/Status not confirmed/g)?.length ?? 0).toBe(unconfirmed.length);
+    expect(html.match(/class="pg-fn/g)?.length ?? 0).toBe(c.opportunities.length ? 1 : 0);
+    if (unconfirmed.length) expect(html.match(/A dash marks/g)?.length).toBe(1);
+    const asOf = new Set(c.opportunities.map((o) => o.as_of ?? ""));
+    if (asOf.size === 1 && [...asOf][0]) {
+      expect(html).toContain(`Statuses as of <time dateTime="${[...asOf][0]}">`);
+    }
+  });
+
   it("Join: only published opportunities, status with as-of date, a mailto in every audience", () => {
     const c = getContent();
     const html = renderToStaticMarkup(<JoinPage />);
@@ -62,10 +79,31 @@ describe.skipIf(!present)("WP5 pages in a production build (drafts excluded)", (
       if (o.as_of) expect(html).toContain(formatDate(o.as_of));
     }
     for (const id of ["students", "partners", "press"]) {
-      const start = html.indexOf(`<section class="pg-section" aria-labelledby="${id}"`);
+      const start = html.indexOf(`<section class="pg-row pg-section" aria-labelledby="${id}"`);
       expect(start, id).toBeGreaterThan(-1);
       const end = html.indexOf("</section>", start);
       expect(html.slice(start, end)).toContain(`href="mailto:${c.site.email}`);
+    }
+  });
+
+  it("Join: a row does not repeat the lab's own address, which its section already gives", () => {
+    const c = getContent();
+    const html = renderToStaticMarkup(<JoinPage />);
+    const lab = c.site.email.toLowerCase();
+    for (const o of c.opportunities) {
+      const start = html.indexOf(`<article class="pg-opp" aria-labelledby="opp-${o.slug}"`);
+      expect(start, o.slug).toBeGreaterThan(-1);
+      const row = html.slice(start, html.indexOf("</article>", start));
+      // Only the row's own link list (a Markdown body may link anything).
+      const links = row.includes('<ul class="pg-links"')
+        ? row.slice(row.indexOf('<ul class="pg-links"'))
+        : "";
+      if (o.email && o.email.toLowerCase() === lab) {
+        expect(links, o.slug).not.toContain(`mailto:${c.site.email}`);
+      } else if (o.email) {
+        // A different contact address is real information and stays.
+        expect(links, o.slug).toContain(`mailto:${o.email}`);
+      }
     }
   });
 

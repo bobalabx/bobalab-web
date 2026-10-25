@@ -1,314 +1,481 @@
 /*
- * WP5 page styles: Join, About, Accessibility, Privacy, 404, and the shared
- * page header used by the news pages. Class prefix: pg-. Plain (unlayered)
- * rules scoped to these classes; tokens come from src/styles/tokens.css.
+ * Page styles for Join, About, Accessibility, Privacy and the 404 page, plus the
+ * page layout shared with News and People ("Lines", D-13; P3 p3.css).
+ * Class prefix: pg-. Unlayered, scoped to these classes; tokens from tokens.css.
+ *
+ * One alignment system: every page is the label column (--lab: 18rem from
+ * 64rem, 12.5rem from 48rem, stacked below) plus the track. Section titles,
+ * dates and short labels sit in the label column; text, lists and ledgers in
+ * the track. Sections are separated by space and 1 px rules, never boxes.
  */
 
-/* ---------- Page shell and header --------------------------------------- */
-/* Same top offset as the other index pages (Research, Publications, People:
-   48 px at every width), so the h1 does not jump when moving through the nav. */
+/* ---------- Page shell and header (P3 .pubs-head / .dr-head) ------------ */
 .pg {
-  padding-top: var(--s-7);
+  padding-top: 44px;
 }
 .pg-head {
   display: grid;
-  gap: var(--s-3);
-  max-width: 50rem;
-  padding-bottom: var(--s-6);
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--s-3);
+}
+@media (min-width: 48rem) {
+  .pg-head {
+    grid-template-columns: var(--lab) minmax(0, 1fr);
+  }
+}
+.pg-head__side {
+  min-width: 0;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+}
+@media (min-width: 48rem) {
+  .pg-head__side {
+    padding-top: 6px;
+    padding-right: var(--s-5);
+  }
+}
+@media (max-width: 47.99rem) {
+  .pg-head__side:empty {
+    display: none;
+  }
+}
+.pg-head__main {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  justify-items: start;
 }
 .pg-head__title {
   max-width: 24ch;
 }
 .pg-head__title--wide {
-  max-width: none;
+  max-width: 34ch;
 }
-/* Titles over 90 characters: between the h2 and h1 sizes (30 → 42 px). */
+/* Very long headlines keep the condensed voice at its 2rem floor. */
 .pg-head__title--long {
-  font-size: clamp(1.875rem, 1.45rem + 1.9vw, 2.625rem);
-  line-height: 1.15;
+  font-size: var(--t-lane);
+  line-height: 1.1;
 }
 .pg-lead {
-  max-width: 60ch;
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
+  max-width: 62ch;
+  font-size: var(--t-title);
+  line-height: 1.5;
   color: var(--ink);
 }
-.pg-lead.prose {
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
+.pg-lead.prose,
+.pg-lead.prose p {
+  font-size: var(--t-title);
+  line-height: 1.5;
 }
+@media (max-width: 39.99rem) {
+  .pg-lead,
+  .pg-lead.prose,
+  .pg-lead.prose p {
+    font-size: 1.125rem;
+  }
+}
+/* Meta words (date, type, "Last reviewed …"): plain muted text, no boxes. */
 .pg-head__meta {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-2) var(--s-3);
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-  color: var(--ink-muted);
+  align-items: baseline;
+  gap: 2px var(--s-3);
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
 }
-
-/* ---------- Sections ---------------------------------------------------- */
-.pg-section {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--s-5);
-  margin-top: var(--s-7);
-  padding-top: var(--s-6);
-  border-top: 1px solid var(--hairline);
-  min-width: 0;
+.pg-head__side .pg-head__meta {
+  flex-direction: column;
+  gap: 2px;
 }
-
-/* Main column + aside (About, statements). Stacks below 64rem. */
-.pg-split {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--s-7);
-  align-items: start;
-}
-@media (min-width: 64rem) {
-  .pg-split {
-    grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem);
-    gap: var(--s-8);
-  }
-}
-.pg-split > * {
-  min-width: 0;
-}
-
-/* Quiet panel (aside facts, contact). Flat, hairline border (§C5). */
-.pg-panel {
-  display: grid;
-  gap: var(--s-4);
-  padding: var(--s-5);
-  background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-md);
-}
-.pg-panel__title {
-  font-family: var(--font-data);
-  font-size: var(--fs-mono);
-  line-height: var(--lh-mono);
-  font-weight: 500;
-  letter-spacing: var(--tracking-mono);
-  text-transform: uppercase;
-  color: var(--ink-muted);
-}
-@media (min-width: 64rem) {
-  .pg-aside {
-    position: sticky;
-    top: calc(var(--header-h) + var(--s-5));
-    display: grid;
-    gap: var(--s-5);
-  }
-}
-.pg-aside {
-  display: grid;
-  gap: var(--s-5);
-}
-
-/* ---------- Definition list of facts ------------------------------------ */
-.pg-facts {
-  display: grid;
-  gap: var(--s-4);
-  margin: 0;
-}
-.pg-facts > div {
-  display: grid;
-  gap: var(--s-1);
-}
-.pg-facts dt {
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-  font-weight: 600;
+.pg-head__meta time {
   color: var(--ink);
+  font-variant-numeric: tabular-nums;
 }
-.pg-facts dd {
-  margin: 0;
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-  color: var(--ink);
-}
-.pg-facts address {
-  font-style: normal;
-}
-.pg-facts__muted {
-  color: var(--ink-muted);
+.pg-head__meta .bl-badge {
+  color: var(--muted);
+  font-weight: 400;
 }
 
-/* Inline list of plain links (PI links, statement cross-links). */
-.pg-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-1) var(--s-4);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-}
-.pg-links a {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3em;
-  min-height: 24px;
-}
-.pg-links .bl-icon {
-  width: 1em;
-  height: 1em;
-}
-
-/* Mail link with icon (Join, statements, 404). */
-.pg-mail {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  min-height: 2.75rem;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-.pg-mail .bl-icon {
-  width: 1.25em;
-  height: 1.25em;
-}
-
-/* ---------- Person line (About: PI) ------------------------------------- */
-.pg-person {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--s-3) var(--s-4);
-  align-items: center;
-}
-.pg-person__name {
-  font-family: var(--font-text);
-  font-size: var(--fs-base);
-  line-height: var(--lh-sm);
-  font-weight: 600;
-}
-.pg-person__title {
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-  color: var(--ink-muted);
-}
-
-/* ---------- About: mission ---------------------------------------------- */
-.pg-mission {
-  display: grid;
-  gap: var(--s-3);
-  margin: 0 0 var(--s-7);
-  padding: var(--s-5) 0 var(--s-5) var(--s-5);
-  border-left: 3px solid var(--accent);
-  max-width: 52rem;
-  justify-items: start;
-}
-.pg-mission__label {
-  font-family: var(--font-data);
-  font-size: var(--fs-mono);
-  line-height: var(--lh-mono);
-  font-weight: 500;
-  letter-spacing: var(--tracking-mono);
-  text-transform: uppercase;
-  color: var(--ink-muted);
-}
-.pg-mission__text {
-  font-family: var(--font-display);
-  font-size: clamp(1.375rem, 1.1rem + 1.1vw, 1.875rem);
-  line-height: 1.3;
-  font-weight: 560;
-  letter-spacing: -0.005em;
-  color: var(--ink);
-  text-wrap: pretty;
-}
-
-/* ---------- Join -------------------------------------------------------- */
+/* "On this page": plain text links in a row (no pills). */
 .pg-jump {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--s-2);
-  margin: 0;
+  column-gap: var(--s-5);
+  margin: 4px 0 0;
   padding: 0;
   list-style: none;
 }
 .pg-jump a {
   display: inline-flex;
   align-items: center;
-  min-height: 2.75rem;
-  padding: 0 1rem;
-  border: 1px solid var(--rule);
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  color: var(--ink);
-  font-size: var(--fs-sm);
+  min-height: 44px;
+  font-size: 1rem;
   font-weight: 500;
-  text-decoration: none;
-}
-.pg-jump a:hover {
-  border-color: var(--accent);
-  color: var(--accent-strong);
 }
 
-.pg-audience {
+/* ---------- Label-column rows (P3 .two) --------------------------------- */
+.pg-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--s-5) var(--s-8);
-  align-items: start;
-}
-@media (min-width: 64rem) {
-  .pg-audience {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  }
-}
-.pg-audience__intro {
-  display: grid;
-  gap: var(--s-4);
-  align-content: start;
-}
-.pg-audience__intro h2 {
-  max-width: 18ch;
-}
-.pg-audience__body {
-  display: grid;
-  gap: var(--s-4);
+  row-gap: 14px;
+  margin-top: var(--sec-gap);
   min-width: 0;
 }
-.pg-subhead {
-  font-family: var(--font-text);
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
-  font-weight: 600;
+@media (min-width: 48rem) {
+  .pg-row {
+    grid-template-columns: var(--lab) minmax(0, 1fr);
+  }
+  .pg-row > .pg-row__label {
+    padding-right: var(--s-5);
+  }
+}
+.pg-row > * {
+  min-width: 0;
+}
+.pg-row__label > h2,
+h2.pg-row__label {
+  font-size: var(--t-h2);
+  line-height: 1.2;
+}
+.pg-row__count {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+/* Content that belongs in the track without a label of its own. */
+@media (min-width: 48rem) {
+  .pg-track {
+    margin-left: var(--lab);
+  }
 }
 
-.pg-opps {
+/* Filter / tool rows: a short label in the label column (P3 .fset). */
+.pg-fset {
   display: grid;
-  gap: var(--s-4);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  margin-top: 26px;
+}
+@media (min-width: 48rem) {
+  .pg-fset {
+    grid-template-columns: var(--lab) minmax(0, 1fr);
+    row-gap: 4px;
+  }
+}
+.pg-fset__label {
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  font-weight: 600;
+}
+@media (max-width: 47.99rem) {
+  .pg-fset__label {
+    margin-top: 10px;
+  }
+}
+.pg-fset > :not(.pg-fset__label) {
+  min-width: 0;
+}
+
+/* Footnote (one per page; D-13 item 7). */
+.pg-fn {
+  margin-top: 22px;
+  max-width: 92ch;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+}
+
+/* ---------- Statement text in the label-column grid --------------------- */
+/* Markdown bodies: each h2 sits in the label column beside its first
+   paragraph; everything else runs in the track. A 1 px ink rule opens each
+   titled part across both columns. */
+.pg-doc {
+  margin-top: 56px;
+  container-type: inline-size;
+}
+.pg-doc > .prose {
+  max-width: none;
+}
+@media (min-width: 48rem) {
+  .pg-doc > .prose,
+  .pg-doc > .prose > article {
+    display: grid;
+    grid-template-columns: var(--lab) minmax(0, 1fr);
+    align-items: start;
+  }
+  .pg-doc > .prose > article {
+    grid-column: 1 / -1;
+  }
+  .pg-doc > .prose > :not(article),
+  .pg-doc > .prose > article > * {
+    grid-column: 2;
+    max-width: 68ch;
+  }
+  .pg-doc > .prose > h2,
+  .pg-doc > .prose > article > h2 {
+    grid-column: 1;
+    max-width: none;
+    padding-right: var(--s-5);
+  }
+  /* The rule above a titled part spans the label column and the track: it is
+     drawn by the h2 at the doc's full width (container units), while the
+     text beside it keeps its measure. */
+  .pg-doc .prose h2,
+  .pg-doc .prose h2 + * {
+    margin-top: 48px;
+    padding-top: 14px;
+  }
+  .pg-doc .prose h2 {
+    position: relative;
+  }
+  .pg-doc .prose h2::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100cqw;
+    border-top: 1px solid var(--ink);
+  }
+  .pg-doc .prose h2 + :is(p, ul, ol) > :first-child {
+    margin-top: 0;
+  }
+  .pg-doc .prose h2 + :is(ul, ol) {
+    padding-top: 18px;
+  }
+}
+@media (max-width: 47.99rem) {
+  .pg-doc .prose h2 {
+    margin-top: 40px;
+    padding-top: 12px;
+    border-top: 1px solid var(--ink);
+  }
+  /* Stacked, the text starts one row-gap under its title, as in .pg-row
+     (it sat flush against the heading). */
+  .pg-doc .prose h2 + *,
+  .pg-doc .prose > h2:first-child + *,
+  .pg-doc .prose > article > h2:first-child + * {
+    margin-top: 14px;
+  }
+}
+.pg-doc .prose h2 {
+  font-size: var(--t-title);
+  line-height: var(--lh-title);
+  font-weight: 600;
+}
+.pg-doc .prose > :first-child,
+.pg-doc .prose > article > :first-child,
+.pg-doc .prose > article > :first-child + * {
+  margin-top: 0;
+}
+
+/* A label-column row on a statement page (About's Mission and Contact, a text
+   page's contact row): drawn exactly like the Markdown parts around it, a 1 px
+   ink rule across both columns and a title-size heading, so one page never
+   mixes three section treatments. */
+.pg-row--doc {
+  margin-top: 56px;
+  padding-top: 14px;
+  border-top: 1px solid var(--ink);
+}
+.pg-doc + .pg-row--doc,
+.pg-row--doc + .pg-row--doc {
+  margin-top: 48px;
+}
+.pg-row--doc + .pg-doc {
+  margin-top: 48px;
+}
+.pg-row--doc .pg-row__label > h2 {
+  font-size: var(--t-title);
+  line-height: var(--lh-title);
+  font-weight: 600;
+}
+.pg-row--doc .pg-facts {
+  border-top: 0;
+  padding-top: 0;
+}
+@media (max-width: 47.99rem) {
+  .pg-row--doc,
+  .pg-doc + .pg-row--doc,
+  .pg-row--doc + .pg-row--doc {
+    margin-top: 40px;
+    padding-top: 12px;
+  }
+  .pg-row--doc + .pg-doc {
+    margin-top: 40px;
+  }
+}
+
+/* ---------- Definition list of facts (P3 .facts) ------------------------- */
+.pg-facts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px 24px;
   margin: 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--ink);
+  font-size: var(--t-meta);
+  line-height: 1.5;
+}
+@media (min-width: 40rem) {
+  .pg-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 64rem) {
+  .pg-facts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.pg-facts > div {
+  min-width: 0;
+}
+.pg-facts dt {
+  font-weight: 600;
+  color: var(--ink);
+}
+.pg-facts dd {
+  margin: 0;
+  color: var(--muted);
+}
+.pg-facts dd a {
+  color: var(--ink);
+}
+.pg-facts address {
+  font-style: normal;
+}
+.pg-facts__name {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* Inline list of plain links (PI links, opportunity links). */
+.pg-links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 4px;
+  margin: 2px 0 0 -6px;
   padding: 0;
   list-style: none;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+}
+.pg-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 2px 6px;
+  color: var(--ink);
+}
+
+/* The lab address as a link (Join, statements). */
+.pg-mail {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.pg-mail .bl-icon {
+  display: none;
+}
+
+/* ---------- About: mission ---------------------------------------------- */
+.pg-mission__text {
+  max-width: 34ch;
+  font-size: var(--t-h2);
+  line-height: 1.3;
+  font-weight: 400;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+@media (max-width: 39.99rem) {
+  .pg-mission__text {
+    font-size: 1.375rem;
+    line-height: 1.35;
+  }
+}
+
+/* ---------- Join: opportunities ledger ---------------------------------- */
+.pg-audience {
+  display: grid;
+  gap: var(--s-4);
+  justify-items: start;
+}
+.pg-audience > .prose {
+  max-width: 68ch;
+}
+.pg-audience > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.pg-subhead {
+  margin-top: var(--s-4);
+  font-size: var(--t-title);
+  line-height: var(--lh-title);
+  font-weight: 600;
+}
+.pg-opps {
+  justify-self: stretch;
+  margin: var(--s-3) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--hairline);
+}
+.pg-opps > li + li {
+  border-top: 1px solid var(--hairline);
 }
 .pg-opp {
   display: grid;
-  gap: var(--s-3);
-  padding: var(--s-5);
-  background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-md);
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 4px;
+  padding: 16px 0 18px;
+}
+@media (min-width: 64rem) {
+  .pg-opp {
+    grid-template-columns: minmax(0, 1fr) 11rem;
+    column-gap: 24px;
+  }
+  .pg-opp > * {
+    grid-column: 1;
+  }
+  .pg-opp > .pg-opp__status {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    padding-top: 3px;
+  }
+}
+.pg-opp__title {
+  font-size: var(--t-title);
+  line-height: var(--lh-title);
+  font-weight: 600;
 }
 .pg-opp__status {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-2) var(--s-3);
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-  color: var(--ink-muted);
+  flex-direction: column;
+  gap: 0;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
 }
-.pg-opp__title {
-  font-family: var(--font-text);
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
-  font-weight: 600;
+@media (max-width: 63.99rem) {
+  .pg-opp__status {
+    flex-direction: row;
+    flex-wrap: wrap;
+    column-gap: var(--s-3);
+  }
+}
+.pg-opp__status .bl-badge {
+  color: var(--ink);
+  font-weight: 500;
 }
 .pg-opp__route {
-  font-size: var(--fs-base);
+  max-width: 68ch;
   color: var(--ink);
   /* Routes contain long slash-joined phrases ("Science/Econometrics/Algorithms"). */
   overflow-wrap: anywhere;
@@ -316,88 +483,62 @@
 .pg-opp__label {
   font-weight: 600;
 }
-.pg-opps > li,
-.pg-opp {
-  min-width: 0;
+.pg-opp > .prose {
+  max-width: 68ch;
+  color: var(--muted);
+}
+.pg-opp .pg-links {
+  margin-top: 4px;
 }
 
 /* ---------- 404 --------------------------------------------------------- */
-.pg-404 {
-  display: grid;
-  gap: var(--s-7);
-  padding-bottom: var(--s-4);
-}
-.pg-404__head {
-  display: grid;
-  gap: var(--s-4);
-  max-width: 44rem;
-}
-.pg-404__code {
-  font-family: var(--font-data);
-  font-size: var(--fs-mono);
-  letter-spacing: var(--tracking-mono);
-  text-transform: uppercase;
-  color: var(--ink-muted);
-}
 .pg-404__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-3);
-  align-items: center;
+  margin-top: 4px;
 }
 .pg-dirs {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--s-2);
-  /* The links' left padding (for the hover fill) would indent the pearls
-     8 px from the heading's edge; pull the list back so they line up. */
-  margin: 0 0 0 calc(-1 * var(--s-2));
+  margin: 0;
   padding: 0;
   list-style: none;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--hairline);
 }
-@media (min-width: 48rem) {
-  .pg-dirs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--s-3) var(--s-5);
-  }
+.pg-dirs > li + li {
+  border-top: 1px solid var(--hairline);
 }
 .pg-dirs a {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: start;
-  gap: var(--s-4);
-  min-height: 3.5rem;
-  padding: var(--s-2) var(--s-3) var(--s-2) var(--s-2);
-  border-radius: var(--r-md);
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: baseline;
+  padding: 14px 0 16px;
   color: var(--ink);
   text-decoration: none;
 }
-.pg-dirs a:hover {
-  background: var(--paper-alt);
-}
-.pg-dirs a:hover .pg-dirs__title {
-  text-decoration: underline;
-  text-decoration-color: var(--accent);
-  text-decoration-thickness: 2px;
+/* A segment has no text, so baseline alignment set its bottom edge on the
+   title's baseline and it read as an underscore. Centre it on the x-height of
+   the first title line instead (P3 .seg sits 0.3em above the baseline). */
+.pg-dirs .bl-seg {
+  align-self: start;
+  margin: calc(var(--t-title) * 0.6) 0 0;
 }
 .pg-dirs__title {
+  font-size: var(--t-title);
+  line-height: var(--lh-title);
   font-weight: 600;
-  line-height: var(--lh-sm);
+}
+.pg-dirs a:hover .pg-dirs__title {
+  text-decoration: underline 2px var(--ink);
+  text-underline-offset: 0.18em;
 }
 .pg-dirs__q {
   display: block;
-  margin-top: 0.15rem;
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-  font-weight: 400;
-  color: var(--ink-muted);
+  margin-top: 2px;
+  max-width: 68ch;
+  font-size: var(--t-body);
+  line-height: 1.5;
+  color: var(--muted);
 }
-
-.pg-narrow {
-  max-width: 30rem;
-}
-.pg-links--spaced {
-  margin-top: var(--s-3);
+.pg-dirs .bl-draft-line {
+  margin-top: 2px;
 }
 
 /* Body text starts flush with its column (Markdoc wraps bodies in <article>,
@@ -406,6 +547,77 @@
 .pg .prose > article > :first-child {
   margin-top: 0;
 }
-.pg-404 > .pg-section {
-  margin-top: 0;
+
+/* ---------- Forced colours ---------------------------------------------- */
+@media (forced-colors: active) {
+  .pg-dirs .bl-seg {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+}
+
+.pg-facts .pg-mail {
+  min-height: 24px;
+  font-weight: 400;
+}
+.pg-404 > .pg-fn {
+  margin-top: 40px;
+}
+/* Phones stack the label column first, which would put "Page not found
+   (error 404)" above the h1 as an eyebrow. Set it under the headline instead
+   (P3 moves .dr-head .side below the title the same way). */
+@media (max-width: 47.99rem) {
+  .pg-404 .pg-head__main {
+    display: contents;
+  }
+  .pg-404 .pg-head__side {
+    order: 1;
+    margin-top: -4px;
+  }
+  .pg-404 .pg-head__main > :not(h1) {
+    order: 2;
+  }
+}
+
+/* Join: column heads over the opportunities ledger (P3 project table .pt-h). */
+.pg-opps__h {
+  display: none;
+}
+@media (min-width: 64rem) {
+  .pg-opps__h {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 11rem;
+    column-gap: 24px;
+    justify-self: stretch;
+    margin-top: var(--s-3);
+    padding: 8px 0;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--hairline);
+    font-size: var(--t-meta);
+    line-height: var(--lh-meta);
+    color: var(--muted);
+  }
+  .pg-opps__h + .pg-opps {
+    margin-top: calc(-1 * var(--s-4));
+    border-top: 0;
+  }
+}
+.pg > .pg-fn.pg-track {
+  margin-top: 64px;
+}
+.pg-opp__statlabel {
+  color: var(--muted);
+}
+@media (max-width: 63.99rem) {
+  .pg-opp__status {
+    column-gap: 0.35em;
+  }
+  .pg-opp__status > :nth-child(n + 3) {
+    margin-left: var(--s-2);
+  }
+}
+@media (min-width: 64rem) {
+  .pg-opp__statlabel {
+    display: none;
+  }
 }

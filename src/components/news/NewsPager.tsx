@@ -1,7 +1,8 @@
 /**
- * Previous / next on a news item (brief §D10). `previous` is the next older
- * item, `next` the next newer one (queries.newsDetail). Each link names its
- * direction, the item title and its full date.
+ * Previous / next on a news item (brief §D10), two plain entries under a 1 px
+ * ink rule. `previous` is the next older item, `next` the next newer one
+ * (queries.newsDetail). Each link names its direction, the item title and its
+ * full date.
  */
 import Link from "next/link";
 import type { NewsView } from "@/lib/content/load";

@@ -139,7 +139,7 @@ describe("person helpers", () => {
       "Professor of X",
     );
     expect(roleLine({ role: "undergrad", title: undefined, program: "econ" })).toBe(
-      "Undergraduate RA · econ",
+      "Undergraduate RA, econ",
     );
     expect(roleLine({ role: "phd", title: undefined, program: undefined })).toBe("PhD student");
   });

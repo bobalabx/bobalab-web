@@ -1,7 +1,8 @@
 /**
  * A person's public links (Haas profile, website, Scholar, LinkedIn, GitHub, ORCID, CV) and
- * email only when `email_public` (the loader drops it otherwise). Every link's
- * accessible name includes the person's name (WCAG 2.4.4).
+ * email only when `email_public` (the loader drops it otherwise), as plain
+ * underlined text links. Every link's accessible name includes the person's
+ * name (WCAG 2.4.4).
  */
 import { isExternalUrl, withBasePath } from "@/lib/site/paths";
 import type { PersonLink } from "./model";
@@ -13,8 +14,8 @@ export function PersonLinks({
 }: {
   name: string;
   links: PersonLink[];
-  /** inline: compact text links (cards); buttons: outlined pills (profile header). */
-  variant?: "inline" | "buttons";
+  /** inline: compact meta-size links (member rows); lead: body-size links (PI, person page). */
+  variant?: "inline" | "lead";
 }) {
   if (!links.length) return null;
   return (

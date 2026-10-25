@@ -1,13 +1,15 @@
 /**
- * One opportunity on /join/ (DECISIONS D-05): title, status with its "as of"
- * date, closing date (only when content gives one), route, links and body.
- * Nothing is inferred: an unknown status says so, and "Apply" appears only
- * while the opportunity is open.
+ * One opportunity on /join/ (DECISIONS D-05), a ruled ledger row: title, route,
+ * body and links in the track; status, closing date and "as of" date at the
+ * right. Nothing is inferred and statuses stay honest: an unknown status shows
+ * a dash (the page's one footnote explains it, D-13 item 7; screen readers
+ * still hear "Status not confirmed" in the row), and "Apply" appears only while
+ * the opportunity is open. The "as of" date is shown per row unless the page
+ * states one shared date in its footnote (`asOfInNote`).
  */
 import type { OpportunityView } from "@/lib/content/load";
 import { Badge, DraftBadge } from "@/components/ui/Badge";
 import { DateText } from "@/components/ui/DateText";
-import { Icon } from "@/components/ui/icons";
 import { Prose } from "@/components/ui/Prose";
 import { mailtoHref } from "./MailLink";
 import "./pages.css";
@@ -23,11 +25,33 @@ const ROUTE_LABELS: Record<OpportunityView["audience"], string> = {
   press: "Next step",
 };
 
+/** The status in words; "Status not confirmed" for an unknown status. */
 export function statusLabel(o: Pick<OpportunityView, "status" | "isOpen">): string {
   if (o.isOpen) return o.status === "rolling" ? "Open, rolling" : "Open";
   if (o.status === "unknown") return "Status not confirmed";
   return "Closed";
 }
+
+/**
+ * Where an opportunity's `url` goes, in words (change request content-4b: link text
+ * says where a link goes, not "More information"). Falls back to the host name.
+ */
+export function urlLabel(url: string): string {
+  let host: string;
+  try {
+    host = new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "Details";
+  }
+  if (host === "urapprojects.berkeley.edu") return "URAP listing";
+  if (host === "classes.berkeley.edu") return "Class listing";
+  if (host === "parksinchaisri.github.io") return "Park Sinchaisri’s website";
+  return host;
+}
+
+/** True when the lab has not confirmed whether the opportunity is open. */
+export const isUnconfirmed = (o: Pick<OpportunityView, "status" | "isOpen">) =>
+  !o.isOpen && o.status === "unknown";
 
 /** Open first, then closed (a known status), then unconfirmed; published before drafts; then title. */
 export function compareOpportunities(a: OpportunityView, b: OpportunityView): number {
@@ -35,13 +59,36 @@ export function compareOpportunities(a: OpportunityView, b: OpportunityView): nu
   return rank(a) - rank(b) || Number(a.draft) - Number(b.draft) || a.title.localeCompare(b.title);
 }
 
-export function OpportunityStatus({ o }: { o: OpportunityView }) {
+/** The one "as of" date every opportunity shares, if they all carry the same one. */
+export function sharedAsOf(opps: Array<Pick<OpportunityView, "as_of">>): string | undefined {
+  const dates = new Set(opps.map((o) => o.as_of ?? ""));
+  if (dates.size !== 1) return undefined;
+  const [d] = [...dates];
+  return d || undefined;
+}
+
+export function OpportunityStatus({
+  o,
+  asOfInNote = false,
+}: {
+  o: OpportunityView;
+  asOfInNote?: boolean;
+}) {
   const pastClose = (o.status === "open" || o.status === "rolling") && !o.isOpen && o.closes_on;
   return (
     <p className="pg-opp__status">
-      <Badge tone={o.isOpen ? "accent" : "neutral"} dot={o.isOpen}>
-        {statusLabel(o)}
-      </Badge>
+      {/* Phones have no column head, so the row names its status column. */}
+      <span className="pg-opp__statlabel" aria-hidden="true">
+        Status:
+      </span>
+      {isUnconfirmed(o) ? (
+        <span className="pg-opp__unconfirmed">
+          <span aria-hidden="true">–</span>
+          <span className="vh">{statusLabel(o)}</span>
+        </span>
+      ) : (
+        <Badge>{statusLabel(o)}</Badge>
+      )}
       {o.isOpen && o.closes_on ? (
         <span>
           Closes <DateText value={o.closes_on} />
@@ -53,7 +100,7 @@ export function OpportunityStatus({ o }: { o: OpportunityView }) {
         </span>
       ) : null}
       {o.as_of ? (
-        <span>
+        <span className={asOfInNote ? "vh" : undefined}>
           as of <DateText value={o.as_of} />
         </span>
       ) : null}
@@ -64,18 +111,28 @@ export function OpportunityStatus({ o }: { o: OpportunityView }) {
 
 export function OpportunityCard({
   o,
+  asOfInNote = false,
   headingLevel: H = "h3",
+  labEmail,
 }: {
   o: OpportunityView;
+  asOfInNote?: boolean;
   headingLevel?: "h3" | "h4";
+  /**
+   * The lab's own address, which the page already gives in its lead and in every
+   * audience section. A row whose contact is that same address does not print it
+   * again (it appeared up to seven times on /join/).
+   */
+  labEmail?: string;
 }) {
   const id = `opp-${o.slug}`;
+  const email = o.email && o.email.toLowerCase() !== labEmail?.toLowerCase() ? o.email : undefined;
   return (
     <article className="pg-opp" aria-labelledby={id}>
       <H className="pg-opp__title" id={id}>
         {o.title}
       </H>
-      <OpportunityStatus o={o} />
+      <OpportunityStatus o={o} asOfInNote={asOfInNote} />
       {o.route ? (
         <p className="pg-opp__route">
           <span className="pg-opp__label">{ROUTE_LABELS[o.audience]}:</span>{" "}
@@ -83,29 +140,28 @@ export function OpportunityCard({
         </p>
       ) : null}
       {o.body?.trim() ? <Prose source={o.body} /> : null}
-      {o.url || (o.isOpen && o.apply_url) || o.email ? (
+      {o.url || (o.isOpen && o.apply_url) || email ? (
         <ul className="pg-links" aria-label={`Links for ${o.title}`}>
           {o.isOpen && o.apply_url ? (
             <li>
               <a href={o.apply_url} rel="noopener noreferrer">
                 Apply<span className="vh"> for {o.title}</span>
-                <Icon name="external" />
               </a>
             </li>
           ) : null}
           {o.url ? (
             <li>
               <a href={o.url} rel="noopener noreferrer">
-                More information<span className="vh"> about {o.title}</span>
-                <Icon name="external" />
+                {urlLabel(o.url)}
+                <span className="vh"> for {o.title}</span>
               </a>
             </li>
           ) : null}
-          {o.email ? (
+          {email ? (
             <li>
-              <a href={mailtoHref(o.email, o.title)}>
+              <a href={mailtoHref(email, o.title)}>
                 <span className="vh">Email about {o.title}: </span>
-                {o.email}
+                {email}
               </a>
             </li>
           ) : null}

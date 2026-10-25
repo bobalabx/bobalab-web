@@ -1,19 +1,20 @@
 /**
- * Person avatar (brief §D9 "Card"): the photo only when the person consented
- * (the loader removes `photo` unless `photo_consent: true`), otherwise a
- * pearl-initial avatar in a deterministic swatch colour (model.avatarSwatch).
- * Decorative in both cases next to the name, except that a consented photo
- * keeps its editor-written alt text.
+ * Person avatar (brief §D9; D-13 item 5): a SQUARE photo, only when the person
+ * consented (the loader removes `photo` unless `photo_consent: true`),
+ * otherwise a square initials tile (Pearl with `initials`). Decorative in both
+ * cases next to the name, except that a consented photo keeps its
+ * editor-written alt text. No circles, halos or rounded corners.
+ *   card: 64 px (member rows); lead and profile: 160 px (the PI on /people/,
+ *   person pages), 120 px on phones. Sizes are set in people.css.
  */
-import type { CSSProperties } from "react";
 import type { PublicPerson } from "@/lib/content/people";
 import type { SwatchId } from "@/lib/content/palette";
 import { Pearl } from "@/components/ui/Pearl";
 import { Img } from "@/components/ui/Img";
 
-export type AvatarSize = "row" | "card" | "profile";
+export type AvatarSize = "card" | "lead" | "profile";
 
-const PX: Record<AvatarSize, number> = { row: 44, card: 64, profile: 112 };
+const PX: Record<AvatarSize, number> = { card: 64, lead: 160, profile: 160 };
 
 export function PersonAvatar({
   person,
@@ -41,11 +42,10 @@ export function PersonAvatar({
   }
   return (
     <Pearl
-      size={size === "row" ? "row" : "avatar"}
+      size="avatar"
       initials={initials}
       swatch={swatch}
       className={`pp-avatar pp-avatar--${size}`}
-      style={size === "profile" ? ({ "--pd": `${px}px` } as CSSProperties) : undefined}
     />
   );
 }

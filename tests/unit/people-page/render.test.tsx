@@ -94,17 +94,29 @@ describe("People index (consent-edge-cases, production)", () => {
     expect(html).not.toContain("Fixture University");
   });
 
-  it("uses pearl-initial avatars when there is no consented photo", () => {
+  it("uses square initials tiles when there is no consented photo; alumni rows have no avatar", () => {
     const devon = between(html, 'id="person-devon-placeholder"', "</article>");
     expect(html).toMatch(/bl-pearl__initials">DP</);
     expect(devon).not.toContain("<img");
-    // Every card has exactly one avatar (img or pearl).
-    const cards = html.split('<article class="pp-').slice(1);
+    // Every current member's row has exactly one square avatar (img or initials tile).
+    const cards = html.split('<article class="pp-card').slice(1);
+    expect(cards.length).toBeGreaterThan(0);
     for (const card of cards) {
       const n =
         (card.match(/<img\b/g)?.length ?? 0) + (card.match(/bl-pearl__initials/g)?.length ?? 0);
       expect(n).toBe(1);
     }
+    // Alumni are a compact text list (D-13 item 5): no photo, no tile.
+    const alums = html.split('<article class="pp-alum"').slice(1);
+    expect(alums.length).toBeGreaterThan(0);
+    for (const alum of alums) {
+      const row = alum.slice(0, alum.indexOf("</article>"));
+      expect(row).not.toContain("<img");
+      expect(row).not.toContain("bl-pearl");
+    }
+    // The size classes people.css squares off (160 px lead, 64 px rows).
+    expect(html).toMatch(/pp-avatar pp-avatar--lead/);
+    expect(html).toMatch(/pp-avatar pp-avatar--card/);
   });
 
   it("links names only for people with a profile page", () => {
@@ -247,6 +259,33 @@ describe("Person page (consent-edge-cases)", () => {
     expect(blair).not.toContain('id="directions"');
   });
 
+  it("sets the lab role after the name and title, never as an eyebrow above the h1 (D-13 item 5)", () => {
+    const head = between(html, '<header class="pp-profile__head"', "</header>");
+    const h1 = head.indexOf("<h1");
+    const role = head.indexOf('<span class="pp-profile__role">Principal investigator</span>');
+    expect(h1).toBeGreaterThan(-1);
+    expect(role).toBeGreaterThan(h1);
+    // Nothing but the avatar comes before the name in the header.
+    expect(head.slice(0, h1)).not.toMatch(/<p\b/);
+    expect(head).toContain('<div class="pp-profile__meta"><span class="pp-profile__role">');
+  });
+
+  it("gives every section its count in the label column and the WIP note there too", () => {
+    const wip = between(html, 'aria-labelledby="in-progress"', "</section>");
+    expect(wip).toMatch(/class="pg-row__count">1 title, no public version yet</);
+    expect(wip).not.toContain("documented talk");
+    const projects = between(html, 'aria-labelledby="projects"', "</section>");
+    const n = pi.projects.length;
+    expect(projects).toContain(`class="pg-row__count">${n} ${n === 1 ? "project" : "projects"}<`);
+  });
+
+  it("uses the site's one provenance wording when a footnote is needed", () => {
+    expect(html).not.toContain("Review statuses are as reported by the lab.");
+    if (html.includes('class="pg-fn')) {
+      expect(html).toContain("Review status and dates are as reported by the lab.");
+    }
+  });
+
   it("puts the lab affiliation (site.yml) under the principal investigator's title only", () => {
     const affil = c.site.affiliation_text;
     expect(html).toContain(`<p class="pp-profile__affil">${affil}</p>`);
@@ -310,7 +349,7 @@ describe("Person page (consent-edge-cases)", () => {
     expect(links).toContain('<span class="vh"> of Avery Example</span>');
   });
 
-  it("does not repeat 'Alumni' as a badge next to the eyebrow", () => {
+  it("does not repeat 'Alumni' as a badge next to the role line", () => {
     // No alum has a profile page in the fixture, so give Finley one for this render.
     const withProfile = {
       ...c,
@@ -322,7 +361,7 @@ describe("Person page (consent-edge-cases)", () => {
     const finley = buildPersonProfile(withProfile, "finley-alum")!;
     expect(finley.item.person.isAlumni).toBe(true);
     const h = renderToStaticMarkup(<PersonProfile content={withProfile} model={finley} />);
-    expect(h).toContain('<p class="t-eyebrow">Alumni · Undergraduate RA</p>');
+    expect(h).toContain('<span class="pp-profile__role">Alumni, Undergraduate RA</span>');
     expect(h.match(/Alumni/g)?.length).toBe(1);
     expect(h).toContain("Now at Fixture Company");
   });

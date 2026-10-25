@@ -1,7 +1,9 @@
 /**
- * /news/ (brief §D10, R3 §7.8): "Upcoming talks" computed from event_date ≥
- * build date (America/Los_Angeles), then every item newest first under year
- * headings, each with its full date ("Oct 20, 2026") and type badge.
+ * /news/ (brief §D10, R3 §7.8) as an editorial log on the label-column grid:
+ * "Upcoming talks" first (computed from event_date ≥ build date in
+ * America/Los_Angeles), then every item newest first under inline year
+ * headings. Each row has its full date ("Oct 20, 2026") and its type as a
+ * plain word in the label column, then the title, summary and directions.
  */
 import type { Metadata } from "next";
 import { getContent } from "@/lib/content/load";
@@ -31,20 +33,22 @@ export default function NewsPage() {
   const c = getContent();
   const upcoming = upcomingNews(c);
   const years = groupByYear(c.news, newsYear);
+  const total = c.news.length;
 
   return (
-    <div className="bl-container pg">
+    <div className="bl-container pg nw-page">
       <PageHeader
         title="News"
         lead={`Papers, talks, awards and other news from ${c.site.name}, newest first.`}
-      >
-        <div className="nw-tools">
-          <FeedLink siteName={c.site.name} />
-          {years.length > 1 ? (
+      />
+
+      <div className="pg-fset nw-tools">
+        {years.length > 1 ? (
+          <>
+            <span className="pg-fset__label" aria-hidden="true">
+              Year
+            </span>
             <nav className="nw-years" aria-label="News by year">
-              <span className="nw-years__label" aria-hidden="true">
-                Jump to
-              </span>
               <ul>
                 {years.map((g) => (
                   <li key={g.year ?? "undated"}>
@@ -53,34 +57,46 @@ export default function NewsPage() {
                 ))}
               </ul>
             </nav>
-          ) : null}
-        </div>
-      </PageHeader>
+          </>
+        ) : null}
+        <span className="pg-fset__label" aria-hidden="true">
+          Follow
+        </span>
+        <p>
+          <FeedLink siteName={c.site.name} />
+        </p>
+      </div>
 
       <UpcomingTalks items={upcoming} />
 
-      {years.length === 0 ? <p className="nw-empty">There is no news yet.</p> : null}
+      {total === 0 ? <p className="nw-empty pg-track">There is no news yet.</p> : null}
 
-      {years.map((g) => {
-        const id = yearAnchor(g.year);
-        return (
-          <section key={id} className="nw-year" aria-labelledby={id}>
-            <div className="nw-year__head">
-              <h2 id={id}>{g.year ?? "Undated"}</h2>
-              <p className="nw-year__count">
-                {g.items.length} {g.items.length === 1 ? "item" : "items"}
-              </p>
-            </div>
-            <ol className="nw-list">
-              {g.items.map((n) => (
-                <li key={n.slug}>
-                  <NewsItem item={n} as="h3" />
-                </li>
-              ))}
-            </ol>
-          </section>
-        );
-      })}
+      {years.length ? (
+        <div className="nw-log">
+          {years.map((g) => {
+            const id = yearAnchor(g.year);
+            return (
+              <section key={id} className="nw-year" aria-labelledby={id}>
+                <div className="nw-year__head">
+                  <h2 id={id} className="t-year">
+                    {g.year ?? "Undated"}
+                  </h2>
+                  <p className="nw-year__count">
+                    {g.items.length} {g.items.length === 1 ? "item" : "items"}
+                  </p>
+                </div>
+                <ol className="nw-list">
+                  {g.items.map((n) => (
+                    <li key={n.slug}>
+                      <NewsItem item={n} as="h3" />
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }

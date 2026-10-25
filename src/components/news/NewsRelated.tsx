@@ -1,45 +1,60 @@
 /**
- * "Related" panel on a news item (brief §D10): linked papers, people and
- * research directions, each group shown only when content links something.
- * People appear only if listed (the loader drops unlisted people); they link
- * to a profile page only when one exists.
+ * "Related" row on a news item (brief §D10): linked papers, people and
+ * research directions in the track, each group shown only when content links
+ * something. People appear only if listed (the loader drops unlisted people);
+ * they link to a profile page only when one exists. The caller renders the
+ * row's label (h2#news-related) and the provenance footnote.
  */
 import Link from "next/link";
 import type { NewsView } from "@/lib/content/load";
 import { PearlTagList } from "@/components/ui/PearlTag";
 import { statusLine } from "@/components/ui/PublicationEntry";
 import { ROLE_LABELS } from "@/lib/content/people";
-import "@/components/pages/pages.css";
 import "./news.css";
 
 export function hasRelated(n: NewsView): boolean {
   return Boolean(n.publicationRefs.length || n.peopleRefs.length || n.directionRefs.length);
 }
 
+/**
+ * True when the Related row prints a review status the lab reported itself, so
+ * the page needs its one provenance footnote (D-13 item 7). Awards are not shown
+ * in this row, so they never trigger it.
+ */
+export function showsReportedStatus(n: NewsView): boolean {
+  return n.publicationRefs.some(
+    (p) => p.status_source === "self-reported" && statusLine(p, p.type) !== null,
+  );
+}
+
+/** "Management Science, 2026"; the year is left out when the venue already names it. */
+export function venueLine(p: { venue?: string | null; year?: number | null }): string {
+  const venue = p.venue?.trim() ?? "";
+  if (!p.year) return venue;
+  if (venue.includes(String(p.year))) return venue;
+  return [venue, p.year].filter(Boolean).join(", ");
+}
+
 export function NewsRelated({ item }: { item: NewsView }) {
   if (!hasRelated(item)) return null;
   return (
-    <div className="pg-panel nw-related">
-      <h2 id="news-related" className="pg-panel__title">
-        Related
-      </h2>
+    <div className="nw-related">
       {item.publicationRefs.length ? (
-        <div className="nw-related__group">
+        <div className="nw-related__group nw-related__group--papers">
           <h3>{item.publicationRefs.length === 1 ? "Paper" : "Papers"}</h3>
           <ul className="nw-related__list">
             {item.publicationRefs.map((p) => {
-              const venue = [p.venue, p.year].filter(Boolean).join(", ");
+              const venue = venueLine(p);
               const status = statusLine(p, p.type);
               return (
                 <li key={p.slug}>
                   <Link href={`/publications/${p.slug}/`}>{p.title}</Link>
-                  {venue || status ? (
+                  {venue ? (
                     <span className="nw-related__sub">
-                      {venue ? <cite>{venue}</cite> : null}
-                      {venue && status ? " · " : null}
-                      {status}
+                      <cite>{venue}</cite>
                     </span>
                   ) : null}
+                  {status ? <span className="nw-related__sub">{status}</span> : null}
                 </li>
               );
             })}
@@ -52,7 +67,11 @@ export function NewsRelated({ item }: { item: NewsView }) {
           <ul className="nw-related__list">
             {item.peopleRefs.map((p) => (
               <li key={p.slug}>
-                {p.hasProfile ? <Link href={`/people/${p.slug}/`}>{p.name}</Link> : p.name}
+                {p.hasProfile ? (
+                  <Link href={`/people/${p.slug}/`}>{p.name}</Link>
+                ) : (
+                  <span className="nw-related__name">{p.name}</span>
+                )}
                 <span className="nw-related__sub">
                   {p.isAlumni ? "Alumni" : p.title || ROLE_LABELS[p.role].one}
                 </span>

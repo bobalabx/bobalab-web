@@ -1,9 +1,9 @@
 /**
  * The lab's contact address as a real mailto: link (brief §D11: one contact
  * email throughout, as a link). The address always comes from content
- * (site.yml → email); components never hard-code it.
+ * (site.yml → email); components never hard-code it. Plain underlined text:
+ * no icon (D-13 item 5).
  */
-import { Icon } from "@/components/ui/icons";
 import "./pages.css";
 
 export function mailtoHref(email: string, subject?: string): string {
@@ -33,11 +33,8 @@ export function MailLink({
       href={mailtoHref(email, subject)}
       className={["pg-mail", className].filter(Boolean).join(" ")}
     >
-      <Icon name="mail" />
-      <span>
-        {label ? `${label} ` : null}
-        {email}
-      </span>
+      {label ? `${label} ` : null}
+      {email}
     </a>
   );
 }

@@ -2,13 +2,14 @@
  * "Upcoming talks" on /news/ (brief §D10): items whose event_date is on or
  * after the build date in America/Los_Angeles, soonest first. Computed by the
  * loader (NewsView.upcoming) and queries.upcomingNews(); nothing is typed by hand.
- * Renders nothing when there are none.
+ * The same ruled log as the news list: the event date in the label column,
+ * then the title, the type as a plain word and the place. Renders nothing
+ * when there are none.
  */
 import Link from "next/link";
 import type { NewsView } from "@/lib/content/load";
 import { DateText } from "@/components/ui/DateText";
 import { Badge, DraftBadge } from "@/components/ui/Badge";
-import { Icon } from "@/components/ui/icons";
 import { NEWS_TYPE_LABELS } from "@/components/ui/labels";
 import "./news.css";
 
@@ -16,12 +17,13 @@ export function UpcomingTalks({ items }: { items: NewsView[] }) {
   if (!items.length) return null;
   return (
     <section className="nw-upcoming" aria-labelledby="news-upcoming">
-      <h2 id="news-upcoming">Upcoming talks</h2>
+      <div className="nw-year__head">
+        <h2 id="news-upcoming">Upcoming talks</h2>
+      </div>
       <ol className="nw-upcoming__list">
         {items.map((n) => (
           <li key={n.slug} className="nw-upcoming__item">
             <p className="nw-upcoming__when">
-              <Icon name="calendar" />
               <DateText value={n.event_date} />
             </p>
             <div>

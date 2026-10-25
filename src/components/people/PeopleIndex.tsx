@@ -1,6 +1,9 @@
 /**
- * The People index body (brief §D9, DECISIONS D-06). Server component; the only
- * client code is the optional filter island (PeopleFilters).
+ * The People index body (brief §D9, DECISIONS D-06; D-13 item 5). Server
+ * component; the only client code is the optional filter island (PeopleFilters).
+ * Label-column grid: each group's title and count sit in the label column and
+ * its people in the track: the PI first (160 px square), then ruled rows with
+ * 64 px square photos, then alumni as a compact ruled list by year.
  *
  * Order: Principal investigator → Postdocs → PhD students → Pre-docs & research
  * staff → Master's students → Undergraduate RAs → Affiliates & collaborators,
@@ -11,7 +14,7 @@
 import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
 import type { Content } from "@/lib/content/load";
-import { Icon } from "@/components/ui/icons";
+import { PageHeader } from "@/components/pages/PageHeader";
 import { AlumniEntry, PeopleCard } from "./PeopleCard";
 import { FilterCount, FilterGroup, FilterItem, PeopleFilters } from "./PeopleFilters";
 import { buildPeopleIndex, type PersonItem } from "./model";
@@ -91,15 +94,28 @@ function MaybeCount({
   if (filterable) return <FilterCount metas={items.map((i) => i.meta)} noun={noun} />;
   return (
     <>
-      {items.length}
-      <span className="vh"> {items.length === 1 ? noun[0] : noun[1]}</span>
+      {items.length} {items.length === 1 ? noun[0] : noun[1]}
     </>
   );
+}
+
+/** "Undergraduate RAs" → "undergraduate RAs"; "PhD students" stays (an initialism). */
+function lowerFirst(label: string): string {
+  return /^[A-Z][a-z]/.test(label) ? label[0]!.toLowerCase() + label.slice(1) : label;
+}
+
+/** "1 principal investigator, 1 master's student, 23 undergraduate RAs and 25 alumni." */
+export function summarySentence(parts: Array<{ count: number; label: string }>): string {
+  const words = parts.map((s) => `${s.count} ${lowerFirst(s.label)}`);
+  const list =
+    words.length > 1 ? `${words.slice(0, -1).join(", ")} and ${words[words.length - 1]}` : words[0];
+  return `${list}.`;
 }
 
 export function PeopleIndex({ content }: { content: Content }) {
   const m = buildPeopleIndex(content);
   const f = m.showFilters;
+  const affiliation = content.site.affiliation_text;
 
   const list = (
     <div className="pp-groups">
@@ -130,7 +146,11 @@ export function PeopleIndex({ content }: { content: Content }) {
                 item={item}
                 className="pp-grid__item"
               >
-                <PeopleCard item={item} lead={g.role === "pi"} />
+                <PeopleCard
+                  item={item}
+                  lead={g.role === "pi"}
+                  affiliation={g.role === "pi" ? affiliation : undefined}
+                />
               </MaybeItem>
             ))}
           </ul>
@@ -149,12 +169,11 @@ export function PeopleIndex({ content }: { content: Content }) {
               Alumni
             </h2>
             <span className="pp-group__count">
-              <MaybeCount filterable={f} items={m.alumniItems} noun={["alum", "alumni"]} />
+              <MaybeCount filterable={f} items={m.alumniItems} noun={["person", "people"]} />
             </span>
           </div>
           <details className="pp-alumni__details">
             <summary className="pp-alumni__summary">
-              <Icon name="chevron" className="pp-alumni__chev" />
               <span className="pp-alumni__show">Show alumni</span>
               <span className="pp-alumni__hide">Hide alumni</span>
             </summary>
@@ -193,45 +212,29 @@ export function PeopleIndex({ content }: { content: Content }) {
   );
 
   return (
-    <div className="bl-container pp-page">
-      <header className="pp-head">
-        <h1 tabIndex={-1}>People</h1>
+    <div className="bl-container pg pp-page">
+      <PageHeader title="People">
         {/* With a single group the summary would only repeat its heading. */}
         {m.summary.length > 1 ? (
-          <p className="pp-summary">
-            {m.summary.map((s, i) => (
-              <span key={s.label} className="pp-summary__part">
-                <span className="pp-summary__n">{s.count}</span> {s.label}
-                {i < m.summary.length - 1 && (
-                  <>
-                    <span className="vh">,</span>
-                    <span className="pp-summary__sep" aria-hidden="true">
-                      ·
-                    </span>
-                  </>
-                )}
-              </span>
-            ))}
-          </p>
+          <p className="pp-summary">{summarySentence(m.summary)}</p>
         ) : m.summary.length === 0 ? (
           <p className="pp-summary">No one is listed yet.</p>
         ) : null}
         {/* Internal tools for lab members (site.yml member_links), e.g. the lab scheduler. */}
         {content.site.member_links.length > 0 ? (
           <p className="pp-members">
-            <span className="pp-members__label">For lab members:</span>{" "}
+            For lab members:{" "}
             {content.site.member_links.map((l, i) => (
               <Fragment key={l.url}>
-                {i > 0 ? <span aria-hidden="true"> · </span> : null}
+                {i > 0 ? ", " : null}
                 <a href={l.url} rel="noopener noreferrer">
                   {l.label}
-                  <Icon name="external" />
                 </a>
               </Fragment>
             ))}
           </p>
         ) : null}
-      </header>
+      </PageHeader>
 
       {f ? (
         <>
@@ -254,9 +257,9 @@ export function PeopleIndex({ content }: { content: Content }) {
         list
       )}
 
-      <p className="pp-join">
+      <p className="pp-join pg-track">
         <Link className="bl-cta bl-cta--quiet" href="/join/">
-          Work with us <Icon name="arrow-right" />
+          Work with us
         </Link>
       </p>
     </div>

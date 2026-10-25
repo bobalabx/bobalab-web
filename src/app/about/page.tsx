@@ -1,7 +1,8 @@
 /**
  * /about/: About & contact (brief §D11). Mission (pages/home.yml), the lab's
- * own About text (pages/about.yml), and a fact sheet built from site.yml and
- * the PI's person record. ResearchOrganization JSON-LD (brief §G3).
+ * own About text (pages/about.yml) on the label-column grid, and the contact
+ * facts built from site.yml and the PI's person record.
+ * ResearchOrganization JSON-LD (brief §G3).
  */
 import type { Metadata } from "next";
 import { getContent } from "@/lib/content/load";
@@ -53,26 +54,33 @@ export default function AboutPage() {
     <div className="bl-container pg">
       <JsonLd data={organizationLd(site)} />
       <PageHeader
-        eyebrow="About & contact"
         title={about?.title || FALLBACK_TITLE}
         lead={about?.intro}
         meta={meta}
+        metaFirst
       />
       {mission ? (
-        <section className="pg-mission" aria-labelledby="about-mission">
-          <h2 id="about-mission" className="pg-mission__label">
-            Mission
-          </h2>
-          <p className="pg-mission__text">{mission}</p>
-          <DraftBadge show={Boolean(pages.home?.draft)} />
+        <section className="pg-row pg-row--doc pg-mission" aria-labelledby="about-mission">
+          <div className="pg-row__label">
+            <h2 id="about-mission">Mission</h2>
+          </div>
+          <div>
+            <p className="pg-mission__text">{mission}</p>
+            <DraftBadge show={Boolean(pages.home?.draft)} line />
+          </div>
         </section>
       ) : null}
-      <div className={about?.body?.trim() ? "pg-split" : "pg-narrow"}>
-        {about?.body?.trim() ? <Prose source={about.body} /> : null}
-        <aside className="pg-aside" aria-labelledby="about-facts">
-          <LabFacts site={site} pi={pi} />
-        </aside>
-      </div>
+      {about?.body?.trim() ? (
+        <div className="pg-doc">
+          <Prose source={about.body} />
+        </div>
+      ) : null}
+      <section className="pg-row pg-row--doc" aria-labelledby="about-facts">
+        <div className="pg-row__label">
+          <h2 id="about-facts">Contact</h2>
+        </div>
+        <LabFacts site={site} pi={pi} />
+      </section>
     </div>
   );
 }

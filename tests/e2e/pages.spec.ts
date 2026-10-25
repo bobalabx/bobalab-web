@@ -55,7 +55,7 @@ test.describe("Join", () => {
     const c = content();
     await open(page, "/join/");
     await expect(page.locator("h1")).toHaveCount(1);
-    await expect(page.locator("h1")).toHaveText("Work with us");
+    await expect(page.locator("h1")).toHaveText("Join the lab");
     for (const [id, title] of [
       ["students", "Students & research assistants"],
       ["partners", "Partners & data collaborators"],
@@ -92,6 +92,40 @@ test.describe("Join", () => {
         await expect(card.locator(".pg-opp__label")).toHaveText(/^(How to join|Next step):$/);
       }
     }
+    // D-13 item 7: the hedge is said once. Unconfirmed rows show a dash (screen
+    // readers hear "Status not confirmed" in the row) and one footnote explains it;
+    // a shared "as of" date is stated once in that footnote.
+    const unconfirmed = c.opportunities.filter((o) => !o.isOpen && o.status === "unknown");
+    const shownHedges = await page.locator("main").evaluate((main) => {
+      const walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT);
+      const hits: string[] = [];
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        if (!n.textContent?.includes("Status not confirmed")) continue;
+        if (!n.parentElement?.closest(".vh")) hits.push(n.parentElement?.className ?? "");
+      }
+      return hits;
+    });
+    expect(shownHedges, "visible 'Status not confirmed'").toEqual([]);
+    expect(await page.locator("main .vh", { hasText: "Status not confirmed" }).count()).toBe(
+      unconfirmed.length,
+    );
+    const note = page.locator("#join-note");
+    const asOf = [...new Set(c.opportunities.map((o) => o.as_of ?? ""))];
+    const shared = c.opportunities.length > 0 && asOf.length === 1 && Boolean(asOf[0]);
+    await expect(note).toHaveCount(unconfirmed.length || shared ? 1 : 0);
+    if (unconfirmed.length) await expect(note).toContainText("A dash marks");
+    if (shared) {
+      await expect(note).toContainText(`Statuses as of ${formatDate(asOf[0])}`);
+    }
+    // The ledger has no card boxes: rows are ruled, not bordered.
+    if (c.opportunities.length) {
+      const box = await page
+        .locator("article.pg-opp")
+        .first()
+        .evaluate((el) => getComputedStyle(el).borderLeftWidth);
+      expect(box).toBe("0px");
+    }
+
     // The audience a card sits in matches its content audience.
     for (const o of c.opportunities) {
       const section =
@@ -128,6 +162,53 @@ test.describe("Join", () => {
       await expect(
         page.locator(`article[aria-labelledby="opp-${o.slug}"] .bl-badge--draft`),
       ).toHaveText("Draft · pending lab review");
+    }
+  });
+});
+
+test.describe("Label-column grid", () => {
+  test("section titles sit in the label column, left of their content (1366 px)", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1366, height: 768 });
+    for (const url of ["/join/", "/about/", "/this-page-does-not-exist/"]) {
+      await open(page, url);
+      const h1 = await page.locator("main h1").boundingBox();
+      const rows = page.locator("main .pg-row");
+      const n = await rows.count();
+      expect(n, url).toBeGreaterThan(0);
+      for (let i = 0; i < n; i++) {
+        const label = await rows.nth(i).locator(".pg-row__label h2").boundingBox();
+        const content = await rows
+          .nth(i)
+          .locator(":scope > :not(.pg-row__label)")
+          .first()
+          .boundingBox();
+        expect(label!.x + label!.width, url).toBeLessThanOrEqual(content!.x);
+        // The track starts where the h1 starts: one alignment system.
+        expect(Math.abs(content!.x - h1!.x), url).toBeLessThanOrEqual(1);
+      }
+    }
+  });
+
+  test("no eyebrows, pills or boxed panels on the WP5 pages", async ({ page }) => {
+    for (const r of ROUTES) {
+      await open(page, r.path);
+      const offenders = await page.locator("main *").evaluateAll((els) =>
+        els
+          .filter((el) => {
+            const cs = getComputedStyle(el);
+            const r = el.getBoundingClientRect();
+            const bordered = ["Top", "Right", "Bottom", "Left"].every(
+              (s) => cs.getPropertyValue(`border-${s.toLowerCase()}-width`) !== "0px",
+            );
+            const tracked =
+              cs.textTransform === "uppercase" && parseFloat(cs.letterSpacing || "0") > 0.3;
+            return (bordered && r.height > 0 && el.tagName !== "INPUT") || tracked;
+          })
+          .map((el) => `${el.tagName}.${el.className}`),
+      );
+      expect(offenders, r.path).toEqual([]);
     }
   });
 });
@@ -231,6 +312,47 @@ test.describe("Not found", () => {
     for (const d of c.directions) {
       await expect(page.locator(`.pg-dirs a[href="/research/${d.slug}/"]`)).toContainText(d.title);
     }
+  });
+
+  test("direction segments sit on the title's x-height, not on its baseline like an underscore", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1366, height: 768 });
+    await open(page, "/this-page-does-not-exist/");
+    const rows = page.locator(".pg-dirs a");
+    for (let i = 0; i < (await rows.count()); i++) {
+      const seg = await rows.nth(i).locator(".bl-seg").boundingBox();
+      const title = await rows
+        .nth(i)
+        .locator(".pg-dirs__title")
+        .evaluate((el) => {
+          const r = el.getClientRects()[0]!; // first line of the title
+          return { top: r.top + scrollY, bottom: r.bottom + scrollY };
+        });
+      const mid = seg!.y + seg!.height / 2;
+      // Between 30 % and 70 % of the first line box (an underscore sits at about 80 %).
+      const rel = (mid - title.top) / (title.bottom - title.top);
+      expect(rel, `row ${i}`).toBeGreaterThan(0.3);
+      expect(rel, `row ${i}`).toBeLessThan(0.7);
+    }
+  });
+
+  test("on phones the 'Page not found' label follows the h1 (no eyebrow above it)", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await open(page, "/this-page-does-not-exist/");
+    const h1 = await page.locator("main h1").boundingBox();
+    const label = await page.locator(".pg-head__side", { hasText: "Page not found" }).boundingBox();
+    expect(label!.y).toBeGreaterThanOrEqual(h1!.y + h1!.height);
+    // Desktop keeps it in the label column, level with the h1.
+    await page.setViewportSize({ width: 1366, height: 768 });
+    const h1d = await page.locator("main h1").boundingBox();
+    const labeld = await page
+      .locator(".pg-head__side", { hasText: "Page not found" })
+      .boundingBox();
+    expect(labeld!.x + labeld!.width).toBeLessThanOrEqual(h1d!.x);
+    expect(Math.abs(labeld!.y - h1d!.y)).toBeLessThan(24);
   });
 
   test("the pun appears on no other WP5 page", async ({ page }) => {

@@ -1,7 +1,8 @@
 /**
  * /news/{yyyy-mm-dd-slug}/ (brief §D10): date, type, title, summary, event
  * details, image, body, external link, related papers/people/directions,
- * previous/next, NewsArticle JSON-LD (§G3).
+ * previous/next, NewsArticle JSON-LD (§G3). Label-column grid: the date and
+ * type sit in the label column beside the headline; "Related" is a row.
  *
  * Static export: generateStaticParams via staticParams() (never an empty
  * array; "_none" is the placeholder) with dynamicParams = false, and
@@ -17,13 +18,12 @@ import { absoluteUrl, newsArticleLd } from "@/lib/seo/jsonld";
 import { isExternalUrl, withBasePath } from "@/lib/site/paths";
 import { Badge, DraftBadge } from "@/components/ui/Badge";
 import { DateText } from "@/components/ui/DateText";
-import { Icon } from "@/components/ui/icons";
 import { Img } from "@/components/ui/Img";
 import { JsonLd } from "@/components/ui/JsonLd";
 import { Prose } from "@/components/ui/Prose";
 import { NEWS_TYPE_LABELS } from "@/components/ui/labels";
 import { PageHeader } from "@/components/pages/PageHeader";
-import { NewsRelated, hasRelated } from "@/components/news/NewsRelated";
+import { NewsRelated, hasRelated, showsReportedStatus } from "@/components/news/NewsRelated";
 import { NewsPager } from "@/components/news/NewsPager";
 import { withFeedAlternate } from "@/components/news/FeedLink";
 import "@/components/news/news.css";
@@ -86,7 +86,7 @@ export default async function NewsItemPage({ params }: { params: Promise<Params>
   };
 
   return (
-    <div className="bl-container pg">
+    <div className="bl-container pg nw-item">
       <JsonLd data={articleLd} />
       <nav className="nw-crumbs" aria-label="Breadcrumb">
         <ol>
@@ -98,75 +98,75 @@ export default async function NewsItemPage({ params }: { params: Promise<Params>
           </li>
         </ol>
       </nav>
-      <article
-        aria-labelledby="news-title"
-        className={related ? "nw-article nw-article--aside" : "nw-article"}
-      >
-        <div className="nw-article__main">
-          <PageHeader
-            titleId="news-title"
-            title={item.title}
-            lead={item.summary}
-            wide
-            metaFirst
-            meta={
-              <>
-                <DateText value={item.date} className="nw-detail__date" />
-                <Badge>{NEWS_TYPE_LABELS[item.type]}</Badge>
-                {item.upcoming ? (
-                  <Badge tone="accent" dot>
-                    Upcoming
-                  </Badge>
+      <article aria-labelledby="news-title" className="nw-article">
+        <PageHeader
+          titleId="news-title"
+          title={item.title}
+          lead={item.summary}
+          wide
+          metaFirst
+          meta={
+            <>
+              <DateText value={item.date} className="nw-detail__date" />
+              <Badge>{NEWS_TYPE_LABELS[item.type]}</Badge>
+              {item.upcoming ? <Badge tone="strong">Upcoming</Badge> : null}
+              <DraftBadge show={item.draft} />
+            </>
+          }
+        />
+        {hasDetail ? (
+          <div className="nw-detail pg-track">
+            {item.event_date || item.location ? (
+              <dl className="nw-event">
+                {item.event_date ? (
+                  <div>
+                    <dt>Event date</dt>
+                    <dd>
+                      <DateText value={item.event_date} />
+                    </dd>
+                  </div>
                 ) : null}
-                <DraftBadge show={item.draft} />
-              </>
-            }
-          />
-          {hasDetail ? (
-            <div className="nw-detail">
-              {item.event_date || item.location ? (
-                <dl className="nw-event">
-                  {item.event_date ? (
-                    <div>
-                      <dt>Event date</dt>
-                      <dd>
-                        <DateText value={item.event_date} />
-                      </dd>
-                    </div>
-                  ) : null}
-                  {item.location ? (
-                    <div>
-                      <dt>Where</dt>
-                      <dd>{item.location}</dd>
-                    </div>
-                  ) : null}
-                </dl>
-              ) : null}
-              {item.image?.image ? (
-                <figure className="nw-figure">
-                  <Img src={item.image.image} alt={item.image.alt ?? ""} loading="eager" />
-                  {item.image.caption ? <figcaption>{item.image.caption}</figcaption> : null}
-                </figure>
-              ) : null}
-              {item.body.trim() ? <Prose source={item.body} /> : null}
-              {link ? (
-                <p className="nw-detail__actions">
-                  <a
-                    className="bl-cta bl-cta--quiet"
-                    href={linkExternal ? link.url : withBasePath(link.url)}
-                    rel={linkExternal ? "noopener noreferrer" : undefined}
-                  >
-                    {link.label}
-                    <Icon name={linkExternal ? "external" : "arrow-right"} />
-                  </a>
-                </p>
+                {item.location ? (
+                  <div>
+                    <dt>Where</dt>
+                    <dd>{item.location}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            ) : null}
+            {item.image?.image ? (
+              <figure className="nw-figure">
+                <Img src={item.image.image} alt={item.image.alt ?? ""} loading="eager" />
+                {item.image.caption ? <figcaption>{item.image.caption}</figcaption> : null}
+              </figure>
+            ) : null}
+            {item.body.trim() ? <Prose source={item.body} /> : null}
+            {link ? (
+              <p className="nw-detail__actions">
+                <a
+                  className="bl-cta bl-cta--quiet"
+                  href={linkExternal ? link.url : withBasePath(link.url)}
+                  rel={linkExternal ? "noopener noreferrer" : undefined}
+                >
+                  {link.label}
+                </a>
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+        {related ? (
+          <aside className="pg-row nw-article__aside" aria-labelledby="news-related">
+            <div className="pg-row__label">
+              <h2 id="news-related">Related</h2>
+            </div>
+            <div>
+              <NewsRelated item={item} />
+              {/* Only when a status the lab reported is printed in this row (awards
+                  are not shown here); same wording as the direction and project pages. */}
+              {showsReportedStatus(item) ? (
+                <p className="pg-fn">Review status and dates are as reported by the lab.</p>
               ) : null}
             </div>
-          ) : null}
-        </div>
-        {related ? (
-          <aside className="pg-aside nw-article__aside" aria-labelledby="news-related">
-            <NewsRelated item={item} />
           </aside>
         ) : null}
       </article>

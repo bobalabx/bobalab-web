@@ -1,10 +1,12 @@
 /**
  * /join/: Join / work with us (brief §D11, DECISIONS D-05). Three audiences:
- * students & RAs, partners & data collaborators, press. Text comes from
- * content/pages/join.yml; positions, routes and open/closed status (with the
- * "as of" date) come only from content/opportunities. One contact address
- * (site.yml → email) as a mailto: link. Nothing is invented: no deadlines or
- * positions that content does not list.
+ * students & RAs, partners & data collaborators, press, each a label-column
+ * row. Text comes from content/pages/join.yml; positions, routes and
+ * open/closed status (with the "as of" date) come only from
+ * content/opportunities, shown as a ruled ledger. One footnote states the
+ * shared "as of" date and what a dash means (D-13 item 7: no repeated
+ * "Status not confirmed"). One contact address (site.yml → email) as a mailto:
+ * link. Nothing is invented: no deadlines or positions that content does not list.
  */
 import type { Metadata } from "next";
 import { getContent, type OpportunityView } from "@/lib/content/load";
@@ -12,10 +14,16 @@ import type { OpportunityEntry } from "@/lib/content/schema";
 import { markdownToText } from "@/lib/content/markdoc";
 import { clipDescription, pageMetadata } from "@/lib/seo/metadata";
 import { DraftBadge } from "@/components/ui/Badge";
+import { DateText } from "@/components/ui/DateText";
 import { Prose } from "@/components/ui/Prose";
 import { PageHeader } from "@/components/pages/PageHeader";
 import { MailLink, linksEmail } from "@/components/pages/MailLink";
-import { OpportunityCard, compareOpportunities } from "@/components/pages/OpportunityCard";
+import {
+  OpportunityCard,
+  compareOpportunities,
+  isUnconfirmed,
+  sharedAsOf,
+} from "@/components/pages/OpportunityCard";
 
 type Audience = OpportunityEntry["audience"];
 
@@ -38,7 +46,7 @@ export function generateMetadata(): Metadata {
     ? markdownToText(pages.join.intro).replace(/\s+([.,;:!?])/g, "$1")
     : undefined;
   return pageMetadata({
-    title: "Work with us",
+    title: "Join the lab",
     description:
       clipDescription(intro) ??
       `How students, research partners and journalists can work with ${site.name}.`,
@@ -79,14 +87,16 @@ export default function JoinPage() {
   ];
   const oppsFor = (audiences: Audience[]): OpportunityView[] =>
     c.opportunities.filter((o) => audiences.includes(o.audience)).sort(compareOpportunities);
+  const asOf = sharedAsOf(c.opportunities);
+  const anyUnconfirmed = c.opportunities.some(isUnconfirmed);
 
   return (
     <div className="bl-container pg">
       <PageHeader
-        eyebrow="Join"
-        title="Work with us"
+        title="Join the lab"
         leadMarkdown={join?.intro}
         meta={join?.draft ? <DraftBadge /> : null}
+        metaFirst
       >
         <nav aria-label="On this page">
           <ul className="pg-jump">
@@ -102,42 +112,54 @@ export default function JoinPage() {
       {sections.map((s) => {
         const opps = oppsFor(s.audiences);
         const extra = s.extra?.markdown?.trim() ? s.extra : undefined;
-        const hasSide = opps.length > 0 || Boolean(extra);
         const showMail =
           !linksEmail(s.prose, site.email) && !linksEmail(extra?.markdown, site.email);
         return (
-          <section key={s.id} className="pg-section" aria-labelledby={s.id}>
-            <div className={hasSide ? "pg-audience" : "pg-audience pg-audience--solo"}>
-              <div className="pg-audience__intro">
-                <h2 id={s.id}>{s.title}</h2>
-                {s.prose?.trim() ? <Prose source={s.prose} /> : null}
-                {showMail ? (
-                  <MailLink email={site.email} subject={s.subject} label="Email" />
-                ) : null}
-              </div>
-              {hasSide ? (
-                <div className="pg-audience__body">
-                  {opps.length ? (
-                    <ul className="pg-opps" aria-label={`Opportunities: ${s.nav}`}>
-                      {opps.map((o) => (
-                        <li key={o.slug}>
-                          <OpportunityCard o={o} />
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                  {extra ? (
-                    <div className="pg-panel">
-                      <h3 className="pg-subhead">{extra.title}</h3>
-                      <Prose source={extra.markdown} />
-                    </div>
-                  ) : null}
+          <section key={s.id} className="pg-row pg-section" aria-labelledby={s.id}>
+            <div className="pg-row__label">
+              <h2 id={s.id}>{s.title}</h2>
+            </div>
+            <div className="pg-audience">
+              {s.prose?.trim() ? <Prose source={s.prose} /> : null}
+              {showMail ? <MailLink email={site.email} subject={s.subject} label="Email" /> : null}
+              {opps.length ? (
+                <div className="pg-opps__h" aria-hidden="true">
+                  <span>Opportunity</span>
+                  <span>Status</span>
                 </div>
+              ) : null}
+              {opps.length ? (
+                <ul className="pg-opps" aria-label={`Opportunities: ${s.nav}`}>
+                  {opps.map((o) => (
+                    <li key={o.slug}>
+                      <OpportunityCard o={o} asOfInNote={Boolean(asOf)} labEmail={site.email} />
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {extra ? (
+                <>
+                  <h3 className="pg-subhead">{extra.title}</h3>
+                  <Prose source={extra.markdown} />
+                </>
               ) : null}
             </div>
           </section>
         );
       })}
+
+      {c.opportunities.length && (asOf || anyUnconfirmed) ? (
+        <p className="pg-fn pg-track" id="join-note">
+          {asOf ? (
+            <>
+              Statuses as of <DateText value={asOf} />.{" "}
+            </>
+          ) : null}
+          {anyUnconfirmed
+            ? "A dash marks an opportunity whose status the lab has not confirmed; email the lab to ask."
+            : null}
+        </p>
+      ) : null}
     </div>
   );
 }

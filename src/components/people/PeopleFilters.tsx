@@ -138,24 +138,23 @@ export function FilterGroup({
   );
 }
 
-/** "8" normally; "3 of 8" while filtering. */
+/**
+ * "8 people" normally; "3 of 8 people" while filtering narrows the group. A group
+ * that still shows everyone keeps its plain count (no "1 of 1 person").
+ */
 export function FilterCount({ metas, noun }: { metas: FilterMeta[]; noun: [string, string] }) {
   const state = useContext(FilterContext);
   const total = metas.length;
   const n = metas.filter((m) => matches(m, state)).length;
   const word = (k: number) => (k === 1 ? noun[0] : noun[1]);
-  return isFiltering(state) ? (
+  return isFiltering(state) && n < total ? (
     <>
-      {n}
-      <span className="vh"> of </span>
-      <span aria-hidden="true"> / </span>
-      {total}
-      <span className="vh"> {word(total)} shown</span>
+      {n} of {total} {word(total)}
+      <span className="vh"> shown</span>
     </>
   ) : (
     <>
-      {total}
-      <span className="vh"> {word(total)}</span>
+      {total} {word(total)}
     </>
   );
 }

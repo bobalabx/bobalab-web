@@ -117,7 +117,9 @@ test("consent: photo, email and now_at render only with their flags", async ({ p
   await open(page, "/people/");
   await openAlumni(page);
   const listed = raw.entries.people.filter((p) => p.listed && (PREVIEW || !p.draft));
-  const photos = listed.filter((p) => p.photo && p.photo_consent).length;
+  // Alumni are a compact text list (D-13 item 5), so only current members show a photo.
+  const isAlum = (slug: string) => content.people.find((x) => x.slug === slug)?.isAlumni;
+  const photos = listed.filter((p) => p.photo && p.photo_consent && !isAlum(p.slug)).length;
   const emails = listed.filter((p) => p.email && p.email_public).length;
   await expect(page.locator("main img.pp-avatar")).toHaveCount(photos);
   await expect(page.locator('main a[href^="mailto:"]')).toHaveCount(emails);
@@ -128,11 +130,34 @@ test("consent: photo, email and now_at render only with their flags", async ({ p
       expect(text, p.slug).toContain(`Now at ${p.now_at}`);
     if (p.email && !p.email_public) expect(text, p.slug).not.toContain(p.email);
   }
-  // Pearl-initial avatar for everyone without a consented photo.
-  const cards = await page.locator(".pp-card, .pp-alum").count();
-  await expect(page.locator(":is(.pp-card, .pp-alum) .bl-pearl__initials")).toHaveCount(
-    cards - photos,
+  // A square initials tile for every current member without a consented photo;
+  // alumni rows carry no avatar at all.
+  const cards = await page.locator(".pp-card").count();
+  await expect(page.locator(".pp-card .bl-pearl__initials")).toHaveCount(cards - photos);
+  await expect(page.locator(".pp-alum :is(img, .bl-pearl)")).toHaveCount(0);
+});
+
+test("avatars are squares: 64 px rows, 160 px for the principal investigator", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await open(page, "/people/");
+  const boxes = await page.locator(".pp-avatar").evaluateAll((els) =>
+    els.map((el) => {
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      return {
+        lead: el.classList.contains("pp-avatar--lead"),
+        w: Math.round(r.width),
+        h: Math.round(r.height),
+        radius: cs.borderTopLeftRadius,
+      };
+    }),
   );
+  expect(boxes.length).toBeGreaterThan(0);
+  for (const b of boxes) {
+    expect(b.radius, "no circles or rounded corners").toBe("0px");
+    expect(b.w).toBe(b.h);
+    expect(b.w).toBe(b.lead ? 160 : 64);
+  }
 });
 
 for (const url of ["/people/", ...profiles.map((p) => `/people/${p.slug}/`)]) {
@@ -216,6 +241,31 @@ test("filters: role chips are <button aria-pressed> and narrow the list", async 
   await expect(page.locator(".pp-group").first()).toBeVisible();
   const focused = await page.evaluate(() => document.activeElement?.getAttribute("aria-pressed"));
   expect(focused).not.toBeNull(); // focus stayed on a chip
+});
+
+test("filters: a focused toggle's 2 px ring is not clipped by its row (WCAG 2.4.7)", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await open(page, "/people/");
+  const chips = page.locator(".pp-filters button[aria-pressed]");
+  test.skip((await chips.count()) === 0, "nothing to filter in this content");
+  await chips.first().focus();
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Shift+Tab");
+  const clipped = await page.evaluate(() => {
+    const el = document.activeElement as HTMLElement;
+    if (!el?.matches("button[aria-pressed]")) return ["focus not on a toggle"];
+    const out: string[] = [];
+    for (let a = el.parentElement; a && !a.matches(".pp-filters"); a = a.parentElement) {
+      const cs = getComputedStyle(a);
+      if (cs.overflowX !== "visible" || cs.overflowY !== "visible") out.push(a.className);
+    }
+    const cs = getComputedStyle(el);
+    if (cs.outlineStyle === "none" || parseFloat(cs.outlineWidth) < 2) out.push("no 2 px outline");
+    return out;
+  });
+  expect(clipped).toEqual([]);
 });
 
 test("filters: a role held only by alumni reveals the collapsed Alumni list", async ({ page }) => {
@@ -308,6 +358,18 @@ test("PI profile: h1, breadcrumb, ProfilePage + Person JSON-LD", async ({ page }
   await expect(page.locator(".pp-profile__head .bl-tags li")).toHaveCount(dirs);
   // The lab affiliation (site.yml) appears under the principal investigator's title.
   await expect(page.locator(".pp-profile__affil")).toHaveText(content.site.affiliation_text);
+  // The lab role is meta after the name, not an eyebrow above the h1 (D-13 item 5),
+  // on phones as well as desktop.
+  for (const [w, h] of [
+    [1366, 768],
+    [390, 844],
+  ] as const) {
+    await page.setViewportSize({ width: w, height: h });
+    const h1 = await page.locator("main h1").boundingBox();
+    const role = await page.locator(".pp-profile__role").boundingBox();
+    expect(role!.y, `${w}px`).toBeGreaterThan(h1!.y + h1!.height);
+  }
+  await page.setViewportSize({ width: 1280, height: 720 });
   // Publications link: a filtered view of the list, named for the person.
   if (counted)
     await expect(
@@ -365,23 +427,42 @@ for (const r of ROUTES) {
   });
 }
 
-test("layout: the principal investigator card spans two grid columns and lines up with them", async ({
+test("layout: group titles sit in the label column, people in the track (PI first, full width)", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await open(page, "/people/");
-  const lead = page.locator(".pp-grid--lead > .pp-grid__item").first();
-  const other = page.locator(".pp-grid:not(.pp-grid--lead)").filter({
-    has: page.locator(".pp-grid__item:nth-child(2)"),
-  });
-  test.skip(!(await lead.count()) || !(await other.count()), "needs the PI and a 2+ group");
-  const second = other.first().locator(".pp-grid__item").nth(1);
-  const [a, b] = [await lead.boundingBox(), await second.boundingBox()];
-  expect(Math.abs(a!.x + a!.width - (b!.x + b!.width))).toBeLessThanOrEqual(1);
-  // One column on a phone: the card fills the width without overflow.
+  const lead = page.locator(".pp-grid--lead").first();
+  test.skip(!(await lead.count()), "needs the PI");
+  const title = page.locator(".pp-group__title").first();
+  const [t, l] = [await title.boundingBox(), await lead.boundingBox()];
+  // The title is in the label column, left of the list; the PI row starts the track.
+  expect(t!.x + t!.width).toBeLessThanOrEqual(l!.x);
+  // Every group's list shares the PI row's track edges.
+  const lists = await page.locator(".pp-group > .pp-grid").evaluateAll((els) =>
+    els.map((el) => {
+      const r = el.getBoundingClientRect();
+      return [Math.round(r.left), Math.round(r.right)];
+    }),
+  );
+  for (const [left, right] of lists) {
+    expect(Math.abs(left! - l!.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(right! - (l!.x + l!.width))).toBeLessThanOrEqual(1);
+  }
+  // Ruled list, not cards: rows have no box border or background.
+  const card = await page
+    .locator(".pp-card")
+    .first()
+    .evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { border: cs.borderTopWidth, bg: cs.backgroundColor };
+    });
+  expect(card.border).toBe("0px");
+  expect(card.bg).toBe("rgba(0, 0, 0, 0)");
+  // One column on a phone: the PI row fills the width without overflow.
   await page.setViewportSize({ width: 390, height: 844 });
-  const c = await lead.boundingBox();
-  const g = await page.locator(".pp-grid--lead").first().boundingBox();
+  const c = await page.locator(".pp-grid--lead > .pp-grid__item").first().boundingBox();
+  const g = await lead.boundingBox();
   expect(Math.abs(c!.width - g!.width)).toBeLessThanOrEqual(1);
 });
 

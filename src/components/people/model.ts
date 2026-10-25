@@ -30,10 +30,10 @@ import type { FilterMeta } from "./filter";
 /** Shared with PersonCard and the home People strip (WP4 request 1). */
 export { avatarSwatch };
 
-/** "Undergraduate RA · applied math", or the position title (the PI's faculty title). */
+/** "Undergraduate RA, applied math", or the position title (the PI's faculty title). */
 export function roleLine(p: Pick<PublicPerson, "role" | "title" | "program">): string {
   const role = p.title?.trim() || ROLE_LABELS[p.role].one;
-  return [role, p.program?.trim()].filter(Boolean).join(" · ");
+  return [role, p.program?.trim()].filter(Boolean).join(", ");
 }
 
 /** "Since Aug 2023" · "2022–2024" · "Until 2025" · null. From `start` / `end` only. */
@@ -213,7 +213,10 @@ export function buildPeopleIndex(c: Content): PeopleIndexModel {
 
 export interface PersonProfileModel {
   item: PersonItem;
-  /** "Principal investigator" · "Alumni · Undergraduate RA". */
+  /**
+   * The lab role: "Principal investigator", "Alumni, Undergraduate RA". The person
+   * page shows it in the meta row after the name and title (not above the h1).
+   */
   eyebrow: string;
   /** Position title (PI) or program, when present. */
   lead: string | null;
@@ -254,8 +257,8 @@ export function buildPersonProfile(c: Content, slug: string): PersonProfileModel
   const publications = d.publications.filter((x) => x.counted);
   return {
     item: toItem(c, p),
-    eyebrow: p.isAlumni ? `Alumni · ${roleOne}` : roleOne,
-    lead: p.title?.trim() && p.program?.trim() ? `${p.title.trim()} · ${p.program.trim()}` : lead,
+    eyebrow: p.isAlumni ? `Alumni, ${roleOne}` : roleOne,
+    lead: p.title?.trim() && p.program?.trim() ? `${p.title.trim()}, ${p.program.trim()}` : lead,
     tenure: tenureLine(p),
     links: personLinks(p),
     directions: d.directions,

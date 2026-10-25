@@ -1,174 +1,59 @@
 /*
- * WP5 news styles (/news/ and /news/{slug}/). Class prefix: nw-.
- * Items themselves use the shared .bl-news primitive (WP0).
+ * News (/news/ and /news/{slug}/), "Lines" (D-13; P3 news log and ledger).
+ * Class prefix: nw-. Rows use the shared .bl-news primitive (WP0), placed
+ * here on the label-column grid: the full date and the type in the label
+ * column, then the title, summary and direction segments in the track.
+ * Page header and rows: components/pages/pages.css (pg-).
  */
 
-/* ---------- Index tools: RSS + year jump -------------------------------- */
-.nw-tools {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-3) var(--s-5);
-}
-.nw-feed {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45em;
-  min-height: 2.75rem;
-  font-size: var(--fs-sm);
-  font-weight: 500;
-}
-.nw-years {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-2);
-}
-.nw-years__label {
-  font-size: var(--fs-sm);
-  color: var(--ink-muted);
-  margin-right: var(--s-1);
-}
+/* ---------- Tools: year jump + feed (P3 .fset / .jump) ------------------ */
 .nw-years ul {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--s-2);
-  margin: 0;
+  column-gap: 4px;
+  margin: 0 0 0 -8px;
   padding: 0;
   list-style: none;
 }
 .nw-years a {
   display: inline-flex;
   align-items: center;
-  min-height: 2.75rem;
-  min-width: 2.75rem;
-  justify-content: center;
-  padding: 0 0.85rem;
-  border: 1px solid var(--rule);
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  color: var(--ink);
-  font-family: var(--font-data);
-  font-size: var(--fs-mono);
-  letter-spacing: var(--tracking-mono);
-  font-weight: 500;
-  text-decoration: none;
-}
-.nw-years a:hover {
-  border-color: var(--accent);
-  color: var(--accent-strong);
-}
-
-/* ---------- Upcoming talks ---------------------------------------------- */
-.nw-upcoming {
-  display: grid;
-  gap: var(--s-4);
-  margin-top: var(--s-6);
-  padding: var(--s-5);
-  background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-left: 3px solid var(--accent);
-  border-radius: var(--r-md);
-  max-width: 60rem;
-}
-.nw-upcoming h2 {
-  font-size: var(--fs-xl);
-  line-height: var(--lh-xl);
-}
-.nw-upcoming__list {
-  display: grid;
-  gap: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.nw-upcoming__item {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--s-1) var(--s-5);
-  padding-block: var(--s-3);
-  border-top: 1px solid var(--hairline);
-}
-.nw-upcoming__item:first-child {
-  border-top: 0;
-  padding-top: 0;
-}
-@media (min-width: 40rem) {
-  .nw-upcoming__item {
-    grid-template-columns: 10rem minmax(0, 1fr);
-    align-items: baseline;
-  }
-}
-.nw-upcoming__when {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45em;
-  font-family: var(--font-data);
-  font-size: var(--fs-mono);
-  line-height: var(--lh-lg);
-  letter-spacing: var(--tracking-mono);
-  font-weight: 500;
-  color: var(--ink);
-}
-.nw-upcoming__when .bl-icon {
-  color: var(--accent);
-}
-.nw-upcoming__title {
-  font-family: var(--font-text);
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
-  font-weight: 600;
-}
-.nw-upcoming__title a {
-  color: var(--ink);
-}
-.nw-upcoming__meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-2) var(--s-3);
-  margin-top: var(--s-1);
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-  color: var(--ink-muted);
-}
-
-/* ---------- Year groups ------------------------------------------------- */
-.nw-year {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--s-2);
-  margin-top: var(--s-7);
-}
-@media (min-width: 64rem) {
-  .nw-year {
-    grid-template-columns: 9rem minmax(0, 48rem);
-    gap: var(--s-6);
-  }
-  .nw-year__head {
-    position: sticky;
-    top: calc(var(--header-h) + var(--s-4));
-    align-self: start;
-    padding-top: var(--s-4);
-  }
-  /* "Jump to 2024" scrolls the h2 under the sticky header; the year's first
-     item starts one head-padding higher, so leave room for it too. */
-  .nw-year__head h2 {
-    scroll-margin-top: var(--s-6);
-  }
-}
-.nw-year__head h2 {
-  font-family: var(--font-data);
-  font-size: var(--fs-xl);
-  line-height: var(--lh-xl);
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  min-height: 44px;
+  padding: 0 8px;
+  font-size: 1rem;
   font-variant-numeric: tabular-nums;
 }
+.nw-feed {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 1rem;
+}
+
+/* ---------- The log ----------------------------------------------------- */
+.nw-log {
+  margin-top: 48px;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+/* Inline year heading (P3 .yh): condensed year + count on one baseline. */
+.nw-year__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 14px;
+  padding: 26px 0 6px;
+}
+.nw-year + .nw-year > .nw-year__head {
+  border-top: 1px solid var(--hairline);
+}
+.nw-year__head h2 {
+  scroll-margin-top: var(--s-4);
+}
 .nw-year__count {
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-  color: var(--ink-muted);
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
 }
 .nw-list {
   margin: 0;
@@ -176,30 +61,142 @@
   list-style: none;
   min-width: 0;
 }
+.nw-list > li:first-child > .bl-news {
+  border-top: 0;
+}
+/* Log row: label column = date and type; track = title, summary, segments. */
+.nw-list .bl-news,
+.nw-upcoming__item {
+  padding: 16px 0 18px;
+}
+@media (min-width: 48rem) {
+  .nw-list .bl-news {
+    grid-template-columns: var(--lab) minmax(0, 1fr);
+    column-gap: 0;
+  }
+  .nw-list .bl-news > .bl-news__head {
+    padding-right: var(--s-5);
+    padding-top: 4px;
+    gap: 0;
+  }
+}
+@media (max-width: 47.99rem) {
+  .nw-list .bl-news > .bl-news__head {
+    column-gap: var(--s-3);
+  }
+}
+.nw-list .bl-news__date {
+  color: var(--ink);
+}
+.nw-list .bl-news__title {
+  font-size: var(--t-title);
+  line-height: var(--lh-title);
+}
+.nw-list .bl-news__summary {
+  max-width: 72ch;
+  margin-top: 2px;
+}
+.nw-list .bl-news__event {
+  margin-top: 2px;
+}
+.nw-list .bl-tags {
+  margin-top: 6px;
+}
 .nw-empty {
   margin-top: var(--s-6);
-  color: var(--ink-muted);
+  color: var(--muted);
+}
+
+/* ---------- Upcoming talks (same row, event date in the label column) ---- */
+.nw-upcoming {
+  margin-top: 48px;
+  border-top: 1px solid var(--ink);
+}
+.nw-upcoming .nw-year__head h2 {
+  font-size: var(--t-h2);
+  line-height: 1.2;
+}
+.nw-upcoming__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.nw-upcoming__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 2px;
+  border-top: 1px solid var(--hairline);
+}
+.nw-upcoming__item:first-child {
+  border-top: 0;
+}
+@media (min-width: 48rem) {
+  .nw-upcoming__item {
+    grid-template-columns: var(--lab) minmax(0, 1fr);
+  }
+  .nw-upcoming__when {
+    padding-top: 4px;
+    padding-right: var(--s-5);
+  }
+}
+.nw-upcoming__when {
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.nw-upcoming__title {
+  font-size: var(--t-title);
+  line-height: var(--lh-title);
+  font-weight: 600;
+}
+.nw-upcoming__title a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.nw-upcoming__title a:hover {
+  text-decoration: underline 2px var(--ink);
+  text-underline-offset: 0.18em;
+}
+.nw-upcoming__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px var(--s-4);
+  margin-top: 2px;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+}
+.nw-upcoming__meta .bl-badge {
+  color: var(--muted);
+  font-weight: 400;
+}
+/* The log after the upcoming block keeps its own opening rule. */
+.nw-upcoming + .nw-log {
+  margin-top: 64px;
 }
 
 /* ---------- Detail ------------------------------------------------------ */
 .nw-crumbs {
-  margin-bottom: var(--s-4);
+  margin-bottom: 14px;
 }
 .nw-crumbs ol {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--s-2);
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
 }
 .nw-crumbs li + li::before {
   content: "/";
-  margin-right: var(--s-2);
-  color: var(--ink-muted);
+  padding-inline: 0.5em;
+  color: var(--rule);
 }
 .nw-crumbs a {
   display: inline-flex;
@@ -207,40 +204,34 @@
   min-height: 24px;
 }
 .nw-detail__date {
-  font-family: var(--font-data);
-  font-size: var(--fs-mono);
-  letter-spacing: var(--tracking-mono);
-  color: var(--ink);
+  font-weight: 600;
 }
 .nw-detail {
   display: grid;
   gap: var(--s-5);
+  margin-top: 40px;
   min-width: 0;
 }
+.nw-detail > .prose {
+  max-width: 68ch;
+}
+/* Event facts: a ruled row of terms (P3 .facts). */
 .nw-event {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--s-3) var(--s-7);
+  gap: 10px 48px;
   margin: 0;
-  padding: var(--s-4) var(--s-5);
-  background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-md);
-}
-.nw-event div {
-  display: grid;
-  gap: var(--s-1);
+  padding-top: 10px;
+  border-top: 1px solid var(--ink);
+  font-size: var(--t-meta);
+  line-height: 1.5;
 }
 .nw-event dt {
-  font-family: var(--font-data);
-  font-size: var(--fs-mono);
-  letter-spacing: var(--tracking-mono);
-  text-transform: uppercase;
-  color: var(--ink-muted);
+  font-weight: 600;
 }
 .nw-event dd {
   margin: 0;
-  font-weight: 500;
+  color: var(--muted);
 }
 .nw-figure {
   margin: 0;
@@ -248,144 +239,119 @@
   gap: var(--s-2);
 }
 .nw-figure img {
-  border-radius: var(--r-md);
   width: 100%;
   height: auto;
 }
 .nw-figure figcaption {
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-  color: var(--ink-muted);
-}
-.nw-detail__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-3);
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
 }
 
-/* Article: header + details, with the Related panel beside it from 64rem. */
-.nw-article {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  /* Row gap: space between the details and the Related panel once they stack. */
-  gap: var(--s-6) var(--s-8);
-  align-items: start;
-}
-/* A header with nothing after it (no event, body or link) gets its bottom
-   space from the row gap / the pager instead, so the gap is not doubled. */
-.nw-article__main > .pg-head:last-child {
-  padding-bottom: 0;
-}
-@media (min-width: 64rem) {
-  .nw-article--aside {
-    grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem);
-  }
-}
-.nw-article__main {
-  min-width: 0;
-  max-width: 50rem;
-}
-.nw-article__main .pg-head {
-  max-width: none;
-}
-
-/* Related panel (aside) */
+/* Related: groups side by side under a 1 px ink rule. */
 .nw-related {
   display: grid;
-  gap: var(--s-5);
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px 32px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ink);
+}
+@media (min-width: 64rem) {
+  .nw-related {
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  }
+  .nw-related__group--papers {
+    grid-column: span 2;
+  }
 }
 .nw-related__group {
   display: grid;
-  gap: var(--s-2);
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
 }
 .nw-related__group h3 {
-  font-family: var(--font-text);
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
   font-weight: 600;
 }
 .nw-related__list {
   display: grid;
-  gap: var(--s-3);
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
 }
-.nw-related__list a {
-  font-weight: 500;
+.nw-related__list a,
+.nw-related__name {
+  font-weight: 600;
 }
 .nw-related__sub {
   display: block;
-  margin-top: 0.15rem;
-  color: var(--ink-muted);
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+}
+.nw-related__sub cite {
+  font-style: normal;
 }
 
-/* Previous / next */
+/* Previous / next: two plain entries under one rule (no cards). */
 .nw-pager {
-  margin-top: var(--s-7);
-  padding-top: var(--s-5);
-  border-top: 1px solid var(--hairline);
+  margin-top: var(--sec-gap);
+  border-top: 1px solid var(--ink);
 }
 .nw-pager ul {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--s-3);
   margin: 0;
   padding: 0;
   list-style: none;
 }
+/* In the track, under a track-wide ink rule like the "Related" row above it,
+   so the page does not end in two full-width bands (pager + footer). */
 @media (min-width: 48rem) {
+  .nw-pager {
+    margin-left: var(--lab);
+  }
   .nw-pager ul {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--s-5);
+    column-gap: 0;
+  }
+  .nw-pager__prev {
+    grid-column: 1;
+    padding-right: 32px;
   }
   .nw-pager__next {
     grid-column: 2;
-    text-align: right;
+  }
+}
+@media (max-width: 47.99rem) {
+  .nw-pager li + li {
+    border-top: 1px solid var(--hairline);
   }
 }
 .nw-pager a {
   display: grid;
-  /* Equal-height cards: keep rows at the top instead of stretching them,
-     so "Older news" / "Newer news" line up across the two cards. */
   align-content: start;
-  gap: var(--s-1);
-  height: 100%;
-  box-sizing: border-box;
-  padding: var(--s-4) var(--s-5);
-  background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-md);
+  gap: 2px;
+  padding: 14px 0 16px;
   color: var(--ink);
   text-decoration: none;
 }
-.nw-pager a:hover {
-  border-color: var(--accent);
-}
 .nw-pager a:hover .nw-pager__title {
-  text-decoration: underline;
-  text-decoration-color: var(--accent);
-  text-decoration-thickness: 2px;
+  text-decoration: underline 2px var(--ink);
+  text-underline-offset: 0.18em;
 }
-.nw-pager__dir {
-  font-family: var(--font-data);
-  font-size: var(--fs-mono);
-  letter-spacing: var(--tracking-mono);
-  text-transform: uppercase;
-  color: var(--ink-muted);
+.nw-pager__dir,
+.nw-pager__date {
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
 }
 .nw-pager__title {
   font-weight: 600;
-  line-height: var(--lh-sm);
-}
-.nw-pager__date {
-  font-size: var(--fs-sm);
-  color: var(--ink-muted);
-}
-
-/* The first year group follows the page header closely. */
-.pg-head + .nw-year {
-  margin-top: var(--s-2);
+  line-height: var(--lh-title);
+  text-decoration: underline 1px var(--rule);
+  text-underline-offset: 0.18em;
 }
