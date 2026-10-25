@@ -228,3 +228,24 @@ Not changed, on purpose:
 - `pages/home.yml` → `statement` stays "How people learn to work with algorithms" (R-22 above is still open).
 - The two archived directions (Cities & Communities, Behavioral Pricing & Experimentation) get no `home_question`: they are not on the homepage.
 - No `findings[]` were written. A pearl shows "One finding" only when you fill one in, because a finding is a claim about results only the lab can make. Until then it shows "A first read": the direction's newest published paper.
+
+## Majors to collect (2026-10-25)
+
+The People page shows each person's major (`program` in `content/people/<slug>.md`). Majors already on file came from the PI's public site, plus 5 alumni whose own public pages state theirs (Jacky Kwok, Jerry Zhu, Matthew Lee, Stephen Yang, Thomas Yeoh).
+
+**Not added: probable matches to confirm with the person.** The source fits, but nothing ties it to the lab:
+
+| Person | Probable major | Source |
+|---|---|---|
+| Brandon Chin | EECS (minor Data Science, as of 2023) | data8.org/sp23/staff |
+| Daniil Kardava | Mathematics | daniilkardava.github.io |
+| Kristin Chen | Economics | Berkeley Economics 2024 commencement booklet |
+| Nick Melamed | Business Administration and Data Science | star.berkeley.edu |
+| Nicole Liu | Cognitive Science, Psychology and Public Health | martinezlab.ucsf.edu |
+| Clinton Nguyen | Statistics and Applied Math (on file: Statistics) | his own site |
+
+**Unknown: ask each person.** The easiest way is a "Major" question in the headshot form.
+- **Current undergraduates:** Alex Hanyu Chen, Andrew Li, Brian Seong Hyun Hwang, Chloe Xiao, Felicia Ye, Jiaming Guan, Jian Kweon, Mete Ehliz, Milosz Rafal Platek, Nathaniel Xian-Zhi Kung, Ryan Sing Chan, Ryan Shek Wah Lam, Siddhartha Chatterjee, Suyang Ma, Tanish Kher, Thomas Michael Morelli, Vinayak Sarkar, Zixian "Amy" Li.
+- **Alumni:** Edward Lee, Ethan Wang, Kareena Wu, Laura Li, Lawrence Chen, Mingyuan (Jeremy) Ma, Ron Wang, Serena Gu, Yutong Wu.
+
+The PI's page also has hidden (commented-out) member cards with majors. Those are not used without the PI's OK (DECISIONS D-06).
