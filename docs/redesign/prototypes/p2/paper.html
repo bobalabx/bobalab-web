@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en" data-page="paper">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Improving Human Sequential Decision Making with Reinforcement Learning, BOBALAB</title>
+<meta name="description" content="An algorithm learns from logs of people's multi-step decisions and turns the biggest gap between their play and an optimal policy into one short tip. In virtual-kitchen experiments the tips raised performance, and people combined them with their own strategies.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>try{var q=new URLSearchParams(location.search),h=document.documentElement;if(q.get('theme'))h.dataset.theme=q.get('theme');if(q.get('motion')==='reduce'||localStorage.getItem('p2-motion')==='reduce')h.dataset.motion='reduce';if(q.get('ground'))h.dataset.ground=q.get('ground')}catch(e){}</script>
+<link rel="stylesheet" href="p2.css">
+</head>
+<body>
+<svg class="sprite" aria-hidden="true" focusable="false"><defs><symbol id="g-aa" viewBox="0 0 4 3.5181"><circle cx="0.5" cy="3.0981" r="0.4"/><circle cx="1.5" cy="3.0981" r="0.4"/><circle cx="2.5" cy="3.0981" r="0.4"/><circle cx="3.5" cy="3.0981" r="0.4"/></symbol><symbol id="g-ai" viewBox="0 0 4 3.5181"><circle cx="1" cy="2.2321" r="0.4"/><circle cx="3" cy="2.2321" r="0.4"/><circle cx="0.5" cy="3.0981" r="0.4"/><circle cx="1.5" cy="3.0981" r="0.4"/><circle cx="2.5" cy="3.0981" r="0.4"/><circle cx="3.5" cy="3.0981" r="0.4"/></symbol><symbol id="g-loj" viewBox="0 0 4 3.5181"><circle cx="1.5" cy="1.366" r="0.4"/><circle cx="1" cy="2.2321" r="0.4"/><circle cx="2" cy="2.2321" r="0.4"/><circle cx="0.5" cy="3.0981" r="0.4"/><circle cx="1.5" cy="3.0981" r="0.4"/><circle cx="2.5" cy="3.0981" r="0.4"/></symbol><symbol id="g-pw" viewBox="0 0 4 3.5181"><circle cx="3" cy="2.2321" r="0.4"/><circle cx="0.5" cy="3.0981" r="0.4"/><circle cx="2.5" cy="3.0981" r="0.4"/><circle cx="3.5" cy="3.0981" r="0.4"/></symbol><symbol id="m-shoulder" viewBox="0 0 3 1.786"><circle cx="1" cy="0.5" r="0.4"/><circle cx="0.5" cy="1.366" r="0.4"/><circle cx="1.5" cy="1.366" r="0.4"/><circle cx="2.5" cy="1.366" r="0.4"/></symbol><symbol id="m-lab" viewBox="0 0 4 3.5181"><circle cx="1.5" cy="1.366" r="0.42"/><circle cx="1" cy="2.2321" r="0.42"/><circle cx="2" cy="2.2321" r="0.42"/><circle cx="3" cy="2.2321" r="0.42"/><circle cx="0.5" cy="3.0981" r="0.42"/><circle cx="1.5" cy="3.0981" r="0.42"/><circle cx="2.5" cy="3.0981" r="0.42"/><circle cx="3.5" cy="3.0981" r="0.42"/></symbol></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap head-row">
+    <div class="lockup">
+      <a class="lockup-link" href="index.html"><svg class="mark" viewBox="0 0 3 1.786" aria-hidden="true" focusable="false"><use href="#m-shoulder"/></svg><span class="wordmark">BOBALAB</span></a>
+      <p class="descriptor">Berkeley Operations and Behavioral Analytics Lab</p>
+    </div>
+    <nav class="nav" aria-label="Main"><ul><li><a class="buoy" href="research.html">Research</a></li><li><a class="buoy" href="publications.html">Publications</a></li><li><a class="buoy" href="project.html">Projects</a></li><li><a class="buoy" href="marks.html">Marks</a></li></ul></nav>
+  </div>
+</header>
+<main id="main">
+<article class="paper">
+<header class="wrap paper-head">
+  <h1 class="page-h">Improving Human Sequential Decision Making with Reinforcement Learning</h1>
+  <p class="pub-authors big">Hamsa Bastani, Osbert Bastani and <b class="member">Wichinpong Park Sinchaisri</b></p>
+  <p class="pub-venue big"><i>Management Science</i> 72(1), 733–755, 2026. Published online 22 May 2025.</p>
+  <div class="paper-meta"><p class="pub-type">Journal article</p><ul class="tags"><li><a class="tag d-aa" data-dir="aa" href="publications.html?dir=algorithmic-advice"><svg class="glyph" viewBox="0 0 4 3.5181" aria-hidden="true" focusable="false"><use href="#g-aa"/></svg><span class="tag-name">Algorithmic Advice</span></a></li></ul><p class="links"><a href="https://parksinchaisri.github.io/files/paper-tips.pdf">PDF</a><a href="https://arxiv.org/abs/2108.08454">arXiv</a><a href="https://pubsonline.informs.org/doi/10.1287/mnsc.2022.02455">Publisher</a><a href="https://doi.org/10.1287/mnsc.2022.02455">DOI</a></p></div>
+</header>
+<section class="wrap block brief" aria-labelledby="h-brief">
+  <h2 class="sec-h" id="h-brief">In brief</h2>
+  <p class="lede">An algorithm learns from logs of people's multi-step decisions and turns the biggest gap between their play and an optimal policy into one short tip. In virtual-kitchen experiments the tips raised performance, and people combined them with their own strategies.</p>
+</section>
+<section class="wrap block" aria-labelledby="h-plate">
+  <h2 class="sec-h" id="h-plate">Study design</h2>
+  <figure class="plate d-aa" id="plate" data-step="0">
+    <div class="plate-grid">
+      <div class="panel panel-a" data-panel="1">
+        <h3 class="panel-h">One round of the game</h3>
+        <div class="orders"><svg class="order-svg" viewBox="0 0 144 132" aria-hidden="true" focusable="false"><g class="order" data-o="0">
+      <text class="s-lab small muted" x="2" y="40">Order 1</text>
+      <line class="s-rule" x1="0" y1="92" x2="144" y2="92"/>
+      <g class="prec"><path class="s-arrow" d="M38 76H50m-5 -3.5l5 3.5l-5 3.5"/><path class="s-arrow" d="M92 76H104m-5 -3.5l5 3.5l-5 3.5"/></g>
+      <circle class="pearl sub sub-0" cx="18" cy="76" r="16"/><circle class="pearl sub sub-1" cx="72" cy="76" r="16"/><circle class="pearl sub sub-2" cx="126" cy="76" r="16"/>
+      <text class="s-lab small sublab" x="18" y="112" text-anchor="middle">chop</text><text class="s-lab small sublab" x="72" y="112" text-anchor="middle">cook</text><text class="s-lab small sublab" x="126" y="112" text-anchor="middle">plate</text>
+    </g></svg><svg class="order-svg" viewBox="0 0 144 132" aria-hidden="true" focusable="false"><g class="order" data-o="1">
+      <text class="s-lab small muted" x="2" y="40">Order 2</text>
+      <line class="s-rule" x1="0" y1="92" x2="144" y2="92"/>
+      <g class="prec"><path class="s-arrow" d="M38 76H50m-5 -3.5l5 3.5l-5 3.5"/><path class="s-arrow" d="M92 76H104m-5 -3.5l5 3.5l-5 3.5"/></g>
+      <circle class="pearl sub sub-0" cx="18" cy="76" r="16"/><circle class="pearl sub sub-1" cx="72" cy="76" r="16"/><circle class="pearl sub sub-2" cx="126" cy="76" r="16"/>
+      
+    </g></svg><svg class="order-svg" viewBox="0 0 144 132" aria-hidden="true" focusable="false"><g class="order" data-o="2">
+      <text class="s-lab small muted" x="2" y="40">Order 3</text>
+      <line class="s-rule" x1="0" y1="92" x2="144" y2="92"/>
+      <g class="prec"><path class="s-arrow" d="M38 76H50m-5 -3.5l5 3.5l-5 3.5"/><path class="s-arrow" d="M92 76H104m-5 -3.5l5 3.5l-5 3.5"/></g>
+      <circle class="pearl sub sub-0" cx="18" cy="76" r="16"/><circle class="pearl sub sub-1" cx="72" cy="76" r="16"/><circle class="pearl sub sub-2" cx="126" cy="76" r="16"/>
+      
+    </g></svg><svg class="order-svg" viewBox="0 0 144 132" aria-hidden="true" focusable="false"><g class="order" data-o="3">
+      <text class="s-lab small muted" x="2" y="40">Order 4</text>
+      <line class="s-rule" x1="0" y1="92" x2="144" y2="92"/>
+      <g class="prec"><path class="s-arrow" d="M38 76H50m-5 -3.5l5 3.5l-5 3.5"/><path class="s-arrow" d="M92 76H104m-5 -3.5l5 3.5l-5 3.5"/></g>
+      <circle class="pearl sub sub-0" cx="18" cy="76" r="16"/><circle class="pearl sub sub-1" cx="72" cy="76" r="16"/><circle class="pearl sub sub-2" cx="126" cy="76" r="16"/>
+      
+    </g></svg></div>
+        <p class="panel-t">Four burger orders arrive in each round. Every order is three subtasks in a fixed order: chop, then cook, then plate. Twelve subtasks per round.</p>
+      </div>
+      <div class="panel panel-b" data-panel="3">
+        <h3 class="panel-h">The kitchen</h3>
+        <svg class="kitchen-svg" viewBox="0 0 420 132" aria-hidden="true" focusable="false">
+          <g class="worker w-0"><text class="s-lab" x="0" y="30">Chef</text><line class="s-rule" x1="96" y1="36" x2="420" y2="36"/><text class="s-lab small leaves" x="420" y="24" text-anchor="end">leaves in the disrupted configuration</text></g><g class="worker w-1"><text class="s-lab" x="0" y="74">Sous-chef</text><line class="s-rule" x1="96" y1="80" x2="420" y2="80"/></g><g class="worker w-2"><text class="s-lab" x="0" y="118">Server</text><line class="s-rule" x1="96" y1="124" x2="420" y2="124"/></g>
+        </svg>
+        <p class="panel-t">The player assigns each subtask to one of three workers. A worker’s speed on a task is revealed only after assignment. Time is counted in ticks.</p>
+        <dl class="params">
+          <div><dt>Normal configuration</dt><dd><svg class="rounds" viewBox="0 0 180 10" aria-hidden="true"><rect class="rd full" x="0" y="0" width="24" height="10"/><rect class="rd full" x="30" y="0" width="24" height="10"/><rect class="rd full" x="60" y="0" width="24" height="10"/></svg>3 full rounds</dd></div>
+          <div class="disrupt"><dt>Disrupted configuration</dt><dd><svg class="rounds" viewBox="0 0 180 10" aria-hidden="true"><rect class="rd full" x="0" y="0" width="24" height="10"/><rect class="rd full" x="30" y="0" width="24" height="10"/><rect class="rd under" x="60.75" y="0.75" width="22.5" height="8.5"/><rect class="rd under" x="90.75" y="0.75" width="22.5" height="8.5"/><rect class="rd under" x="120.75" y="0.75" width="22.5" height="8.5"/><rect class="rd under" x="150.75" y="0.75" width="22.5" height="8.5"/></svg>2 full rounds, then 4 without the chef</dd></div>
+          <div><dt>Optimal finish, fully staffed</dt><dd>20 ticks</dd></div>
+          <div><dt>Optimal finish, understaffed</dt><dd>34 ticks</dd></div>
+        </dl>
+      </div>
+      <div class="panel panel-c" data-panel="4">
+        <h3 class="panel-h">The experiment</h3>
+        <div class="phases">
+          <div class="phase1"><p class="ph-name">Phase I</p><p class="panel-t">No tips. Players’ decisions are recorded as trace data.</p></div>
+          <svg class="fork" viewBox="0 0 80 192" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path class="s-link arm-link" d="M0 96 C 40 96, 40 24, 80 24"/><path class="s-link arm-link" d="M0 96 C 40 96, 40 72, 80 72"/><path class="s-link arm-link" d="M0 96 C 40 96, 40 120, 80 120"/><path class="s-link arm-link" d="M0 96 C 40 96, 40 168, 80 168"/></svg>
+          <div class="phase2"><p class="ph-name">Phase II, four randomised arms</p>
+            <ol class="arms"><li>No tip</li><li>The algorithm’s tip</li><li>The tip chosen most often in Phase I</li><li>A baseline tip</li></ol>
+          </div>
+        </div>
+        <p class="panel-t">A tip is a single if-then rule.</p>
+      </div>
+    </div>
+    <div class="stepper" hidden>
+      <button type="button" class="btn buoy" id="step-btn">Step through the design</button>
+      <p class="step-text" id="step-text" aria-live="polite"></p>
+    </div>
+    <figcaption class="cap">Study design of Bastani, Bastani &amp; Sinchaisri (2026). Redrawn as a schematic from the paper’s description; not data. No assignment schedule and no result is shown. Source: the experimental design described in arXiv:2108.08454v5. Schematic pending author check.</figcaption>
+  </figure>
+</section>
+<div class="wrap block cite-grid">
+  <section id="awards" aria-labelledby="h-awards">
+    <h2 class="sec-h" id="h-awards">Awards</h2>
+    <details class="awards"><summary>7 awards, 2021 to 2023</summary>
+      <ul><li><span class="a-y">2021</span><span>INFORMS Behavioral Operations Management Best Working Paper, First Place<span class="a-t">as <i>Learning Best Practices: Can Machine Learning Improve Human Decision-Making?</i></span></span></li><li><span class="a-y">2021</span><span>INFORMS TIMES Section Best Working Paper<span class="a-t">as <i>Learning Best Practices: Can Machine Learning Improve Human Decision-Making?</i></span></span></li><li><span class="a-y">2021</span><span>POMS College of Behavioral Operations Junior Scholar Paper Competition, 2nd place</span></li><li><span class="a-y">2022</span><span>INFORMS SAS Data Mining Best Paper Award, Winner (General Paper Track)<span class="a-t">as <i>Improving Human Decision-Making with Machine Learning</i></span></span></li><li><span class="a-y">2022</span><span>INFORMS Service Science Section Best Paper Competition, Finalist<span class="a-t">as <i>Improving Human Decision-Making with Machine Learning</i></span></span></li><li><span class="a-y">2022</span><span>WISE (Workshop on Information Systems and Economics) Best Conference Paper</span></li><li><span class="a-y">2023</span><span>POMS College of Operational Excellence Best Junior Scholar Paper, Runner-up<span class="a-t">as <i>Improving Human Decision-Making with Machine Learning</i></span></span></li></ul>
+    </details>
+  </section>
+  <section aria-labelledby="h-cite">
+    <h2 class="sec-h" id="h-cite">Cite</h2>
+    <p class="apa">Bastani, H., Bastani, O., &amp; Sinchaisri, W. P. (2026). Improving human sequential decision making with reinforcement learning. <i>Management Science, 72</i>(1), 733–755. <a href="https://doi.org/10.1287/mnsc.2022.02455">https://doi.org/10.1287/mnsc.2022.02455</a></p>
+    <pre class="bibtex" id="bibtex" tabindex="0" aria-label="BibTeX">@article{bastani2026improving,
+  title   = {Improving Human Sequential Decision Making
+             with Reinforcement Learning},
+  author  = {Bastani, Hamsa and Bastani, Osbert and
+             Sinchaisri, Wichinpong Park},
+  journal = {Management Science},
+  volume  = {72},
+  number  = {1},
+  pages   = {733--755},
+  year    = {2026},
+  doi     = {10.1287/mnsc.2022.02455}
+}</pre>
+    <p><button type="button" class="btn buoy" data-copy="bibtex">Copy BibTeX</button></p>
+  </section>
+</div>
+</article>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-mark"><svg class="labmark" viewBox="0 0 4 3.5181" aria-hidden="true" focusable="false"><use href="#m-lab"/></svg><span class="foot-word">BOBALAB</span></div>
+    <div class="foot-cols">
+      <div>
+        <p>Berkeley Operations and Behavioral Analytics Lab<br>Haas School of Business<br>University of California, Berkeley<br>2220 Piedmont Avenue, Berkeley, CA 94720</p>
+        <p><a href="mailto:bobalab@berkeley.edu">bobalab@berkeley.edu</a></p>
+      </div>
+      <nav aria-label="Site"><ul class="foot-links"><li><a href="research.html">Research</a></li><li><a href="publications.html">Publications</a></li><li><a href="project.html">Projects</a></li><li><a href="marks.html">Marks</a></li><li><a href="paper.html">Paper page</a></li></ul></nav>
+      <div>
+        <p>Lab members: <a href="https://scheduler.bobalab.org/">Lab scheduler</a></p>
+        <p><button class="motion-toggle" type="button" aria-pressed="false">Reduce motion</button></p>
+        <p class="muted">Last updated 24 October 2026</p>
+      </div>
+    </div>
+    <p class="proto-note" role="note">Prototype P2, Settle. A design study built from the lab’s content as of 24 October 2026; not the live site.</p>
+  </div>
+</footer>
+<script src="site.js" defer></script>
+<script src="plate.js" defer></script>
+</body>
+</html>

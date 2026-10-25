@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Improving Human Sequential Decision Making with Reinforcement Learning · BOBALAB</title>
+<meta name="description" content="Bastani, Bastani &amp; Sinchaisri (2026), Management Science 72(1): study design, citation and links.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="p3.css">
+<script>(()=>{const q=new URLSearchParams(location.search),d=document.documentElement,t=q.get('theme');d.classList.add('js');if(t)d.dataset.theme=t;try{if(localStorage.getItem('p3m'))d.dataset.motion='reduce'}catch(e){}if(q.get('motion')==='reduce')d.dataset.motion='reduce'})()</script>
+</head>
+<body data-page="paper">
+<a class="skip" href="#main">Skip to content</a>
+<header class="hd wrap"><div class="hd-in">
+  <a class="wm" href="index.html">BOBALAB</a>
+  <nav class="nav" aria-label="Main"><ul><li><a href="research.html">Research</a></li><li><a href="publications.html">Publications</a></li><li><a href="project.html">Projects</a></li></ul></nav>
+</div></header>
+<main id="main" class="wrap">
+
+<header class="pp-head">
+  <div>
+    <p class="crumb"><a href="publications.html">Publications</a>, <a href="publications.html#y2026">2026</a></p>
+    <h1>Improving Human Sequential Decision Making with Reinforcement Learning</h1>
+    <p class="pp-au">Hamsa Bastani, Osbert Bastani, <span class="lab">Wichinpong Park Sinchaisri</span></p>
+    <p class="pp-ve"><i style="font-style:normal">Management Science</i> 72(1), 733–755. Published online 22 May 2025, in the January 2026 issue.</p>
+    <p class="lk-row" style="margin-top:12px"><a href="https://parksinchaisri.github.io/files/paper-tips.pdf">PDF</a><a href="https://arxiv.org/abs/2108.08454">arXiv</a><a href="https://pubsonline.informs.org/doi/10.1287/mnsc.2022.02455">Publisher</a><a href="https://doi.org/10.1287/mnsc.2022.02455">DOI</a><span class="doi" style="align-self:center;padding-left:4px;color:var(--muted)">10.1287/mnsc.2022.02455</span></p>
+  </div>
+  <dl class="pp-side">
+    <dt>Type</dt><dd>Journal article</dd>
+    <dt>Direction</dt><dd class="c-algorithmic-advice"><a href="publications.html?dir=algorithmic-advice">Algorithmic Advice</a>
+      <span class="onl" role="img" aria-label="The papers on the Algorithmic Advice line; this paper is ringed."><i></i><i class="me"></i><i></i><i></i><b></b></span>
+      <span style="display:block;margin-top:2px">One of 4 papers on this line; the ringed dot is this paper.</span></dd>
+    <dt>Awards</dt><dd><details class="aw"><summary>7 awards, 2021 to 2023</summary><ul><li>INFORMS Behavioral Operations Management Best Working Paper, First Place, 2021<span>As “Learning Best Practices: Can Machine Learning Improve Human Decision-Making?”</span></li><li>INFORMS TIMES Section Best Working Paper, 2021<span>As “Learning Best Practices: Can Machine Learning Improve Human Decision-Making?”</span></li><li>POMS College of Behavioral Operations Junior Scholar Paper Competition, 2nd place, 2021</li><li>INFORMS SAS Data Mining Best Paper Award, Winner (General Paper Track), 2022<span>As “Improving Human Decision-Making with Machine Learning”</span></li><li>INFORMS Service Science Section Best Paper Competition, Finalist, 2022<span>As “Improving Human Decision-Making with Machine Learning”</span></li><li>WISE (Workshop on Information Systems and Economics) Best Conference Paper, 2022</li><li>POMS College of Operational Excellence Best Junior Scholar Paper, Runner-up, 2023<span>As “Improving Human Decision-Making with Machine Learning”</span></li></ul></details></dd>
+  </dl>
+</header>
+<p class="pp-ib">An algorithm learns from logs of people's multi-step decisions and turns the biggest gap between their play and an optimal policy into one short tip. In virtual-kitchen experiments the tips raised performance, and people combined them with their own strategies.</p>
+<section class="sec" aria-label="Study design"><figure class="plate c-algorithmic-advice" aria-labelledby="plc">
+  <div class="plate-bar"><h2 id="plh">Study design</h2><p class="stepnote" aria-live="polite"></p><button type="button" class="btn step">Step through the design</button><button type="button" class="btn all" hidden>Show all steps</button></div>
+  <div class="pl" data-at="0"
+    data-n1="&lt;b&gt;Step 1 of 4.&lt;/b&gt; Orders arrive: four burger orders per round."
+    data-n2="&lt;b&gt;Step 2 of 4.&lt;/b&gt; Each order splits into three subtasks in a fixed order, chop then cook then plate. The player assigns every subtask to a worker."
+    data-n3="&lt;b&gt;Step 3 of 4.&lt;/b&gt; The chef leaves. In the disrupted configuration four of six rounds are understaffed, and the optimal finish moves from 20 to 34 ticks."
+    data-n4="&lt;b&gt;Step 4 of 4.&lt;/b&gt; Phase II: after a first phase without tips, play is randomised into four arms.">
+    <div class="pl-row">
+      <div class="pl-cell"><h3>The task: one round, four orders</h3><p>Each burger order is three subtasks in a fixed order: chop, cook, plate.</p>
+        <svg viewBox="0 0 360 200" role="img" aria-label="Four orders, each drawn as three linked subtasks: chop, then cook, then plate. Twelve subtasks in all.">
+          <text class="m" x="150" y="18" text-anchor="middle">chop</text><text class="m" x="220" y="18" text-anchor="middle">cook</text><text class="m" x="290" y="18" text-anchor="middle">plate</text>
+          <g data-k="1" class="arr" style="transition-delay:0ms"><text class="m" x="0" y="53">Order 1</text><g data-k="2" class="grow"><path class="pk" d="M163 48H204"/><path class="ah" d="M207 48l-6 -4v8z"/></g><g data-k="2" class="grow"><path class="pk" d="M233 48H274"/><path class="ah" d="M277 48l-6 -4v8z"/></g><circle class="pe sp" cx="150" cy="48" r="11" style="--dx:0px"/><circle class="pe sp" cx="220" cy="48" r="11" style="--dx:-70px"/><circle class="pe sp" cx="290" cy="48" r="11" style="--dx:-140px"/></g><g data-k="1" class="arr" style="transition-delay:70ms"><text class="m" x="0" y="95">Order 2</text><g data-k="2" class="grow"><path class="pk" d="M163 90H204"/><path class="ah" d="M207 90l-6 -4v8z"/></g><g data-k="2" class="grow"><path class="pk" d="M233 90H274"/><path class="ah" d="M277 90l-6 -4v8z"/></g><circle class="pe sp" cx="150" cy="90" r="11" style="--dx:0px"/><circle class="pe sp" cx="220" cy="90" r="11" style="--dx:-70px"/><circle class="pe sp" cx="290" cy="90" r="11" style="--dx:-140px"/></g><g data-k="1" class="arr" style="transition-delay:140ms"><text class="m" x="0" y="137">Order 3</text><g data-k="2" class="grow"><path class="pk" d="M163 132H204"/><path class="ah" d="M207 132l-6 -4v8z"/></g><g data-k="2" class="grow"><path class="pk" d="M233 132H274"/><path class="ah" d="M277 132l-6 -4v8z"/></g><circle class="pe sp" cx="150" cy="132" r="11" style="--dx:0px"/><circle class="pe sp" cx="220" cy="132" r="11" style="--dx:-70px"/><circle class="pe sp" cx="290" cy="132" r="11" style="--dx:-140px"/></g><g data-k="1" class="arr" style="transition-delay:210ms"><text class="m" x="0" y="179">Order 4</text><g data-k="2" class="grow"><path class="pk" d="M163 174H204"/><path class="ah" d="M207 174l-6 -4v8z"/></g><g data-k="2" class="grow"><path class="pk" d="M233 174H274"/><path class="ah" d="M277 174l-6 -4v8z"/></g><circle class="pe sp" cx="150" cy="174" r="11" style="--dx:0px"/><circle class="pe sp" cx="220" cy="174" r="11" style="--dx:-70px"/><circle class="pe sp" cx="290" cy="174" r="11" style="--dx:-140px"/></g>
+        </svg></div>
+      <div class="pl-cell"><h3>The kitchen: three workers</h3><p>The player assigns each subtask to a worker. A worker’s speed varies by task and is revealed only after assignment. Time runs in ticks.</p>
+        <svg viewBox="0 0 360 200" role="img" aria-label="Three worker lanes, chef, sous-chef and server, along a time axis in ticks. Marks at 20 ticks, the optimal finish with full staff, and 34 ticks, the optimal finish when understaffed. No schedule is drawn.">
+          <g data-k="3"><path class="opt" d="M241.64705882352942 30V168"/><text x="241.64705882352942" y="22" text-anchor="middle" class="tn" font-weight="600">20</text></g>
+          <g data-k="3"><path class="opt" d="M352 30V168"/><text x="352" y="22" text-anchor="middle" class="tn" font-weight="600">34</text></g>
+          <text x="0" y="65">Chef</text><path data-k="3o" class="lane" d="M84 60H352"/><g data-k="3x"><path class="lane off" d="M84 60H352"/><text class="m" x="162.8235294117647" y="52" text-anchor="middle">chef leaves</text></g>
+          <text x="0" y="109">Sous-chef</text><path class="lane" d="M84 104H352"/>
+          <text x="0" y="153">Server</text><path class="lane" d="M84 148H352"/>
+          <path class="tick" d="M84 176H352"/><path class="tick" d="M84 176v5"/><text class="m tn" x="84" y="196" text-anchor="middle">0</text><path class="tick" d="M162.8235294117647 176v5"/><text class="m tn" x="162.8235294117647" y="196" text-anchor="middle">10</text><path class="tick" d="M241.64705882352942 176v5"/><text class="m tn" x="241.64705882352942" y="196" text-anchor="middle">20</text><path class="tick" d="M320.47058823529414 176v5"/><text class="m tn" x="320.47058823529414" y="196" text-anchor="middle">30</text>
+        </svg>
+        <p class="pl-cap" style="margin-top:6px">Dashed marks: the optimal finish, 20 ticks with full staff and 34 when understaffed.</p></div>
+      <div class="pl-cell"><h3>Two configurations</h3><p>Each glyph is one round; its three lines are the three workers. A dashed top line is a round without the chef.</p>
+        <svg viewBox="0 0 360 200" role="img" aria-label="Normal configuration: three full rounds. Disrupted configuration: two full rounds, then four rounds without the chef.">
+          <text x="0" y="16" font-weight="600">Normal</text><text class="m" x="72" y="16">3 full rounds</text>
+          <g data-k="1"><path class="lane" d="M0 34h46"/><path class="lane" d="M0 46h46M0 58h46"/></g><g data-k="1"><path class="lane" d="M58 34h46"/><path class="lane" d="M58 46h46M58 58h46"/></g><g data-k="1"><path class="lane" d="M116 34h46"/><path class="lane" d="M116 46h46M116 58h46"/></g>
+          <text x="0" y="100" font-weight="600">Disrupted</text><text class="m" x="86" y="100">2 full, then 4 understaffed</text>
+          <g data-k="1"><path class="lane" d="M0 118h46"/><path class="lane" d="M0 130h46M0 142h46"/></g><g data-k="1"><path class="lane" d="M58 118h46"/><path class="lane" d="M58 130h46M58 142h46"/></g><g data-k="3"><path class="lane off" d="M116 118h46"/><path class="lane" d="M116 130h46M116 142h46"/></g><g data-k="3"><path class="lane off" d="M174 118h46"/><path class="lane" d="M174 130h46M174 142h46"/></g><g data-k="3"><path class="lane off" d="M232 118h46"/><path class="lane" d="M232 130h46M232 142h46"/></g><g data-k="3"><path class="lane off" d="M290 118h46"/><path class="lane" d="M290 130h46M290 142h46"/></g>
+          <text class="m" x="0" y="186">rounds in order of play, left to right</text>
+        </svg></div>
+    </div>
+    <div class="pl-row"><div class="pl-cell pl-wide"><h3>The experiment</h3>
+      <div class="flow">
+        <p class="ph ph1" data-k="4"><b>Phase I</b>No tips. People play and their decisions are logged as trace data. From these logs the algorithm learns a tip: one if-then rule.</p>
+        <div class="rnode" data-k="4" aria-hidden="true"><span>R</span></div>
+        <ul class="arms" aria-label="Phase II, randomised into four arms"><li><span>No tip</span></li><li><span>The algorithm’s tip</span></li><li><span>The tip most chosen in Phase I</span></li><li><span>A baseline tip</span></li></ul>
+      </div></div></div>
+  </div>
+  <figcaption class="cap" id="plc"><b>Figure 1.</b> Study design of Bastani, Bastani &amp; Sinchaisri (2026), <i style="font-style:normal">Management Science</i> 72(1). Redrawn as a schematic from the paper’s description (arXiv 2108.08454, v5); not data. R marks random assignment. No assignment schedule and no result is drawn.</figcaption>
+</figure></section>
+<section class="sec" aria-labelledby="ci"><div class="sec-h"><h2 id="ci">Cite</h2></div>
+  <div class="cite">
+    <div><h3>APA <button type="button" class="btn cp" data-c="apa">Copy</button></h3><p id="apa">Bastani, H., Bastani, O., &amp; Sinchaisri, W. P. (2026). Improving human sequential decision making with reinforcement learning. <i style="font-style:normal">Management Science</i>, 72(1), 733–755. https://doi.org/10.1287/mnsc.2022.02455</p></div>
+    <div><h3>BibTeX <button type="button" class="btn cp" data-c="bib">Copy</button></h3><pre class="bibtex" id="bib">@article{bastani2026improving,
+  title   = {Improving Human Sequential Decision Making with Reinforcement Learning},
+  author  = {Bastani, Hamsa and Bastani, Osbert and Sinchaisri, Wichinpong Park},
+  journal = {Management Science},
+  volume  = {72},
+  number  = {1},
+  pages   = {733--755},
+  year    = {2026},
+  doi     = {10.1287/mnsc.2022.02455}
+}</pre></div>
+  </div>
+</section>
+</main>
+<footer class="ft wrap"><div class="ft-in">
+  <div><a class="wm" href="index.html">BOBALAB</a><p>Berkeley Operations and<br>Behavioral Analytics Lab</p></div>
+  <div><h2>Visit</h2><p>Haas School of Business<br>2220 Piedmont Avenue<br>Berkeley, CA 94720</p><p><a href="mailto:bobalab@berkeley.edu">bobalab@berkeley.edu</a></p></div>
+  <div><h2>Site</h2><ul><li><a href="research.html">Research</a></li><li><a href="publications.html">Publications</a></li><li><a href="project.html">Projects</a></li><li><a href="marks.html">Marks</a></li></ul></div>
+  <div><h2>Lab members</h2><p><a href="https://scheduler.bobalab.org/">Lab scheduler</a></p><button type="button" class="tbtn" id="motion" aria-pressed="false">Reduce motion</button></div>
+  <div class="ft-base"><span>Last updated 24 October 2026</span><span>Prototype P3 “Lines”. Variants: <a href="index.html?links=rings">rings</a>, <a href="index.html?order=chain">suggested order</a>, <a href="index.html?n=4x">growth at 4x</a></span></div>
+</div></footer>
+<script src="site.js"></script>
+
+</body>
+</html>

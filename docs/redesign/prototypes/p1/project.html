@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en" data-page="project">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dispatching for Worker Development, BOBALAB</title>
+<meta name="description" content="Algorithms for offering jobs to gig workers who can decline and who learn at different, unknown rates, so that platforms build skill as well as fill orders.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/stix-two-text@5.3.0/files/stix-two-text-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/atkinson-hyperlegible-next@5.3.0/files/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="p1.css">
+<script>(function(){var d=document.documentElement,q=new URLSearchParams(location.search),m=q.get('motion'),t=q.get('theme');d.classList.add('js');if(t)d.dataset.theme=t;try{m=m||localStorage.getItem('p1-motion')}catch(e){}if(m==='reduce')d.dataset.motion='reduce';else if(d.dataset.page==='home'&&!matchMedia('(prefers-reduced-motion: reduce)').matches)try{if(q.has('intro')||!sessionStorage.getItem('p1-intro')){d.dataset.intro='';sessionStorage.setItem('p1-intro','1')}}catch(e){}})()</script>
+<script src="p1.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="hdr"><div class="wrap hdr-in">
+<a class="wm" href="index.html"><span class="wm-n">BOBALAB</span><span class="wm-d">Berkeley Operations and Behavioral Analytics Lab</span></a>
+<nav class="nav" aria-label="Site"><ul><li><a href="research.html">Research</a></li><li><a href="publications.html">Publications</a></li><li><a href="project.html" aria-current="page">Projects</a></li><li><a href="index.html#people">People</a></li></ul></nav>
+</div></header>
+<main id="main" class="wrap">
+<article aria-labelledby="h1">
+<header class="ah g">
+<p class="rail ah-k">Project</p>
+<div class="ah-t">
+<p class="crumb"><a href="research.html#projects">Learning on the Job</a></p>
+<h1 id="h1" class="ttl">Dispatching for Worker Development</h1>
+<p class="dek dek--r">Algorithms for offering jobs to gig workers who can decline and who learn at different, unknown rates, so that platforms build skill as well as fill orders.</p>
+<dl class="by">
+<div><dt>Directions</dt><dd><a href="research.html" data-dir="learning-on-the-job">Learning on the Job</a>, <a href="publications.html?dir=platform-work" data-dir="platform-work">Platform Work</a></dd></div>
+<div><dt>Papers</dt><dd>2</dd></div>
+<div class="by-w"><dt>Team</dt><dd>William Deng, Shunan Jiang, Park Sinchaisri</dd></div>
+</dl>
+</div>
+</header>
+
+<section class="sec g" aria-labelledby="q-h">
+<h2 class="rl" id="q-h">The problem</h2>
+<div class="prose">
+<p class="lead">How should a platform offer jobs when its workers can turn offers down, and get better at the work at different rates the platform cannot see in advance?</p>
+<p>Asks how a platform should offer jobs when workers may decline and improve at different, unknown rates. Proposes a tractable benchmark and learning algorithms, including a variant that caps the risk of market failure, and tests them on delivery-platform data.</p>
+<p>The companion paper, <a href="#p-deng-2026-dispatching-to-develop">Dispatching to Develop</a>, studies dispatch policies that develop gig workers’ skills.</p>
+</div>
+<aside class="notes nlog" aria-label="Dated notes">
+<p><time datetime="2026-05-11">11 May 2026</time>Learning to Gig received a major revision from Manufacturing &amp; Service Operations Management.</p><p><time datetime="2026-08-04">4 August 2026</time>Dispatching to Develop, a working paper by Haonan Deng and Park Sinchaisri on dispatch policies that develop gig workers’ skills, posted on SSRN.</p>
+</aside>
+</section>
+
+<section class="sec g fsec">
+<figure class="plate pf pjf" id="fig-p" data-hl="deng-2025-learning-to-gig deng-2026-dispatching-to-develop" aria-labelledby="fp-cap">
+<div class="pf-area"><ol class="pf-list" role="list" aria-label="Directions of this project"><li class="pf-item" data-slug="learning-on-the-job" data-k="matcha" style="--x:30%;--y:0"><a class="pf-link" href="research.html"><span class="pf-pearl" aria-hidden="true"></span><span class="pf-lab"><span class="pf-n">Learning on the Job</span><span class="pf-c">4 papers, 1 in progress</span></span></a></li><li class="pf-item" data-slug="platform-work" data-k="oolong" style="--x:72%;--y:0"><a class="pf-link" href="publications.html?dir=platform-work"><span class="pf-pearl" aria-hidden="true"></span><span class="pf-lab"><span class="pf-n">Platform Work</span><span class="pf-c">6 papers, 2 in progress</span></span></a></li></ol><svg class="pf-svg" aria-hidden="true" focusable="false"></svg></div>
+<figcaption class="cap" id="fp-cap"><b>Figure 1.</b> Where the project sits in the lab’s research. Its two papers are the ringed dots: each belongs to both Learning on the Job and Platform Work, and a line joins its two appearances. The other papers of each direction are shown faint.</figcaption>
+<script type="application/json" id="lab-data">{"asOf":"2026-10-24","dirs":{"algorithmic-advice":{"n":"Algorithmic Advice","k":"pea"},"ai-at-work":{"n":"AI at Work","k":"lychee"},"learning-on-the-job":{"n":"Learning on the Job","k":"matcha"},"platform-work":{"n":"Platform Work","k":"oolong"}},"papers":[{"s":"sinchaisri-2021-penn-dissertation","y":2021,"d":["platform-work"],"t":"Managing the Gig Economy via Behavioral and Operational Lenses","sh":"Managing the Gig Economy","ty":"Dissertation","b":"Park Sinchaisri's doctoral dissertation on managing gig-economy work through behavioral and operational lenses; the gig-driver paper is reported to be one chapter."},{"s":"allon-2023-gig-drivers","y":2023,"d":["platform-work"],"t":"The Impact of Behavioral and Economic Drivers on Gig Economy Workers","sh":"Drivers of Gig Economy Workers","ty":"Journal article","b":"Uses ride-hailing data to model when on-demand drivers start and stop working."},{"s":"keppler-2025-making-chatgpt-work","y":2025,"d":["ai-at-work"],"t":"Making ChatGPT Work for Me","sh":"Making ChatGPT Work for Me","ty":"Journal article","b":"Observes 24 K-12 teachers using ChatGPT on their own work and sorts their requests into a handful of distinct ways of asking for help; most conversations stay within one of them."},{"s":"jiang-2025-learning-on-the-go","y":2025,"d":["learning-on-the-job","platform-work"],"t":"Learning on the Go: Understanding How Gig Economy Workers Learn with Recommendation Algorithms","sh":"Learning on the Go","ty":"Journal article","b":"Draws on more than a million delivery orders to show couriers get faster and more punctual with experience."},{"s":"deng-2025-learning-to-gig","y":2025,"d":["learning-on-the-job","platform-work"],"t":"Learning to Gig: Workforce Development under Worker Agency","sh":"Learning to Gig","ty":"Working paper","b":"Asks how a platform should offer jobs when workers may decline and improve at different, unknown rates."},{"s":"lee-2025-non-adoption-algorithmic-advice","y":2025,"d":["algorithmic-advice"],"t":"Understanding Non-Adoption of “Optimal” Algorithmic Advice for Problem Solving","sh":"Non-Adoption of Optimal Advice","ty":"Working paper","b":"Looks at why people in the virtual-kitchen task pass over algorithm-generated tips, finding they interpret tips differently and face barriers beyond trust, such as how hard a tip is to apply and features of the task setting."},{"s":"bastani-2026-rl-tips","y":2026,"d":["algorithmic-advice"],"t":"Improving Human Sequential Decision Making with Reinforcement Learning","sh":"Improving Sequential Decisions with RL","ty":"Journal article","b":"An algorithm learns from logs of people's multi-step decisions and turns the biggest gap between their play and an optimal policy into one short tip."},{"s":"allon-2026-multihoming-workers","y":2026,"d":["platform-work"],"t":"Managing Multihoming Workers in the Gig Economy","sh":"Managing Multihoming Workers","ty":"Working paper","b":"Combines one ride-hailing platform's data with public New York City trip data to estimate how drivers split time between competing apps, then tests pay designs: guaranteed hourly pay can raise supply at fixed cost, streak bonuses curb switching, and wage floors need limits on congestion."},{"s":"blaettchen-2026-precise-or-broad","y":2026,"d":["algorithmic-advice","learning-on-the-job"],"t":"Precise or Broad? The Reward-Learning Frontier in Algorithmic Advice Design","sh":"Precise or Broad?","ty":"Working paper","b":"Compares two ways of turning an optimal policy into advice in EV-charging route experiments: an exact action versus a broader rule of thumb."},{"s":"deng-2026-dispatching-to-develop","y":2026,"d":["learning-on-the-job","platform-work"],"t":"Dispatching to Develop: Worker Agency and Workforce Development in Gig Platforms","sh":"Dispatching to Develop","ty":"Working paper","b":""},{"s":"deng-2026-stale-misattributed-late","y":2026,"d":["ai-at-work"],"t":"Stale, Misattributed, or Late: Where Personal Memory Fails Before Generation","sh":"Stale, Misattributed, or Late","ty":"Working paper","b":""},{"s":"keppler-2026-teachers-knapsack","y":2026,"d":["ai-at-work"],"t":"The Teacher’s Knapsack: Generative AI and Teacher Productivity","sh":"The Teacher's Knapsack","ty":"Working paper","b":"Frames lesson preparation as picking the quickest set of tasks that meets a learning goal."},{"s":"liu-2026-strategic-advice-personal-ai","y":2026,"d":["ai-at-work","algorithmic-advice"],"t":"Strategic Advice in the Age of Personal AI","sh":"Strategic Advice and Personal AI","ty":"Working paper","b":"A game-theoretic model of a professional advisor whose client may also consult a personal AI."}]}</script>
+</figure>
+</section>
+
+<section class="sec g" aria-labelledby="pp-h">
+<h2 class="rl" id="pp-h">Papers</h2>
+<ol class="es" role="list"><li class="e" id="p-deng-2025-learning-to-gig" data-paper="deng-2025-learning-to-gig" data-year="2025" data-type="working-paper" data-dirs="learning-on-the-job platform-work">
+<span class="mm" aria-hidden="true"><i class="dot c-matcha" aria-hidden="true"></i></span>
+<div class="e-m"><h3 class="e-t"><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5387320">Learning to Gig: Workforce Development under Worker Agency</a></h3>
+<p class="e-a"><b>Haonan Deng</b>, <b>Shunan Jiang</b>, Xinpeng Qu, <b>Wichinpong Park Sinchaisri</b></p>
+<p class="e-v">SSRN working paper 5387320. Major revision at <i>Manufacturing &amp; Service Operations Management</i>.</p><p class="e-b">Asks how a platform should offer jobs when workers may decline and improve at different, unknown rates. Proposes a tractable benchmark and learning algorithms, including a variant that caps the risk of market failure, and tests them on delivery-platform data.</p>
+<p class="e-l"><span class="e-ty">Working paper</span><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5387320">SSRN</a><a href="https://doi.org/10.2139/ssrn.5387320">DOI</a></p></div>
+<div class="e-n"><span class="dn"><i class="dot c-matcha" aria-hidden="true"></i>Learning on the Job</span><span class="dn"><i class="dot c-oolong" aria-hidden="true"></i>Platform Work</span></div>
+</li>
+<li class="e" id="p-deng-2026-dispatching-to-develop" data-paper="deng-2026-dispatching-to-develop" data-year="2026" data-type="working-paper" data-dirs="learning-on-the-job platform-work">
+<span class="mm" aria-hidden="true"><i class="dot c-matcha" aria-hidden="true"></i></span>
+<div class="e-m"><h3 class="e-t"><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7151739">Dispatching to Develop: Worker Agency and Workforce Development in Gig Platforms</a></h3>
+<p class="e-a"><b>Haonan Deng</b>, <b>Wichinpong Park Sinchaisri</b></p>
+<p class="e-v">SSRN working paper 7151739.</p>
+<p class="e-l"><span class="e-ty">Working paper</span><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7151739">SSRN</a><a href="https://doi.org/10.2139/ssrn.7151739">DOI</a></p></div>
+<div class="e-n"><span class="dn"><i class="dot c-matcha" aria-hidden="true"></i>Learning on the Job</span><span class="dn"><i class="dot c-oolong" aria-hidden="true"></i>Platform Work</span></div>
+</li></ol>
+</section>
+
+<section class="sec g" aria-labelledby="tm-h">
+<h2 class="rl" id="tm-h">Team</h2>
+<ul class="mast mast--1" role="list"><li class="m"><span class="ph ph--i" aria-hidden="true">WD</span><span class="m-t"><span class="m-n">William Deng</span><span class="m-r">Master’s student, IEOR</span></span></li><li class="m"><span class="ph ph--i" aria-hidden="true">SJ</span><span class="m-t"><span class="m-n">Shunan Jiang</span><span class="m-r">PhD student, IEOR</span></span></li><li class="m"><span class="ph ph--i" aria-hidden="true">PS</span><span class="m-t"><span class="m-n">Park Sinchaisri</span><span class="m-r">Principal investigator</span></span></li></ul>
+</section>
+
+<section class="sec g" aria-labelledby="ot-h">
+<h2 class="rl" id="ot-h">Related projects</h2>
+<ol class="prs" role="list"><li class="pr pr--1"><span class="pr-r" aria-hidden="true"><i class="dot c-matcha" aria-hidden="true"></i><i class="dot c-oolong" aria-hidden="true"></i></span><div class="pr-m"><h3 class="pr-t">How Gig Workers Learn</h3></div><p class="pr-n">1 paper, <i>completed</i></p></li><li class="pr pr--1"><span class="pr-r" aria-hidden="true"><i class="dot c-pea" aria-hidden="true"></i><i class="dot c-matcha" aria-hidden="true"></i></span><div class="pr-m"><h3 class="pr-t">Precise or Broad Advice</h3></div><p class="pr-n">1 paper</p></li><li class="pr pr--1"><span class="pr-r" aria-hidden="true"><i class="dot c-matcha" aria-hidden="true"></i></span><div class="pr-m"><h3 class="pr-t">Learning Across Jobs</h3></div><p class="pr-n">1 paper</p></li></ol>
+</section>
+</article>
+</main>
+<footer class="ftr"><div class="wrap">
+<div class="g ftr-g">
+<div class="ftr-c"><p class="ftr-h">BOBALAB</p><p>Haas School of Business<br>2220 Piedmont Avenue<br>Berkeley, CA 94720</p><p><a href="mailto:bobalab@berkeley.edu">bobalab@berkeley.edu</a></p></div>
+<nav class="ftr-c" aria-label="Footer"><p class="ftr-h">Site</p><ul><li><a href="research.html">Research</a></li><li><a href="publications.html">Publications</a></li><li><a href="project.html">Projects</a></li><li><a href="index.html#people">People</a></li></ul></nav>
+<div class="ftr-c"><p class="ftr-h">Lab members</p><ul><li><a href="https://scheduler.bobalab.org/">Lab scheduler</a></li></ul></div>
+</div>
+<div class="ftr-b">
+<button type="button" class="tbtn" id="rm" aria-pressed="false">Reduce motion</button>
+<p>Last updated 24 October 2026</p>
+<p class="mock" role="note">Prototype P1 Notebook, mock of /projects/learning-to-gig/. Pages: <a href="index.html">Home</a>, <a href="research.html">Direction</a>, <a href="publications.html">Publications</a>, <a href="project.html">Project</a>, <a href="paper.html">Paper</a>, <a href="marks.html">Mark sheet</a>.</p>
+</div>
+</div></footer>
+</body>
+</html>

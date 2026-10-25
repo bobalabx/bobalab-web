@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en" data-page="publications">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Publications</title>
+<meta name="description" content="Publications of the Berkeley Operations and Behavioral Analytics Lab. Prototype P0.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="proto.css">
+<script>(function(h){var q=new URLSearchParams(location.search);h.classList.add('js');var t=q.get('theme');if(t)h.setAttribute('data-theme',t);try{if(localStorage.getItem('bobalab-motion')==='reduce')h.setAttribute('data-motion','reduce')}catch(e){}if(q.get('motion')==='reduce')h.setAttribute('data-motion','reduce');if(h.getAttribute('data-page')==='home'){var s=0;try{s=sessionStorage.getItem('p0-intro');sessionStorage.setItem('p0-intro','1')}catch(e){}if(!s||q.has('intro'))h.setAttribute('data-intro','')}})(document.documentElement)</script>
+<script src="proto.js" defer></script>
+</head>
+<body>
+<a class="bl-skip" href="#main">Skip to content</a>
+<div class="mock-note" role="note"><div class="bl-container">P0 Control prototype. Mock of /publications/</div></div>
+<header class="bl-header"><div class="bl-container bl-header__inner"><a href="index.html" class="bl-header__brand" aria-label="BOBALAB home"><svg class="bl-pearlmark" viewBox="0 0 64 64" width="1.25rem" height="1.25rem" aria-hidden="true" focusable="false"><circle cx="32" cy="32" r="29" stroke-width="2"/></svg><span class="bl-header__name" aria-hidden="true">BOBALAB</span></a><nav class="bl-header__nav" aria-label="Main"><ul class="bl-nav__list"><li><a class="bl-nav__link" href="research.html">Research</a></li><li><a class="bl-nav__link" href="publications.html" aria-current="page">Publications</a></li><li><a class="bl-nav__link" href="project.html">Projects</a></li><li><a class="bl-nav__link" href="marks.html">Marks</a></li></ul></nav></div></header>
+<main id="main" tabindex="-1">
+<div class="bl-container pubs">
+<header class="pg-head"><h1>Publications</h1><p class="pg-head__lead">Journal articles, working papers and preprints from the lab’s four research directions, newest first.</p></header>
+<div class="pubs-layout">
+<aside class="pubs-aside" aria-label="Search and filter">
+<button type="button" class="pubs-toggle" aria-expanded="false" aria-controls="pubs-filters">Search and filter</button>
+<div class="pubs-filters" id="pubs-filters">
+<div class="pubs-search"><label class="pubs-label" for="pubs-q">Search titles and authors</label><input class="pubs-input" id="pubs-q" type="search" autocomplete="off"></div>
+<fieldset class="pubs-group"><legend class="pubs-label">Type</legend><ul><li><button type="button" class="bl-chip" data-type="all" aria-pressed="true"><span class="bl-chip__l">All</span><span class="bl-chip__n">13</span></button></li><li><button type="button" class="bl-chip" data-type="journal" aria-pressed="false"><span class="bl-chip__l">Journal articles</span><span class="bl-chip__n">4</span></button></li><li><button type="button" class="bl-chip" data-type="working-paper" aria-pressed="false"><span class="bl-chip__l">Working papers</span><span class="bl-chip__n">8</span></button></li></ul></fieldset>
+<fieldset class="pubs-group"><legend class="pubs-label">Direction</legend><ul><li><button type="button" class="bl-chip" data-dir="algorithmic-advice" data-swatch="butterfly-pea" aria-pressed="false"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span><span class="bl-chip__l">Algorithmic Advice</span><span class="bl-chip__n">4</span></button></li><li><button type="button" class="bl-chip" data-dir="ai-at-work" data-swatch="lychee" aria-pressed="false"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span><span class="bl-chip__l">AI at Work</span><span class="bl-chip__n">4</span></button></li><li><button type="button" class="bl-chip" data-dir="learning-on-the-job" data-swatch="matcha" aria-pressed="false"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span><span class="bl-chip__l">Learning on the Job</span><span class="bl-chip__n">4</span></button></li><li><button type="button" class="bl-chip" data-dir="platform-work" data-swatch="oolong" aria-pressed="false"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span><span class="bl-chip__l">Platform Work</span><span class="bl-chip__n">6</span></button></li></ul></fieldset>
+<nav class="pubs-jump" aria-label="Jump to year"><p class="pubs-label">Year</p><ul class="pubs-jump__list"><li><a href="#y2026">2026</a></li><li><a href="#y2025">2025</a></li><li><a href="#y2023">2023</a></li><li><a href="#y2021">2021</a></li></ul></nav>
+</div>
+</aside>
+<div class="pubs-groups">
+<p class="pubs-results" aria-live="polite" id="pubs-results">13 papers</p>
+<section class="pubs-year" id="y2026" aria-labelledby="h2026"><div class="pubs-year__head"><h2 class="pubs-year__h" id="h2026">2026</h2><span class="pubs-year__count">7 papers</span></div><div class="pubs-list"><article class="bl-pub" data-p="bastani-2026-rl-tips" data-type="journal" data-dirs="algorithmic-advice" data-year="2026">
+<p class="bl-pub__kind">Journal article, 2026</p>
+<h3 class="bl-pub__title"><a href="paper.html">Improving Human Sequential Decision Making with Reinforcement Learning</a></h3>
+<p class="bl-pub__authors">Hamsa Bastani, Osbert Bastani and <b class="bl-pub__author--lab">Wichinpong Park Sinchaisri</b></p>
+<p class="bl-pub__venue"><cite>Management Science</cite>, 72(1), 733–755. <span class="bl-pub__awards"><a href="paper.html#awards">7 awards</a></span></p>
+<p class="bl-pub__brief">An algorithm learns from logs of people's multi-step decisions and turns the biggest gap between their play and an optimal policy into one short tip. In virtual-kitchen experiments the tips raised performance, and people combined them with their own strategies.</p>
+<div class="bl-pub__foot"><ul class="bl-tags"><li><a class="bl-tag" href="research-algorithmic-advice.html" data-swatch="butterfly-pea"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>Algorithmic Advice</a></li></ul><ul class="bl-materials" aria-label="Links for this paper"><li><a href="https://parksinchaisri.github.io/files/paper-tips.pdf">PDF</a></li><li><a href="https://arxiv.org/abs/2108.08454">arXiv</a></li><li><a href="https://pubsonline.informs.org/doi/10.1287/mnsc.2022.02455">Publisher</a></li><li><a href="https://doi.org/10.1287/mnsc.2022.02455">DOI</a></li></ul></div>
+</article>
+<article class="bl-pub" data-p="blaettchen-2026-precise-or-broad" data-type="working-paper" data-dirs="algorithmic-advice learning-on-the-job" data-year="2026">
+<p class="bl-pub__kind">Working paper, 2026</p>
+<h3 class="bl-pub__title"><a href="https://www.dropbox.com/scl/fi/ehetta55hl48yberpqmao/Precise-or-Broad-2026.pdf?rlkey=76belsk6wovmd5p8f7skel9tz&amp;dl=0">Precise or Broad? The Reward-Learning Frontier in Algorithmic Advice Design</a></h3>
+<p class="bl-pub__authors">Philippe Blaettchen and <b class="bl-pub__author--lab">Wichinpong Park Sinchaisri</b></p>
+<p class="bl-pub__venue">Major revision at <cite>Manufacturing & Service Operations Management</cite></p>
+<p class="bl-pub__brief">Compares two ways of turning an optimal policy into advice in EV-charging route experiments: an exact action versus a broader rule of thumb. Exact advice performs best while it is visible; broader advice can leave people better able to act alone in similar settings once advice is removed.</p>
+<div class="bl-pub__foot"><ul class="bl-tags"><li><a class="bl-tag" href="research-algorithmic-advice.html" data-swatch="butterfly-pea"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>Algorithmic Advice</a></li><li><a class="bl-tag" href="research.html" data-swatch="matcha"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>Learning on the Job</a></li></ul><ul class="bl-materials" aria-label="Links for this paper"><li><a href="https://www.dropbox.com/scl/fi/ehetta55hl48yberpqmao/Precise-or-Broad-2026.pdf?rlkey=76belsk6wovmd5p8f7skel9tz&amp;dl=0">PDF</a></li></ul></div>
+</article>
+<article class="bl-pub" data-p="liu-2026-strategic-advice-personal-ai" data-type="working-paper" data-dirs="ai-at-work algorithmic-advice" data-year="2026">
+<p class="bl-pub__kind">Working paper, 2026</p>
+<h3 class="bl-pub__title"><a href="https://arxiv.org/abs/2603.02055">Strategic Advice in the Age of Personal AI</a></h3>
+<p class="bl-pub__authors">Yueyang Liu and <b class="bl-pub__author--lab">Wichinpong Park Sinchaisri</b></p>
+<p class="bl-pub__venue">arXiv preprint, version 2</p>
+<p class="bl-pub__brief">A game-theoretic model of a professional advisor whose client may also consult a personal AI. The advisor tilts advice to offset the AI, and is worst off when clients use the AI some of the time rather than never or always.</p>
+<div class="bl-pub__foot"><ul class="bl-tags"><li><a class="bl-tag" href="research-ai-at-work.html" data-swatch="lychee"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>AI at Work</a></li><li><a class="bl-tag" href="research-algorithmic-advice.html" data-swatch="butterfly-pea"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>Algorithmic Advice</a></li></ul><ul class="bl-materials" aria-label="Links for this paper"><li><a href="https://arxiv.org/abs/2603.02055">arXiv</a></li><li><a href="https://doi.org/10.48550/arXiv.2603.02055">DOI</a></li></ul></div>
+</article>
+<article class="bl-pub" data-p="allon-2026-multihoming-workers" data-type="working-paper" data-dirs="platform-work" data-year="2026">
+<p class="bl-pub__kind">Working paper, 2026</p>
+<h3 class="bl-pub__title"><a href="https://parksinchaisri.github.io/files/paper-multihoming.pdf">Managing Multihoming Workers in the Gig Economy</a></h3>
+<p class="bl-pub__authors">Gad Allon, Maxime C. Cohen, Ken Moon and <b class="bl-pub__author--lab">Wichinpong Park Sinchaisri</b></p>
+<p class="bl-pub__venue">SSRN working paper 4502968. Revise and resubmit at <cite>Operations Research</cite>. <span class="bl-pub__awards">INFORMS TIMES Section Best Working Paper, Runner-Up, 2024</span></p>
+<p class="bl-pub__brief">Combines one ride-hailing platform's data with public New York City trip data to estimate how drivers split time between competing apps, then tests pay designs: guaranteed hourly pay can raise supply at fixed cost, streak bonuses curb switching, and wage floors need limits on congestion.</p>
+<div class="bl-pub__foot"><ul class="bl-tags"><li><a class="bl-tag" href="research-platform-work.html" data-swatch="oolong"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>Platform Work</a></li></ul><ul class="bl-materials" aria-label="Links for this paper"><li><a href="https://parksinchaisri.github.io/files/paper-multihoming.pdf">PDF</a></li><li><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4502968">SSRN</a></li><li><a href="https://doi.org/10.2139/ssrn.4502968">DOI</a></li></ul></div>
+</article>
+<article class="bl-pub" data-p="deng-2026-dispatching-to-develop" data-type="working-paper" data-dirs="learning-on-the-job platform-work" data-year="2026">
+<p class="bl-pub__kind">Working paper, 2026</p>
+<h3 class="bl-pub__title"><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7151739">Dispatching to Develop: Worker Agency and Workforce Development in Gig Platforms</a></h3>
+<p class="bl-pub__authors"><b class="bl-pub__author--lab">Haonan Deng</b> and <b class="bl-pub__author--lab">Wichinpong Park Sinchaisri</b></p>
+<p class="bl-pub__venue">SSRN working paper 7151739</p>
+
+<div class="bl-pub__foot"><ul class="bl-tags"><li><a class="bl-tag" href="research.html" data-swatch="matcha"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>Learning on the Job</a></li><li><a class="bl-tag" href="research-platform-work.html" data-swatch="oolong"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>Platform Work</a></li></ul><ul class="bl-materials" aria-label="Links for this paper"><li><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7151739">SSRN</a></li><li><a href="https://doi.org/10.2139/ssrn.7151739">DOI</a></li></ul></div>
+</article>
+<article class="bl-pub" data-p="deng-2026-stale-misattributed-late" data-type="working-paper" data-dirs="ai-at-work" data-year="2026">
+<p class="bl-pub__kind">Working paper, 2026</p>
+<h3 class="bl-pub__title"><a href="https://arxiv.org/abs/2610.10265">Stale, Misattributed, or Late: Where Personal Memory Fails Before Generation</a></h3>
+<p class="bl-pub__authors"><b class="bl-pub__author--lab">Haonan Deng</b> and <b class="bl-pub__author--lab">Wichinpong Park Sinchaisri</b></p>
+<p class="bl-pub__venue">arXiv preprint, version 1</p>
+
+<div class="bl-pub__foot"><ul class="bl-tags"><li><a class="bl-tag" href="research-ai-at-work.html" data-swatch="lychee"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>AI at Work</a></li></ul><ul class="bl-materials" aria-label="Links for this paper"><li><a href="https://arxiv.org/abs/2610.10265">arXiv</a></li><li><a href="https://doi.org/10.48550/arXiv.2610.10265">DOI</a></li></ul></div>
+</article>
+<article class="bl-pub" data-p="keppler-2026-teachers-knapsack" data-type="working-paper" data-dirs="ai-at-work" data-year="2026">
+<p class="bl-pub__kind">Working paper, 2026</p>
+<h3 class="bl-pub__title"><a href="https://parksinchaisri.github.io/files/paper-knapsack.pdf">The Teacher's Knapsack: Generative AI and Teacher Productivity</a></h3>
+<p class="bl-pub__authors">Samantha Keppler, <b class="bl-pub__author--lab">Wichinpong Park Sinchaisri</b> and Clare Snyder</p>
+<p class="bl-pub__venue">SSRN working paper 4924786</p>
+<p class="bl-pub__brief">Frames lesson preparation as picking the quickest set of tasks that meets a learning goal. A year-long case study of 24 teachers suggests generative AI helps both by speeding familiar tasks and by making it worthwhile to switch to new ones, though switching costs hold some teachers back.</p>
+<div class="bl-pub__foot"><ul class="bl-tags"><li><a class="bl-tag" href="research-ai-at-work.html" data-swatch="lychee"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>AI at Work</a></li></ul><ul class="bl-materials" aria-label="Links for this paper"><li><a href="https://parksinchaisri.github.io/files/paper-knapsack.pdf">PDF</a></li><li><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4924786">SSRN</a></li><li><a href="https://doi.org/10.2139/ssrn.4924786">DOI</a></li></ul></div>
+</article></div></section>
+<section class="pubs-year" id="y2025" aria-labelledby="h2025"><div class="pubs-year__head"><h2 class="pubs-year__h" id="h2025">2025</h2><span class="pubs-year__count">4 papers</span></div><div class="pubs-list"><article class="bl-pub" data-p="deng-2025-learning-to-gig" data-type="working-paper" data-dirs="learning-on-the-job platform-work" data-year="2025">
+<p class="bl-pub__kind">Working paper, 2025</p>
+<h3 class="bl-pub__title"><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5387320">Learning to Gig: Workforce Development under Worker Agency</a></h3>
+<p class="bl-pub__authors"><b class="bl-pub__author--lab">Haonan Deng</b>, <b class="bl-pub__author--lab">Shunan Jiang</b>, Xinpeng Qu and <b class="bl-pub__author--lab">Wichinpong Park Sinchaisri</b></p>
+<p class="bl-pub__venue">SSRN working paper 5387320. Major revision at <cite>Manufacturing & Service Operations Management</cite></p>
+<p class="bl-pub__brief">Asks how a platform should offer jobs when workers may decline and improve at different, unknown rates. Proposes a tractable benchmark and learning algorithms, including a variant that caps the risk of market failure, and tests them on delivery-platform data.</p>
+<div class="bl-pub__foot"><ul class="bl-tags"><li><a class="bl-tag" href="research.html" data-swatch="matcha"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>Learning on the Job</a></li><li><a class="bl-tag" href="research-platform-work.html" data-swatch="oolong"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>Platform Work</a></li></ul><ul class="bl-materials" aria-label="Links for this paper"><li><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5387320">SSRN</a></li><li><a href="https://doi.org/10.2139/ssrn.5387320">DOI</a></li></ul></div>
+</article>
+<article class="bl-pub" data-p="jiang-2025-learning-on-the-go" data-type="journal" data-dirs="learning-on-the-job platform-work" data-year="2025">
+<p class="bl-pub__kind">Journal article, 2025</p>
+<h3 class="bl-pub__title"><a href="https://parksinchaisri.github.io/files/paper-learningonthego.pdf">Learning on the Go: Understanding How Gig Economy Workers Learn with Recommendation Algorithms</a></h3>
+<p class="bl-pub__authors"><b class="bl-pub__author--lab">Shunan Jiang</b> and <b class="bl-pub__author--lab">Wichinpong Park Sinchaisri</b></p>
+<p class="bl-pub__venue"><cite>Proceedings of the ACM on Human-Computer Interaction</cite>, 9(7), 1–35</p>
+<p class="bl-pub__brief">Draws on more than a million delivery orders to show couriers get faster and more punctual with experience. Newcomers tend to follow the app's job recommendations, while seasoned workers increasingly go their own way.</p>
+<div class="bl-pub__foot"><ul class="bl-tags"><li><a class="bl-tag" href="research.html" data-swatch="matcha"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>Learning on the Job</a></li><li><a class="bl-tag" href="research-platform-work.html" data-swatch="oolong"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>Platform Work</a></li></ul><ul class="bl-materials" aria-label="Links for this paper"><li><a href="https://parksinchaisri.github.io/files/paper-learningonthego.pdf">PDF</a></li><li><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5376462">SSRN</a></li><li><a href="https://dl.acm.org/doi/10.1145/3757621">Publisher</a></li><li><a href="https://doi.org/10.1145/3757621">DOI</a></li></ul></div>
+</article>
+<article class="bl-pub" data-p="keppler-2025-making-chatgpt-work" data-type="journal" data-dirs="ai-at-work" data-year="2025">
+<p class="bl-pub__kind">Journal article, 2025</p>
+<h3 class="bl-pub__title"><a href="https://parksinchaisri.github.io/files/paper-chatgpt.pdf">Making ChatGPT Work for Me</a></h3>
+<p class="bl-pub__authors">Samantha Keppler, <b class="bl-pub__author--lab">Wichinpong Park Sinchaisri</b> and Clare Snyder</p>
+<p class="bl-pub__venue"><cite>Proceedings of the ACM on Human-Computer Interaction</cite>, 9(2), 1–23</p>
+<p class="bl-pub__brief">Observes 24 K-12 teachers using ChatGPT on their own work and sorts their requests into a handful of distinct ways of asking for help; most conversations stay within one of them.</p>
+<div class="bl-pub__foot"><ul class="bl-tags"><li><a class="bl-tag" href="research-ai-at-work.html" data-swatch="lychee"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>AI at Work</a></li></ul><ul class="bl-materials" aria-label="Links for this paper"><li><a href="https://parksinchaisri.github.io/files/paper-chatgpt.pdf">PDF</a></li><li><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4700354">SSRN</a></li><li><a href="https://dl.acm.org/doi/10.1145/3711026">Publisher</a></li><li><a href="https://doi.org/10.1145/3711026">DOI</a></li></ul></div>
+</article>
+<article class="bl-pub" data-p="lee-2025-non-adoption-algorithmic-advice" data-type="working-paper" data-dirs="algorithmic-advice" data-year="2025">
+<p class="bl-pub__kind">Working paper, 2025</p>
+<h3 class="bl-pub__title">Understanding Non-Adoption of “Optimal” Algorithmic Advice for Problem Solving</h3>
+<p class="bl-pub__authors">David Lee and <b class="bl-pub__author--lab">Wichinpong Park Sinchaisri</b></p>
+
+<p class="bl-pub__brief">Looks at why people in the virtual-kitchen task pass over algorithm-generated tips, finding they interpret tips differently and face barriers beyond trust, such as how hard a tip is to apply and features of the task setting.</p>
+<div class="bl-pub__foot"><ul class="bl-tags"><li><a class="bl-tag" href="research-algorithmic-advice.html" data-swatch="butterfly-pea"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>Algorithmic Advice</a></li></ul></div>
+</article></div></section>
+<section class="pubs-year" id="y2023" aria-labelledby="h2023"><div class="pubs-year__head"><h2 class="pubs-year__h" id="h2023">2023</h2><span class="pubs-year__count">1 paper</span></div><div class="pubs-list"><article class="bl-pub" data-p="allon-2023-gig-drivers" data-type="journal" data-dirs="platform-work" data-year="2023">
+<p class="bl-pub__kind">Journal article, 2023</p>
+<h3 class="bl-pub__title"><a href="https://parksinchaisri.github.io/files/paper-gigdrivers.pdf">The Impact of Behavioral and Economic Drivers on Gig Economy Workers</a></h3>
+<p class="bl-pub__authors">Gad Allon, Maxime C. Cohen and <b class="bl-pub__author--lab">Wichinpong Park Sinchaisri</b></p>
+<p class="bl-pub__venue"><cite>Manufacturing & Service Operations Management</cite>, 25(4), 1376–1393. <span class="bl-pub__awards">4 awards</span></p>
+<p class="bl-pub__brief">Uses ride-hailing data to model when on-demand drivers start and stop working. Pay matters, but so do habits such as quitting after reaching an earnings goal and staying on once a shift has momentum; incentives that account for both can add capacity without extra cost.</p>
+<div class="bl-pub__foot"><ul class="bl-tags"><li><a class="bl-tag" href="research-platform-work.html" data-swatch="oolong"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>Platform Work</a></li></ul><ul class="bl-materials" aria-label="Links for this paper"><li><a href="https://parksinchaisri.github.io/files/paper-gigdrivers.pdf">PDF</a></li><li><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3274628">SSRN</a></li><li><a href="https://pubsonline.informs.org/doi/10.1287/msom.2023.1191">Publisher</a></li><li><a href="https://doi.org/10.1287/msom.2023.1191">DOI</a></li></ul></div>
+</article></div></section>
+<section class="pubs-year" id="y2021" aria-labelledby="h2021"><div class="pubs-year__head"><h2 class="pubs-year__h" id="h2021">2021</h2><span class="pubs-year__count">1 paper</span></div><div class="pubs-list"><article class="bl-pub" data-p="sinchaisri-2021-penn-dissertation" data-type="dissertation" data-dirs="platform-work" data-year="2021">
+<p class="bl-pub__kind">Dissertation, 2021</p>
+<h3 class="bl-pub__title"><a href="https://repository.upenn.edu/edissertations/4013">Managing the Gig Economy via Behavioral and Operational Lenses</a></h3>
+<p class="bl-pub__authors"><b class="bl-pub__author--lab">Wichinpong Park Sinchaisri</b></p>
+<p class="bl-pub__venue">Ph.D. dissertation, University of Pennsylvania</p>
+<p class="bl-pub__brief">Park Sinchaisri's doctoral dissertation on managing gig-economy work through behavioral and operational lenses.</p>
+<div class="bl-pub__foot"><ul class="bl-tags"><li><a class="bl-tag" href="research-platform-work.html" data-swatch="oolong"><span class="bl-dot bl-dot--sm" aria-hidden="true"></span>Platform Work</a></li></ul><ul class="bl-materials" aria-label="Links for this paper"><li><a href="https://repository.upenn.edu/edissertations/4013">Repository</a></li></ul></div>
+</article></div></section>
+<p class="pubs-empty" hidden>No paper matches. Clear the search or choose All.</p>
+<section class="pubs-wip pubs-year" aria-labelledby="h-wip"><div class="pubs-year__head"><h2 class="pubs-year__h" id="h-wip">In progress</h2><span class="pubs-year__count">7 studies without a public version yet</span></div><ul class="pubs-wip__list"><li><p class="dr-wip__title">Act, Ask, or Defer? Authority Design for Agentic AI Service Workflows</p><p class="dr-wip__note">Haonan Deng and Park Sinchaisri. Submitted to Production and Operations Management.</p></li><li><p class="dr-wip__title">Planning vs. Execution: How AI Changes Task Portfolio Choice</p><p class="dr-wip__note">Clare Snyder, Samantha Keppler and Park Sinchaisri. Presented at the 2026 INFORMS MSOM Conference.</p></li><li><p class="dr-wip__title">Mechanism-Guided Generative AI Simulation for Pricing Operations</p><p class="dr-wip__note">Xinwei Chen, Xiexin Liu, Park Sinchaisri and Yixiang Xu. Submitted to Production and Operations Management.</p></li><li><p class="dr-wip__title">Managing Human Agents with Compliance-Aware Reinforcement Learning</p><p class="dr-wip__note">Park Sinchaisri and Bryce McLaughlin. Presented at the 2026 INFORMS MSOM Conference.</p></li><li><p class="dr-wip__title">Learning Across Jobs</p><p class="dr-wip__note">Park Sinchaisri and Ryan Jesubalan. Presented at the Behavioral Operations Conference 2026.</p></li><li><p class="dr-wip__title">Fruits of Labor: Staffing Fluid Teams in a Fragmented Market</p><p class="dr-wip__note">Park Sinchaisri and Jerry Anunrojwong.</p></li><li><p class="dr-wip__title">Designing and Sequencing Incentives for Platform Workers</p><p class="dr-wip__note">Park Sinchaisri. Presented at the Behavioral Operations Conference 2026.</p></li></ul></section>
+<p class="pubs-foot">Review status and dates are as reported by the lab, October 2026.</p>
+</div>
+</div>
+</div>
+</main>
+<footer class="bl-footer"><div class="bl-container"><div class="bl-footer__grid">
+<section aria-labelledby="ft-lab"><h2 id="ft-lab">Berkeley Operations and Behavioral Analytics Lab</h2><address>Haas School of Business, University of California, Berkeley<br>2220 Piedmont Avenue, Berkeley, CA 94720<br><a href="mailto:bobalab@berkeley.edu">bobalab@berkeley.edu</a></address></section>
+<section aria-labelledby="ft-site"><h2 id="ft-site">Site</h2><ul><li><a href="research.html">Research</a></li><li><a href="project.html">Projects</a></li><li><a href="publications.html">Publications</a></li><li><a href="marks.html">Mark sheet</a></li></ul></section>
+<section aria-labelledby="ft-mem"><h2 id="ft-mem">Lab members</h2><p><a href="https://scheduler.bobalab.org/">Lab scheduler</a></p><p class="bl-footer__meta">Weekly lab meeting scheduling; lab members sign in with Google.</p><p><button type="button" class="bl-switch" aria-pressed="false" data-motion-toggle>Reduce motion</button></p></section>
+</div><div class="bl-footer__base"><span>Prototype P0, the control: the current kit with the shared cleanup.</span><span>Last updated 24 October 2026</span></div></div></footer>
+
+</body>
+</html>

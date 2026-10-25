@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dispatching for Worker Development · BOBALAB</title>
+<meta name="description" content="A BOBALAB project on offering jobs to gig workers who can decline and who learn at different, unknown rates.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="p3.css">
+<script>(()=>{const q=new URLSearchParams(location.search),d=document.documentElement,t=q.get('theme');d.classList.add('js');if(t)d.dataset.theme=t;try{if(localStorage.getItem('p3m'))d.dataset.motion='reduce'}catch(e){}if(q.get('motion')==='reduce')d.dataset.motion='reduce'})()</script>
+</head>
+<body data-page="project">
+<a class="skip" href="#main">Skip to content</a>
+<header class="hd wrap"><div class="hd-in">
+  <a class="wm" href="index.html">BOBALAB</a>
+  <nav class="nav" aria-label="Main"><ul><li><a href="research.html">Research</a></li><li><a href="publications.html">Publications</a></li><li><a href="project.html" aria-current="page">Projects</a></li></ul></nav>
+</div></header>
+<main id="main" class="wrap">
+
+<header class="pj-head">
+  <p class="crumb"><a href="research.html">Learning on the Job</a> and <a href="publications.html?dir=platform-work">Platform Work</a></p>
+  <h1>Dispatching for Worker Development</h1>
+  <p class="lede">Algorithms for offering jobs to gig workers who can decline and who learn at different, unknown rates, so that platforms build skill as well as fill orders.</p>
+  <dl class="facts">
+    <div><dt>Directions</dt><dd><span style="display:block"><span class="seg c-learning-on-the-job" aria-hidden="true"></span><a href="research.html">Learning on the Job</a></span><span style="display:block"><span class="seg c-platform-work" aria-hidden="true"></span><a href="publications.html?dir=platform-work">Platform Work</a></span></dd></div>
+    <div><dt>People</dt><dd>William Deng, Shunan Jiang, Park Sinchaisri</dd></div>
+    <div><dt>Papers</dt><dd>2 working papers, 2025 and 2026</dd></div>
+    <div><dt>Latest</dt><dd>Dispatching to Develop posted on SSRN, 4 August 2026</dd></div>
+  </dl>
+</header>
+<figure class="sec pl2" aria-labelledby="pl2c">
+  <div class="pl2-g">
+    <div class="pl2-lab" aria-hidden="true"><span class="c-learning-on-the-job" style="height:52px;font-size:var(--t-lane)">Learning on the Job</span><span style="height:52px;font-size:var(--t-lane)">Platform Work</span></div>
+    <div class="pl2-col"><span class="yrl">2025</span>
+      <div class="pl2-lanes" aria-hidden="true"><i class="c-learning-on-the-job"></i><i class="c-platform-work"></i></div>
+      <div class="pl2-ev" style="--x:30%" aria-hidden="true"><span class="d d1 c-learning-on-the-job"></span><span class="k"></span><span class="d d2 c-platform-work"></span></div>
+      <p class="pl2-note bot" style="--x:30%"><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5387320">Learning to Gig</a><span>Working paper, SSRN 5387320</span></p>
+    </div>
+    <div class="pl2-col"><span class="yrl">2026</span>
+      <div class="pl2-lanes" aria-hidden="true"><i class="c-learning-on-the-job"></i><i class="c-platform-work"></i></div>
+      <p class="pl2-note top" style="--x:12px">11 May<span>Learning to Gig: major revision at M&amp;SOM</span></p>
+      <div class="pl2-ev" style="--x:62%" aria-hidden="true"><span class="d d1 c-learning-on-the-job"></span><span class="k"></span><span class="d d2 c-platform-work"></span></div>
+      <p class="pl2-note bot" style="--x:62%"><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7151739">Dispatching to Develop</a><span>4 August, posted on SSRN</span></p>
+    </div>
+    <div class="pl2-now" aria-hidden="true"><span class="nl">now</span><b class="a"></b><b class="b"></b></div>
+  </div>
+  <figcaption class="cap" id="pl2c" style="margin-top:14px;font-size:var(--t-meta);color:var(--muted)"><b style="color:var(--ink)">Figure 1.</b> The project’s papers on the two directions it belongs to. Dots are papers; notes are dated events from the lab’s news. As of 24 October 2026.</figcaption>
+</figure>
+<section class="sec two" aria-labelledby="q"><h2 id="q" class="h2">The question</h2><div class="prose">
+  <p class="lede">How should a platform offer jobs when workers may decline and improve at different, unknown rates?</p>
+  <p style="margin-top:14px">Learning to Gig proposes a tractable benchmark and learning algorithms, including a variant that caps the risk of market failure, and tests them on delivery-platform data. It received a major revision from <i style="font-style:normal">Manufacturing &amp; Service Operations Management</i> in May 2026. Dispatching to Develop, posted in August 2026, studies dispatch policies that develop gig workers’ skills.</p>
+</div></section>
+<section class="sec" aria-label="Study design"><figure class="plate c-learning-on-the-job" aria-labelledby="lgc">
+  <div class="plate-bar"><h2>Study design: Learning to Gig<span class="draft">Draft schematic, pending author check</span></h2><p class="stepnote" aria-live="polite"></p><button type="button" class="btn step">Step through the design</button><button type="button" class="btn all" hidden>Show all steps</button></div>
+  <div class="pl" data-at="0"
+    data-n1="&lt;b&gt;Step 1 of 4.&lt;/b&gt; The platform offers a job to a worker."
+    data-n2="&lt;b&gt;Step 2 of 4.&lt;/b&gt; The worker may accept or decline. An accepted job adds to the worker’s experience."
+    data-n3="&lt;b&gt;Step 3 of 4.&lt;/b&gt; Workers improve at different rates, which the platform does not know in advance."
+    data-n4="&lt;b&gt;Step 4 of 4.&lt;/b&gt; The paper proposes ways to decide whom to offer each job, and tests them on delivery-platform data.">
+    <div class="pl-row">
+      <div class="pl-cell"><h3>The platform offers a job</h3><p>Jobs are offered to workers one at a time.</p>
+        <svg viewBox="0 0 360 170" role="img" aria-label="The platform holds jobs and offers one to a worker.">
+          <text x="0" y="20" font-weight="600">Platform</text>
+          <path class="lane" d="M60 34V150"/>
+          <g data-k="1"><circle class="pe" cx="30" cy="56" r="10"/><circle class="pe" cx="30" cy="92" r="10"/><circle class="pe" cx="30" cy="128" r="10"/></g>
+          <g data-k="1" class="arr"><path class="pk" d="M62 92H282"/><path class="ah" d="M286 92l-7 -4.5v9z"/><circle class="pe" cx="176" cy="92" r="10"/><text class="m" x="176" y="74" text-anchor="middle">offer</text></g>
+          <text x="294" y="97">Worker</text>
+        </svg></div>
+      <div class="pl-cell"><h3>The worker accepts or declines</h3><p>An accepted job adds to the worker’s experience; a declined job goes back to the platform.</p>
+        <svg viewBox="0 0 360 170" role="img" aria-label="At the worker, the job is either accepted, joining the worker’s experience, or declined and returned to the platform.">
+          <path class="pk" d="M0 60H58"/><rect class="rbox" x="58" y="50" width="20" height="20"/>
+          <g data-k="2" class="grow"><path class="pk" d="M78 60H200"/><text x="92" y="50">accept</text>
+            <circle class="pe" cx="222" cy="60" r="10"/><circle class="pe" cx="248" cy="60" r="10"/><circle class="pe" cx="274" cy="60" r="10"/><circle class="pe" cx="300" cy="60" r="10"/><text class="m" x="209" y="94">experience</text></g>
+          <g data-k="2"><path class="pk" d="M68 70V130H8"/><path class="ah" d="M4 130l7 -4.5v9z"/><text x="92" y="135">decline: back to the platform</text></g>
+        </svg></div>
+      <div class="pl-cell"><h3>Workers learn at unknown rates</h3><p>Each worker improves with experience at a different rate, which the platform does not know in advance.</p>
+        <svg viewBox="0 0 360 170" role="img" aria-label="Three workers, each improving at a different rate that the platform does not know.">
+          <g data-k="3"><text x="0" y="44">Worker 1</text><path class="lane" d="M84 39H262"/><text class="m tn" x="272" y="44">rate r₁ = ?</text></g><g data-k="3"><text x="0" y="90">Worker 2</text><path class="lane" d="M84 85H262"/><text class="m tn" x="272" y="90">rate r₂ = ?</text></g><g data-k="3"><text x="0" y="136">Worker 3</text><path class="lane" d="M84 131H262"/><text class="m tn" x="272" y="136">rate r₃ = ?</text></g>
+        </svg></div>
+    </div>
+    <div class="pl-row"><div class="pl-cell pl-wide"><h3>What the paper compares</h3>
+      <div class="flow">
+        <p class="ph ph1" data-k="4"><b>Whom to offer each job</b>The paper proposes three approaches to this choice and tests them on delivery-platform data.</p>
+        <div class="rnode bare" data-k="4" aria-hidden="true"><span></span></div>
+        <ul class="arms" aria-label="Approaches in the paper"><li><span>A tractable benchmark</span></li><li><span>Learning algorithms</span></li><li><span>A variant that caps the risk of market failure</span></li></ul>
+      </div></div></div>
+  </div>
+  <figcaption class="cap" id="lgc"><b>Figure 2.</b> Study design of Deng, Jiang, Qu &amp; Sinchaisri (2025), <i style="font-style:normal">Learning to Gig</i>. Draft schematic drawn from the paper’s published summary only, pending a check by the authors against the model section; not data. Three workers are drawn for illustration.</figcaption>
+</figure></section>
+<section class="sec two" aria-labelledby="pe"><h2 id="pe" class="h2">People</h2><div>
+  <div class="ros-h" style="display:grid;grid-template-columns:56px minmax(0,1fr) auto;column-gap:18px"><span></span><span></span><span class="mx mx-h" aria-hidden="true"><span class="seg c-algorithmic-advice"></span><span class="seg c-ai-at-work"></span><span class="seg c-learning-on-the-job"></span><span class="seg c-platform-work"></span></span></div>
+  <ol class="ros"><li><span class="ini" aria-hidden="true">WD</span><div><p class="nm">William Deng</p><p class="rl">Master's student, IEOR</p></div><span class="mx" role="img" aria-label="Works in Algorithmic Advice, AI at Work, Learning on the Job and Platform Work"><i class="c-algorithmic-advice y"></i><i class="c-ai-at-work y"></i><i class="c-learning-on-the-job y"></i><i class="c-platform-work y"></i></span></li><li><span class="ini" aria-hidden="true">SJ</span><div><p class="nm">Shunan Jiang</p><p class="rl">PhD student, IEOR</p></div><span class="mx" role="img" aria-label="Works in Learning on the Job and Platform Work"><i class="c-algorithmic-advice"></i><i class="c-ai-at-work"></i><i class="c-learning-on-the-job y"></i><i class="c-platform-work y"></i></span></li><li><span class="ini" aria-hidden="true">PS</span><div><p class="nm">Park Sinchaisri</p><p class="rl">Principal investigator</p></div><span class="mx" role="img" aria-label="Works in Algorithmic Advice, AI at Work, Learning on the Job and Platform Work"><i class="c-algorithmic-advice y"></i><i class="c-ai-at-work y"></i><i class="c-learning-on-the-job y"></i><i class="c-platform-work y"></i></span></li></ol>
+  <p class="meta muted" style="margin-top:10px">Columns, left to right: Algorithmic Advice, AI at Work, Learning on the Job, Platform Work. A filled dot marks a direction in which the person has a project.</p>
+</div></section>
+<section class="sec two" aria-labelledby="pp"><h2 id="pp" class="h2">Papers</h2><div>
+  <ol class="ledger"><li class="row" data-s="deng-2026-dispatching-to-develop" data-type="working-paper" data-dirs="learning-on-the-job platform-work">
+  <div class="main"><h3 class="row-t"><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7151739">Dispatching to Develop: Worker Agency and Workforce Development in Gig Platforms</a></h3><p class="au"><span class="lab">Haonan Deng</span>, <span class="lab">Wichinpong Park Sinchaisri</span></p><p class="ve">SSRN working paper 7151739</p></div>
+  <div class="rt"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="rl" d="M0 3H24M0 9H24M0 15H24M0 21H24"/><path class="rk" d="M12 15V21"/><circle cx="12" cy="15" r="3" style="fill:var(--matcha)"/><circle cx="12" cy="21" r="3" style="fill:var(--oolong)"/></svg></div>
+  <div class="mt"><span class="ty">Working paper, 2026</span><span class="ds"><span>Learning on the Job</span><span>Platform Work</span></span><span class="lk-row"><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7151739">SSRN</a><a href="https://doi.org/10.2139/ssrn.7151739">DOI</a></span></div>
+</li>
+<li class="row" data-s="deng-2025-learning-to-gig" data-type="working-paper" data-dirs="learning-on-the-job platform-work">
+  <div class="main"><h3 class="row-t"><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5387320">Learning to Gig: Workforce Development under Worker Agency</a></h3><p class="au"><span class="lab">Haonan Deng</span>, <span class="lab">Shunan Jiang</span>, Xinpeng Qu, <span class="lab">Wichinpong Park Sinchaisri</span></p><p class="ve">SSRN working paper 5387320. Major revision at Manufacturing &amp; Service Operations Management</p><p class="ib">Asks how a platform should offer jobs when workers may decline and improve at different, unknown rates. Proposes a tractable benchmark and learning algorithms, including a variant that caps the risk of market failure, and tests them on delivery-platform data.</p></div>
+  <div class="rt"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="rl" d="M0 3H24M0 9H24M0 15H24M0 21H24"/><path class="rk" d="M12 15V21"/><circle cx="12" cy="15" r="3" style="fill:var(--matcha)"/><circle cx="12" cy="21" r="3" style="fill:var(--oolong)"/></svg></div>
+  <div class="mt"><span class="ty">Working paper, 2025</span><span class="ds"><span>Learning on the Job</span><span>Platform Work</span></span><span class="lk-row"><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5387320">SSRN</a><a href="https://doi.org/10.2139/ssrn.5387320">DOI</a></span></div>
+</li></ol>
+</div></section>
+</main>
+<footer class="ft wrap"><div class="ft-in">
+  <div><a class="wm" href="index.html">BOBALAB</a><p>Berkeley Operations and<br>Behavioral Analytics Lab</p></div>
+  <div><h2>Visit</h2><p>Haas School of Business<br>2220 Piedmont Avenue<br>Berkeley, CA 94720</p><p><a href="mailto:bobalab@berkeley.edu">bobalab@berkeley.edu</a></p></div>
+  <div><h2>Site</h2><ul><li><a href="research.html">Research</a></li><li><a href="publications.html">Publications</a></li><li><a href="project.html">Projects</a></li><li><a href="marks.html">Marks</a></li></ul></div>
+  <div><h2>Lab members</h2><p><a href="https://scheduler.bobalab.org/">Lab scheduler</a></p><button type="button" class="tbtn" id="motion" aria-pressed="false">Reduce motion</button></div>
+  <div class="ft-base"><span>Last updated 24 October 2026</span><span>Prototype P3 “Lines”. Variants: <a href="index.html?links=rings">rings</a>, <a href="index.html?order=chain">suggested order</a>, <a href="index.html?n=4x">growth at 4x</a></span></div>
+</div></footer>
+<script src="site.js"></script>
+
+</body>
+</html>

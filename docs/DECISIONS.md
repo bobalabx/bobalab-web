@@ -99,3 +99,38 @@ Labels: DOCUMENTED (primary source), MEASURED (we ran it), HYPOTHESIS, UNKNOWN.
     - William Deng: he submitted nothing.
   - One file in the form export ("Jazz Beecham") is not on the roster and was not used.
 - **Scheduler link:** `site.yml` → `member_links` (new schema field and CMS list "Links for lab members"). It holds "Lab scheduler" → https://scheduler.bobalab.org/ and is shown in the footer ("Lab members") and at the top of `/people/`. It is a link only: the scheduler sends `frame-ancestors 'none'` and uses Google sign-in, so it cannot be embedded.
+
+## D-13 Redesign: "Lines" hybrid (owner request after PI feedback "looks AI-generated", 2026-10-24)
+- **Evidence:**
+  - `docs/redesign/AUDIT.md`, `AUDIT-SYSTEM.md`, `IDENTITY-RESEARCH.md`, `DIRECTION.md` (diagnosis, references, 4 concepts and the critique).
+  - `docs/redesign/prototypes/` (P0 Control, P1 Notebook, P2 Settle, P3 Lines; `JUDGE.md` plus comparison sheets).
+- **Decision (orchestrator, following the judge with changes):** build on **P3 "Lines"** (`docs/redesign/prototypes/p3/`). Apply the judge's refinement list in `prototypes/JUDGE.md`, with these binding changes:
+  1. **Navigation:** keep all five sections in the header: Research · Publications · People · News · Join. P3 dropped People, News and Join; they stay. Projects are reached from Research.
+  2. **Boba identity stays visible.**
+     - The four lanes of Fig. 1 end in a matte black tapioca **pearl at the "now" rule**. That pearl is the morph source into the direction page, where the same pearl heads Figure 2.
+     - **Wordmark:** "BOBALAB" set in Archivo (condensed, bold), with the first O replaced by that pearl, built as outlined SVG with the existing script approach.
+     - **Favicon:** P2's "shoulder on floor" (four pearls resting on a rule). Fallback: P1's "ruled b". A blind lineup with 3 people is still to run (owner).
+  3. **Type:** one family, Archivo (variable width and weight, self-hosted woff2, latin; ≤ 100 KiB total fonts).
+     - Condensed (wdth ~68, wght 700): h1, figure lane labels and year headings only.
+     - Normal width: everything else (h2 ≤ 2rem, weight 600; body 400).
+     - DOI and BibTeX use the system `ui-monospace` stack (no mono webfont).
+     - Fraunces, Inter and IBM Plex Mono are removed.
+  4. **Colour:** P3's paper, ink, muted, rule and hairline tokens (white paper, near-black ink, no brand accent; links are ink with underline), with the DIRECTION.md §5.0 direction tones.
+     - **Light (deep):** #2B4FA8, #A12C5A, #4C7A1E, #6B4500.
+     - **Dark (light):** #8EA4F7, #F590AE, #A8DA84, #C4943A.
+     - Contrast is recomputed in tests. The swatch enum and CMS stay; each swatch maps to these tones.
+  5. **No cards, pills, eyebrows or arrow-on-every-link:**
+     - Lists are ruled ledgers in a label-column grid (18rem left label column on desktop).
+     - Type and status are plain words. Filters stay real `<button aria-pressed>` styled as text toggles.
+     - People are lists with square photos (P1/P2); initials squares where there is no photo.
+  6. **Motion:** remove D-02's idle float, pointer buoyancy, stir, halos, gloss, the bounce and the in-figure Pause button (the footer "Reduce motion" switch stays). Keep or replace with purposeful, finite motion:
+     - papers arrive year by year on the settle curve;
+     - linked highlighting between lede words, lanes, dots and list rows;
+     - the React `<ViewTransition name="pearl-{slug}">` morph;
+     - the study-design plate's step-through.
+     - All transform/opacity only, and off under reduced motion. This supersedes D-02/D-02a.
+  7. **Copy cleanup (P0):** remove inline pipeline hedges ("reported by the lab" on every row, "Status not confirmed", "listed by title only", "This direction collects…"). Replace them with one provenance footnote per page where needed. Statuses stay honest. **PI sign-off is needed on the wording.**
+  8. **Study-design plates:** a code component per paper (registry keyed by publication slug), shown only when the publication's new `plate_verified` field is true, or in preview mode. Ship the Bastani 2026 plate (design facts only, with a source line). The Learning to Gig plate stays off.
+  9. **Unchanged:** all URLs, content, the CMS, the static export, accessibility (WCAG 2.2 AA), budgets and tests. Tests are updated to the new structure, never deleted to make them pass.
+- **Not deployed:** the work lives on branch `redesign`. `main` and the live site are untouched until the owner and PI approve.
+- **Rollback:** `git checkout main`.

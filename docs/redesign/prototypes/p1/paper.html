@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en" data-page="paper">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Improving Human Sequential Decision Making with Reinforcement Learning, BOBALAB</title>
+<meta name="description" content="An algorithm learns from logs of people's multi-step decisions and turns the biggest gap between their play and an optimal policy into one short tip. In virtual-kitchen experiments the tips raised performance, and people combined them with their own strategies.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/stix-two-text@5.3.0/files/stix-two-text-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/atkinson-hyperlegible-next@5.3.0/files/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="p1.css">
+<script>(function(){var d=document.documentElement,q=new URLSearchParams(location.search),m=q.get('motion'),t=q.get('theme');d.classList.add('js');if(t)d.dataset.theme=t;try{m=m||localStorage.getItem('p1-motion')}catch(e){}if(m==='reduce')d.dataset.motion='reduce';else if(d.dataset.page==='home'&&!matchMedia('(prefers-reduced-motion: reduce)').matches)try{if(q.has('intro')||!sessionStorage.getItem('p1-intro')){d.dataset.intro='';sessionStorage.setItem('p1-intro','1')}}catch(e){}})()</script>
+<script src="p1.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="hdr"><div class="wrap hdr-in">
+<a class="wm" href="index.html"><span class="wm-n">BOBALAB</span><span class="wm-d">Berkeley Operations and Behavioral Analytics Lab</span></a>
+<nav class="nav" aria-label="Site"><ul><li><a href="research.html">Research</a></li><li><a href="publications.html" aria-current="page">Publications</a></li><li><a href="project.html">Projects</a></li><li><a href="index.html#people">People</a></li></ul></nav>
+</div></header>
+<main id="main" class="wrap">
+<article aria-labelledby="h1">
+<header class="ah g">
+<p class="rail ah-k">Journal article<br><span class="yr">2026</span></p>
+<div class="ah-t">
+<p class="crumb"><a href="publications.html#p-bastani-2026-rl-tips">Publications</a></p>
+<h1 id="h1" class="ttl ttl--p">Improving Human Sequential Decision Making with Reinforcement Learning</h1>
+<p class="pa">Hamsa Bastani, Osbert Bastani, <b>Wichinpong Park Sinchaisri</b></p>
+<p class="pv"><i>Management Science</i> 72(1), 733–755. Published online 22 May 2025, in the January 2026 issue.</p>
+<p class="e-l"><a href="https://parksinchaisri.github.io/files/paper-tips.pdf">PDF</a><a href="https://arxiv.org/abs/2108.08454">arXiv</a><a href="https://pubsonline.informs.org/doi/10.1287/mnsc.2022.02455">Publisher</a><a href="https://doi.org/10.1287/mnsc.2022.02455">DOI</a></p>
+</div>
+<div class="notes ah-n"><div class="e-n"><span class="dn"><i class="dot c-pea" aria-hidden="true"></i>Algorithmic Advice</span><a class="aw" href="paper.html#awards">7 awards</a></div></div>
+</header>
+
+<section class="sec g" aria-labelledby="ib-h">
+<h2 class="rl" id="ib-h">In brief</h2>
+<div class="prose"><p class="lead">An algorithm learns from logs of people's multi-step decisions and turns the biggest gap between their play and an optimal policy into one short tip. In virtual-kitchen experiments the tips raised performance, and people combined them with their own strategies.</p></div>
+</section>
+
+<section class="sec g fsec" aria-labelledby="f3-cap">
+<figure class="sdp" id="plate" aria-labelledby="f3-cap">
+<div class="sdp-ctl"><button type="button" class="tbtn" id="step" hidden>Step through the design</button><p class="sdp-st" id="step-st" aria-live="polite"></p></div>
+<div class="panels">
+<div class="panel"><p class="pl-h"><b>a</b> One round</p>
+<svg viewBox="0 0 330 290" class="pl-svg" role="img" aria-labelledby="pa-t"><title id="pa-t">Panel a: four burger orders, each split into chop, cook and plate in fixed order, and three worker lanes for the chef, sous-chef and server, left empty.</title>
+<defs><marker id="ah" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L6 3L0 6z" class="pl-ah"/></marker></defs>
+<g data-s="2" class="pl-hd"><text class="pl-t" x="148" y="18" text-anchor="middle">chop</text><text class="pl-t" x="214" y="18" text-anchor="middle">cook</text><text class="pl-t" x="280" y="18" text-anchor="middle">plate</text></g>
+<g data-s="1"><text class="pl-t pl-m" x="0" y="49">Order 1</text><text class="pl-t pl-m" x="0" y="81">Order 2</text><text class="pl-t pl-m" x="0" y="113">Order 3</text><text class="pl-t pl-m" x="0" y="145">Order 4</text></g>
+<line class="pl-ln" data-s="2" x1="161" y1="44" x2="199" y2="44" marker-end="url(#ah)"/><line class="pl-ln" data-s="2" x1="227" y1="44" x2="265" y2="44" marker-end="url(#ah)"/><line class="pl-ln" data-s="2" x1="161" y1="76" x2="199" y2="76" marker-end="url(#ah)"/><line class="pl-ln" data-s="2" x1="227" y1="76" x2="265" y2="76" marker-end="url(#ah)"/><line class="pl-ln" data-s="2" x1="161" y1="108" x2="199" y2="108" marker-end="url(#ah)"/><line class="pl-ln" data-s="2" x1="227" y1="108" x2="265" y2="108" marker-end="url(#ah)"/><line class="pl-ln" data-s="2" x1="161" y1="140" x2="199" y2="140" marker-end="url(#ah)"/><line class="pl-ln" data-s="2" x1="227" y1="140" x2="265" y2="140" marker-end="url(#ah)"/>
+<g class="stks" data-s="1"><circle class="stk" data-c="0" cx="148" cy="44" r="9" style="--back:0px"/><circle class="stk" data-c="1" cx="214" cy="44" r="9" style="--back:-66px"/><circle class="stk" data-c="2" cx="280" cy="44" r="9" style="--back:-132px"/><circle class="stk" data-c="0" cx="148" cy="76" r="9" style="--back:0px"/><circle class="stk" data-c="1" cx="214" cy="76" r="9" style="--back:-66px"/><circle class="stk" data-c="2" cx="280" cy="76" r="9" style="--back:-132px"/><circle class="stk" data-c="0" cx="148" cy="108" r="9" style="--back:0px"/><circle class="stk" data-c="1" cx="214" cy="108" r="9" style="--back:-66px"/><circle class="stk" data-c="2" cx="280" cy="108" r="9" style="--back:-132px"/><circle class="stk" data-c="0" cx="148" cy="140" r="9" style="--back:0px"/><circle class="stk" data-c="1" cx="214" cy="140" r="9" style="--back:-66px"/><circle class="stk" data-c="2" cx="280" cy="140" r="9" style="--back:-132px"/></g>
+<g data-s="1" class="lanes"><text class="pl-t pl-m" x="0" y="205">Chef</text><line class="lane-e" x1="96" y1="200" x2="320" y2="200"/><text class="pl-t pl-m" x="0" y="231">Sous-chef</text><line class="lane-e" x1="96" y1="226" x2="320" y2="226"/><text class="pl-t pl-m" x="0" y="257">Server</text><line class="lane-e" x1="96" y1="252" x2="320" y2="252"/>
+<line class="pl-ax" x1="96" y1="266" x2="322" y2="266" marker-end="url(#ah)"/><text class="pl-xs" x="320" y="282" text-anchor="end">time, in ticks</text></g>
+</svg></div>
+<div class="panel"><p class="pl-h"><b>b</b> Two configurations</p>
+<svg viewBox="0 0 330 290" class="pl-svg" role="img" aria-labelledby="pb-t"><title id="pb-t">Panel b: the normal configuration has three fully staffed rounds; the disrupted configuration has two full rounds and four rounds in which the chef has left. Line length is the optimal finish time, 20 ticks with full staff and 34 understaffed.</title>
+<g data-s="3"><text class="pl-t" x="0" y="18">Normal: 3 full rounds</text></g><g class="rd" data-s="3" style="--i:1"><text class="pl-xs" x="0" y="45">1</text><line class="lane" x1="0" y1="52" x2="34" y2="52"/><line class="lane" x1="0" y1="60" x2="34" y2="60"/><line class="lane" x1="0" y1="68" x2="34" y2="68"/></g><g class="rd" data-s="3" style="--i:2"><text class="pl-xs" x="41" y="45">2</text><line class="lane" x1="41" y1="52" x2="75" y2="52"/><line class="lane" x1="41" y1="60" x2="75" y2="60"/><line class="lane" x1="41" y1="68" x2="75" y2="68"/></g><g class="rd" data-s="3" style="--i:3"><text class="pl-xs" x="82" y="45">3</text><line class="lane" x1="82" y1="52" x2="116" y2="52"/><line class="lane" x1="82" y1="60" x2="116" y2="60"/><line class="lane" x1="82" y1="68" x2="116" y2="68"/></g>
+<g data-s="3"><text class="pl-t" x="0" y="96">Disrupted: 2 full + 4 understaffed rounds</text></g><g class="rd" data-s="3" style="--i:1"><text class="pl-xs" x="0" y="123">1</text><line class="lane" x1="0" y1="130" x2="34" y2="130"/><line class="lane" x1="0" y1="138" x2="34" y2="138"/><line class="lane" x1="0" y1="146" x2="34" y2="146"/></g><g class="rd" data-s="3" style="--i:2"><text class="pl-xs" x="41" y="123">2</text><line class="lane" x1="41" y1="130" x2="75" y2="130"/><line class="lane" x1="41" y1="138" x2="75" y2="138"/><line class="lane" x1="41" y1="146" x2="75" y2="146"/></g><g class="rd rd--u" data-s="3" style="--i:3"><text class="pl-xs" x="82" y="123">3</text><line class="gone" x1="82" y1="130" x2="139.8" y2="130"/><line class="lane" x1="82" y1="138" x2="139.8" y2="138"/><line class="lane" x1="82" y1="146" x2="139.8" y2="146"/><line class="was" x1="82" y1="130" x2="116" y2="130"/></g><g class="rd rd--u" data-s="3" style="--i:4"><text class="pl-xs" x="146.8" y="123">4</text><line class="gone" x1="146.8" y1="130" x2="204.60000000000002" y2="130"/><line class="lane" x1="146.8" y1="138" x2="204.60000000000002" y2="138"/><line class="lane" x1="146.8" y1="146" x2="204.60000000000002" y2="146"/><line class="was" x1="146.8" y1="130" x2="180.8" y2="130"/></g><g class="rd rd--u" data-s="3" style="--i:5"><text class="pl-xs" x="211.60000000000002" y="123">5</text><line class="gone" x1="211.60000000000002" y1="130" x2="269.40000000000003" y2="130"/><line class="lane" x1="211.60000000000002" y1="138" x2="269.40000000000003" y2="138"/><line class="lane" x1="211.60000000000002" y1="146" x2="269.40000000000003" y2="146"/><line class="was" x1="211.60000000000002" y1="130" x2="245.60000000000002" y2="130"/></g><g class="rd rd--u" data-s="3" style="--i:6"><text class="pl-xs" x="276.40000000000003" y="123">6</text><line class="gone" x1="276.40000000000003" y1="130" x2="334.20000000000005" y2="130"/><line class="lane" x1="276.40000000000003" y1="138" x2="334.20000000000005" y2="138"/><line class="lane" x1="276.40000000000003" y1="146" x2="334.20000000000005" y2="146"/><line class="was" x1="276.40000000000003" y1="130" x2="310.40000000000003" y2="130"/></g>
+<g data-s="3" class="pl-key"><line class="lane" x1="0" y1="200" x2="34" y2="200"/><text class="pl-t" x="44" y="205">20 ticks: optimal finish, fully staffed</text>
+<line class="lane" x1="0" y1="228" x2="57.8" y2="228"/><text class="pl-t" x="67.8" y="233">34 ticks: optimal, chef gone</text>
+<text class="pl-xs" x="0" y="258">Each round: one line per worker, chef on top.</text><text class="pl-xs" x="0" y="274">A dotted line: the chef has left.</text></g>
+</svg></div>
+<div class="panel"><p class="pl-h"><b>c</b> Two phases</p>
+<svg viewBox="0 0 330 290" class="pl-svg" role="img" aria-labelledby="pc-t"><title id="pc-t">Panel c: Phase I has no tips and records play as trace data; in Phase II participants are randomised into four arms: no tip, the algorithm's tip, the tip most chosen in Phase I, and a baseline tip. A tip is one if-then rule.</title>
+<g data-s="4"><text class="pl-t pl-b" x="0" y="18">Phase I</text><text class="pl-t" x="0" y="40">No tips; play is recorded</text><text class="pl-t" x="0" y="58">as trace data.</text>
+<line class="pl-ln" x1="14" y1="72" x2="14" y2="104" marker-end="url(#ah2)"/></g>
+<defs><marker id="ah2" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L6 3L0 6z" class="pl-ah"/></marker></defs>
+<g data-s="4"><text class="pl-t pl-b" x="0" y="126">Phase II, randomised</text><line class="pl-ln trunk" x1="14" y1="136" x2="14" y2="240"/></g>
+<g class="arm" data-s="4" style="--i:0"><line class="pl-ln" x1="14" y1="150" x2="40" y2="150"/><text class="pl-t" x="50" y="155">No tip</text></g><g class="arm" data-s="4" style="--i:1"><line class="pl-ln" x1="14" y1="180" x2="40" y2="180"/><text class="pl-t" x="50" y="185">The algorithm’s tip</text></g><g class="arm" data-s="4" style="--i:2"><line class="pl-ln" x1="14" y1="210" x2="40" y2="210"/><text class="pl-t" x="50" y="215">The tip most chosen in Phase I</text></g><g class="arm" data-s="4" style="--i:3"><line class="pl-ln" x1="14" y1="240" x2="40" y2="240"/><text class="pl-t" x="50" y="245">A baseline tip</text></g>
+<g data-s="4"><text class="pl-xs" x="0" y="272">A tip is one if-then rule.</text></g>
+</svg></div>
+</div>
+<figcaption class="cap" id="f3-cap"><b>Figure 1.</b> Study design of Bastani, Bastani &amp; Sinchaisri (2026). (a) Players manage three virtual workers; each of the four burger orders in a round is three subtasks in fixed order, and a worker’s speed on a task is revealed only after assignment. (b) Line length is the optimal finish time. (c) Phase I has no tips; Phase II randomises participants into four arms. Redrawn as a schematic from the paper’s description; not data.</figcaption>
+<p class="cap-n">Source: the description of the experiment in arXiv:2108.08454v5. The plate shows design facts only, not a schedule and not results.</p>
+</figure>
+</section>
+
+<section class="sec g" id="awards" aria-labelledby="aw-h">
+<h2 class="rl" id="aw-h">Awards</h2>
+<details class="aws"><summary>7 awards, 2021 to 2023</summary>
+<ol class="aw-l" role="list"><li><span class="aw-y">2021</span><span>INFORMS Behavioral Operations Management Best Working Paper, First Place<span class="aw-u">Under the earlier title “Learning Best Practices: Can Machine Learning Improve Human Decision-Making?”</span></span></li><li><span class="aw-y">2021</span><span>INFORMS TIMES Section Best Working Paper<span class="aw-u">Under the earlier title “Learning Best Practices: Can Machine Learning Improve Human Decision-Making?”</span></span></li><li><span class="aw-y">2021</span><span>POMS College of Behavioral Operations Junior Scholar Paper Competition, 2nd place</span></li><li><span class="aw-y">2022</span><span>INFORMS SAS Data Mining Best Paper Award, Winner (General Paper Track)<span class="aw-u">Under the earlier title “Improving Human Decision-Making with Machine Learning”</span></span></li><li><span class="aw-y">2022</span><span>INFORMS Service Science Section Best Paper Competition, Finalist<span class="aw-u">Under the earlier title “Improving Human Decision-Making with Machine Learning”</span></span></li><li><span class="aw-y">2022</span><span>WISE (Workshop on Information Systems and Economics) Best Conference Paper</span></li><li><span class="aw-y">2023</span><span>POMS College of Operational Excellence Best Junior Scholar Paper, Runner-up<span class="aw-u">Under the earlier title “Improving Human Decision-Making with Machine Learning”</span></span></li></ol>
+</details>
+</section>
+
+<section class="sec g" aria-labelledby="ci-h">
+<h2 class="rl" id="ci-h">Cite</h2>
+<div class="cite">
+<p class="apa">Bastani, H., Bastani, O., &amp; Sinchaisri, W. P. (2026). Improving human sequential decision making with reinforcement learning. <i>Management Science</i>, <i>72</i>(1), 733–755. <a href="https://doi.org/10.1287/mnsc.2022.02455">https://doi.org/10.1287/mnsc.2022.02455</a></p>
+<div class="bib"><pre class="bibtex" id="bib">@article{bastani2026improving,
+  title   = {Improving Human Sequential Decision Making with Reinforcement Learning},
+  author  = {Bastani, Hamsa and Bastani, Osbert and Sinchaisri, Wichinpong Park},
+  journal = {Management Science},
+  volume  = {72},
+  number  = {1},
+  pages   = {733--755},
+  year    = {2026},
+  doi     = {10.1287/mnsc.2022.02455}
+}</pre><button type="button" class="tbtn" data-copy="bib">Copy BibTeX</button></div>
+<p class="doi-l">DOI <span class="doi">10.1287/mnsc.2022.02455</span></p>
+</div>
+</section>
+
+<section class="sec g" aria-labelledby="rl-h">
+<h2 class="rl" id="rl-h">Project</h2>
+<ol class="prs" role="list"><li class="pr"><span class="pr-r" aria-hidden="true"><i class="dot c-pea" aria-hidden="true"></i></span><div class="pr-m"><h3 class="pr-t">Turning Decision Data into Tips</h3><p class="pr-s">Learning short, usable tips from records of how people make multi-step decisions, testing them in a virtual-kitchen game, and studying why some people still pass the tips over.</p></div><p class="pr-n">2 papers</p></li></ol>
+<h3 class="sub">The other paper in this project</h3>
+<ol class="es" role="list"><li class="e" id="p-lee-2025-non-adoption-algorithmic-advice" data-paper="lee-2025-non-adoption-algorithmic-advice" data-year="2025" data-type="working-paper" data-dirs="algorithmic-advice">
+<span class="mm" aria-hidden="true"><i class="dot c-pea" aria-hidden="true"></i></span>
+<div class="e-m"><h4 class="e-t">Understanding Non-Adoption of “Optimal” Algorithmic Advice for Problem Solving</h4>
+<p class="e-a">David Lee, <b>Wichinpong Park Sinchaisri</b></p>
+<p class="e-b">Looks at why people in the virtual-kitchen task pass over algorithm-generated tips, finding they interpret tips differently and face barriers beyond trust, such as how hard a tip is to apply and features of the task setting.</p>
+<p class="e-l"><span class="e-ty">Working paper</span></p></div>
+<div class="e-n"><span class="dn"><i class="dot c-pea" aria-hidden="true"></i>Algorithmic Advice</span></div>
+</li></ol>
+</section>
+</article>
+</main>
+<footer class="ftr"><div class="wrap">
+<div class="g ftr-g">
+<div class="ftr-c"><p class="ftr-h">BOBALAB</p><p>Haas School of Business<br>2220 Piedmont Avenue<br>Berkeley, CA 94720</p><p><a href="mailto:bobalab@berkeley.edu">bobalab@berkeley.edu</a></p></div>
+<nav class="ftr-c" aria-label="Footer"><p class="ftr-h">Site</p><ul><li><a href="research.html">Research</a></li><li><a href="publications.html">Publications</a></li><li><a href="project.html">Projects</a></li><li><a href="index.html#people">People</a></li></ul></nav>
+<div class="ftr-c"><p class="ftr-h">Lab members</p><ul><li><a href="https://scheduler.bobalab.org/">Lab scheduler</a></li></ul></div>
+</div>
+<div class="ftr-b">
+<button type="button" class="tbtn" id="rm" aria-pressed="false">Reduce motion</button>
+<p>Last updated 24 October 2026</p>
+<p class="mock" role="note">Prototype P1 Notebook, mock of /publications/bastani-2026-rl-tips/. Pages: <a href="index.html">Home</a>, <a href="research.html">Direction</a>, <a href="publications.html">Publications</a>, <a href="project.html">Project</a>, <a href="paper.html">Paper</a>, <a href="marks.html">Mark sheet</a>.</p>
+</div>
+</div></footer>
+</body>
+</html>

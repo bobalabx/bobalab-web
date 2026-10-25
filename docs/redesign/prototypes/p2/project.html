@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en" data-page="project">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dispatching for Worker Development, BOBALAB</title>
+<meta name="description" content="Algorithms for offering jobs to gig workers who can decline and who learn at different, unknown rates, so that platforms build skill as well as fill orders.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>try{var q=new URLSearchParams(location.search),h=document.documentElement;if(q.get('theme'))h.dataset.theme=q.get('theme');if(q.get('motion')==='reduce'||localStorage.getItem('p2-motion')==='reduce')h.dataset.motion='reduce';if(q.get('ground'))h.dataset.ground=q.get('ground')}catch(e){}</script>
+<link rel="stylesheet" href="p2.css">
+</head>
+<body>
+<svg class="sprite" aria-hidden="true" focusable="false"><defs><symbol id="g-aa" viewBox="0 0 4 3.5181"><circle cx="0.5" cy="3.0981" r="0.4"/><circle cx="1.5" cy="3.0981" r="0.4"/><circle cx="2.5" cy="3.0981" r="0.4"/><circle cx="3.5" cy="3.0981" r="0.4"/></symbol><symbol id="g-ai" viewBox="0 0 4 3.5181"><circle cx="1" cy="2.2321" r="0.4"/><circle cx="3" cy="2.2321" r="0.4"/><circle cx="0.5" cy="3.0981" r="0.4"/><circle cx="1.5" cy="3.0981" r="0.4"/><circle cx="2.5" cy="3.0981" r="0.4"/><circle cx="3.5" cy="3.0981" r="0.4"/></symbol><symbol id="g-loj" viewBox="0 0 4 3.5181"><circle cx="1.5" cy="1.366" r="0.4"/><circle cx="1" cy="2.2321" r="0.4"/><circle cx="2" cy="2.2321" r="0.4"/><circle cx="0.5" cy="3.0981" r="0.4"/><circle cx="1.5" cy="3.0981" r="0.4"/><circle cx="2.5" cy="3.0981" r="0.4"/></symbol><symbol id="g-pw" viewBox="0 0 4 3.5181"><circle cx="3" cy="2.2321" r="0.4"/><circle cx="0.5" cy="3.0981" r="0.4"/><circle cx="2.5" cy="3.0981" r="0.4"/><circle cx="3.5" cy="3.0981" r="0.4"/></symbol><symbol id="m-shoulder" viewBox="0 0 3 1.786"><circle cx="1" cy="0.5" r="0.4"/><circle cx="0.5" cy="1.366" r="0.4"/><circle cx="1.5" cy="1.366" r="0.4"/><circle cx="2.5" cy="1.366" r="0.4"/></symbol><symbol id="m-lab" viewBox="0 0 4 3.5181"><circle cx="1.5" cy="1.366" r="0.42"/><circle cx="1" cy="2.2321" r="0.42"/><circle cx="2" cy="2.2321" r="0.42"/><circle cx="3" cy="2.2321" r="0.42"/><circle cx="0.5" cy="3.0981" r="0.42"/><circle cx="1.5" cy="3.0981" r="0.42"/><circle cx="2.5" cy="3.0981" r="0.42"/><circle cx="3.5" cy="3.0981" r="0.42"/></symbol></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap head-row">
+    <div class="lockup">
+      <a class="lockup-link" href="index.html"><svg class="mark" viewBox="0 0 3 1.786" aria-hidden="true" focusable="false"><use href="#m-shoulder"/></svg><span class="wordmark">BOBALAB</span></a>
+      <p class="descriptor">Berkeley Operations and Behavioral Analytics Lab</p>
+    </div>
+    <nav class="nav" aria-label="Main"><ul><li><a class="buoy" href="research.html">Research</a></li><li><a class="buoy" href="publications.html">Publications</a></li><li><a class="buoy" href="project.html" aria-current="page">Projects</a></li><li><a class="buoy" href="marks.html">Marks</a></li></ul></nav>
+  </div>
+</header>
+<main id="main">
+<article class="case">
+<header class="wrap case-head">
+  <h1 class="page-h">Dispatching for Worker Development</h1>
+  <p class="question">Algorithms for offering jobs to gig workers who can decline and who learn at different, unknown rates, so that platforms build skill as well as fill orders.</p>
+  <div class="case-meta"><ul class="tags"><li><a class="tag d-loj" data-dir="loj" href="research.html"><svg class="glyph" viewBox="0 0 4 3.5181" aria-hidden="true" focusable="false"><use href="#g-loj"/></svg><span class="tag-name">Learning on the Job</span></a></li><li><a class="tag d-pw" data-dir="pw" href="publications.html?dir=platform-work"><svg class="glyph" viewBox="0 0 4 3.5181" aria-hidden="true" focusable="false"><use href="#g-pw"/></svg><span class="tag-name">Platform Work</span></a></li></ul><p class="derived-s">2 papers, 3 people.</p></div>
+</header>
+<div class="wrap case-body">
+  <div class="case-main prose">
+    <h2 class="sec-h">The question</h2>
+    <p class="lede">How should a platform offer jobs when workers may decline and improve at different, unknown rates?</p>
+    <p>Gig platforms usually dispatch to cover today’s demand. This project treats each offer as a chance to build skill as well, for workers who can say no and who learn at rates the platform cannot see in advance.</p>
+    <h2 class="sec-h">Approach</h2>
+    <p><i>Learning to Gig</i> proposes a tractable benchmark and learning algorithms, including a variant that caps the risk of market failure, and tests them on delivery-platform data. A second working paper, <i>Dispatching to Develop</i>, studies dispatch policies that develop gig workers’ skills.</p>
+  </div>
+  <aside class="case-aside" aria-labelledby="h-team">
+    <h2 class="sec-h" id="h-team">Team</h2>
+    <ul class="team"><li><span class="sq" aria-hidden="true">PS</span><span><b class="tname">Park Sinchaisri</b><span class="trole">Principal investigator</span></span></li><li><span class="sq" aria-hidden="true">SJ</span><span><b class="tname">Shunan Jiang</b><span class="trole">PhD student, IEOR</span></span></li><li><span class="sq" aria-hidden="true">WD</span><span><b class="tname">William Deng</b><span class="trole">Master’s student, IEOR</span></span></li></ul>
+  </aside>
+</div>
+<section class="wrap block" aria-labelledby="h-schem">
+  <h2 class="sec-h" id="h-schem">The setting</h2>
+  <figure class="schem">
+    <svg class="schem-svg d-loj" viewBox="0 0 920 252" role="img" aria-labelledby="schem-t"><title id="schem-t">Draft schematic: the platform offers a job; a worker who accepts adds it to their experience; a worker who declines leaves it unsettled; each worker's rate of improvement is unknown to the platform.</title>
+    <text class="s-lab" x="0" y="222">Platform</text>
+    <line class="s-rule" x1="0" y1="196" x2="120" y2="196"/>
+    <circle class="ring" cx="56" cy="64" r="13.44"/>
+    <text class="s-lab small muted" x="0" y="22">A job is offered</text>
+    <path class="s-link" d="M73.44 64 C 190 64, 290 70, 282 135.40800000000002"/>
+    <path class="s-link dashed" d="M73.44 58 C 300 20, 500 20, 510.55999999999995 92"/>
+    <text class="s-lab small" x="176" y="96">accepts</text>
+    <text class="s-lab small" x="360" y="26">declines</text>
+    <circle class="ring" cx="528" cy="100" r="13.44"/>
+    <line class="s-rule" x1="250" y1="196" x2="366" y2="196"/><circle class="pearl" cx="266" cy="182.6" r="13.44"/><circle class="pearl" cx="298" cy="182.6" r="13.44"/><circle class="pearl" cx="330" cy="182.6" r="13.44"/><circle class="pearl" cx="282" cy="154.8" r="13.44"/><text class="s-lab" x="250" y="222">Worker A</text><text class="s-lab small muted" x="250" y="242">learning rate unknown to the platform</text><line class="s-rule" x1="480" y1="196" x2="596" y2="196"/><circle class="pearl" cx="496" cy="182.6" r="13.44"/><circle class="pearl" cx="528" cy="182.6" r="13.44"/><text class="s-lab" x="480" y="222">Worker B</text><text class="s-lab small muted" x="480" y="242">learning rate unknown to the platform</text><line class="s-rule" x1="710" y1="196" x2="826" y2="196"/><circle class="pearl" cx="726" cy="182.6" r="13.44"/><circle class="pearl" cx="758" cy="182.6" r="13.44"/><circle class="pearl" cx="790" cy="182.6" r="13.44"/><text class="s-lab" x="710" y="222">Worker C</text><text class="s-lab small muted" x="710" y="242">learning rate unknown to the platform</text>
+    <circle class="pearl new" cx="282" cy="154.8" r="13.44"/>
+  </svg>
+    <figcaption class="cap"><b>Draft schematic, pending author check.</b> Redrawn from the summary of <i>Learning to Gig</i>: the platform offers a job; a worker may accept it, adding to their experience, or decline it; workers improve at different rates the platform does not know in advance. Not data: the stacks and their heights are illustrative.</figcaption>
+  </figure>
+</section>
+<section class="wrap block" aria-labelledby="h-record">
+  <h2 class="sec-h" id="h-record">Record</h2>
+  <ol class="record">
+    <li><span class="r-date">2025</span><span class="r-ev"><svg class="r-dot d-loj" viewBox="0 0 1 1" aria-hidden="true"><circle cx=".5" cy=".5" r=".5"/></svg><i>Learning to Gig</i> posted as SSRN working paper 5387320.</span></li>
+    <li><span class="r-date">11 May 2026</span><span class="r-ev">Major revision at <i>Manufacturing &amp; Service Operations Management</i>.</span></li>
+    <li><span class="r-date">4 August 2026</span><span class="r-ev"><svg class="r-dot d-loj" viewBox="0 0 1 1" aria-hidden="true"><circle cx=".5" cy=".5" r=".5"/></svg><i>Dispatching to Develop</i> posted as SSRN working paper 7151739.</span></li>
+  </ol>
+</section>
+<section class="wrap block" aria-labelledby="h-pp">
+  <h2 class="sec-h" id="h-pp">Papers</h2>
+  <ol class="ledger"><li class="pub" id="deng-2025-learning-to-gig" data-dirs="loj pw" data-type="working" data-year="2025">
+  <div class="pub-main">
+    <h3 class="pub-title">Learning to Gig: Workforce Development under Worker Agency</h3>
+    <p class="pub-authors"><b class="member">Haonan Deng</b>, <b class="member">Shunan Jiang</b>, Xinpeng Qu and <b class="member">Wichinpong Park Sinchaisri</b></p>
+    <p class="pub-venue">SSRN working paper 5387320. Major revision at <i>Manufacturing &amp; Service Operations Management</i></p>
+    <p class="pub-brief">Asks how a platform should offer jobs when workers may decline and improve at different, unknown rates. Proposes a tractable benchmark and learning algorithms, including a variant that caps the risk of market failure, and tests them on delivery-platform data.</p>
+    <p class="links"><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5387320">SSRN</a><a href="https://doi.org/10.2139/ssrn.5387320">DOI</a></p>
+  </div>
+  <div class="pub-side">
+    <p class="pub-type">Working paper, 2025</p>
+    <ul class="tags"><li><a class="tag d-loj" data-dir="loj" href="research.html"><svg class="glyph" viewBox="0 0 4 3.5181" aria-hidden="true" focusable="false"><use href="#g-loj"/></svg><span class="tag-name">Learning on the Job</span></a></li><li><a class="tag d-pw" data-dir="pw" href="publications.html?dir=platform-work"><svg class="glyph" viewBox="0 0 4 3.5181" aria-hidden="true" focusable="false"><use href="#g-pw"/></svg><span class="tag-name">Platform Work</span></a></li></ul>
+    
+  </div>
+</li>
+<li class="pub" id="deng-2026-dispatching-to-develop" data-dirs="loj pw" data-type="working" data-year="2026">
+  <div class="pub-main">
+    <h3 class="pub-title">Dispatching to Develop: Worker Agency and Workforce Development in Gig Platforms</h3>
+    <p class="pub-authors"><b class="member">Haonan Deng</b> and <b class="member">Wichinpong Park Sinchaisri</b></p>
+    <p class="pub-venue">SSRN working paper 7151739</p>
+    
+    <p class="links"><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7151739">SSRN</a><a href="https://doi.org/10.2139/ssrn.7151739">DOI</a></p>
+  </div>
+  <div class="pub-side">
+    <p class="pub-type">Working paper, 2026</p>
+    <ul class="tags"><li><a class="tag d-loj" data-dir="loj" href="research.html"><svg class="glyph" viewBox="0 0 4 3.5181" aria-hidden="true" focusable="false"><use href="#g-loj"/></svg><span class="tag-name">Learning on the Job</span></a></li><li><a class="tag d-pw" data-dir="pw" href="publications.html?dir=platform-work"><svg class="glyph" viewBox="0 0 4 3.5181" aria-hidden="true" focusable="false"><use href="#g-pw"/></svg><span class="tag-name">Platform Work</span></a></li></ul>
+    
+  </div>
+</li></ol>
+</section>
+<section class="wrap block" aria-labelledby="h-rel">
+  <h2 class="sec-h" id="h-rel">Related</h2>
+  <ol class="ledger"><li class="proj"><div class="pub-main"><h3 class="pub-title">How Gig Workers Learn</h3><p class="pub-brief">Large-scale delivery data on how couriers improve with experience and how their reliance on app recommendations changes as they do.</p></div><div class="pub-side"><p class="pub-type">1 paper, 2 people. Completed</p><ul class="tags"><li><a class="tag d-loj" data-dir="loj" href="research.html"><svg class="glyph" viewBox="0 0 4 3.5181" aria-hidden="true" focusable="false"><use href="#g-loj"/></svg><span class="tag-name">Learning on the Job</span></a></li><li><a class="tag d-pw" data-dir="pw" href="publications.html?dir=platform-work"><svg class="glyph" viewBox="0 0 4 3.5181" aria-hidden="true" focusable="false"><use href="#g-pw"/></svg><span class="tag-name">Platform Work</span></a></li></ul></div></li></ol>
+</section>
+</article>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-mark"><svg class="labmark" viewBox="0 0 4 3.5181" aria-hidden="true" focusable="false"><use href="#m-lab"/></svg><span class="foot-word">BOBALAB</span></div>
+    <div class="foot-cols">
+      <div>
+        <p>Berkeley Operations and Behavioral Analytics Lab<br>Haas School of Business<br>University of California, Berkeley<br>2220 Piedmont Avenue, Berkeley, CA 94720</p>
+        <p><a href="mailto:bobalab@berkeley.edu">bobalab@berkeley.edu</a></p>
+      </div>
+      <nav aria-label="Site"><ul class="foot-links"><li><a href="research.html">Research</a></li><li><a href="publications.html">Publications</a></li><li><a href="project.html">Projects</a></li><li><a href="marks.html">Marks</a></li><li><a href="paper.html">Paper page</a></li></ul></nav>
+      <div>
+        <p>Lab members: <a href="https://scheduler.bobalab.org/">Lab scheduler</a></p>
+        <p><button class="motion-toggle" type="button" aria-pressed="false">Reduce motion</button></p>
+        <p class="muted">Last updated 24 October 2026</p>
+      </div>
+    </div>
+    <p class="proto-note" role="note">Prototype P2, Settle. A design study built from the lab’s content as of 24 October 2026; not the live site.</p>
+  </div>
+</footer>
+<script src="site.js" defer></script>
+
+</body>
+</html>
