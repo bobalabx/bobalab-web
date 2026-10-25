@@ -160,3 +160,28 @@ Labels: DOCUMENTED (primary source), MEASURED (we ran it), HYPOTHESIS, UNKNOWN.
   - The rest of D-13 stays: Archivo, ink on white, ledgers, no cards or pills, and real figures.
 - **Copy:** new hero lines and the `home_question` texts are paraphrases of existing content. They are logged for PI approval in `CONTENT-QUESTIONS.md`.
 - **Not deployed:** this work is on branch `simplify`. Merge only with the owner's explicit approval. **Rollback:** `git checkout main`.
+
+## D-15 Hero figure: restore the original pearl figure, polished (owner, 2026-10-25)
+- **Owner feedback on D-14:** "for this part [the hero figure], I like the first version better. The rest I think this version is good. Just polish the first version and make it fit the rest of the website." The owner confirmed "first version" means **the original Fig. 1 pearl figure** from the first live site (commit `4740e10`; spec in `docs/design/JUDGE.md`; the original code is in `git show 4740e10:src/components/figure/*` and `src/lib/figure/*`).
+- **Decision:** the boba cup is replaced by the original pearl cluster. Everything else in D-14 stays:
+  - the hero text column (h1, who line, why line, two links);
+  - the below-the-fold sections;
+  - `/research/#map`;
+  - the tokens, and the `home_question` field.
+- **Polish rules (make it fit D-13/D-14):**
+  - **Panel:** flat `--tea` panel. No rounded border, crop marks or cream page.
+  - **Labels:** Archivo, in link style with a direction-colour underline; muted paper counts.
+  - **Pearls:** matte dark tapioca bodies, keeping the **soft direction-colour halo** and the **hairline orbit with paper seeds** the owner liked. No specular gloss, no index numerals, no bounce.
+  - **Layout:** the original fixed slot templates (2×2 offset cluster for 4; templates for 2–8).
+- **Interaction:**
+  - **Hover or focus:** the pearl lifts slightly, its halo brightens and its seeds bloom; the other pearls dim (graphics only). A live caption shows the direction's `home_question` and its counts.
+  - **Default caption:** one plain sentence explaining that each pearl is a direction and each dot is one of its papers.
+  - **Click:** the `pearl-{slug}` morph into the direction page.
+  - **Wordmark:** the O tints to the direction colour.
+  - **Arrival:** a settle animation once per session.
+  - **No idle loop, so no Pause button.** Nothing moves under reduced motion. No-JS renders plain links.
+  - **Mobile:** a compact 2×2 pearl grid with labels inside the first screen; tap goes to the direction.
+  - **Below the figure:** "See how the four directions connect" → `/research/#map`.
+- **People (owner, same day):** remove the count sentence ("1 principal investigator, 1 master's student, 23 undergraduate RAs and 25 alumni.") from `/people/`, and the equivalent count sentence in the homepage people section.
+- **The cup:** removed from `src/`. It survives in git history and in `docs/simplify/prototypes/c/`.
+- **Branch:** `simplify`, not deployed.
