@@ -673,6 +673,10 @@ export const collections = [
         message: "One line, at most 28 characters, without < or >.",
       },
       question: { label: "Guiding question", widget: "text", hint: "≤ 140 characters." },
+      home_question: {
+        label: "Short question for the homepage (optional)",
+        hint: "Shown when this pearl is picked on the home page: a short, plain question anyone can follow, ≤ 90 characters. Leave empty to use the guiding question.",
+      },
       summary: { label: "Summary", widget: "text", hint: "One sentence, ≤ 160 characters." },
       color: {
         label: "Colour",
@@ -910,10 +914,15 @@ export const fileCollections = [
             label: "Statement (page heading)",
             hint: "The large first line of the home page, ≤ 80 characters. Leave empty for the default.",
           },
+          why: {
+            label: "Why it matters (under the heading)",
+            widget: "text",
+            hint: "One or two concrete sentences under the home page heading: what algorithms and AI now do, and what the lab studies about it. About 30 words, ≤ 240 characters. Leave empty to use the mission.",
+          },
           mission: {
             label: "Mission",
             widget: "text",
-            hint: "One or two sentences beside the lab name, before the research directions (≤ 240 characters).",
+            hint: "One or two sentences for the About page and for search results (≤ 240 characters).",
           },
           featured_findings: {
             label: "Featured findings",

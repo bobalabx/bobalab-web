@@ -104,6 +104,9 @@ export const directionSchema = z.strictObject({
     .max(28)
     .regex(/^[^\r\n<>]+$/, "one line, no angle brackets"),
   question: z.string().trim().max(140).optional(),
+  /** D-14: the short, human question shown when the direction's pearl rises on the
+   *  homepage (≤ 90 characters, one line of thought). Falls back to `question`. */
+  home_question: z.string().trim().min(1).max(90).optional(),
   summary: z.string().trim().max(160).optional(),
   color: swatchField,
   active_since: yearField.optional(),
@@ -420,6 +423,9 @@ export const opportunitySchema = z.strictObject({
 export const homePageSchema = z.strictObject({
   /** Home h1, the display statement (P3 "Lines"); falls back to the HomeHero constant. */
   statement: z.string().trim().min(1).max(80).optional(),
+  /** D-14: the concrete "why" line under the homepage h1 (about 30 words). Falls back to `mission`. */
+  why: z.string().trim().min(1).max(240).optional(),
+  /** The lab's mission: the About page and the homepage meta description. */
   mission: z.string().trim().max(240).optional(),
   featured_findings: z
     .array(

@@ -1020,6 +1020,14 @@ collections:
           - At most 140 characters.
         required: false
         hint: ≤ 140 characters.
+      - label: Short question for the homepage (optional)
+        name: home_question
+        widget: string
+        pattern:
+          - (?=^[\s\S]{1,90}$)
+          - At most 90 characters. At least 1 characters.
+        required: false
+        hint: "Shown when this pearl is picked on the home page: a short, plain question anyone can follow, ≤ 90 characters. Leave empty to use the guiding question."
       - label: Summary
         name: summary
         widget: text
@@ -1666,6 +1674,14 @@ collections:
               - At most 80 characters. At least 1 characters.
             required: false
             hint: The large first line of the home page, ≤ 80 characters. Leave empty for the default.
+          - label: Why it matters (under the heading)
+            name: why
+            widget: text
+            pattern:
+              - (?=^[\s\S]{1,240}$)
+              - At most 240 characters. At least 1 characters.
+            required: false
+            hint: "One or two concrete sentences under the home page heading: what algorithms and AI now do, and what the lab studies about it. About 30 words, ≤ 240 characters. Leave empty to use the mission."
           - label: Mission
             name: mission
             widget: text
@@ -1673,7 +1689,7 @@ collections:
               - (?=^[\s\S]{0,240}$)
               - At most 240 characters.
             required: false
-            hint: One or two sentences beside the lab name, before the research directions (≤ 240 characters).
+            hint: One or two sentences for the About page and for search results (≤ 240 characters).
           - label: Featured findings
             name: featured_findings
             widget: list

@@ -2,6 +2,7 @@
 title: Algorithmic Advice & Human Decisions
 short_label: Algorithmic Advice
 question: When should advice name the exact next move, and when should it give a broader rule people can carry into new situations?
+home_question: When should an algorithm give exact advice, and when a rule of thumb?
 summary: How algorithms should advise people through multi-step decisions so the advice gets used, helps now, and still leaves people better on their own.
 color: butterfly-pea
 status: active

@@ -3,7 +3,9 @@
  * exact hex and agrees with palette.ts, and every contrast pair is recomputed
  * (fails below the WCAG threshold or if it drifts from the documented ratio).
  * Documented ratios: docs/redesign/prototypes/p3/NOTES.md (core) and
- * DIRECTION.md §5.0 (direction tones), recomputed 2026-10-24.
+ * DIRECTION.md §5.0 (direction tones), recomputed 2026-10-24. D-14 adds the
+ * cup's tea (--tea, light #F4ECE2 / dark #211C17) and the scoped home-h1 size
+ * --t-display; the ratios on tea were computed 2026-10-25.
  */
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -40,6 +42,8 @@ const LIGHT_TABLE: Record<string, string> = {
   muted: "#50564F",
   rule: "#80877F",
   hairline: "#D9DCD6",
+  tea: "#F4ECE2",
+  "tea-dark": "#211C17",
   surface: "#FFFFFF",
   "paper-alt": "#F2F3F1",
   plate: "#FFFFFF",
@@ -56,6 +60,8 @@ const DARK_TABLE: Record<string, string> = {
   muted: "#A6ACA4",
   rule: "#7A8178",
   hairline: "#2B302B",
+  tea: "#211C17",
+  "tea-dark": "#211C17",
   surface: "#101210",
   "paper-alt": "#181B18",
   plate: "#101210",
@@ -81,9 +87,11 @@ describe("tokens.css matches palette.ts and the D-13 tables", () => {
       expect((CORE_LIGHT as Record<string, string>)[k]).toBe(hex);
     });
   }
+  /** Mode-independent literals: defined once in :root, not redefined for dark mode. */
+  const LITERAL = new Set(["tea-dark"]);
   for (const [k, hex] of Object.entries(DARK_TABLE)) {
     it(`dark --${k} = ${hex}`, () => {
-      expect(cssVar(darkBlock, k)).toBe(hex);
+      expect(cssVar(LITERAL.has(k) ? lightBlock : darkBlock, k)).toBe(hex);
       expect((CORE_DARK as Record<string, string>)[k]).toBe(hex);
     });
   }
@@ -140,6 +148,16 @@ const CORE_PAIRS: Record<string, Pair> = {
   "dark rule/band": [D.rule, D.band, 4.33, UI],
   "dark pearl/paper": [D.pearl, D.paper, 15.5, UI],
   "dark pearl-index/pearl": [D["pearl-index"], D.pearl, 15.5, TEXT],
+  // D-14: everything the homepage cup puts on its tea, both schemes.
+  "light ink/tea": [L.ink, L.tea, 15.86, TEXT],
+  "light muted/tea": [L.muted, L.tea, 6.44, TEXT],
+  "light rule/tea (cup ticks, meniscus)": [L.rule, L.tea, 3.15, UI],
+  "light pearl/tea": [L.pearl, L.tea, 15.86, UI],
+  "dark ink/tea": [D.ink, D.tea, 13.92, TEXT],
+  "dark muted/tea": [D.muted, D.tea, 7.29, TEXT],
+  "dark rule/tea (cup ticks, meniscus)": [D.rule, D.tea, 4.21, UI],
+  "dark pearl/tea": [D.pearl, D.tea, 13.92, UI],
+  "dark ink on the literal --tea-dark": [D.ink, L["tea-dark"], 13.92, TEXT],
 };
 
 /** Per swatch: deep/paper, deep/band, ink/tint, deep/tint, light/dark paper, light/dark band, dark ink/bandDark. */
@@ -216,5 +234,80 @@ describe("direction swatches", () => {
       expect(SWATCH_IDS).toContain(b);
       expect(live.includes(a) && live.includes(b)).toBe(false);
     }
+  });
+});
+
+describe("D-14: the cup's tea and the home display size", () => {
+  /** Live direction tones on the tea: [deep on light tea, light on dark tea]. */
+  const ON_TEA: Partial<Record<SwatchId, [number, number]>> = {
+    "butterfly-pea": [6.44, 7.08],
+    lychee: [5.93, 7.63],
+    matcha: [4.37, 10.48],
+    oolong: [7.25, 6.15],
+  };
+  for (const [id, [deep, light]] of Object.entries(ON_TEA)) {
+    it(`${id}: pearls and leader lines on the tea pass 3:1 in both schemes`, () => {
+      const s = SWATCHES[id as SwatchId];
+      const rd = contrastRatio(s.deep, L.tea);
+      const rl = contrastRatio(s.light, D.tea);
+      expect(rd).toBeGreaterThanOrEqual(UI);
+      expect(rl).toBeGreaterThanOrEqual(TEXT);
+      expect(Math.abs(rd - deep)).toBeLessThanOrEqual(TOL);
+      expect(Math.abs(rl - light)).toBeLessThanOrEqual(TOL);
+    });
+  }
+  it("direction-coloured TEXT may not sit on the light tea: matcha deep is below AA there", () => {
+    // Documented in tokens.css: the cup carries pearls and lines in direction
+    // colours, never direction-coloured text (labels and panel text sit on paper).
+    expect(contrastRatio(SWATCHES.matcha.deep, L.tea)).toBeLessThan(TEXT);
+    expect(contrastRatio(SWATCHES.matcha.deep, L.paper)).toBeGreaterThanOrEqual(TEXT);
+  });
+  it("tea is a flat warm tone close to the paper, and is not the retired cream", () => {
+    expect(contrastRatio(L.tea, L.paper)).toBeCloseTo(1.17, 1);
+    expect(contrastRatio(D.tea, D.paper)).toBeCloseTo(1.11, 1);
+    expect(L["tea-dark"]).toBe(D.tea);
+    for (const old of ["#FCFAF6", "#F4F0EA", "#F7F1E8"]) expect(L.tea).not.toBe(old);
+  });
+  it("tokens.css names the tea only in the --tea / --tea-dark declarations", () => {
+    const hexes = css.toUpperCase().match(/#F4ECE2|#211C17/g) ?? [];
+    expect(hexes).toHaveLength(3); // --tea, --tea-dark, dark-mode --tea
+    expect(css).not.toMatch(/(background|--paper|--band|--surface)[^;]*var\(--tea/);
+  });
+
+  const rem = (name: string) => {
+    const m = new RegExp(`--${name}:\\s*([0-9.]+)rem;`).exec(lightBlock);
+    return m ? Number(m[1]) : NaN;
+  };
+  /** Evaluate the --t-display clamp(min, a + b vw, max) at a viewport width, in rem (16 px). */
+  const display = (vw: number) => {
+    const m =
+      /--t-display:\s*clamp\(([0-9.]+)rem,\s*([0-9.]+)rem \+ ([0-9.]+)vw,\s*([0-9.]+)rem\);/.exec(
+        lightBlock,
+      );
+    expect(m, "--t-display is clamp(<min>rem, <a>rem + <b>vw, <max>rem)").not.toBeNull();
+    const [min, a, b, max] = m!.slice(1).map(Number) as [number, number, number, number];
+    return Math.min(max, Math.max(min, a + (b * vw) / 100 / 16));
+  };
+  it("--t-display: about 5–5.5rem on desktop and 2.5–2.75rem on phones", () => {
+    for (const w of [1440, 1920]) {
+      expect(display(w)).toBeGreaterThanOrEqual(5);
+      expect(display(w)).toBeLessThanOrEqual(5.5);
+    }
+    for (const w of [320, 375, 390, 414]) {
+      expect(display(w)).toBeGreaterThanOrEqual(2.5);
+      expect(display(w)).toBeLessThanOrEqual(2.75);
+    }
+  });
+  it("--t-display is at least 2x the next text level at every width (REFS-SIMPLE C5)", () => {
+    for (let w = 320; w <= 1920; w += 10)
+      expect(display(w) / rem("t-title")).toBeGreaterThanOrEqual(2);
+    for (let w = 1024; w <= 1920; w += 10)
+      expect(display(w) / rem("t-h2")).toBeGreaterThanOrEqual(2);
+  });
+  it("--t-display is the only size token above 2.25rem", () => {
+    const sizes = [...css.matchAll(/--(t|fs)-([a-z0-9-]+):\s*([0-9.]+)rem;/g)];
+    expect(sizes.length).toBeGreaterThan(8);
+    for (const [, , name, v] of sizes) expect(Number(v), `--${name}`).toBeLessThanOrEqual(2.25);
+    expect(css.match(/--t-display:/g)).toHaveLength(1);
   });
 });

@@ -2,6 +2,7 @@
 title: Gig & Platform Work Design
 short_label: Platform Work
 question: "What drives a ride-hail driver's choice to log on and log off: the pay rate, an earnings target, or the momentum of a long shift?"
+home_question: What gets gig workers to log on, and what keeps them on?
 summary: When and where flexible workers choose to work, and how platforms can pay, motivate and staff them in competitive labor markets.
 color: oolong
 status: active

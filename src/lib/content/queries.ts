@@ -59,6 +59,118 @@ export function featuredFindings(c: Content): FindingView[] {
 }
 
 // ---------------------------------------------------------------------------
+// Homepage (D-14 "the boba cup"; docs/simplify/JUDGE.md R1, R7)
+
+/** The question a direction's pearl shows on the homepage: `home_question`, else `question`. */
+export function homeQuestion(
+  d: Pick<DirectionView, "home_question" | "question">,
+): string | undefined {
+  return d.home_question ?? d.question;
+}
+
+export interface HomeWho {
+  /** site.name ("BOBALAB"). */
+  lab: string;
+  /** site.affiliation_text ("Haas School of Business, University of California, Berkeley"). */
+  affiliation: string;
+  /** The PI (role "pi", listed), if any. */
+  lead?: {
+    name: string;
+    /** "Prof." when the PI's title says Professor, else "". */
+    honorific: string;
+    slug: string;
+    /** Profile page, when the PI has one in this build. */
+    href?: string;
+  };
+  /** The whole line as plain text, e.g. "BOBALAB is a research lab at the Haas School of
+   *  Business, University of California, Berkeley, led by Prof. Park Sinchaisri."
+   *  ("Prof." and the name are joined by a no-break space). */
+  text: string;
+}
+
+/** Hero texts. Every part comes from content: nothing about the lab is hard-coded here. */
+export interface HomeHeroCopy {
+  /** home.statement; undefined → the component's HOME_STATEMENT default. */
+  statement?: string;
+  who: HomeWho;
+  /** home.why, else home.mission (typeset). */
+  why?: string;
+  /** True when `why` is the mission fallback (the PI has not approved a why line yet). */
+  whyIsMission: boolean;
+  /** home.draft (preview builds badge draft copy). */
+  draft: boolean;
+}
+
+const PROFESSOR = /\bprofessor\b/i;
+/** "Haas School of Business, …" reads "at the Haas School…"; "UC Berkeley …" does not take "the". */
+const TAKES_THE =
+  /^(?!the\b|uc\b|university\b)[^,]*\b(school|department|institute|center|centre|college)\b/i;
+
+export function homeWho(c: Content): HomeWho {
+  const lab = c.site.name;
+  const affiliation = c.site.affiliation_text;
+  const pi = c.people.find((p) => p.role === "pi" && !p.isAlumni);
+  const lead = pi
+    ? {
+        name: pi.name,
+        honorific: pi.title && PROFESSOR.test(pi.title) ? "Prof." : "",
+        slug: pi.slug,
+        href: pi.hasProfile ? `/people/${pi.slug}/` : undefined,
+      }
+    : undefined;
+  const at = `${TAKES_THE.test(affiliation) ? "the " : ""}${affiliation}`;
+  const by = lead ? `, led by ${lead.honorific ? `${lead.honorific} ` : ""}${lead.name}` : "";
+  return { lab, affiliation, lead, text: `${lab} is a research lab at ${at}${by}.` };
+}
+
+export function homeHeroCopy(c: Content): HomeHeroCopy {
+  const home = c.pages.home;
+  return {
+    statement: home?.statement,
+    who: homeWho(c),
+    why: home?.why ?? home?.mission,
+    whyIsMission: !home?.why && Boolean(home?.mission),
+    draft: home?.draft ?? false,
+  };
+}
+
+/** One pearl in the homepage cup (R7: at most three items in its reveal). */
+export interface HomePearl {
+  direction: DirectionView;
+  /** `home_question`, else `question`. */
+  question?: string;
+  /** The direction's first finding, only when `findings[]` is filled. */
+  finding?: FindingView;
+  /** Otherwise "A first read": the newest published paper (else the newest counted one). */
+  firstRead?: PublicationView;
+}
+
+/**
+ * Live directions in editorial order, each with what its pearl reveals.
+ * "A first read" is the newest published paper whose first (home) direction is
+ * this one, and that no earlier pearl already offers; failing that, any newest
+ * published paper of the direction, then any counted one. So two pearls do not
+ * recommend the same shared paper while each has one of its own.
+ */
+export function homePearls(c: Content): HomePearl[] {
+  const used = new Set<string>();
+  return c.directions.map((direction) => {
+    const finding = resolveFindings(c, direction.findings)[0];
+    const papers = c.countedPublications.filter((p) => p.directions.includes(direction.slug));
+    const published = papers.filter((p) => p.status === "published");
+    const fresh = (p: PublicationView) => !used.has(p.slug);
+    const firstRead = finding
+      ? undefined
+      : (published.find((p) => p.directions[0] === direction.slug && fresh(p)) ??
+        published.find(fresh) ??
+        published[0] ??
+        papers[0]);
+    if (firstRead) used.add(firstRead.slug);
+    return { direction, question: direction.homeQuestion, finding, firstRead };
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 
 const byStatusThenYear = (a: ProjectView, b: ProjectView) => {

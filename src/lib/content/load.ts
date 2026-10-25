@@ -52,6 +52,8 @@ export function isPreview(env: NodeJS.ProcessEnv = process.env): boolean {
 export interface DirectionView extends DirectionEntry {
   /** 1-based index among live directions in site.direction_order (null when archived). */
   index: number | null;
+  /** D-14: the homepage pearl's question: `home_question`, else `question` (typeset). */
+  homeQuestion?: string;
   swatch: Swatch;
   counts: {
     /** Publications that count under D-05 (public version or documented presentation). */
@@ -216,6 +218,8 @@ export function buildContent(raw: RawContent, opts: BuildOptions): Content {
   const mkDir = (d: DirectionEntry, index: number | null): DirectionView => ({
     ...d,
     question: ts(d.question),
+    home_question: ts(d.home_question),
+    homeQuestion: ts(d.home_question ?? d.question),
     summary: ts(d.summary),
     findings: d.findings.map((f) => ({ ...f, text: ts(f.text) })),
     index,
@@ -347,6 +351,7 @@ function typesetPages(pages: PagesData): PagesData {
     out.home = {
       ...out.home,
       statement: ts(out.home.statement),
+      why: ts(out.home.why),
       mission: ts(out.home.mission),
       featured_findings: out.home.featured_findings.map((f) => ({ ...f, text: ts(f.text) })),
     };

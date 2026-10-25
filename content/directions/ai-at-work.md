@@ -2,6 +2,7 @@
 title: Generative & Agentic AI at Work
 short_label: AI at Work
 question: What kinds of help do teachers ask ChatGPT for on their own real tasks, and do their conversations stick to one kind?
+home_question: How do people really use AI at work, and how much should it decide on its own?
 summary: How professionals actually use generative AI and AI assistants, what it changes about their work, and how much authority AI agents should hold.
 color: lychee
 status: active

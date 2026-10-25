@@ -19,6 +19,10 @@ export const CORE_LIGHT = {
   muted: "#50564F",
   rule: "#80877F",
   hairline: "#D9DCD6",
+  /** D-14: the tea inside the homepage cup drawing only (never a page or panel background). */
+  tea: "#F4ECE2",
+  /** D-14: the literal dark-mode tea (tokens.css `--tea-dark`; `--tea` switches to it in dark mode). */
+  "tea-dark": "#211C17",
   // aliases (legacy names, same values as above)
   surface: "#FFFFFF",
   "paper-alt": "#F2F3F1",
@@ -37,6 +41,8 @@ export const CORE_DARK = {
   muted: "#A6ACA4",
   rule: "#7A8178",
   hairline: "#2B302B",
+  tea: "#211C17",
+  "tea-dark": "#211C17",
   surface: "#101210",
   "paper-alt": "#181B18",
   plate: "#101210",

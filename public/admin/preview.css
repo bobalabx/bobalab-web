@@ -20,8 +20,9 @@
 /* ---- src/styles/tokens.css ---- */
 /*
  * BOBALAB design tokens: the "Lines" system (DECISIONS D-13; prototype
- * docs/redesign/prototypes/p3/p3.css). Hex values must match
- * src/lib/content/palette.ts (unit-tested).
+ * docs/redesign/prototypes/p3/p3.css), plus the two D-14 additions for the
+ * homepage boba cup: --t-display (home h1 only) and --tea (cup fill only).
+ * Hex values must match src/lib/content/palette.ts (unit-tested).
  *
  * Ink on white. Colour encodes research directions and nothing else: there is
  * no brand accent, links are ink with an underline. Light/dark follow
@@ -44,6 +45,15 @@
   --rule: #80877f;
   --hairline: #d9dcd6;
   --hair: var(--hairline);
+
+  /* D-14 "the boba cup": the tea inside the homepage cup drawing, and NOTHING else
+   * (never a page, band or panel background: the page stays ink on white).
+   * --tea is mode-aware; --tea-dark is the literal dark value. Contrast on tea
+   * (palette.test): ink 15.86 / 13.92, muted 6.44 / 7.29, rule 3.15 / 4.21, live
+   * direction tones ≥ 4.37 (light) / ≥ 6.15 (dark). Matcha deep on tea is 4.37, so
+   * direction-coloured TEXT must not sit on the tea; pearls and leader lines may. */
+  --tea: #f4ece2;
+  --tea-dark: #211c17;
 
   /* Legacy names (aliases with literal values; palette.test checks them) */
   --surface: #ffffff;
@@ -85,8 +95,13 @@
   --lh-meta: 1.45;
   --lh-body: 1.6;
   --lh-title: 1.3;
+  /* D-14: the homepage h1 ONLY (the one exception to the 2.25rem cap; REFS-SIMPLE C5:
+   * at least 2x the next level). 2.5rem at 320 px, 2.625rem at 390 px, 4.2rem at
+   * 1024 px, 5.25rem from 1440 px. Condensed, like every line ≥ 2rem. */
+  --t-display: clamp(2.5rem, 1.65rem + 4vw, 5.25rem);
+  --lh-display-home: 0.96;
 
-  /* Legacy size names mapped onto the new scale (nothing above 2.25rem). */
+  /* Legacy size names mapped onto the new scale (nothing else above 2.25rem). */
   --fs-mono: 0.875rem;
   --fs-sm: 0.875rem;
   --fs-base: 1.0625rem;
@@ -178,6 +193,7 @@
     --muted: #a6aca4;
     --rule: #7a8178;
     --hairline: #2b302b;
+    --tea: #211c17;
     --surface: #101210;
     --paper-alt: #181b18;
     --plate: #101210;

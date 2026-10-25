@@ -2,6 +2,7 @@
 title: Learning on the Job with Algorithms
 short_label: Learning on the Job
 question: Do gig workers get faster and more reliable with experience, and do they lean on or drift away from the app's recommendations as they learn?
+home_question: Do gig workers lean on the app as they learn, or outgrow it?
 summary: How workers build skill alongside app recommendations, and how platforms can assign work so people improve instead of only covering today's demand.
 color: matcha
 status: active
