@@ -14,7 +14,7 @@ import { profilePageLd } from "@/lib/seo/jsonld";
 import { DraftBadge } from "@/components/ui/Badge";
 import { PearlTagList } from "@/components/ui/PearlTag";
 import { Prose } from "@/components/ui/Prose";
-import { PublicationEntry, needsProvenanceNote } from "@/components/ui/PublicationEntry";
+import { PublicationEntry } from "@/components/ui/PublicationEntry";
 import { NewsItem } from "@/components/ui/NewsItem";
 import { JsonLd } from "@/components/ui/JsonLd";
 import { CompactProjectList } from "@/components/projects/CompactProjectList";
@@ -98,11 +98,14 @@ export function PersonProfile({ content, model }: { content: Content; model: Per
                     <a href={`#${s.id}`}>
                       <span className="pp-toc__label">{s.label}</span>
                       {s.count !== undefined && (
-                        <span className="pp-toc__n">
-                          <span className="vh"> (</span>
-                          {s.count}
-                          <span className="vh">)</span>
-                        </span>
+                        <>
+                          {" "}
+                          <span className="pp-toc__n">
+                            <span className="vh">(</span>
+                            {s.count}
+                            <span className="vh">)</span>
+                          </span>
+                        </>
                       )}
                     </a>
                   </li>
@@ -145,9 +148,9 @@ export function PersonProfile({ content, model }: { content: Content; model: Per
                   href={`/publications/?member=${encodeURIComponent(p.slug)}`}
                 >
                   {morePubs
-                    ? `See all ${model.publications.length} in Publications`
+                    ? `All ${model.publications.length} publications`
                     : "View in Publications"}
-                  <span className="vh">, filtered to {p.name}</span>
+                  <span className="vh"> by {p.name}</span>
                 </Link>
               </p>
             </div>
@@ -158,23 +161,13 @@ export function PersonProfile({ content, model }: { content: Content; model: Per
           <section className="pg-row pp-section" aria-labelledby="in-progress">
             <div className="pg-row__label">
               <h2 id="in-progress">Work in progress</h2>
-              {/* The count and what it means sit in the label column (P3 "In progress:
-                  no public version yet"), so the track opens with its rule, as the
-                  Alumni list on /people/ does. */}
-              <span className="pg-row__count">
-                {model.inProgress.length} {model.inProgress.length === 1 ? "title" : "titles"}, no
-                public version yet
-              </span>
             </div>
             <div>
               {/* Collapsed: titles without a public version are secondary to the papers.
                   The heading stays outside, so the on-page link always lands on it. */}
               <details className="pp-disclosure">
                 <summary className="pp-disclosure__summary">
-                  <span className="pp-disclosure__show">
-                    Show {model.inProgress.length}{" "}
-                    {model.inProgress.length === 1 ? "title" : "titles"}
-                  </span>
+                  <span className="pp-disclosure__show">Show work in progress</span>
                   <span className="pp-disclosure__hide">Hide work in progress</span>
                 </summary>
                 <div className="pp-pubs">
@@ -204,9 +197,6 @@ export function PersonProfile({ content, model }: { content: Content; model: Per
           <section className="pg-row pp-section" aria-labelledby="news">
             <div className="pg-row__label">
               <h2 id="news">News</h2>
-              <span className="pg-row__count">
-                {model.news.length} {model.news.length === 1 ? "item" : "items"}
-              </span>
             </div>
             <div className="pp-news">
               {model.news.map((n) => (
@@ -216,11 +206,6 @@ export function PersonProfile({ content, model }: { content: Content; model: Per
           </section>
         )}
       </div>
-
-      {needsProvenanceNote([...model.shownPublications, ...model.inProgress]) ? (
-        // Same wording as the direction and project pages (one sentence for PI sign-off).
-        <p className="pg-fn pg-track">Review status and dates are as reported by the lab.</p>
-      ) : null}
 
       <p className="pp-back pg-track">
         <Link href="/people/" className="bl-cta bl-cta--quiet">

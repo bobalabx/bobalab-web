@@ -95,7 +95,10 @@ describe("RSS feed (fixture content)", () => {
     const ch = channelOf(xml);
     expect(child(ch, "title")!.text).toBe(`${c.site.name} news`);
     expect(child(ch, "link")!.text).toMatch(/^https:\/\/.+\/news\/$/);
-    expect(child(ch, "description")!.text).toContain(c.site.long_name);
+    // "News from BOBALAB, {PI}’s lab at {school}." (copy sweep: no boilerplate long name).
+    expect(child(ch, "description")!.text.startsWith(`News from ${c.site.name}, `)).toBe(true);
+    expect(child(ch, "description")!.text.endsWith(".")).toBe(true);
+    expect(child(ch, "description")!.text).not.toContain(c.site.long_name);
     expect(child(ch, "language")!.text).toBe("en-us");
     expect(child(ch, "lastBuildDate")!.text).toBe("Tue, 20 Oct 2026 18:30:00 GMT");
     const self = child(ch, "atom:link")!;
@@ -125,13 +128,14 @@ describe("RSS feed (fixture content)", () => {
     for (const d of drafts) expect(ptitles).toContain(`[Draft] ${d.title}`);
   });
 
-  it("describes an event with its full date", () => {
+  it("describes an event with its summary only (no templated 'Event:' line)", () => {
     const withEvent = c.news.find((n) => n.event_date);
     expect(withEvent).toBeDefined();
     const item = childrenNamed(channelOf(xml), "item").find(
       (i) => child(i, "title")!.text === withEvent!.title,
     )!;
-    expect(child(item, "description")!.text).toMatch(/Event: [A-Z][a-z]{2} \d{1,2}, \d{4}/);
+    expect(child(item, "description")!.text).toBe(withEvent!.summary ?? withEvent!.title);
+    expect(child(item, "description")!.text).not.toMatch(/Event: /);
   });
 });
 

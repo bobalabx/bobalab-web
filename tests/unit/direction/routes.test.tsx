@@ -83,7 +83,7 @@ describe("generateStaticParams for the static export (WP2 #1)", () => {
 describe("direction page markup", () => {
   beforeEach(() => vi.resetModules());
 
-  it("one h1 (tabIndex -1), Figure 2 pearl = the only morph target, derived counts, see-all filter, More directions", async () => {
+  it("one h1 (tabIndex -1), Figure 1 pearl = the only morph target, derived counts, see-all filter, More directions, no stat or provenance sentences", async () => {
     useFixture("n4");
     const { getContent } = await import("@/lib/content/load");
     const c = getContent();
@@ -92,25 +92,31 @@ describe("direction page markup", () => {
       const out = await html(page.default({ params: Promise.resolve({ direction: d.slug }) }));
       expect(count(out, /<h1[\s>]/g)).toBe(1);
       expect(out).toMatch(/<h1 tabindex="-1"/i);
-      // Exactly one DirectionPearl: Figure 2's pearl at "now", the morph target
+      // Exactly one DirectionPearl: the figure's pearl at "now", the morph target
       // (no rail pearls any more), carrying this direction's slug.
       const slugs = [...out.matchAll(/class="f1-dp[^"]*"[^>]*data-slug="([^"]+)"/g)].map(
         (m) => m[1],
       );
       const hasFigure = d.counts.papers + d.counts.inProgress > 0;
       expect(slugs).toEqual(hasFigure ? [d.slug] : []);
-      // Figure 2: one column per counted paper and per work in progress, each paper linked.
+      // The direction's figure (the page's Figure 1): one column per counted paper and per
+      // work in progress, each paper linked.
       if (hasFigure) {
         expect(out).toContain('aria-labelledby="dr-f2-cap"');
-        expect(out).toContain("<b>Figure 2.</b>");
+        expect(out).toContain("<b>Figure 1.</b>");
+        expect(out).not.toContain("<b>Figure 2.</b>");
         expect(count(out, /class="dr-f2__p"/g)).toBe(d.counts.papers);
         expect(count(out, /class="dr-f2__p dr-f2__p--wip"/g)).toBe(d.counts.inProgress);
         for (const p of c.countedPublications.filter((x) => x.directions.includes(d.slug)))
           expect(out).toContain(`href="/publications/${p.slug}/"`);
       }
-      // Counts sentence is derived from the loader counts.
-      expect(out).toContain(`${d.counts.projects} project`);
-      expect(out).toContain(`${d.counts.papers} paper`);
+      // Section labels carry the derived counts; the header has no counts sentence.
+      if (d.counts.projects > 0) expect(out).toContain(`${d.counts.projects} project`);
+      if (d.counts.papers > 0) expect(out).toContain(`${d.counts.papers} paper`);
+      expect(out).not.toContain('class="dr-status"');
+      // Copy sweep: no stats-as-prose, date stamps or provenance hedges.
+      expect(out).not.toMatch(/Shares \d|, as of |last updated|reported by the lab/i);
+      expect(out).not.toContain("Order within a year");
       if (d.counts.papers > 0) expect(out).toContain(`href="/publications/?direction=${d.slug}"`);
       // More directions: every other live direction once, sliding by index;
       // "All directions" reverses the morph.
@@ -169,6 +175,11 @@ describe("project page markup", () => {
     expect(out).not.toMatch(/emery-hidden|Emery/);
     expect(out).not.toMatch(/indigo-draft|Indigo/);
     expect(out).toContain('"@type":"ResearchProject"');
+    // Copy sweep: the facts row has no People or Papers summaries (the Team and Papers
+    // sections carry them), and the page has no provenance or date-stamp boilerplate.
+    expect(out).not.toContain("<dt>People</dt>");
+    expect(out).not.toContain("<dt>Papers</dt>");
+    expect(out).not.toMatch(/reported by the lab|, as of |As of |full citation in APA/i);
   });
 });
 
@@ -185,13 +196,15 @@ describe("archived direction (real content)", () => {
       const out = await html(page.default({ params: Promise.resolve({ direction: d.slug }) }));
       expect(out).not.toContain("f1-dp");
       expect(out).toContain("<b>Earlier research</b>");
-      if (d.archived_on) expect(out).toMatch(/archived <time dateTime=/);
+      // No archive date stamp (copy sweep).
+      expect(out).not.toMatch(/archived <time dateTime=/);
       // A figure needs two or more items (a line); a lone paper is listed under Papers only.
       const items = d.counts.papers + d.counts.inProgress;
       if (items >= 2) {
         expect(out).toContain("<b>Figure 1.</b>");
-        // No pearl at now, so the line stops at the last paper and the caption says why.
-        expect(out).toContain("The line ends at the last paper; the direction is archived.");
+        // No pearl at now, so the line stops at the last paper (the header already says
+        // "Earlier research", so the caption does not explain it again).
+        expect(out).not.toContain("The line ends at the last paper");
         expect(out).not.toMatch(/class="dr-f2"[^>]*data-live/);
       } else {
         expect(out).not.toContain('class="dr-f2"');
@@ -232,19 +245,28 @@ describe("index pages: empty states and archived directions", () => {
 describe("project <title> is unique (WCAG 2.4.2; verify A11Y-03)", () => {
   beforeEach(() => vi.resetModules());
 
-  it("qualifies the project title so it never equals its paper's page title", async () => {
-    useFixture("n4");
-    const { getContent } = await import("@/lib/content/load");
-    const c = getContent();
-    const page = await import("@/app/projects/[slug]/page");
-    const titles = new Set<string>();
-    for (const p of c.projects) {
-      const meta = await page.generateMetadata({ params: Promise.resolve({ slug: p.slug }) });
-      const t = meta.title as { absolute: string };
-      expect(t.absolute).toBe(`${p.title}, ${c.site.name} project`);
-      titles.add(t.absolute);
+  it("uses '{Title} · BOBALAB' and qualifies it only when a paper has the same title", async () => {
+    for (const set of ["n4", "real"]) {
+      vi.resetModules();
+      if (set === "real") {
+        process.env.CONTENT_DIR = fileURLToPath(new URL("../../../content/", import.meta.url));
+        process.env.INCLUDE_DRAFTS = "0";
+      } else useFixture(set);
+      const { getContent } = await import("@/lib/content/load");
+      const c = getContent();
+      const page = await import("@/app/projects/[slug]/page");
+      const paperTitles = new Set(c.publications.map((x) => `${x.title} · ${c.site.name}`));
+      const titles = new Set<string>();
+      for (const p of c.projects) {
+        const meta = await page.generateMetadata({ params: Promise.resolve({ slug: p.slug }) });
+        const t = meta.title as { absolute: string };
+        const clash = c.publications.some((x) => x.title.toLowerCase() === p.title.toLowerCase());
+        expect(t.absolute).toBe(`${p.title}${clash ? " (project)" : ""} · ${c.site.name}`);
+        expect(paperTitles.has(t.absolute)).toBe(false);
+        titles.add(t.absolute);
+      }
+      expect(titles.size).toBe(c.projects.length);
     }
-    expect(titles.size).toBe(c.projects.length);
   });
 });
 

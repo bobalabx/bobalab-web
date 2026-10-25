@@ -28,7 +28,6 @@ import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 import { DraftBadge } from "@/components/ui/Badge";
 import { PUBLICATION_TYPE_LABELS } from "@/components/ui/labels";
-import { formatDate } from "@/lib/content/dates";
 import {
   joinAnd,
   laneCounts,
@@ -142,8 +141,7 @@ function Caption({ model }: { model: FigureModel }) {
   return (
     <>
       <b>Figure 1.</b> Papers in the lab’s {numberWord(model.n)} research{" "}
-      {model.n === 1 ? "direction" : "directions"}, by year. Each filled dot is a paper with a
-      public version or a documented talk;{" "}
+      {model.n === 1 ? "direction" : "directions"}, by year. Each filled dot is a paper;{" "}
       <span className="f1-cap-d">
         {shared ? (
           <>
@@ -159,19 +157,15 @@ function Caption({ model }: { model: FigureModel }) {
         ) : (
           "each line starts at its direction’s first paper."
         )}{" "}
-        {merged && `The first column group covers ${merged.from} to ${merged.to}. `}
-        Order within a year is not meaningful.
-        {wip &&
-          " Open rings after the “now” line are work in progress, in no particular order."}{" "}
-        Lines follow the lab’s own order of directions. Point at a line or a dot to name it.
+        {merged && `The first column covers ${merged.from}–${merged.to}. `}
+        {wip && " Open rings after the “now” line are work in progress."} Point at a line or a dot
+        to see its name.
       </span>
       <span className="f1-cap-m">
         the large disc marks the direction today
-        {wip ? ", and open rings after it are work in progress, in no particular order" : ""}.
-        {shared && " Papers shared with another direction are named under each line."} Order within
-        a year is not meaningful.
-      </span>{" "}
-      As of {formatDate(model.asOf)}.
+        {wip ? ", and open rings after it are work in progress" : ""}.
+        {shared && " Papers shared with another direction are listed under each line."}
+      </span>
     </>
   );
 }
@@ -193,36 +187,39 @@ function Key({ model }: { model: FigureModel }) {
   const kinds = model.maxShare > 2 ? "more than one direction" : "two directions";
   return (
     <p className="f1-key">
-      One line per direction: each <K k="dot" />
-      dot is a paper, placed by year
+      Each line is a direction and each <K k="dot" />
+      dot a paper, placed by year.
       {shared && (
         <>
           <span className="f1-cap-d">
-            ;{" "}
+            {" "}
             <span className="f1-cv-l">
-              a <K k="link" />
-              vertical link joins a paper shared by {kinds}
+              A <K k="link" />
+              vertical link joins a paper shared by {kinds}.
             </span>
             <span className="f1-cv-r">
-              a <K k="tw" />
-              ringed dot is a paper shared by {kinds}, drawn on each of their lines
+              A <K k="tw" />
+              ringed dot is a paper shared by {kinds}, drawn on each of their lines.
             </span>
           </span>
           <span className="f1-cap-m">
-            ; papers shared with another direction are named under each line
+            {" "}
+            Papers shared with another direction are listed under each line.
           </span>
         </>
       )}
       {wip ? (
         <>
-          ; the <K k="pearl" />
-          pearl marks now, and <K k="ring" />
+          {" "}
+          The <K k="pearl" />
+          pearl marks today; <K k="ring" />
           open rings after it are work in progress.
         </>
       ) : (
         <>
-          ; the <K k="pearl" />
-          pearl marks now.
+          {" "}
+          The <K k="pearl" />
+          pearl marks today.
         </>
       )}
     </p>
@@ -234,12 +231,9 @@ function ShortCaption({ model }: { model: FigureModel }) {
   const merged = model.merged > 0 ? model.bins[0] : undefined;
   return (
     <>
-      <b>Figure 1.</b> Papers in the lab’s {numberWord(model.n)} research{" "}
-      {model.n === 1 ? "direction" : "directions"} with a public version or a documented talk, by
-      year. {merged && `The first column group covers ${merged.from} to ${merged.to}. `}
-      Order within a year is not meaningful.
-      <span className="f1-cap-d f1-hint"> Point at a line, a dot or a ring to name it.</span> As of{" "}
-      {formatDate(model.asOf)}.
+      <b>Figure 1.</b> The lab’s papers by direction and year.
+      {merged && ` The first column covers ${merged.from}–${merged.to}.`}
+      <span className="f1-cap-d f1-hint"> Point at a dot or ring to see the paper.</span>
     </>
   );
 }
@@ -363,7 +357,7 @@ export function PearlFigure({ model, heading }: PearlFigureProps) {
                     hidden
                   >
                     <b>{p.title}.</b> {PUBLICATION_TYPE_LABELS[p.type]}, {p.year}.{" "}
-                    {p.lanes.length > 1 && `In ${joinAnd(p.lanes.map(label))}. `}
+                    {p.lanes.length > 1 && `Shared by ${joinAnd(p.lanes.map(label))}. `}
                     {p.brief}
                   </span>
                 ))}

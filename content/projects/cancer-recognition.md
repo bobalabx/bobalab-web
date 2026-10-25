@@ -1,5 +1,6 @@
 ---
 title: Foundation Models for Cancer Recognition
+summary: Using features from foundation models to recognize and interpret cancer.
 directions: []
 status: active
 team:

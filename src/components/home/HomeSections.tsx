@@ -1,17 +1,17 @@
 /**
  * Home sections below the hero (DECISIONS D-14, D-15; JUDGE.md §5 "Below the
  * fold", R18, R19): "New papers" (3 ruled rows: title, authors, one meta line) beside
- * "News" (4 dated one-liners), then "People" (one sentence naming the team, no counts,
- * the routes to join, and the consented photos cropped round with first names).
- * Featured findings render only when content has them (R19). Each section
- * renders only what content provides (no placeholders); its way on is one
- * factual line at the foot of the list ("Publications: 17 papers, 8 in progress").
+ * "News" (4 dated one-liners), then "People" (the way to join and the consented
+ * photos cropped round with first names; no team sentence and no counts, copy
+ * sweep). Featured findings render only when content has them (R19). Each section
+ * renders only what content provides (no placeholders); its way on is one plain
+ * link at the foot of the list ("All publications", no stats).
  */
 import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
 import type { AuthorView, NewsView, PublicationView } from "@/lib/content/load";
 import type { FindingView } from "@/lib/content/queries";
-import { ROLE_LABELS, ROLE_ORDER, type PublicPerson } from "@/lib/content/people";
+import type { PublicPerson } from "@/lib/content/people";
 import { typeWord } from "@/lib/publications/csl";
 import { PearlTag } from "@/components/ui/PearlTag";
 import { EvidenceLabel } from "@/components/ui/EvidenceLabel";
@@ -29,7 +29,7 @@ function Section({
 }: {
   id: string;
   title: string;
-  /** The foot line: where the full list lives and what it holds. */
+  /** The foot line: where the full list lives. */
   more?: { href: string; label: string };
   children: ReactNode;
   className?: string;
@@ -49,32 +49,22 @@ function Section({
   );
 }
 
-const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+/** The foot links: plain words, no stats (copy sweep). */
+export const PUBLICATIONS_LINK = "All publications";
+export const NEWS_LINK = "All news";
+export const PEOPLE_LINK = "Meet the lab";
 
-/** "Publications: 17 papers, 8 in progress". */
-export function publicationsLine(papers: number, inProgress: number): string {
-  return `Publications: ${plural(papers, "paper")}${inProgress ? `, ${inProgress} in progress` : ""}`;
-}
-/** "People: current members and alumni" (D-15: no people counts on the home page). */
-export function peopleLine(alumni: number): string {
-  return `People: current members${alumni ? " and alumni" : ""}`;
-}
-/** "News: 19 items since 2023". */
-export function newsLine(total: number, since?: string): string {
-  const y = since?.slice(0, 4);
-  return `News: ${plural(total, "item")}${y && /^\d{4}$/.test(y) ? ` since ${y}` : ""}`;
-}
-
-/** "a, b and c" */
-function and(parts: string[]): string {
-  return parts.length < 2
-    ? (parts[0] ?? "")
-    : `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
-}
-
-/** "Journal article, Management Science, 2026": the paper's one meta line. */
+/**
+ * The paper's one meta line: "Journal article, Management Science, 2026". When
+ * the venue already says what the paper is ("arXiv preprint", "SSRN working
+ * paper 7151739") it stands for the type, and an SSRN number is left out:
+ * "arXiv preprint, 2026", "SSRN working paper, 2026".
+ */
 export function paperMeta(p: Pick<PublicationView, "type" | "venue" | "year">): string {
-  return [typeWord(p), p.venue, p.year].filter(Boolean).join(", ");
+  const venue = p.venue?.replace(/^(SSRN working paper)\s+\d+$/i, "$1");
+  const type = typeWord(p);
+  const typeInVenue = venue && /preprint|working paper|thesis|dissertation/i.test(venue);
+  return [typeInVenue ? null : type, venue, p.year].filter(Boolean).join(", ");
 }
 
 /**
@@ -94,27 +84,6 @@ export function firstNames(
     people.map((p) => {
       const f = first(p.name);
       return [p.slug, (count.get(f) ?? 0) > 1 ? `${f} ${last(p.name)}.` : f];
-    }),
-  );
-}
-
-/** "Master’s student" → "master’s student"; a first word with more capitals ("PhD") stays. */
-const lower = (label: string) =>
-  /^[A-Z][a-z]*(?=[\s’'-]|$)/.test(label) ? label.charAt(0).toLowerCase() + label.slice(1) : label;
-
-/**
- * The team as words, by role in ROLE_ORDER, without numbers (D-15: no people
- * counts on the home page): "a master’s student and undergraduate RAs".
- */
-export function teamWords(people: Array<Pick<PublicPerson, "role">>): string {
-  return and(
-    ROLE_ORDER.filter((r) => r !== "pi").flatMap((role) => {
-      const n = people.filter((p) => p.role === role).length;
-      if (!n) return [];
-      const l = ROLE_LABELS[role];
-      if (n > 1) return [lower(l.group)];
-      const one = lower(l.one);
-      return [`${/^[aeiou]/i.test(one) ? "an" : "a"} ${one}`];
     }),
   );
 }
@@ -171,23 +140,14 @@ function Authors({ authors }: { authors: AuthorView[] }) {
 }
 
 /** "New papers": title, authors (lab members in 600) and one meta line. */
-export function PapersSection({
-  items,
-  total,
-  inProgress = 0,
-}: {
-  items: PublicationView[];
-  /** Counted publications (D-05). */
-  total: number;
-  inProgress?: number;
-}) {
+export function PapersSection({ items }: { items: PublicationView[] }) {
   if (!items.length) return null;
   return (
     <Section
       id="h-pubs"
       title="New papers"
       className="hm-papers-sec"
-      more={{ href: "/publications/", label: publicationsLine(total, inProgress) }}
+      more={{ href: "/publications/", label: PUBLICATIONS_LINK }}
     >
       <ol role="list" className="hm-papers">
         {items.map((p) => (
@@ -215,23 +175,14 @@ export function PapersSection({
 }
 
 /** "News": dated one-liners. */
-export function NewsSection({
-  items,
-  total,
-  since,
-}: {
-  items: NewsView[];
-  total: number;
-  /** Date of the oldest item ("YYYY-MM-DD"). */
-  since?: string;
-}) {
+export function NewsSection({ items }: { items: NewsView[] }) {
   if (!items.length) return null;
   return (
     <Section
       id="h-news"
       title="News"
       className="hm-news-sec"
-      more={{ href: "/news/", label: newsLine(total, since) }}
+      more={{ href: "/news/", label: NEWS_LINK }}
     >
       <ol role="list" className="hm-log">
         {items.map((n) => (
@@ -260,49 +211,26 @@ export function NewsSection({
 }
 
 /**
- * "People" (R18; D-15: no people counts): a sentence naming the team by role, the
- * routes to join, then the people with a consented photo, cropped round, with their
- * first names (alt = full name). Nobody without a photo is drawn (no initials discs).
+ * "People" (R18; D-15): the way to join, then the people with a consented photo,
+ * cropped round, with their first names (alt = full name). Nobody without a photo
+ * is drawn (no initials discs). No sentence about the team or former members
+ * (owner, copy sweep): the photos and "Meet the lab" carry that.
  */
-export function PeopleSection({
-  people,
-  lead,
-  alumni = 0,
-  email,
-}: {
-  people: PublicPerson[];
-  /** "Prof. Park Sinchaisri" (homeWho), when the lab has a listed PI. */
-  lead?: string;
-  alumni?: number;
-  email?: string;
-}) {
+export function PeopleSection({ people, email }: { people: PublicPerson[]; email?: string }) {
   if (!people.length) return null;
   const faces = people.filter((p) => p.photo);
   const names = firstNames(faces);
-  const team = teamWords(people);
   return (
     <Section
       id="h-people"
       title="People"
       className="hm-people-sec"
-      more={{ href: "/people/", label: peopleLine(alumni) }}
+      more={{ href: "/people/", label: PEOPLE_LINK }}
     >
       <div className="hm-people-in">
         <div className="hm-people-txt">
-          {(lead || team) && (
-            <p className="hm-team">
-              {lead && team
-                ? `${lead} leads the lab with ${team}.`
-                : lead
-                  ? `${lead} leads the lab.`
-                  : `The lab has ${team}.`}
-              {alumni > 0 && " The people page also lists former members."}
-            </p>
-          )}
           <p className="hm-join">
-            To work with the lab, see the notes for{" "}
-            <Link href="/join/#students">Students & RAs</Link> and for{" "}
-            <Link href="/join/#partners">Partners & data collaborators</Link>
+            Want to join or work with us? See <Link href="/join/">Join the lab</Link>
             {email ? (
               <>
                 , or email <a href={`mailto:${email}`}>{email}</a>.

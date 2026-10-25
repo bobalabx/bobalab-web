@@ -17,7 +17,7 @@ press: []
 awards: []
 directions:
   - algorithmic-advice
-in_brief: Looks at why people in the virtual-kitchen task pass over algorithm-generated tips, finding they interpret tips differently and face barriers beyond trust, such as how hard a tip is to apply and features of the task setting.
+in_brief: Why do people in the virtual-kitchen task pass over algorithm-generated tips? They read the tips differently, and trust is only one barrier; some tips are hard to apply, and the task setting matters too.
 featured: false
 draft: false
 ---

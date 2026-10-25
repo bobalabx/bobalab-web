@@ -7,8 +7,7 @@ export function PreviewRibbon({ show }: { show: boolean }) {
   return (
     <div className="bl-preview" role="note" aria-label="Preview build">
       <div className="bl-container">
-        <strong>Preview</strong>
-        This build includes drafts pending lab review. It is not the public site.
+        <strong>Preview:</strong> includes drafts the lab hasn&rsquo;t reviewed yet.
       </div>
     </div>
   );

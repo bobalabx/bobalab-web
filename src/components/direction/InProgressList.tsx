@@ -2,10 +2,8 @@
  * "In progress" (DECISIONS D-05): work without a public version or a
  * documented talk, as a ruled list of titles with their authors (lab members
  * in weight 600), venue and any status that adds something. It never counts
- * toward paper totals. The old inline caveat ("Listed by title only until …")
- * is gone (D-13 item 7); the page's one provenance footnote covers
- * self-reported status (`showsReportedStatus` tells the page whether any row
- * still prints one).
+ * toward paper totals. Statuses are plain labels, with no provenance note
+ * (copy sweep).
  *
  * `heading={false}`: the surrounding section is itself titled "In progress"
  * (a project or direction with no counted paper yet), so the list is labelled
@@ -19,19 +17,13 @@ import { DraftBadge } from "@/components/ui/Badge";
 
 /**
  * The status printed under an in-progress title, or null. Under an "In
- * progress" heading a bare in-progress status (with only its as-of date)
- * would repeat the heading on every row; statuses that add something
- * ("Submitted to …") stay.
+ * progress" heading a bare in-progress status would repeat the heading on
+ * every row; statuses that add something ("Submitted to …") stay.
  */
 export function wipStatus(
-  p: Pick<PublicationView, "status" | "status_note" | "as_of" | "status_source" | "type">,
+  p: Pick<PublicationView, "status" | "status_note" | "type"> & { venue?: string },
 ): string | null {
   return p.status === "in-progress" && !p.status_note ? null : statusLine(p, p.type);
-}
-
-/** True when a row of this list prints a self-reported status (the page then prints its footnote). */
-export function showsReportedStatus(items: readonly PublicationView[]): boolean {
-  return items.some((p) => wipStatus(p) != null && p.status_source === "self-reported");
 }
 
 export function InProgressList({

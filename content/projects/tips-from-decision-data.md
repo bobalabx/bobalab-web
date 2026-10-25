@@ -1,6 +1,6 @@
 ---
 title: Turning Decision Data into Tips
-summary: Learning short, usable tips from records of how people make multi-step decisions, testing them in a virtual-kitchen game, and studying why some people still pass the tips over.
+summary: We turn records of people's multi-step decisions into short, usable tips and test them in a virtual-kitchen game. Some people still pass the tips over, and we study why.
 directions:
   - algorithmic-advice
 status: active

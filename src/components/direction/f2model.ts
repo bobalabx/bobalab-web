@@ -18,7 +18,7 @@
  */
 import type { DirectionView, PublicationView } from "@/lib/content/load";
 import { hasDocumentedPresentation, hasPublicVersion } from "@/lib/content/relations";
-import { PUBLICATION_TYPE_LABELS } from "@/components/ui/labels";
+import { typeWord } from "@/lib/publications/csl";
 
 export interface F2Other {
   slug: string;
@@ -77,11 +77,11 @@ export function shortTitle(title: string): string {
  * paper only because of a documented conference presentation (D-05) is drawn
  * as a filled dot, so "Work in progress" under it would contradict the
  * caption's "open rings are work in progress": it is named for what makes it
- * count, a conference presentation.
+ * count, a conference presentation. A thesis filed as `other` is "Thesis".
  */
 export function figureTypeWord(
   p: Pick<PublicationView, "type"> &
-    Partial<Pick<PublicationView, "doi" | "links" | "presentations">>,
+    Partial<Pick<PublicationView, "doi" | "links" | "presentations" | "venue">>,
 ): string {
   if (
     p.type === "work-in-progress" &&
@@ -89,7 +89,7 @@ export function figureTypeWord(
     hasDocumentedPresentation({ presentations: p.presentations ?? [] })
   )
     return "Conference presentation";
-  return PUBLICATION_TYPE_LABELS[p.type];
+  return typeWord({ type: p.type, venue: p.venue });
 }
 
 export function f2Fit(columns: number): F2Fit {

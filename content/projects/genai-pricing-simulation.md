@@ -1,5 +1,6 @@
 ---
 title: Generative-AI Simulation for Pricing
+summary: Generative-AI simulation, guided by economic mechanisms, for pricing operations.
 directions:
   - pricing-experimentation
   - ai-at-work

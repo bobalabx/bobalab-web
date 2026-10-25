@@ -206,7 +206,7 @@ test("detail: breadcrumb Research › Direction › Project, JSON-LD, team only 
   }
 });
 
-test("detail (phone): the project line's dots stay on the rail, so 'Dots are papers' holds", async ({
+test("detail (phone): the project line's dots stay on the rail, under a short caption", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -217,7 +217,10 @@ test("detail (phone): the project line's dots stay on the rail, so 'Dots are pap
   for (const h of href) {
     await open(page, h);
     if (!(await page.locator(".pjl-fig").count())) continue;
-    await expect(page.locator(".pjl-fig figcaption")).toContainText("Dots are papers");
+    // Copy sweep: "Figure 1. Papers and news for this project, by date." (no hedges, no date stamp).
+    await expect(page.locator(".pjl-fig figcaption")).toHaveText(
+      /^Figure 1\. Papers (and news )?for this project, by date\.$/,
+    );
     const dots = page.locator(".pjl-dot");
     expect(await dots.count()).toBeGreaterThan(0);
     for (const box of await dots.evaluateAll((ds) =>

@@ -3,12 +3,13 @@
  * research directions in the track, each group shown only when content links
  * something. People appear only if listed (the loader drops unlisted people);
  * they link to a profile page only when one exists. The caller renders the
- * row's label (h2#news-related) and the provenance footnote.
+ * row's label (h2#news-related).
  */
 import Link from "next/link";
-import type { NewsView } from "@/lib/content/load";
+import type { NewsView, PublicationView } from "@/lib/content/load";
 import { PearlTagList } from "@/components/ui/PearlTag";
 import { statusLine } from "@/components/ui/PublicationEntry";
+import { typeWord } from "@/lib/publications/csl";
 import { ROLE_LABELS } from "@/lib/content/people";
 import "./news.css";
 
@@ -17,20 +18,18 @@ export function hasRelated(n: NewsView): boolean {
 }
 
 /**
- * True when the Related row prints a review status the lab reported itself, so
- * the page needs its one provenance footnote (D-13 item 7). Awards are not shown
- * in this row, so they never trigger it.
+ * "Management Science, 2026"; the year is left out when the venue already names
+ * it. Without a venue, the type stands in ("Working paper, 2026"), so a bare
+ * year never looks like a missing field.
  */
-export function showsReportedStatus(n: NewsView): boolean {
-  return n.publicationRefs.some(
-    (p) => p.status_source === "self-reported" && statusLine(p, p.type) !== null,
-  );
-}
-
-/** "Management Science, 2026"; the year is left out when the venue already names it. */
-export function venueLine(p: { venue?: string | null; year?: number | null }): string {
+export function venueLine(p: {
+  venue?: string | null;
+  year?: number | null;
+  type?: PublicationView["type"];
+}): string {
   const venue = p.venue?.trim() ?? "";
   if (!p.year) return venue;
+  if (!venue && p.type) return `${typeWord({ type: p.type })}, ${p.year}`;
   if (venue.includes(String(p.year))) return venue;
   return [venue, p.year].filter(Boolean).join(", ");
 }
@@ -73,7 +72,7 @@ export function NewsRelated({ item }: { item: NewsView }) {
                   <span className="nw-related__name">{p.name}</span>
                 )}
                 <span className="nw-related__sub">
-                  {p.isAlumni ? "Alumni" : p.title || ROLE_LABELS[p.role].one}
+                  {p.isAlumni ? "Former lab member" : p.title || ROLE_LABELS[p.role].one}
                 </span>
               </li>
             ))}

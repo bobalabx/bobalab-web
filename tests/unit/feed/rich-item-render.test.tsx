@@ -84,7 +84,8 @@ describe("news item with every optional field (fixture)", () => {
 
     // Header: full date, type, Upcoming (event in the future), the long title.
     expect(html).toContain(`>${formatDate("2026-10-05")}</time>`);
-    expect(html).toContain("Talk/Event");
+    expect(html).toContain('<span class="bl-badge">Talk</span>');
+    expect(html).not.toContain("Talk/Event");
     expect(html).toContain("Upcoming");
     expect(html).toContain(TITLE);
     // Event details with a full date.
@@ -114,6 +115,7 @@ describe("news item with every optional field (fixture)", () => {
     expect(start).toBeGreaterThan(-1);
     const itemXml = xml.slice(start, xml.indexOf("</item>", start));
     expect(itemXml).toContain('href="https://example.invalid/publications/"');
-    expect(itemXml).toContain("Event: Feb 1, 2099, Fixture Auditorium");
+    // The summary as written; the event date and place live on the page, not in a templated line.
+    expect(itemXml).not.toContain("Event: Feb 1, 2099");
   });
 });

@@ -2,7 +2,8 @@
  * The paper's place on its direction's line (P3 paper.html `.onl`): every
  * counted paper of the direction as a dot in year order, this paper ringed,
  * and the direction's pearl at "now". A small data mark: one dot per paper,
- * nothing decorative. Text carries the same fact for everyone.
+ * nothing decorative. Its accessible name says what it shows; no counting
+ * sentence beside it (copy sweep).
  */
 import type { CSSProperties } from "react";
 import type { SwatchId } from "@/lib/content/palette";
@@ -23,26 +24,19 @@ export function DirectionLine({
   if (at < 0) return null;
   const n = slugs.length;
   return (
-    <>
-      <span
-        className="pub-onl"
-        data-swatch={swatch}
-        role="img"
-        aria-label={`The papers on the ${label} line, oldest first; this paper is ringed.`}
-        style={{ "--n": n } as CSSProperties}
-      >
-        <span className="pub-onl__dots">
-          {slugs.map((s) => (
-            <i key={s} className={s === current ? "pub-onl__me" : undefined} />
-          ))}
-        </span>
-        <b className="pub-onl__pearl" />
+    <span
+      className="pub-onl"
+      data-swatch={swatch}
+      role="img"
+      aria-label={`${label} papers by year, with this one highlighted`}
+      style={{ "--n": n } as CSSProperties}
+    >
+      <span className="pub-onl__dots">
+        {slugs.map((s) => (
+          <i key={s} className={s === current ? "pub-onl__me" : undefined} />
+        ))}
       </span>
-      <span className="pub-onl__text">
-        {n === 1
-          ? "The only paper on this line so far."
-          : `One of ${n} papers on this line; the ringed dot is this paper.`}
-      </span>
-    </>
+      <b className="pub-onl__pearl" />
+    </span>
   );
 }

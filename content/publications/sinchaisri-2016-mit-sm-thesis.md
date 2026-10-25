@@ -14,7 +14,7 @@ press: []
 awards: []
 directions:
   - pricing-experimentation
-in_brief: Park Sinchaisri's master's thesis on pricing when buyers judge quality from price, combining a model with an experiment; precursor of the markdown-pricing working paper.
+in_brief: Park Sinchaisri's MIT master's thesis on pricing when buyers judge quality from price, combining a model with an experiment. It later grew into the markdown-pricing working paper.
 featured: false
 draft: false
 ---

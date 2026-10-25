@@ -51,6 +51,13 @@ export const ROLE_LABELS: Record<PersonRole, { one: string; group: string }> = {
   affiliate: { one: "Affiliate", group: "Affiliates & collaborators" },
 };
 
+/** "Undergraduate RA" → "undergraduate RA"; a first word with more capitals ("PhD") stays. */
+export const lowerRole = (label: string) =>
+  /^[A-Z][a-z]*(?=[\s’'-]|$)/.test(label) ? label.charAt(0).toLowerCase() + label.slice(1) : label;
+
+/** A former member's role: "Former PhD student", "Former undergraduate RA". */
+export const formerRole = (role: PersonRole) => `Former ${lowerRole(ROLE_LABELS[role].one)}`;
+
 export function isAlumni(
   p: Pick<PersonEntry, "end" | "role">,
   today: string = todayInLab(),

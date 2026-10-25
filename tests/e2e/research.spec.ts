@@ -158,7 +158,7 @@ test("index: live directions in editorial order, archived under 'Earlier and rel
   }
 });
 
-test("map: 'Explore' band after the ledger, before projects and earlier research; full bleed; one lane per live direction", async ({
+test("map: 'How the directions connect' band after the ledger, before projects and earlier research; full bleed; one lane per live direction", async ({
   page,
 }) => {
   const { live } = await discover(page);
@@ -167,19 +167,20 @@ test("map: 'Explore' band after the ledger, before projects and earlier research
   await expect(map).toHaveCount(1);
   await expect(map).toHaveAttribute("aria-labelledby", "map-h");
   const h2 = map.locator("h2#map-h");
-  if (live.length > 1)
-    await expect(h2).toHaveText(
-      /^Explore: how the (two|three|four|five|six|seven|eight|\d+) directions connect$/,
-    );
-  else await expect(h2).toHaveText("Explore: every paper by year");
+  if (live.length > 1) await expect(h2).toHaveText("How the directions connect");
+  else await expect(h2).toHaveText("Every paper by year");
   // Open by default: no disclosure, the figure is drawn.
   await expect(map.locator("details")).toHaveCount(0);
   await expect(map.locator("figure.f1-plate")).toBeVisible();
-  // One key sentence above the plate; the caption below says only the rest.
+  // A short key of plain sentences above the plate (copy sweep: no colon-and-semicolon
+  // chain); the caption below says only the rest.
   const key = map.locator(".f1-key");
   await expect(key).toHaveCount(1);
   const keyText = (await key.innerText()).trim();
-  expect(keyText.split(/[.!?](\s|$)/).filter((x) => x.trim()).length, keyText).toBe(1);
+  expect(keyText.startsWith("Each line is a direction"), keyText).toBe(true);
+  expect(keyText, keyText).not.toMatch(/: /);
+  const sentences = keyText.split(/[.!?](\s|$)/).filter((x) => x?.trim()).length;
+  expect(sentences, keyText).toBeLessThanOrEqual(4);
   // …and it comes before the plate.
   expect(
     await map.evaluate((m) =>
@@ -285,7 +286,7 @@ test("map: exactly one pearl per direction on the page, all in the map (the morp
 // ---------------------------------------------------------------------------
 // Direction page
 
-test("direction page: header, derived counts, Figure 2, see-all filter, sections, one pearl", async ({
+test("direction page: header, derived counts, Figure 1, see-all filter, sections, one pearl, no stat prose", async ({
   page,
 }) => {
   const { live } = await discover(page);
@@ -295,19 +296,28 @@ test("direction page: header, derived counts, Figure 2, see-all filter, sections
     await expect(h1).toHaveCount(1);
     await expect(h1).toHaveAttribute("tabindex", "-1");
 
-    // Label column: "Research direction", the counts sentence, "All directions" → Fig. 1.
+    // Label column: "Research direction" and "All directions" → Fig. 1; no counts sentence.
     await expect(page.locator(".dr-kind")).toContainText("Research direction");
     await expect(page.locator(".dr-back")).toHaveAttribute("href", "/");
 
-    // Exactly one pearl on the page: Figure 2's, for this direction (the morph target).
+    // Exactly one pearl on the page: the direction figure's, for this direction (the morph target).
     await expect(page.locator(".f1-dp")).toHaveCount(1);
     await expect(page.locator(`.dr-f2 .f1-dp[data-slug="${slug}"]`)).toHaveCount(1);
 
-    // Counts are derived and match what the page lists.
-    const status = (await page.locator(".dr-status").textContent()) ?? "";
-    const projects = Number(/(\d+) projects?/.exec(status)?.[1]);
-    const papers = Number(/(\d+) papers?/.exec(status)?.[1]);
-    const wip = Number(/(\d+) in progress/.exec(status)?.[1] ?? 0);
+    // Counts sit in the section labels, are derived, and match what the page lists.
+    await expect(page.locator(".dr-status, .dr-shares, .dr-updated, .dr-fn")).toHaveCount(0);
+    await expect(page.locator("main")).not.toContainText(
+      /Shares \d|, as of |last updated|reported by the lab/i,
+    );
+    const aside = async (id: string) =>
+      (await page.locator(`section[aria-labelledby="${id}"] .dr-section__aside`).count())
+        ? ((await page
+            .locator(`section[aria-labelledby="${id}"] .dr-section__aside`)
+            .textContent()) ?? "")
+        : "";
+    const projects = Number(/(\d+) projects?/.exec(await aside("projects"))?.[1] ?? 0);
+    const papers = Number(/(\d+) papers?/.exec(await aside("publications"))?.[1] ?? 0);
+    const wip = await page.locator(".dr-wip li").count();
     await expect(page.locator(".dr-project")).toHaveCount(projects);
     await expect(page.locator(".dr-f2__p:not(.dr-f2__p--wip)")).toHaveCount(papers);
     await expect(page.locator(".dr-f2__p--wip")).toHaveCount(wip);
@@ -324,7 +334,8 @@ test("direction page: header, derived counts, Figure 2, see-all filter, sections
       .locator(".dr-f2__p:not(.dr-f2__p--wip) .dr-f2__t")
       .evaluateAll((as) => as.map((a) => a.getAttribute("href"))))
       expect(href).toMatch(/^\/publications\/[a-z0-9-]+\/$/);
-    await expect(page.locator(".dr-f2 figcaption")).toContainText("Figure 2.");
+    await expect(page.locator(".dr-f2 figcaption")).toContainText("Figure 1.");
+    await expect(page.locator(".dr-f2 figcaption")).not.toContainText(/As of|Order within a year/);
 
     // Empty sections are hidden: every section has content.
     const empties = await page
@@ -346,7 +357,7 @@ test("direction page: header, derived counts, Figure 2, see-all filter, sections
     ).toBe(true);
 
     // Unique page title.
-    await expect(page).toHaveTitle(/, BOBALAB research$/);
+    await expect(page).toHaveTitle(/ · BOBALAB$/);
   }
 });
 
@@ -369,11 +380,9 @@ test("Figure 2 geometry: the pearl sits on the line at now (wide); beside the h1
         expect(d.x + d.width, slug).toBeLessThan(pearl.x + pearl.width / 2);
       }
       expect(Math.round(pearl.width)).toBe(96);
-      // The caption describes the stubs that are drawn, not the phone's "Also in" lines.
-      if (await page.locator(".dr-f2[data-shared]").count()) {
+      // The caption describes the stubs that are drawn.
+      if (await page.locator(".dr-f2[data-shared]").count())
         await expect(page.locator(".dr-f2__cap-w")).toBeVisible();
-        await expect(page.locator(".dr-f2__cap-l")).toBeHidden();
-      }
     }
     // Phone: the list layout; the pearl beside the h1, inside the first screen, clear of its text.
     await page.setViewportSize({ width: 390, height: 844 });
@@ -392,10 +401,11 @@ test("Figure 2 geometry: the pearl sits on the line at now (wide); beside the h1
       );
     });
     expect(overlap, `${slug}: h1 text under the pearl`).toBe(false);
-    if (await page.locator(".dr-f2[data-shared]").count()) {
-      await expect(page.locator(".dr-f2__cap-l")).toBeVisible();
+    // The list layout names the other direction on each row ("Also in"); the caption
+    // needs no note about it (copy sweep), and the stubs note is hidden.
+    if (await page.locator(".dr-f2[data-shared]").count())
       await expect(page.locator(".dr-f2__cap-w")).toBeHidden();
-    }
+    await expect(page.locator(".dr-f2__cap-l")).toHaveCount(0);
   }
 });
 
@@ -433,14 +443,14 @@ test("Figure 2 labels never collide (wide): 'Also in' labels clear the twin dots
   }
 });
 
-test("archived direction: 'Earlier research' with its date, no pearl, not in the main list", async ({
+test("archived direction: 'Earlier research' with no archive date stamp, no pearl, not in the main list", async ({
   page,
 }) => {
   const { archived } = await discover(page);
   test.skip(!archived.length, "no archived directions in this content");
   await open(page, `/research/${archived[0]}/`);
   await expect(page.locator(".dr-kind")).toContainText("Earlier research");
-  await expect(page.locator(".dr-kind time")).toHaveCount(1);
+  await expect(page.locator(".dr-kind time")).toHaveCount(0);
   // No index and no Fig. 1 pearl to morph from: no pearl at all.
   await expect(page.locator(".f1-dp")).toHaveCount(0);
   await expect(page.locator(".dr-back")).toHaveAttribute("href", "/research/");
@@ -551,7 +561,7 @@ test("no-JS: direction page and index render fully", async ({ browser }) => {
     ).toBe("1");
   await open(page, `/research/${live[0]}/`);
   await expect(page.locator("main h1")).toBeVisible();
-  await expect(page.locator(".dr-status")).toBeVisible();
+  await expect(page.locator(".dr-kind")).toBeVisible();
   if (live.length > 1) await expect(page.locator(".dr-rail a")).toHaveCount(live.length - 1);
   await ctx.close();
 });

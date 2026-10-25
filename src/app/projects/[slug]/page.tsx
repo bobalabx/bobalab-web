@@ -2,7 +2,8 @@
  * Project page `/projects/{slug}/` (brief §D6; redesign D-13 after P3
  * `project.html`): an editorial case study built only from real content.
  * Head: breadcrumb, condensed h1, the lab's summary, and a facts row (status,
- * directions, people, papers, latest news). Then Figure 1, the project line
+ * directions, latest news; the team and papers have sections of their own).
+ * Then Figure 1, the project line
  * (papers on the project's directions plus dated news), and the sections that
  * have content: overview, findings, papers, materials, team, funding, how to
  * cite, news, related projects. Empty sections are not rendered.
@@ -13,7 +14,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getContent } from "@/lib/content/load";
 import { projectDetail, showStudyPlate, staticParams, staticSlugs } from "@/lib/content/queries";
-import { formatDate } from "@/lib/content/dates";
 import { clipDescription, pageMetadata } from "@/lib/seo/metadata";
 import { researchProjectLd } from "@/lib/seo/jsonld";
 import { JsonLd } from "@/components/ui/JsonLd";
@@ -23,12 +23,11 @@ import { Badge, DraftBadge } from "@/components/ui/Badge";
 import { DateText } from "@/components/ui/DateText";
 import { PearlTagList } from "@/components/ui/PearlTag";
 import { MaterialsRow } from "@/components/ui/MaterialsRow";
-import { PublicationEntry, needsProvenanceNote } from "@/components/ui/PublicationEntry";
+import { PublicationEntry } from "@/components/ui/PublicationEntry";
 import { NewsItem } from "@/components/ui/NewsItem";
 import { Section } from "@/components/direction/Section";
 import { FindingList } from "@/components/direction/FindingList";
-import { InProgressList, showsReportedStatus } from "@/components/direction/InProgressList";
-import { listJoin } from "@/components/direction/model";
+import { InProgressList } from "@/components/direction/InProgressList";
 import { Breadcrumb } from "@/components/projects/Breadcrumb";
 import { TeamList, hasTeam } from "@/components/projects/TeamList";
 import { ProjectLine } from "@/components/projects/ProjectLine";
@@ -38,11 +37,10 @@ import {
   canonicalPaper,
   latestNews,
   outputsToMaterials,
-  papersFact,
   projectBreadcrumb,
   projectFindings,
   projectLineModel,
-  projectTeamRows,
+  projectTitle,
   projectYears,
 } from "@/components/projects/model";
 import { StudyPlate, hasPlate } from "@/components/plates";
@@ -63,13 +61,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const detail = projectDetail(c, slug);
   if (!detail) return { title: "Not found", robots: { index: false } };
   const p = detail.project;
-  // A project often shares its name with its paper, so "{Title} · BOBALAB"
-  // was not unique (WCAG 2.4.2; verify A11Y-03). Qualify it the way direction
-  // pages do ("…, BOBALAB research"); the lab name comes from site.yml.
-  const title = `${p.title}, ${c.site.name} project`;
+  // "{Title} · BOBALAB", like every other page; "(project)" only when a paper
+  // has the same title, so page titles stay unique (WCAG 2.4.2; verify A11Y-03).
+  const title = `${projectTitle(p, c.publications)} · ${c.site.name}`;
   const meta = pageMetadata({
     title,
-    description: clipDescription(p.summary),
+    // The lab's summary, then what the page is ("A BOBALAB project.") when it fits.
+    description: p.summary
+      ? clipDescription(`${p.summary.replace(/([^.!?])$/, "$1.")} A ${c.site.name} project.`)
+      : undefined,
     path: `/projects/${p.slug}/`,
   });
   return { ...meta, title: { absolute: title } };
@@ -82,7 +82,6 @@ export default async function ProjectPage({ params }: Props) {
   if (!detail) notFound();
   const p = detail.project;
   const path = `/projects/${p.slug}/`;
-  const asOf = formatDate(c.today, { long: true });
   const years = projectYears(p);
   const counted = p.publicationRefs.filter((x) => x.counted);
   const wip = p.publicationRefs.filter((x) => !x.counted);
@@ -91,14 +90,6 @@ export default async function ProjectPage({ params }: Props) {
   const cite = canonicalPaper(p);
   const line = projectLineModel(p, detail.news);
   const latest = latestNews(detail.news);
-  const team = projectTeamRows(p);
-  const teamNames = [
-    ...team.map((r) => (r.kind === "member" ? r.person.name : r.name)),
-    ...p.visibleCollaborators.map((x) => x.name),
-  ];
-  const papers = papersFact(p);
-  // The footnote only when a row on the page still prints a self-reported status.
-  const provenance = needsProvenanceNote(counted) || showsReportedStatus(wip);
   const plated = counted.filter((x) => hasPlate(x.slug) && showStudyPlate(x, c.preview));
   let fig = line ? 2 : 1;
 
@@ -134,18 +125,6 @@ export default async function ProjectPage({ params }: Props) {
               </dd>
             </div>
           )}
-          {teamNames.length > 0 && (
-            <div>
-              <dt>People</dt>
-              <dd>{listJoin(teamNames)}</dd>
-            </div>
-          )}
-          {papers && (
-            <div>
-              <dt>Papers</dt>
-              <dd>{papers}</dd>
-            </div>
-          )}
           {latest && (
             <div>
               <dt>Latest</dt>
@@ -158,7 +137,7 @@ export default async function ProjectPage({ params }: Props) {
         </dl>
       </header>
 
-      {line && <ProjectLine model={line} asOf={asOf} />}
+      {line && <ProjectLine model={line} />}
 
       {p.hero?.image && p.hero.alt && (
         <figure className="pj-hero">
@@ -244,7 +223,7 @@ export default async function ProjectPage({ params }: Props) {
             ) : cite.year ? (
               ` (${cite.year})`
             ) : null}
-            . Its page has the full citation in APA and BibTeX.
+            .
           </p>
         </Section>
       )}
@@ -268,8 +247,6 @@ export default async function ProjectPage({ params }: Props) {
           />
         </Section>
       )}
-
-      {provenance && <p className="dr-fn">Review status and dates are as reported by the lab.</p>}
     </article>
   );
 }

@@ -1,7 +1,7 @@
 ---
 title: Academic and industry collaborators
 audience: partners
-route: Email the lab
+route: Email the lab.
 url: https://parksinchaisri.github.io/#bobalab
 email: bobalab@berkeley.edu
 status: unknown

@@ -30,12 +30,6 @@ export function NewsItem({
       <H className="bl-news__title" id={`news-${item.slug}`}>
         <Link href={`/news/${item.slug}/`}>{item.title}</Link>
       </H>
-      {item.event_date && (
-        <p className="bl-news__event t-sm t-muted">
-          Event: <DateText value={item.event_date} />
-          {item.location ? `, ${item.location}` : ""}
-        </p>
-      )}
       {item.summary && <p className="bl-news__summary">{item.summary}</p>}
       {showTags && <PearlTagList items={item.directionRefs} />}
     </article>

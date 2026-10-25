@@ -21,5 +21,5 @@ direction_order:
 member_links:
   - label: Lab scheduler
     url: https://scheduler.bobalab.org/
-    description: Weekly lab meeting scheduling (lab members sign in with Google).
+    description: Weekly meeting scheduler for lab members (Google sign-in)
 redirects: []

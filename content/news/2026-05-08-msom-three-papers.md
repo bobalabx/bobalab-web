@@ -4,7 +4,7 @@ type: talk
 title: Three papers on the 2026 MSOM Conference program
 event_date: "2026-07-14"
 location: Harvard Business School
-summary: Work on compliance-aware reinforcement learning, strategic advice with personal AI, and how AI changes planning versus execution was selected for the 2026 MSOM Conference at Harvard Business School (July 13–14).
+summary: Our papers on compliance-aware reinforcement learning, strategic advice in the age of personal AI, and how AI changes planning versus execution are on the program for the 2026 MSOM Conference at Harvard Business School (July 13–14).
 directions:
   - ai-at-work
   - algorithmic-advice

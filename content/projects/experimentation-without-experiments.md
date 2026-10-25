@@ -1,5 +1,6 @@
 ---
 title: Experimentation without Experiments
+summary: How firms can learn about pricing without running costly live experiments.
 directions:
   - pricing-experimentation
 status: active

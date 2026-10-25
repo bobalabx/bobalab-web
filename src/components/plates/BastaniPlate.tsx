@@ -156,7 +156,7 @@ export function BastaniPlate() {
           <div
             className="pl-lanes"
             role="img"
-            aria-label="Three worker lanes, chef, sous-chef and server, along time in ticks, drawn empty: no schedule. In the disrupted configuration the chef leaves."
+            aria-label="Three empty worker lanes (chef, sous-chef and server) along a time axis in ticks. In the disrupted configuration the chef leaves."
           >
             {WORKERS.map((w) => (
               <div key={w} className="pl-lrow" aria-hidden="true">
@@ -201,13 +201,13 @@ export function BastaniPlate() {
             <span className="pl-l">b</span> Two configurations
           </h3>
           <p className="pl-t">
-            Each glyph is one round, one line per worker with the chef on top. Its length is the
+            Each mark is one round, with one line per worker and the chef on top. Its length is the
             optimal finish time.
           </p>
           <div
             className="pl-conf"
             role="img"
-            aria-label="Normal configuration: three fully staffed rounds of 20 ticks each. Disrupted configuration: two full rounds, then four rounds without the chef of 34 ticks each."
+            aria-label="Normal configuration: three fully staffed rounds of 20 ticks each. Disrupted configuration: two full rounds, then four 34-tick rounds without the chef."
           >
             <p className="pl-cl" aria-hidden="true">
               <b>Normal</b> 3 full rounds
@@ -270,7 +270,7 @@ export function BastaniPlate() {
               <span className="pl-rrow">
                 <span className="pl-r">R</span>
                 <span className="pl-p2h pl-p2h--m">
-                  <b>Phase II</b>, randomised into four arms
+                  <b>Phase II:</b> random assignment to four arms
                 </span>
               </span>
               <svg className="pl-rnode__v" viewBox="0 0 4 14" focusable="false">
@@ -282,7 +282,7 @@ export function BastaniPlate() {
             </div>
             <div className="pl-phase2">
               <p className="pl-p2h pl-p2h--d">
-                <b>Phase II</b>, randomised into four arms
+                <b>Phase II:</b> random assignment to four arms
               </p>
               <div className="pl-armsbox">
                 <svg

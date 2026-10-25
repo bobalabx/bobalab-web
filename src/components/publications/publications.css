@@ -381,19 +381,6 @@
   }
 }
 
-/* ---- the page's one provenance footnote (D-13 item 7) ---- */
-.pubs-fn {
-  margin-top: 28px;
-  font-size: var(--t-meta);
-  line-height: var(--lh-meta);
-  color: var(--muted);
-}
-@media (min-width: 48rem) {
-  .pubs-fn {
-    margin-left: var(--lab);
-  }
-}
-
 /* Filter changes: the results steep in once (opacity only, finite). */
 @media (prefers-reduced-motion: no-preference) {
   :root:not([data-motion="reduce"]) .pubs-groups[data-steep] {
@@ -502,10 +489,6 @@
   display: block;
   color: var(--ink);
 }
-.pub-status__meta,
-.pub-type__wip {
-  display: block;
-}
 .pub-dir > a {
   display: inline-block;
   padding-block: 2px;
@@ -554,10 +537,6 @@
   margin-left: auto;
   border-radius: 50%;
   background: var(--pearl);
-}
-.pub-onl__text {
-  display: block;
-  margin-top: 2px;
 }
 
 /* In brief (P3 `.pp-ib`) */
@@ -643,10 +622,6 @@
 .pub-award__head {
   display: block;
 }
-.pub-award__src {
-  margin-left: 2px;
-  color: var(--muted);
-}
 .pub-award__under {
   display: block;
   margin-top: 2px;
@@ -660,12 +635,6 @@
 }
 .pub-talks > li:first-child {
   border-top: 0;
-}
-.pub-fn {
-  margin-top: 8px;
-  font-size: var(--t-meta);
-  line-height: var(--lh-meta);
-  color: var(--muted);
 }
 .pub-notes {
   padding-top: 14px;

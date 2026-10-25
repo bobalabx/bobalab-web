@@ -7,7 +7,7 @@
  */
 import Link from "next/link";
 import type { PublicPerson } from "@/lib/content/people";
-import { ROLE_LABELS, avatarSwatch, initials } from "@/lib/content/people";
+import { ROLE_LABELS, avatarSwatch, formerRole, initials } from "@/lib/content/people";
 import type { DirectionView } from "@/lib/content/load";
 import { Pearl } from "./Pearl";
 import { Img } from "./Img";
@@ -38,7 +38,7 @@ export function PersonCard({
     [string, string]
   >;
   const role = person.isAlumni
-    ? `Alumni, ${ROLE_LABELS[person.role].one}`
+    ? formerRole(person.role)
     : person.title || ROLE_LABELS[person.role].one;
   return (
     <article className="bl-person" aria-labelledby={`person-${person.slug}`}>

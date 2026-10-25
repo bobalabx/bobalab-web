@@ -1,7 +1,7 @@
 /**
  * Research direction page `/research/{direction}/` (brief §D5, §E5; redesign
- * D-13 after P3 `research.html`): label-column header with the derived counts,
- * condensed h1 and the guiding question; Figure 2 (the direction's papers on
+ * D-13 after P3 `research.html`): label-column header, condensed h1 and the
+ * guiding question; Figure 1 (the direction's papers on
  * its line, ending in its pearl, the morph target); Why it matters; projects
  * as a ruled table; papers as a ruled ledger; people; More directions.
  * Static export: generateStaticParams via staticParams() (never []),
@@ -13,32 +13,26 @@ import { notFound } from "next/navigation";
 import { ViewTransition } from "react";
 import { getContent } from "@/lib/content/load";
 import { directionDetail, showStudyPlate, staticParams, staticSlugs } from "@/lib/content/queries";
-import { formatDate } from "@/lib/content/dates";
 import { clipDescription, pageMetadata } from "@/lib/seo/metadata";
 import { researchProjectLd } from "@/lib/seo/jsonld";
 import { PAGE_ENTER_EXIT } from "@/lib/vt";
 import { JsonLd } from "@/components/ui/JsonLd";
 import { Prose } from "@/components/ui/Prose";
-import { PublicationEntry, needsProvenanceNote } from "@/components/ui/PublicationEntry";
-import { DateText } from "@/components/ui/DateText";
+import { PublicationEntry } from "@/components/ui/PublicationEntry";
 import { DirectionHeader } from "@/components/direction/DirectionHeader";
 import { DirectionRail } from "@/components/direction/DirectionRail";
 import { Figure2 } from "@/components/direction/Figure2";
 import { FindingList } from "@/components/direction/FindingList";
-import { InProgressList, showsReportedStatus } from "@/components/direction/InProgressList";
+import { InProgressList } from "@/components/direction/InProgressList";
 import { KeyFigure } from "@/components/direction/KeyFigure";
 import { Section } from "@/components/direction/Section";
 import { WorkWithUs } from "@/components/direction/WorkWithUs";
-import { contentLastUpdated } from "@/components/direction/lastUpdated";
 import { figure2Model } from "@/components/direction/f2model";
-import { lastUpdated as siteLastUpdated } from "@/lib/site/build-info";
 import {
   DIRECTION_PUBLICATION_LIMIT,
   directionPeople,
-  directionUpdatedDate,
   plural,
   publicationsHref,
-  sharedWith,
   workWithUs,
 } from "@/components/direction/model";
 import { ProjectLedger } from "@/components/projects/ProjectLedger";
@@ -61,9 +55,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const detail = directionDetail(c, direction);
   if (!detail) return { title: "Not found", robots: { index: false } };
   const d = detail.direction;
-  // Unique "{Direction}, BOBALAB research" title (§E5) without the site suffix;
-  // the lab name comes from site.yml, never hard-coded.
-  const title = `${d.title}, ${c.site.name} research`;
+  // "{Direction} · BOBALAB", like every other page (§E5); the lab name comes
+  // from site.yml, never hard-coded.
+  const title = `${d.title} · ${c.site.name}`;
   const meta = pageMetadata({
     title,
     description: clipDescription(d.summary ?? d.question),
@@ -79,12 +73,10 @@ export default async function DirectionPage({ params }: Props) {
   if (!detail) notFound();
   const d = detail.direction;
   const path = `/research/${d.slug}/`;
-  const asOf = formatDate(c.today, { long: true });
   const work = workWithUs(c, d);
   const shownPubs = detail.publications.slice(0, DIRECTION_PUBLICATION_LIMIT);
   const archived = d.status === "archived" || d.index == null;
   const order = [...c.directions, ...c.archivedDirections];
-  const shared = sharedWith(c, d, detail.publications);
   const f2 = figure2Model(d, detail.publications, detail.inProgress, order);
   // A live direction always draws Figure 2: it carries the pearl, the morph
   // target of Fig. 1. An archived one draws it only when there is a line to
@@ -92,27 +84,14 @@ export default async function DirectionPage({ params }: Props) {
   // listed under Papers anyway.
   const showF2 = archived ? f2.columns >= 2 : f2.columns > 0;
   const people = directionPeople(c, d, detail.projects);
-  // The footnote only when a row on the page still prints a self-reported status.
-  const provenance =
-    needsProvenanceNote(detail.publications) || showsReportedStatus(detail.inProgress);
   const hasPapers = detail.publications.length > 0;
-  // Shown only when it differs from the footer's site-wide date (VIS-12).
-  const updated = directionUpdatedDate(
-    contentLastUpdated(c.dir, [
-      d.file,
-      ...detail.projects.map((p) => p.file),
-      ...detail.publications.map((p) => p.file),
-      ...detail.inProgress.map((p) => p.file),
-    ]),
-    siteLastUpdated(),
-  );
   const hasPublications = detail.publications.length > 0 || detail.inProgress.length > 0;
   // Study-design plates of this direction's papers (D-13 item 8): a plate belongs
   // to its paper, so it shows wherever the paper does, under the same gate.
   const plated = detail.publications.filter(
     (p) => hasPlate(p.slug) && showStudyPlate(p, c.preview),
   );
-  let fig = archived ? 1 : 2;
+  let fig = 1;
 
   return (
     <ViewTransition enter={PAGE_ENTER_EXIT} exit={PAGE_ENTER_EXIT} default="none">
@@ -122,9 +101,9 @@ export default async function DirectionPage({ params }: Props) {
         data-pearl={!archived && showF2 ? f2.fit : undefined}
       >
         <JsonLd data={researchProjectLd(d, path, c.site)} />
-        <DirectionHeader direction={d} shared={shared} asOf={asOf} />
+        <DirectionHeader direction={d} />
 
-        {showF2 && <Figure2 direction={d} model={f2} number={fig++} asOf={asOf} />}
+        {showF2 && <Figure2 direction={d} model={f2} number={fig++} />}
 
         {(d.summary || d.body.trim()) && (
           <Section id="why" title="Why it matters">
@@ -177,9 +156,8 @@ export default async function DirectionPage({ params }: Props) {
               <p className="dr-seeall">
                 <Link href={publicationsHref(d.slug)}>
                   {detail.publications.length > shownPubs.length
-                    ? `All ${detail.publications.length} in Publications`
-                    : "These papers in Publications"}
-                  <span className="vh">, filtered to {d.short_label}</span>
+                    ? `All ${detail.publications.length} ${d.short_label} papers`
+                    : `${d.short_label} papers in Publications`}
                 </Link>
               </p>
             )}
@@ -192,7 +170,7 @@ export default async function DirectionPage({ params }: Props) {
         )}
 
         {people.length > 0 && (
-          <Section id="people" title="People" aside={plural(people.length, "person", "people")}>
+          <Section id="people" title="People">
             <Roster people={people} label={`People in ${d.short_label}`} />
           </Section>
         )}
@@ -215,19 +193,6 @@ export default async function DirectionPage({ params }: Props) {
         )}
 
         <DirectionRail current={d} siblings={detail.siblings} />
-
-        {(provenance || updated) && (
-          <div className="dr-notes">
-            {provenance && (
-              <p className="dr-fn">Review status and dates are as reported by the lab.</p>
-            )}
-            {updated && (
-              <p className="dr-updated">
-                This direction was last updated <DateText value={updated} long />.
-              </p>
-            )}
-          </div>
-        )}
       </div>
     </ViewTransition>
   );

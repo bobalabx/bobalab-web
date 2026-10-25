@@ -1,5 +1,6 @@
 ---
 title: Compliance-Aware Reinforcement Learning
+summary: Compliance-aware reinforcement learning for managing human agents.
 directions:
   - algorithmic-advice
 status: active

@@ -10,10 +10,8 @@ import {
   dayMonth,
   groupProjectsByPrimaryDirection,
   latestNews,
-  paperYears,
-  papersByType,
-  papersFact,
   projectLineModel,
+  projectTitle,
   groupProjectsByStatus,
   outputsToMaterials,
   projectBreadcrumb,
@@ -23,7 +21,7 @@ import {
   statusesPresent,
 } from "@/components/projects/model";
 import { projectPapersCell } from "@/components/projects/ProjectLedger";
-import { showsReportedStatus, wipStatus } from "@/components/direction/InProgressList";
+import { wipStatus } from "@/components/direction/InProgressList";
 
 const md = (front: string, body = "") => `---\n${front.trim()}\n---\n${body}\n`;
 
@@ -361,21 +359,29 @@ publications: [student-2025-paper]
   });
 });
 
-describe("project page facts (redesign D-13; P3 dl.facts)", () => {
-  it("names counted papers by type and year, then work in progress", () => {
-    expect(papersFact(proj("p-active"))).toBe(
-      "1 journal article and 1 working paper, 2024 and 2025; 1 in progress",
-    );
-    expect(papersFact(proj("p-done"))).toBeNull();
+describe("project page facts (redesign D-13; copy sweep)", () => {
+  it("cites the project's working paper rather than the thesis it grew out of", () => {
+    const thesis = { slug: "t", counted: true, status: "published", type: "other", year: 2016 };
+    const wp = {
+      slug: "w",
+      counted: true,
+      status: "major-revision",
+      type: "working-paper",
+      year: 2020,
+    };
+    expect(canonicalPaper({ publicationRefs: [thesis, wp] } as never)?.slug).toBe("w");
+    // A published journal article still wins, and a lone thesis is still cited.
+    const journal = { ...thesis, slug: "j", type: "journal", year: 2015 };
+    expect(canonicalPaper({ publicationRefs: [thesis, wp, journal] } as never)?.slug).toBe("j");
+    expect(canonicalPaper({ publicationRefs: [thesis] } as never)?.slug).toBe("t");
   });
-  it("pluralises type words and joins years without a serial comma", () => {
-    expect(papersByType([{ type: "working-paper" }, { type: "working-paper" }])).toBe(
-      "2 working papers",
-    );
-    expect(papersByType([])).toBeNull();
-    expect(paperYears([{ year: 2026 }, { year: 2021 }, { year: 2023 }, { year: undefined }])).toBe(
-      "2021, 2023 and 2026",
-    );
+  it("titles the page '{Title}' and adds '(project)' only when a paper has the same title", () => {
+    expect(
+      projectTitle({ title: "Learning Across Jobs" }, [{ title: "Learning Across Jobs" }]),
+    ).toBe("Learning Across Jobs (project)");
+    expect(
+      projectTitle({ title: "Authority Design for AI Agents" }, [{ title: "Act, Ask, or Defer?" }]),
+    ).toBe("Authority Design for AI Agents");
   });
   it("projects table cells: papers first, else work in progress, else nothing", () => {
     expect(projectPapersCell(proj("p-active"))).toBe("2 papers");
@@ -384,10 +390,10 @@ describe("project page facts (redesign D-13; P3 dl.facts)", () => {
       "1 in progress",
     );
   });
-  it("latest news is the newest by date; day and month without the year", () => {
+  it("latest news is the newest by date; month and day without the year, in the site's order", () => {
     expect(latestNews([{ date: "2026-05-11" }, { date: "2026-08-04" }])?.date).toBe("2026-08-04");
     expect(latestNews([])).toBeNull();
-    expect(dayMonth("2026-05-11")).toBe("11 May");
+    expect(dayMonth("2026-05-11")).toBe("May 11");
     expect(dayMonth("2026-08")).toBe("August");
   });
 });
@@ -411,7 +417,7 @@ describe("project line (P3 project.html Figure 1)", () => {
     const y2025 = m.years.find((y) => y.year === 2025)!;
     expect(y2025.events.map((e) => e.key)).toEqual(["doe-2025-paper-two", "n-early", "n-late"]);
     const note = y2025.events[1]!;
-    expect(note.kind === "news" && note.day).toBe("1 February");
+    expect(note.kind === "news" && note.day).toBe("February 1");
     expect(note.kind === "news" && note.href).toBe("/news/n-early/");
   });
   it("dates a paper by the same-year news item about it, which joins the paper's column (P3 'posted on SSRN')", () => {
@@ -437,7 +443,7 @@ describe("project line (P3 project.html Figure 1)", () => {
     const paper = y2025.events[2]!;
     expect(paper.kind === "paper" && paper.date).toBe("2025-08-04");
     expect(paper.kind === "paper" && paper.note?.key).toBe("n-posted");
-    expect(paper.kind === "paper" && paper.note?.day).toBe("4 August");
+    expect(paper.kind === "paper" && paper.note?.day).toBe("August 4");
     // The attached note is not drawn twice.
     expect(m.years.flatMap((y) => y.events.map((e) => e.key))).not.toContain("n-posted");
     expect(m.news).toBe(3);
@@ -470,17 +476,20 @@ describe("project line (P3 project.html Figure 1)", () => {
   });
 });
 
-describe("in-progress rows (D-13 item 7: no repeated hedges)", () => {
+describe("in-progress rows (D-13 item 7; copy sweep: no repeated hedges)", () => {
   const wip = proj("p-active").publicationRefs.find((x) => !x.counted)!;
   it("a bare in-progress status is not repeated under the 'In progress' heading", () => {
     expect(wip.status).toBe("in-progress");
     expect(wipStatus(wip)).toBeNull();
-    // …so the page needs no provenance footnote for it.
-    expect(showsReportedStatus([wip])).toBe(false);
   });
-  it("a status that adds something stays, and then the footnote is needed", () => {
-    const submitted = { ...wip, status: "submitted" as const, status_note: "to Fixture Review" };
-    expect(wipStatus(submitted)).toMatch(/^Submitted to Fixture Review/);
-    expect(showsReportedStatus([submitted])).toBe(true);
+  it("a status that adds something stays, as a plain label with no date or provenance", () => {
+    const submitted = {
+      ...wip,
+      status: "submitted" as const,
+      status_note: "to Fixture Review",
+      as_of: "2026-08",
+      status_source: "self-reported" as const,
+    };
+    expect(wipStatus(submitted)).toBe("Submitted to Fixture Review");
   });
 });

@@ -16,7 +16,7 @@ as_of: "2026-09"
 links:
   arxiv: https://arxiv.org/abs/2603.02055
 presentations:
-  - event: 2026 INFORMS MSOM Conference, HBS Boston, session TD10, Jul 14, 2026
+  - event: 2026 INFORMS MSOM Conference, Harvard Business School, July 14, 2026
     year: 2026
     url: https://www.hbs.edu/about/research/msom-conference-2026/program
   - event: 2026 INFORMS Revenue Management & Pricing Conference

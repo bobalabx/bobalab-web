@@ -72,11 +72,9 @@ describe("People index (consent-edge-cases, production)", () => {
     for (const attrs of years) expect(attrs).toMatch(/role="group" aria-labelledby="alumni-/);
   });
 
-  it("hides the meaningless count next to the principal investigator heading", () => {
-    const pi = between(html, 'aria-labelledby="people-pi"', "</section>");
-    expect(pi).not.toContain("pp-group__count");
-    const phd = between(html, 'aria-labelledby="people-phd"', "</section>");
-    expect(phd).toContain("pp-group__count");
+  it("shows no headcount under any group heading (copy sweep, D-15)", () => {
+    expect(html).not.toContain("pp-group__count");
+    expect(html).not.toMatch(/>\d+ (person|people)</);
   });
 
   it("never renders or links an unlisted person (D-06, §F3)", () => {
@@ -274,20 +272,20 @@ describe("Person page (consent-edge-cases)", () => {
     expect(head).toContain('<div class="pp-profile__meta"><span class="pp-profile__role">');
   });
 
-  it("gives every section its count in the label column and the WIP note there too", () => {
+  it("labels papers and projects with their counts; no count or pipeline note on work in progress or news", () => {
     const wip = between(html, 'aria-labelledby="in-progress"', "</section>");
-    expect(wip).toMatch(/class="pg-row__count">1 title, no public version yet</);
-    expect(wip).not.toContain("documented talk");
+    expect(wip).not.toContain("pg-row__count");
+    expect(wip).not.toMatch(/no public version|documented talk/);
+    const news = between(html, 'aria-labelledby="news"', "</section>");
+    expect(news).not.toMatch(/\d+ items?</);
     const projects = between(html, 'aria-labelledby="projects"', "</section>");
     const n = pi.projects.length;
     expect(projects).toContain(`class="pg-row__count">${n} ${n === 1 ? "project" : "projects"}<`);
   });
 
-  it("uses the site's one provenance wording when a footnote is needed", () => {
-    expect(html).not.toContain("Review statuses are as reported by the lab.");
-    if (html.includes('class="pg-fn')) {
-      expect(html).toContain("Review status and dates are as reported by the lab.");
-    }
+  it("prints no provenance footnote (copy sweep)", () => {
+    expect(html).not.toMatch(/as reported by the lab|reported by the lab/i);
+    expect(html).not.toContain('class="pg-fn');
   });
 
   it("puts the lab affiliation (site.yml) under the principal investigator's title only", () => {
@@ -303,8 +301,9 @@ describe("Person page (consent-edge-cases)", () => {
     for (const p of pi.publications.slice(0, 5)) expect(pubs).toContain(`id="pub-${p.slug}"`);
     for (const p of pi.publications.slice(5)) expect(pubs).not.toContain(`id="pub-${p.slug}"`);
     expect(pubs).toMatch(/href="\/publications\/?\?member=avery-example"/);
-    expect(pubs).toContain("See all 7 in Publications");
-    expect(pubs).toContain("filtered to Avery Example");
+    expect(pubs).toContain("All 7 publications");
+    expect(pubs).toContain('<span class="vh"> by Avery Example</span>');
+    expect(pubs).not.toContain("filtered to");
     // The on-page count is the full total, not the five shown.
     expect(html).toMatch(/href="#publications">.*?<\/span>7<span class="vh">\)/);
   });
@@ -323,7 +322,7 @@ describe("Person page (consent-edge-cases)", () => {
     expect(wip.indexOf('<h2 id="in-progress"')).toBeLessThan(wip.indexOf("<details"));
     expect(wip).toMatch(/<details class="pp-disclosure">/);
     expect(wip).not.toMatch(/<details[^>]*\sopen[\s=>]/);
-    expect(wip).toContain("Show 1 title");
+    expect(wip).toContain("Show work in progress");
     expect(wip).toContain('id="pub-example-2020-fixture-paper-194"');
   });
 
@@ -365,8 +364,8 @@ describe("Person page (consent-edge-cases)", () => {
     const finley = buildPersonProfile(withProfile, "finley-alum")!;
     expect(finley.item.person.isAlumni).toBe(true);
     const h = renderToStaticMarkup(<PersonProfile content={withProfile} model={finley} />);
-    expect(h).toContain('<span class="pp-profile__role">Alumni, Undergraduate RA</span>');
-    expect(h.match(/Alumni/g)?.length).toBe(1);
+    expect(h).toContain('<span class="pp-profile__role">Former undergraduate RA</span>');
+    expect(h).not.toContain("Alumni,");
     expect(h).toContain("Now at Fixture Company");
   });
 

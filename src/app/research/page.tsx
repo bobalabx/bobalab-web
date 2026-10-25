@@ -1,10 +1,9 @@
 /**
  * Research index `/research/` (brief §D4; DECISIONS D-04 archived directions;
  * redesign D-13 in P3's grammar; D-14 moves Fig. 1 here; the homepage figure is the D-15 pearl cluster):
- *   1. condensed h1, derived counts in the label column, a lede naming the
- *      directions;
+ *   1. condensed h1, the page's links in the label column, a one-line lede;
  *   2. the live directions as a ruled ledger (title, question, counts);
- *   3. <section id="map">, "Explore: how the N directions connect": Fig. 1
+ *   3. <section id="map">, "How the directions connect": Fig. 1
  *      (PearlFigure, buildFigure) in a full-bleed --band band, open by default,
  *      with its one-sentence key, hover readout, keyboard support and morph
  *      (JUDGE.md "Where the timeline moves"; the homepage links here once);
@@ -21,19 +20,17 @@
  */
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Fragment, ViewTransition } from "react";
+import { ViewTransition } from "react";
 import type { DirectionView } from "@/lib/content/load";
 import { getContent } from "@/lib/content/load";
-import { formatDate } from "@/lib/content/dates";
 import { pageMetadata } from "@/lib/seo/metadata";
 import { buildFigure } from "@/lib/figure/buildFigure";
 import { PAGE_ENTER_EXIT } from "@/lib/vt";
 import { PearlFigure } from "@/components/figure/PearlFigure";
-import { DateText } from "@/components/ui/DateText";
 import { DraftBadge, OpenToRAsBadge } from "@/components/ui/Badge";
 import { CompactProjectList } from "@/components/projects/CompactProjectList";
 import { groupProjectsByStatus } from "@/components/projects/model";
-import { countsSentence, listJoin, numberWord, plural } from "@/components/direction/model";
+import { countsSentence, numberWord } from "@/components/direction/model";
 import {
   DirectionStrip,
   StripAxisLabels,
@@ -47,7 +44,7 @@ export function generateMetadata(): Metadata {
   const { site } = getContent();
   return pageMetadata({
     title: "Research",
-    description: `Research directions and projects of ${site.name}, the ${site.long_name}.`,
+    description: `The questions ${site.name} works on, from algorithmic advice to gig work, and the projects behind them.`,
     path: "/research/",
   });
 }
@@ -60,7 +57,6 @@ function DirectionRow({
   /** Earlier research only: the row's papers on the list's shared year axis. */
   strip?: { years: Array<number | undefined>; axis: StripAxis };
 }) {
-  const archived = d.status === "archived" || d.index == null;
   return (
     <li className={strip ? "rs-dir rs-dir--strip" : "rs-dir"} data-swatch={d.color}>
       <div className="rs-dir__main">
@@ -77,14 +73,7 @@ function DirectionRow({
         )}
       </div>
       {strip && <DirectionStrip direction={d} years={strip.years} axis={strip.axis} />}
-      <p className="rs-dir__counts">
-        {countsSentence(d.counts)}
-        {archived && d.archived_on && (
-          <span className="rs-dir__arch">
-            Archived <DateText value={d.archived_on} long />
-          </span>
-        )}
-      </p>
+      <p className="rs-dir__counts">{countsSentence(d.counts)}</p>
     </li>
   );
 }
@@ -102,7 +91,6 @@ export default function ResearchPage() {
   const live = c.directions;
   const archived = c.archivedDirections;
   const projectGroups = groupProjectsByStatus(c.projects);
-  const papers = c.countedPublications.length;
   const yearsOf = (d: DirectionView) =>
     c.countedPublications.filter((p) => p.directions.includes(d.slug)).map((p) => p.year);
   // Earlier research: one binned year axis for its rows, so they compare on a shared scale.
@@ -110,7 +98,6 @@ export default function ResearchPage() {
     archived.map((d) => yearsOf(d)),
     false,
   );
-  const asOf = formatDate(c.today, { long: true });
   const figure = buildFigure(c);
 
   return (
@@ -123,14 +110,6 @@ export default function ResearchPage() {
             </h1>
             <div className="rs-head__row">
               <p className="rs-head__side">
-                {live.length > 0 ? (
-                  <>
-                    {plural(live.length, "direction")}, {plural(c.projects.length, "project")} and{" "}
-                    {plural(papers, "paper")}, as of {asOf}.
-                  </>
-                ) : (
-                  <>As of {asOf}.</>
-                )}
                 <span className="rs-head__links">
                   {c.projects.length > 0 && <Link href="/projects/">All projects</Link>}
                   <Link href="/publications/">All publications</Link>
@@ -139,17 +118,9 @@ export default function ResearchPage() {
               </p>
               {live.length > 0 ? (
                 <p className="t-lead rs-lede">
-                  The lab&rsquo;s work runs along {numberWord(live.length)}{" "}
-                  {live.length === 1 ? "line" : "lines"}:{" "}
-                  {live.map((d, i) => (
-                    <Fragment key={d.slug}>
-                      {i > 0 ? (i === live.length - 1 ? " and " : ", ") : null}
-                      <Link href={`/research/${d.slug}/`} className="rs-dl" data-swatch={d.color}>
-                        {d.short_label}
-                      </Link>
-                    </Fragment>
-                  ))}
-                  .
+                  {live.length === 1
+                    ? "Our current work has one direction."
+                    : `Our current work falls into ${numberWord(live.length)} directions.`}
                 </p>
               ) : (
                 <p className="t-lead rs-lede">Research directions are coming soon.</p>
@@ -182,9 +153,7 @@ export default function ResearchPage() {
                 model={figure}
                 heading={
                   <h2 id="map-h" className="dr-section__title rs-map__title">
-                    {figure.n > 1
-                      ? `Explore: how the ${numberWord(figure.n)} directions connect`
-                      : "Explore: every paper by year"}
+                    {figure.n > 1 ? "How the directions connect" : "Every paper by year"}
                   </h2>
                 }
               />
@@ -230,9 +199,9 @@ export default function ResearchPage() {
               </div>
               <div className="dr-section__body">
                 <p className="rs-intro">
-                  {listJoin(archived.map((d) => d.short_label))}{" "}
-                  {archived.length === 1 ? "is" : "are"} no longer among the lab&rsquo;s current
-                  directions.
+                  {live.length > 0
+                    ? `Work outside our ${numberWord(live.length)} current ${live.length === 1 ? "direction" : "directions"}.`
+                    : "Work outside our current directions."}
                 </p>
                 <AxisRow axis={earlierAxis} />
                 <ul className="rs-dirs" role="list">

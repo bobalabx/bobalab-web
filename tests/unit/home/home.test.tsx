@@ -41,11 +41,10 @@ const {
   PapersSection,
   PeopleSection,
   NewsSection,
-  publicationsLine,
-  peopleLine,
-  newsLine,
+  PUBLICATIONS_LINK,
+  PEOPLE_LINK,
+  NEWS_LINK,
   firstNames,
-  teamWords,
   paperMeta,
 } = await import("@/components/home/HomeSections");
 const { affiliationText, HomeHero, HOME_STATEMENT } = await import("@/components/home/HomeHero");
@@ -100,9 +99,7 @@ describe("new papers", () => {
   it("rows: title link, authors, one meta line with direction tags; no abstracts", () => {
     const c = content();
     const items = recentPublications(c, 3);
-    const html = renderToStaticMarkup(
-      <PapersSection items={items} total={c.countedPublications.length} />,
-    );
+    const html = renderToStaticMarkup(<PapersSection items={items} />);
     expect(html.match(/<li>/g)).toHaveLength(items.length);
     for (const p of items) {
       expect(html).toContain(`<a href="/publications/${p.slug}/">`);
@@ -112,45 +109,30 @@ describe("new papers", () => {
     expect(paperMeta({ type: "journal", venue: "Management Science", year: 2026 })).toMatch(
       /, Management Science, 2026$/,
     );
+    // A venue that already names the kind of paper stands for the type; no SSRN number.
+    expect(paperMeta({ type: "working-paper", venue: "arXiv preprint", year: 2026 })).toBe(
+      "arXiv preprint, 2026",
+    );
+    expect(
+      paperMeta({ type: "working-paper", venue: "SSRN working paper 7151739", year: 2026 }),
+    ).toBe("SSRN working paper, 2026");
   });
 });
 
 describe("section foot lines", () => {
-  it("wording", () => {
-    expect(publicationsLine(17, 8)).toBe("Publications: 17 papers, 8 in progress");
-    expect(publicationsLine(1, 0)).toBe("Publications: 1 paper");
-    // D-15: no people counts on the home page.
-    expect(peopleLine(25)).toBe("People: current members and alumni");
-    expect(peopleLine(0)).toBe("People: current members");
-    expect(newsLine(19, "2023-07-20")).toBe("News: 19 items since 2023");
-    expect(newsLine(1)).toBe("News: 1 item");
+  it("wording: plain links, no stats (copy sweep)", () => {
+    expect(PUBLICATIONS_LINK).toBe("All publications");
+    expect(NEWS_LINK).toBe("All news");
+    expect(PEOPLE_LINK).toBe("Meet the lab");
+    for (const l of [PUBLICATIONS_LINK, NEWS_LINK, PEOPLE_LINK]) expect(l).not.toMatch(/\d|:/);
   });
 
   it("the link sits after the list, never in the section head; news is 4 one-liners", () => {
     const c = content();
     const html = [
-      renderToStaticMarkup(
-        <PapersSection
-          items={recentPublications(c, 3)}
-          total={c.countedPublications.length}
-          inProgress={c.inProgress.length}
-        />,
-      ),
-      renderToStaticMarkup(
-        <PeopleSection
-          people={currentPeople(c)}
-          lead="Prof. Park Sinchaisri"
-          alumni={c.people.filter((p) => p.isAlumni).length}
-          email="lab@example.edu"
-        />,
-      ),
-      renderToStaticMarkup(
-        <NewsSection
-          items={c.news.slice(0, 4)}
-          total={c.news.length}
-          since={c.news.at(-1)?.date}
-        />,
-      ),
+      renderToStaticMarkup(<PapersSection items={recentPublications(c, 3)} />),
+      renderToStaticMarkup(<PeopleSection people={currentPeople(c)} email="lab@example.edu" />),
+      renderToStaticMarkup(<NewsSection items={c.news.slice(0, 4)} />),
     ];
     for (const h of html) {
       const head = h.match(/<div class="bl-sec-h hm-sec-h">(.*?)<\/div>/)![1]!;
@@ -192,9 +174,7 @@ describe("hero", () => {
 describe("people", () => {
   const c = content();
   const people = currentPeople(c);
-  const html = renderToStaticMarkup(
-    <PeopleSection people={people} lead="Prof. Park Sinchaisri" alumni={7} email="a@b.edu" />,
-  );
+  const html = renderToStaticMarkup(<PeopleSection people={people} email="a@b.edu" />);
 
   it("only photo_consent people are drawn; alt = full name; no initials discs", () => {
     const imgs = [...html.matchAll(/<img [^>]*alt="([^"]*)"[^>]*>/g)].map((m) => m[1]);
@@ -205,26 +185,14 @@ describe("people", () => {
     expect(html).not.toContain("hm-ini");
   });
 
-  it("the team in one sentence, by role, with no numbers (D-15)", () => {
-    const team = teamWords(people);
-    expect(html).toContain(`Prof. Park Sinchaisri leads the lab with ${team}.`);
-    expect(team).not.toMatch(/\d|\b(one|two|three|four|five|six|seven|eight)\b/);
-    if (people.filter((p) => p.role === "undergrad").length > 1)
-      expect(team).toContain("undergraduate RAs");
-    expect(teamWords([{ role: "masters" }, { role: "phd" }, { role: "phd" }])).toBe(
-      "PhD students and a master’s student",
-    );
-    expect(teamWords([{ role: "undergrad" }, { role: "affiliate" }])).toBe(
-      "an undergraduate RA and an affiliate",
-    );
-    expect(html).toContain("The people page also lists former members.");
-    const sentence = html.match(/<p class="hm-team">([^<]*)<\/p>/)?.[1] ?? "";
-    expect(sentence).not.toMatch(/\d/);
-    // Only the PI, or nobody but the team: no count either.
-    const solo = renderToStaticMarkup(
-      <PeopleSection people={people.filter((p) => p.role === "pi")} lead="Prof. X" />,
-    );
-    expect(solo).toContain(">Prof. X leads the lab.</p>");
+  it("no team sentence, no former-members sentence and no counts (owner, copy sweep)", () => {
+    expect(html).not.toContain("hm-team");
+    expect(html).not.toMatch(/leads the lab|former members|people page/i);
+    const text = html.replace(/<[^>]+>/g, " ");
+    expect(text).not.toMatch(/\b\d+\b/);
+    expect(html).toContain('<a href="/join/">Join the lab</a>');
+    expect(html).toContain('<a href="mailto:a@b.edu">a@b.edu</a>');
+    expect(html).toMatch(/>Want to join or work with us\? See /);
   });
 
   it("first names: preferred name in quotes, duplicates get a last initial", () => {

@@ -2,7 +2,7 @@
 date: "2026-04-16"
 type: publication
 title: Precise or Broad? gets a major revision at M&SOM
-summary: Our study of whether algorithmic advice should be precise or broad received a major revision from Manufacturing & Service Operations Management.
+summary: Our paper on whether algorithmic advice should be precise or broad is now under major revision at Manufacturing & Service Operations Management.
 directions:
   - algorithmic-advice
   - learning-on-the-job

@@ -64,8 +64,9 @@ describe("Fig. 1 draft badges", () => {
     expect(count(render(withDrafts(base, () => false)), BADGE)).toBe(0);
   });
 
-  it("the caption says dots include papers with a documented talk (D-05)", () => {
+  it("the caption does not spell out the inclusion rule (copy sweep; D-05 still decides what is drawn)", () => {
     const html = render(withDrafts(base, () => false));
-    expect(html).toContain("Each filled dot is a paper with a public version or a documented talk");
+    expect(html).toContain("Each filled dot is a paper;");
+    expect(html).not.toContain("with a public version or a documented talk");
   });
 });

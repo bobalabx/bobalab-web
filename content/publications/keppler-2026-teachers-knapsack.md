@@ -22,7 +22,7 @@ press:
   - outlet: The Conversation (by Keppler and Snyder)
     url: https://theconversation.com/teachers-feel-most-productive-when-they-use-ai-for-teaching-strategies-236543
     date: "2024-09-27"
-  - outlet: The 74 (republication)
+  - outlet: The 74 (republished)
     url: https://www.the74million.org/article/beyond-lessons-plans-ai-can-boost-teacher-creativity-provide-classroom-advice/
     date: "2024-09-27"
 awards: []

@@ -1,5 +1,6 @@
 ---
 title: Sequencing Incentives for Platform Workers
+summary: How to design and sequence incentives for platform workers.
 directions:
   - platform-work
 status: active

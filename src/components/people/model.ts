@@ -14,6 +14,7 @@ import {
   ROLE_LABELS,
   ROLE_ORDER,
   avatarSwatch,
+  formerRole,
   groupPeople,
   initials,
   type PublicPerson,
@@ -214,7 +215,7 @@ export function buildPeopleIndex(c: Content): PeopleIndexModel {
 export interface PersonProfileModel {
   item: PersonItem;
   /**
-   * The lab role: "Principal investigator", "Alumni, Undergraduate RA". The person
+   * The lab role: "Principal investigator", "Former undergraduate RA". The person
    * page shows it in the meta row after the name and title (not above the h1).
    */
   eyebrow: string;
@@ -257,7 +258,7 @@ export function buildPersonProfile(c: Content, slug: string): PersonProfileModel
   const publications = d.publications.filter((x) => x.counted);
   return {
     item: toItem(c, p),
-    eyebrow: p.isAlumni ? `Alumni, ${roleOne}` : roleOne,
+    eyebrow: p.isAlumni ? formerRole(p.role) : roleOne,
     lead: p.title?.trim() && p.program?.trim() ? `${p.title.trim()}, ${p.program.trim()}` : lead,
     tenure: tenureLine(p),
     links: personLinks(p),

@@ -45,12 +45,6 @@ export function WorkWithUs({
               </p>
               <p className="dr-work__meta">
                 <Badge tone="strong">{STATUS[o.status]}</Badge>
-                {o.as_of && (
-                  <span>
-                    {", as of "}
-                    <DateText value={o.as_of} />
-                  </span>
-                )}
                 {o.closes_on && (
                   <span>
                     {", closes "}

@@ -126,14 +126,6 @@
   font-size: var(--t-h2);
   line-height: 1.2;
 }
-.pp-group__count {
-  display: block;
-  margin-top: 4px;
-  font-size: var(--t-meta);
-  line-height: var(--lh-meta);
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
 @media (max-width: 47.99rem) {
   .pp-group__head {
     display: flex;

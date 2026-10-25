@@ -24,11 +24,7 @@ import { MaterialsRow } from "@/components/ui/MaterialsRow";
 import { EvidenceLabel } from "@/components/ui/EvidenceLabel";
 import { Icon } from "@/components/ui/icons";
 import { countsLine } from "@/components/ui/DirectionCard";
-import {
-  PublicationEntry,
-  needsProvenanceNote,
-  statusLine,
-} from "@/components/ui/PublicationEntry";
+import { PublicationEntry, statusLine } from "@/components/ui/PublicationEntry";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { PearlMark, SHOULDER, ShoulderMark } from "@/components/brand/PearlMark";
 import { getContent } from "@/lib/content/load";
@@ -117,23 +113,26 @@ describe("links: plain text, no arrows", () => {
   });
 });
 
-describe("publication row and provenance (D-13 item 7)", () => {
+describe("publication row and status (D-13 item 7; copy sweep)", () => {
   const all = () => [...content().countedPublications, ...content().inProgress];
-  it("statusLine leaves out 'reported by the lab' unless asked", () => {
+  it("statusLine is a plain label: no 'as of' date, no 'reported by the lab'", () => {
     const p = {
       status: "major-revision",
       status_note: "at M&SOM",
       as_of: "2026-04",
       status_source: "self-reported",
     } as const;
-    expect(statusLine(p)).toBe("Major revision at M&SOM · as of Apr 2026");
-    expect(statusLine(p, undefined, { provenance: true })).toBe(
-      "Major revision at M&SOM · as of Apr 2026 · reported by the lab",
-    );
+    expect(statusLine(p)).toBe("Major revision at M&SOM");
+    // After an "arXiv preprint" venue the version-only status is left out.
+    expect(
+      statusLine({ status: "preprint", status_note: "v2", venue: "arXiv preprint" }),
+    ).toBeNull();
   });
-  it("needsProvenanceNote finds self-reported statuses and awards", () => {
-    expect(needsProvenanceNote(all())).toBe(true);
-    expect(needsProvenanceNote([])).toBe(false);
+  it("no row on the site prints a date stamp or provenance hedge", () => {
+    for (const p of all()) {
+      const out = html(<PublicationEntry pub={p} />);
+      expect(out, p.slug).not.toMatch(/as of |reported by the lab/i);
+    }
   });
   it("a row has main and meta columns, the in_brief line, and no inline hedge", () => {
     const pub = all().find((p) => p.in_brief && p.status_source === "self-reported")!;

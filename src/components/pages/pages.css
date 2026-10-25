@@ -480,9 +480,6 @@ h2.pg-row__label {
   /* Routes contain long slash-joined phrases ("Science/Econometrics/Algorithms"). */
   overflow-wrap: anywhere;
 }
-.pg-opp__label {
-  font-weight: 600;
-}
 .pg-opp > .prose {
   max-width: 68ch;
   color: var(--muted);

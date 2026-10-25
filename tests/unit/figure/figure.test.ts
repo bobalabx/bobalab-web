@@ -137,9 +137,9 @@ describe("copy helpers", () => {
         { slug: "pw", label: "Platform Work", count: 3 },
         { slug: "aa", label: "Algorithmic Advice", count: 1 },
       ]),
-    ).toBe("Shares 3 papers with Platform Work and 1 with Algorithmic Advice.");
+    ).toBe("Shared papers: Platform Work (3), Algorithmic Advice (1)");
     expect(sharesSentence([{ slug: "a", label: "AI at Work", count: 1 }])).toBe(
-      "Shares 1 paper with AI at Work.",
+      "Shared papers: AI at Work (1)",
     );
     expect(laneCounts({ papers: 4, inProgress: 2 })).toEqual(["4 papers", ", 2 in progress"]);
     expect(laneCounts({ papers: 1, inProgress: 0 })).toEqual(["1 paper", ""]);

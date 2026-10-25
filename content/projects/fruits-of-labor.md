@@ -1,5 +1,6 @@
 ---
 title: Staffing Fluid Teams
+summary: How to staff fluid teams in a fragmented labor market.
 directions:
   - platform-work
 status: active

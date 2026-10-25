@@ -78,29 +78,21 @@ export function Figure2({
   direction: d,
   model,
   number,
-  asOf,
 }: {
   direction: DirectionView;
   model: F2Model;
-  /** "Figure 2" after Fig. 1 on the home page; archived directions have no Fig. 1. */
+  /** The figure's number on its page (the first figure of a direction page). */
   number: number;
-  asOf: string;
 }) {
   const live = d.index != null && d.status !== "archived";
   let k = 0;
   const lastBin = model.bins.length - 1;
-  const rest = [
+  const wipNote =
     model.wip.length > 1
-      ? "Open rings after now are work in progress, in no particular order."
+      ? " Open rings are work in progress."
       : model.wip.length
-        ? "The open ring after now is work in progress."
-        : null,
-    live ? null : "The line ends at the last paper; the direction is archived.",
-    model.orderMeaningful ? null : "Order within a year is not meaningful.",
-    `As of ${asOf}.`,
-  ]
-    .filter(Boolean)
-    .join(" ");
+        ? " The open ring is work in progress."
+        : "";
   return (
     <figure
       className="dr-f2"
@@ -160,22 +152,17 @@ export function Figure2({
         )}
       </div>
       <figcaption className="dr-f2__cap" id="dr-f2-cap">
-        <b>Figure {number}.</b> {d.short_label}, paper by paper.
+        <b>Figure {number}.</b> {d.short_label} papers by year.
         {model.shared && (
-          // Says what the reader sees: stubs in the drawn figure, the "Also in"
-          // line in the list layout (phones, or too many papers to draw).
-          <>
+          // Drawn figure only: the list layout (phones, or too many papers to
+          // draw) names the other direction on each row ("Also in"), which
+          // needs no key.
+          <span className="dr-f2__cap-w">
             {" "}
-            <span className="dr-f2__cap-w">
-              A paper that also belongs to another direction rises into a short stub of that
-              direction’s line.
-            </span>
-            <span className="dr-f2__cap-l">
-              “Also in” names the other direction a paper belongs to.
-            </span>
-          </>
+            A paper shared with another direction branches toward that direction’s line.
+          </span>
         )}
-        {` ${rest}`}
+        {wipNote}
       </figcaption>
     </figure>
   );

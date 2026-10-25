@@ -5,7 +5,7 @@ window.BOBALAB_CMS = {
     newsTypes: {
       publication: "Publication",
       award: "Award",
-      talk: "Talk/Event",
+      talk: "Talk",
       media: "Media",
       people: "People",
       grant: "Grant",

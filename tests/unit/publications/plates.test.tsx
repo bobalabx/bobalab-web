@@ -66,14 +66,14 @@ describe("<StudyPlate> gate", () => {
 describe("Bastani plate content", () => {
   const html = render(true, false);
 
-  it("is a numbered figure with a caption that says 'not data' and a source line", () => {
+  it("is a numbered figure with a caption that says it is a schematic with no results, and a source line", () => {
     expect(html).toMatch(
       /<figure class="plate" data-swatch="butterfly-pea" aria-labelledby="[^"]+-cap">/,
     );
     expect(html).toContain("<b>Figure 1.</b>");
-    expect(html).toContain("not data");
-    expect(html).toContain("No assignment schedule and no result is drawn.");
-    expect(html).toContain("arXiv:2108.08454");
+    expect(html).toContain("A schematic of the design, based on the paper; it shows no results.");
+    expect(html).toContain("Source: arXiv:2108.08454 (v5).");
+    expect(html).not.toMatch(/randomised|glyph/i);
   });
 
   it("letters its panels a, b, c (P1) and keeps every label in HTML, not SVG text", () => {

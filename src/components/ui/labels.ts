@@ -26,7 +26,7 @@ export const PUBLICATION_STATUS_LABELS: Record<PublicationStatus, string> = {
 export const NEWS_TYPE_LABELS: Record<NewsType, string> = {
   publication: "Publication",
   award: "Award",
-  talk: "Talk/Event",
+  talk: "Talk",
   media: "Media",
   people: "People",
   grant: "Grant",

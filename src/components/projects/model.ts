@@ -13,7 +13,6 @@ import type { FindingView } from "@/lib/content/queries";
 import type { MaterialKind, MaterialLink } from "@/components/ui/MaterialsRow";
 import type { ProjectEntry } from "@/lib/content/schema";
 import type { PublicPerson } from "@/lib/content/people";
-import { listJoin } from "@/components/direction/model";
 import { figureTypeWord, shortTitle } from "@/components/direction/f2model";
 
 export const PROJECT_STATUS_LABELS: Record<ProjectView["status"], string> = {
@@ -210,69 +209,42 @@ export function projectFindings(
 
 /**
  * The paper to cite for a project (§D6.10): its newest published, counted
- * paper (journal first). None → the "How to cite" block is hidden.
+ * paper (journal first). When the only published item is a thesis or
+ * dissertation and the project has a counted working paper, the working paper
+ * is cited instead: the thesis is its precursor, not the project's paper
+ * (copy sweep: markdown-pricing cited the 2016 master's thesis). None → the
+ * "How to cite" block is hidden.
  */
 export function canonicalPaper(
   p: Pick<ProjectView, "publicationRefs">,
 ): PublicationView | undefined {
-  const published = p.publicationRefs
-    .filter((x) => x.counted && x.status === "published")
-    .sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
-  return (
-    published.find((x) => x.type === "journal") ??
-    published.find((x) => x.type === "conference") ??
-    published[0]
-  );
+  const newest = (xs: PublicationView[]) => [...xs].sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
+  const published = newest(p.publicationRefs.filter((x) => x.counted && x.status === "published"));
+  const article =
+    published.find((x) => x.type === "journal") ?? published.find((x) => x.type === "conference");
+  if (article) return article;
+  const workingPaper = newest(
+    p.publicationRefs.filter((x) => x.counted && x.type === "working-paper"),
+  )[0];
+  if (published.length && workingPaper) return workingPaper;
+  return published[0];
+}
+
+/**
+ * The project's page title without the site suffix: its title, plus
+ * "(project)" only when a paper has exactly the same title, so the two pages'
+ * titles stay distinct (WCAG 2.4.2; verify A11Y-03).
+ */
+export function projectTitle(
+  p: Pick<ProjectView, "title">,
+  publications: ReadonlyArray<Pick<PublicationView, "title">>,
+): string {
+  const key = (t: string) => t.trim().toLowerCase();
+  return publications.some((x) => key(x.title) === key(p.title)) ? `${p.title} (project)` : p.title;
 }
 
 // ---------------------------------------------------------------------------
-// Project page facts and the project line (redesign D-13; P3 `project.html`)
-
-/** "1 journal article and 2 working papers" (counted papers, D-05). */
-export function papersByType(
-  pubs: ReadonlyArray<
-    Pick<PublicationView, "type"> &
-      Partial<Pick<PublicationView, "doi" | "links" | "presentations">>
-  >,
-): string | null {
-  if (!pubs.length) return null;
-  const order: string[] = [];
-  const n = new Map<string, number>();
-  for (const p of pubs) {
-    const label = figureTypeWord(p).toLowerCase();
-    if (!n.has(label)) order.push(label);
-    n.set(label, (n.get(label) ?? 0) + 1);
-  }
-  return listJoin(
-    order.map((label) => {
-      const k = n.get(label)!;
-      return `${k} ${k === 1 ? label : pluralWord(label)}`;
-    }),
-  );
-}
-
-/** "2025 and 2026" · "2021, 2023 and 2026" · null when no paper has a year. */
-export function paperYears(pubs: ReadonlyArray<Pick<PublicationView, "year">>): string | null {
-  const ys = [...new Set(pubs.map((p) => p.year).filter((y): y is number => !!y))].sort();
-  return ys.length ? listJoin(ys.map(String)) : null;
-}
-
-/** The "Papers" fact: "2 working papers, 2025 and 2026"; "1 in progress" when none counts yet. */
-export function papersFact(p: Pick<ProjectView, "publicationRefs">): string | null {
-  const counted = p.publicationRefs.filter((x) => x.counted);
-  const wip = p.publicationRefs.length - counted.length;
-  const parts: string[] = [];
-  const types = papersByType(counted);
-  if (types) {
-    const years = paperYears(counted);
-    parts.push(years ? `${types}, ${years}` : types);
-  }
-  if (wip) parts.push(`${wip} in progress`);
-  return parts.length ? parts.join("; ") : null;
-}
-
-const pluralWord = (label: string) =>
-  label.endsWith("work in progress") ? label : label.replace(/(\w+)$/, (w) => `${w}s`);
+// The project line (redesign D-13; P3 `project.html`)
 
 export interface LineLane {
   slug: string;
@@ -337,12 +309,12 @@ const MONTHS_LONG = [
   "December",
 ];
 
-/** "2026-05-11" → "11 May" (the column already gives the year). */
+/** "2026-05-11" → "May 11", the site's date order (the column already gives the year). */
 export function dayMonth(date: string): string {
   const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?/.exec(date);
   if (!m) return date;
   const mon = MONTHS_LONG[Number(m[2]) - 1] ?? "";
-  return m[3] ? `${Number(m[3])} ${mon}` : mon;
+  return m[3] ? `${mon} ${Number(m[3])}` : mon;
 }
 
 const noteOf = (n: Pick<NewsView, "slug" | "date" | "title">): LineNote => ({
@@ -362,7 +334,7 @@ const noteOf = (n: Pick<NewsView, "slug" | "date" | "title">): LineNote => ({
  * earlier to later:
  * - a paper's date is its `date_online` when that falls in its year, else the
  *   date of the lab's news item about it from that year, which is then drawn
- *   in the paper's column (P3: "Dispatching to Develop, 4 August, posted on
+ *   in the paper's column (P3: "Dispatching to Develop, August 4, posted on
  *   SSRN") instead of as a second, separate note;
  * - papers with only a year come first in their bin (by title);
  * - every remaining news item is a note in its own column.

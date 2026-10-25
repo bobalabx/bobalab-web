@@ -50,11 +50,6 @@
 .nw-year__head h2 {
   scroll-margin-top: var(--s-4);
 }
-.nw-year__count {
-  font-size: var(--t-meta);
-  line-height: var(--lh-meta);
-  color: var(--muted);
-}
 .nw-list {
   margin: 0;
   padding: 0;
@@ -94,9 +89,6 @@
 }
 .nw-list .bl-news__summary {
   max-width: 72ch;
-  margin-top: 2px;
-}
-.nw-list .bl-news__event {
   margin-top: 2px;
 }
 .nw-list .bl-tags {

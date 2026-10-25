@@ -24,7 +24,7 @@ const content = () => buildContent(loadRawContent(CONTENT_DIR), { preview: true 
 const TYPE_LABELS: Record<string, string> = {
   publication: "Publication",
   award: "Award",
-  talk: "Talk/Event",
+  talk: "Talk",
   media: "Media",
   people: "People",
   grant: "Grant",

@@ -236,13 +236,15 @@ function assign(placed: Placed[], years: number[], merged: number, packAll = fal
 const and = (xs: string[]) =>
   xs.length <= 1 ? (xs[0] ?? "") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`;
 
-/** "Shares 3 papers with Platform Work and 1 with Algorithmic Advice." */
+/**
+ * "Shared papers: Platform Work (3), Algorithmic Advice (1)": a short label,
+ * not a sentence (copy sweep). The links in the lanes draw the same fact; in
+ * the strip layout (phones) and for screen readers this label is where the
+ * shared papers are named.
+ */
 export function sharesSentence(shares: FigureShare[]): string | null {
   if (!shares.length) return null;
-  const parts = shares.map((s, i) =>
-    i === 0 ? `${plural(s.count, "paper")} with ${s.label}` : `${s.count} with ${s.label}`,
-  );
-  return `Shares ${and(parts)}.`;
+  return `Shared papers: ${shares.map((s) => `${s.label} (${s.count})`).join(", ")}`;
 }
 
 export function buildFigureModel(input: FigureInput): FigureModel {

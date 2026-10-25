@@ -13,7 +13,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getContent } from "@/lib/content/load";
-import { pageMetadata } from "@/lib/seo/metadata";
+import { labTagline, pageMetadata } from "@/lib/seo/metadata";
 import { buildIndexData } from "@/lib/publications/index-data";
 import {
   EMPTY_FILTERS,
@@ -27,23 +27,16 @@ import { PublicationRow } from "@/components/publications/PublicationRow";
 import { PublicationsExplorer } from "@/components/publications/PublicationsExplorer";
 import { PublicationsStatic } from "@/components/publications/PublicationsStatic";
 import { WorkInProgress } from "@/components/publications/WorkInProgress";
-import { isSelfReportedStatus } from "@/components/publications/PaperParts";
 import "@/components/publications/publications.css";
 
 export function generateMetadata(): Metadata {
-  const { site } = getContent();
+  const { site, people } = getContent();
+  const pi = people.find((p) => p.role === "pi" && !p.isAlumni);
   return pageMetadata({
     title: "Publications",
-    description: `Papers and working papers from ${site.name}, the ${site.long_name}: search and filter by research direction, type, lab member and year.`,
+    description: `Papers and working papers from ${labTagline(site, pi?.name)}.`,
     path: "/publications/",
   });
-}
-
-/** "17 publications and 8 works in progress, newest first." */
-function lead(n: number, wip: number): string {
-  const pubs = `${n} ${n === 1 ? "publication" : "publications"}`;
-  if (!wip) return `${pubs}, newest first.`;
-  return `${pubs} and ${wip} ${wip === 1 ? "work" : "works"} in progress, newest first.`;
 }
 
 export default function PublicationsPage() {
@@ -60,19 +53,15 @@ export default function PublicationsPage() {
   const visible = visibleFacetKeys(facets);
   const counts: Partial<Record<FacetKey, Map<string, number>>> = {};
   for (const key of visible) counts[key] = facetCounts(docs, EMPTY_FILTERS, null, key);
-  // One footnote for the page, only when a shown status is the lab's own report.
-  const needsNote = [...pubs, ...c.inProgress].some(isSelfReportedStatus);
 
   return (
     <div className="bl-container pubs">
       <header className="pubs-head">
         <div className="pubs-head__track">
           <h1 tabIndex={-1}>Publications</h1>
-          <p className="pubs-head__lead">
-            {pubs.length > 0
-              ? lead(pubs.length, c.inProgress.length)
-              : "There are no publications to show yet."}
-          </p>
+          {pubs.length === 0 && (
+            <p className="pubs-head__lead">There are no publications to show yet.</p>
+          )}
         </div>
       </header>
 
@@ -95,12 +84,6 @@ export default function PublicationsPage() {
       )}
 
       <WorkInProgress items={c.inProgress} />
-
-      {needsNote && (
-        <p className="pubs-fn">
-          Review statuses are as reported by the lab, dated by when each was last checked.
-        </p>
-      )}
     </div>
   );
 }

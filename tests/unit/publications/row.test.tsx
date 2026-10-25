@@ -7,12 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { PublicationRow } from "@/components/publications/PublicationRow";
-import {
-  AuthorList,
-  isSelfReportedStatus,
-  reviewStatus,
-  statusText,
-} from "@/components/publications/PaperParts";
+import { AuthorList, reviewStatus, statusText } from "@/components/publications/PaperParts";
 import { hasContent, loadContent } from "./helpers";
 
 describe("reviewStatus", () => {
@@ -21,10 +16,6 @@ describe("reviewStatus", () => {
     expect(reviewStatus({ ...base, type: "working-paper", status: "working-paper" })).toBeNull();
     expect(reviewStatus({ ...base, type: "work-in-progress", status: "in-progress" })).toBeNull();
     expect(reviewStatus({ ...base, type: "journal", status: "published" })).toBeNull();
-    // Not marked as the lab's own claim either (no footnote needed for it).
-    expect(isSelfReportedStatus({ ...base, type: "work-in-progress", status: "in-progress" })).toBe(
-      false,
-    );
   });
   it("keeps a status that adds something", () => {
     expect(reviewStatus({ ...base, type: "working-paper", status: "submitted" })).toBe("Submitted");
@@ -74,16 +65,14 @@ describe.skipIf(!hasContent)("PublicationRow", () => {
     expect(row).not.toContain("href=");
   });
 
-  it("dates a review status on the row and keeps the lab's claim for the footnote", () => {
+  it("prints a review status as a plain label, with no 'as of' date or provenance (copy sweep)", () => {
     const p = c.countedPublications.find(
       (x) => x.status === "major-revision" && x.status_source === "self-reported" && x.as_of,
     );
     expect(p).toBeTruthy();
     const html = renderToStaticMarkup(<PublicationRow pub={p!} />);
-    expect(html).toMatch(
-      /<span class="bl-pub__status">Major revision [^<]*, as of [A-Z][a-z]{2} \d{4}<\/span>/,
-    );
-    expect(isSelfReportedStatus(p!)).toBe(true);
+    expect(html).toMatch(/<span class="bl-pub__status">Major revision at [^<,]+<\/span>/);
+    expect(html).not.toMatch(/as of|reported by the lab/i);
   });
 
   it("does not repeat 'preprint' after an arXiv preprint venue", () => {
@@ -91,7 +80,9 @@ describe.skipIf(!hasContent)("PublicationRow", () => {
       (x) => x.status === "preprint" && /preprint/i.test(x.venue ?? ""),
     );
     if (!p) return;
-    expect(statusText(p)).toMatch(/^v\d+(, as of .+)?$/);
+    // "arXiv preprint" already says it; the version alone is left out of the row.
+    expect(statusText(p)).toBeNull();
+    expect(renderToStaticMarkup(<PublicationRow pub={p} />)).not.toContain("bl-pub__status");
   });
 
   it("shows awards as one count linking to the paper's award list", () => {

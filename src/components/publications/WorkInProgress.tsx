@@ -17,12 +17,10 @@ export function WorkInProgress({ items }: { items: PublicationView[] }) {
         </h2>
       </div>
       <div className="pubs-wip__track">
-        <p className="pubs-wip__note">
-          No public version or documented presentation yet, so these are not in the list above.
-        </p>
+        <p className="pubs-wip__note">Papers with no public draft yet.</p>
         <details className="pubs-wip__details">
           <summary className="pubs-wip__summary">
-            Show {n} {n === 1 ? "item" : "items"} in progress
+            Show {n} {n === 1 ? "work" : "works"} in progress
           </summary>
           <ul className="pubs-list" role="list">
             {items.map((p) => (

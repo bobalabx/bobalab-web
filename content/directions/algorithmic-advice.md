@@ -3,13 +3,13 @@ title: Algorithmic Advice & Human Decisions
 short_label: Algorithmic Advice
 question: When should advice name the exact next move, and when should it give a broader rule people can carry into new situations?
 home_question: When should an algorithm give exact advice, and when a rule of thumb?
-summary: How algorithms should advise people through multi-step decisions so the advice gets used, helps now, and still leaves people better on their own.
+summary: Advice only helps if people use it. We ask how algorithms should guide multi-step decisions so the advice helps now and still leaves people better on their own.
 color: butterfly-pea
 status: active
 findings: []
 draft: false
 ---
 
-A published study develops a reinforcement-learning method that reads logs of people's step-by-step choices and condenses the costliest gap from a strong policy into one short tip, then tests the tips with participants in a virtual-kitchen game. A working paper compares two ways of phrasing advice, an exact next action or a broader rule of thumb, in experiments on electric-vehicle charging routes, and asks how each shapes what people do once the advice is taken away. A second working paper looks at why people in the virtual-kitchen task pass over tips that are known to be good.
+Our Management Science paper uses reinforcement learning to read logs of people's step-by-step choices and turn the costliest gap from a strong policy into one short tip, which we then tested in a virtual-kitchen game. Another paper asks why people in the same game pass over tips that are known to be good. In experiments on electric-vehicle charging routes, we compare an exact next action with a broader rule of thumb and ask what people do once the advice is gone.
 
-Work in progress develops compliance-aware reinforcement learning for managing human agents.
+We are also developing compliance-aware reinforcement learning for managing human agents.

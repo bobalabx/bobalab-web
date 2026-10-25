@@ -43,7 +43,6 @@ export default function HomePage() {
   const c = getContent();
   const { site } = c;
   const copy = homeHeroCopy(c);
-  const lead = copy.who.lead;
 
   return (
     <ViewTransition enter={PAGE_ENTER_EXIT} exit={PAGE_ENTER_EXIT} default="none">
@@ -52,23 +51,10 @@ export default function HomePage() {
         <HomeHero copy={copy} figure={<HomePearls model={buildPearls(c.directions)} />} />
         <FindingsSection findings={featuredFindings(c)} />
         <div className="hm-lately">
-          <PapersSection
-            items={recentPublications(c, 3)}
-            total={c.countedPublications.length}
-            inProgress={c.inProgress.length}
-          />
-          <NewsSection
-            items={c.news.slice(0, 4)}
-            total={c.news.length}
-            since={c.news.at(-1)?.date}
-          />
+          <PapersSection items={recentPublications(c, 3)} />
+          <NewsSection items={c.news.slice(0, 4)} />
         </div>
-        <PeopleSection
-          people={currentPeople(c)}
-          lead={lead ? `${lead.honorific ? `${lead.honorific} ` : ""}${lead.name}` : undefined}
-          alumni={c.people.filter((p) => p.isAlumni).length}
-          email={site.email}
-        />
+        <PeopleSection people={currentPeople(c)} email={site.email} />
       </div>
     </ViewTransition>
   );

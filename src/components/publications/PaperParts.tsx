@@ -13,8 +13,7 @@
 import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
 import type { AuthorView, PublicationView } from "@/lib/content/load";
-import { formatDate } from "@/lib/content/dates";
-import { venueLine } from "@/lib/publications/csl";
+import { typeWord, venueLine } from "@/lib/publications/csl";
 import { PUBLICATION_STATUS_LABELS } from "@/components/ui/labels";
 
 type AuthorVariant = "page" | "row";
@@ -74,10 +73,16 @@ export function AuthorList({
   );
 }
 
-/** "<cite>Management Science</cite> 2026, 72(1):733–755; online May 22, 2025". */
+/**
+ * "<cite>Management Science</cite> 2026, 72(1):733–755; online May 22, 2025".
+ * Without a venue a bare year would look like a missing field, so the line
+ * names the type: "Working paper, 2026".
+ */
 export function VenueLineText({ pub }: { pub: PublicationView }) {
   const v = venueLine(pub);
   if (!v.venue && !v.detail && !v.online) return null;
+  if (!v.venue && !v.online && pub.year && v.detail === String(pub.year))
+    return <span className="pub-venue__detail">{`${typeWord(pub)}, ${pub.year}`}</span>;
   const serial = pub.type === "journal" || pub.type === "conference" || pub.type === "chapter";
   return (
     <>
@@ -93,10 +98,7 @@ export function VenueLineText({ pub }: { pub: PublicationView }) {
   );
 }
 
-type StatusFields = Pick<
-  PublicationView,
-  "type" | "status" | "status_note" | "as_of" | "status_source"
->;
+type StatusFields = Pick<PublicationView, "type" | "status" | "status_note">;
 
 /**
  * The review status worth stating: null for published papers, and for a bare
@@ -115,40 +117,20 @@ export function reviewStatus(p: StatusFields): string | null {
 }
 
 /**
- * Ledger form: "Major revision at M&SOM, as of Apr 2026". The lab's own claim
- * is dated on the row; the page carries one provenance footnote instead of a
- * hedge on every row (D-13 item 7).
+ * Ledger form, a plain academic label: "Major revision at Manufacturing &
+ * Service Operations Management". No "as of" date and no provenance note (the
+ * site is the lab's own; copy sweep, docs/CONTENT-QUESTIONS.md). After
+ * "arXiv preprint" the status "Preprint v2" adds only the version, so it is
+ * left out of the row (the paper page still gives it).
  */
 export function statusText(p: StatusFields & { venue?: string }): string | null {
-  // After "arXiv preprint" the status "Preprint v2" only adds the version.
-  const s =
-    p.status === "preprint" && /preprint/i.test(p.venue ?? "")
-      ? (p.status_note ?? null)
-      : reviewStatus(p);
-  if (!s) return null;
-  return p.as_of ? `${s}, as of ${formatDate(p.as_of)}` : s;
+  if (p.status === "preprint" && /preprint/i.test(p.venue ?? "")) return null;
+  return reviewStatus(p);
 }
 
-/** True when a review status shown on the page is the lab's own report. */
-export const isSelfReportedStatus = (p: StatusFields) =>
-  reviewStatus(p) !== null && p.status_source === "self-reported";
-
-/**
- * Paper page: the status with its date and provenance in one muted line
- * (the page's one provenance note, D-13 item 7).
- */
+/** Paper page: the status as one plain line ("Preprint v2", "Submitted to …"). */
 export function StatusDetail({ pub }: { pub: PublicationView }) {
   const s = reviewStatus(pub);
   if (!s) return null;
-  const when = pub.as_of ? `As of ${formatDate(pub.as_of, { long: true })}` : null;
-  const source = pub.status_source === "self-reported" ? "as reported by the lab" : null;
-  const meta = [when, source].filter(Boolean).join(", ");
-  return (
-    <>
-      <span className="pub-status__main">{s}</span>
-      {meta && (
-        <span className="pub-status__meta">{meta.charAt(0).toUpperCase() + meta.slice(1)}.</span>
-      )}
-    </>
-  );
+  return <span className="pub-status__main">{s}</span>;
 }

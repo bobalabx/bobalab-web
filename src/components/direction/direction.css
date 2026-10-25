@@ -48,29 +48,6 @@
   max-width: var(--prose-max);
 }
 
-/* Footnotes: one provenance line per page (D-13 item 7), the last-updated date. */
-.dr-notes {
-  margin-top: 56px;
-}
-.dr-fn,
-.dr-updated {
-  margin-top: 56px;
-  font-size: var(--t-meta);
-  line-height: var(--lh-meta);
-  color: var(--muted);
-  max-width: 92ch;
-}
-.dr-notes > .dr-fn,
-.dr-notes > .dr-updated {
-  margin-top: 4px;
-}
-@media (min-width: 48rem) {
-  .dr-notes,
-  .pj-page > .dr-fn {
-    padding-left: var(--lab);
-  }
-}
-
 /* ---------- Direction header (P3 `.dr-head`) ---------- */
 .dr-page {
   position: relative;
@@ -284,17 +261,14 @@
   color: var(--ink);
   font-weight: 600;
 }
-/* The caption names what is drawn: "Also in" lines in the list layout,
-   stubs in the drawn figure (the switch is at the same 64rem as the figure). */
+/* The shared-papers note is for the drawn figure only (the list layout names the
+   other direction on each row); the switch is at the same 64rem as the figure. */
 .dr-f2__cap-w {
   display: none;
 }
 @media (min-width: 64rem) {
   .dr-f2[data-fit="lines"] .dr-f2__cap-w {
     display: inline;
-  }
-  .dr-f2[data-fit="lines"] .dr-f2__cap-l {
-    display: none;
   }
 }
 
@@ -717,15 +691,6 @@
 .rs-lede {
   max-width: 62ch;
 }
-.rs-dl {
-  text-decoration-color: var(--dir);
-  text-decoration-thickness: 2px;
-  white-space: nowrap;
-}
-.rs-dl:hover {
-  text-decoration-color: var(--dir);
-  text-decoration-thickness: 3px;
-}
 
 .rs-dirs {
   margin: 0;
@@ -773,10 +738,6 @@
 .rs-dir__counts {
   font-size: var(--t-meta);
   line-height: var(--lh-meta);
-}
-.rs-dir__arch {
-  display: block;
-  color: var(--muted);
 }
 /* Fixed pixel width (one scale for every row of a list), left-aligned. */
 .rs-strip {

@@ -1,7 +1,8 @@
 /**
  * The People index body (brief §D9, DECISIONS D-06; D-13 item 5). Server
  * component; the only client code is the optional filter island (PeopleFilters).
- * Label-column grid: each group's title and count sit in the label column and
+ * Label-column grid: each group's title sits in the label column (no headcounts,
+ * copy sweep) and
  * its people in the track: the PI first (160 px square), then ruled rows with
  * 64 px square photos, then alumni as a compact ruled list by year.
  *
@@ -16,7 +17,7 @@ import { Fragment, type ReactNode } from "react";
 import type { Content } from "@/lib/content/load";
 import { PageHeader } from "@/components/pages/PageHeader";
 import { AlumniEntry, PeopleCard } from "./PeopleCard";
-import { FilterCount, FilterGroup, FilterItem, PeopleFilters } from "./PeopleFilters";
+import { FilterGroup, FilterItem, PeopleFilters } from "./PeopleFilters";
 import { buildPeopleIndex, type PersonItem } from "./model";
 import "./people.css";
 
@@ -82,23 +83,6 @@ function MaybeGroup({
   );
 }
 
-function MaybeCount({
-  filterable,
-  items,
-  noun,
-}: {
-  filterable: boolean;
-  items: PersonItem[];
-  noun: [string, string];
-}) {
-  if (filterable) return <FilterCount metas={items.map((i) => i.meta)} noun={noun} />;
-  return (
-    <>
-      {items.length} {items.length === 1 ? noun[0] : noun[1]}
-    </>
-  );
-}
-
 export function PeopleIndex({ content }: { content: Content }) {
   const m = buildPeopleIndex(content);
   const f = m.showFilters;
@@ -118,12 +102,6 @@ export function PeopleIndex({ content }: { content: Content }) {
             <h2 id={g.id} className="pp-group__title">
               {g.label}
             </h2>
-            {/* A count of "1" next to "Principal investigator" says nothing. */}
-            {g.role !== "pi" && (
-              <span className="pp-group__count">
-                <MaybeCount filterable={f} items={g.items} noun={["person", "people"]} />
-              </span>
-            )}
           </div>
           <ul className={g.role === "pi" ? "pp-grid pp-grid--lead" : "pp-grid"} role="list">
             {g.items.map((item) => (
@@ -155,9 +133,6 @@ export function PeopleIndex({ content }: { content: Content }) {
             <h2 id="people-alumni" className="pp-group__title">
               Alumni
             </h2>
-            <span className="pp-group__count">
-              <MaybeCount filterable={f} items={m.alumniItems} noun={["person", "people"]} />
-            </span>
           </div>
           <details className="pp-alumni__details">
             <summary className="pp-alumni__summary">

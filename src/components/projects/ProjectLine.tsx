@@ -12,17 +12,15 @@
  * below). Below 48rem the same markup is a vertical, dated list whose paper
  * dots sit on the rail.
  * Marks are aria-hidden; every paper label is a link, every note links to its
- * news item, and the caption explains the encoding.
+ * news item, and the caption says what the figure shows.
  */
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { numberWord } from "@/components/direction/model";
 import type { ProjectLineModel } from "./model";
 
 type Vars = CSSProperties & Record<`--${string}`, string | number>;
 
-export function ProjectLine({ model, asOf }: { model: ProjectLineModel; asOf: string }) {
-  const L = model.lanes.length;
+export function ProjectLine({ model }: { model: ProjectLineModel }) {
   const notes = model.news > 0;
   return (
     <figure
@@ -30,7 +28,7 @@ export function ProjectLine({ model, asOf }: { model: ProjectLineModel; asOf: st
       aria-labelledby="pjl-cap"
       style={
         {
-          "--lanes": L,
+          "--lanes": model.lanes.length,
           "--cols": model.years.map((y) => `minmax(0, ${y.events.length}fr)`).join(" "),
         } as Vars
       }
@@ -111,11 +109,7 @@ export function ProjectLine({ model, asOf }: { model: ProjectLineModel; asOf: st
       </div>
       <figcaption className="pjl-cap" id="pjl-cap">
         <b>Figure 1.</b>{" "}
-        {L > 1
-          ? `The project’s papers on the ${numberWord(L)} directions it belongs to.`
-          : `The project’s papers on its direction.`}{" "}
-        Dots are papers, by year and, where the date is known, in date order
-        {notes ? "; notes are dated items from the lab’s news" : ""}. As of {asOf}.
+        {notes ? "Papers and news for this project, by date." : "Papers for this project, by date."}
       </figcaption>
     </figure>
   );

@@ -6,13 +6,11 @@
  * which the shared entry does not draw:
  *
  *   main — title (links to the paper page), authors (lab members in 600,
- *          linked when they have a profile), venue line plus the dated review
+ *          linked when they have a profile), venue line plus the review
  *          status, and the lab's `in_brief` one-liner (2 lines at most);
  *   meta — the type word, the directions with their 16 px line segment,
  *          "7 awards" (linking to the paper page's award list), and the
  *          materials as plain text links "PDF  arXiv  DOI".
- *
- * No per-row "reported by the lab": the page prints one footnote (item 7).
  */
 import Link from "next/link";
 import type { PublicationView } from "@/lib/content/load";
@@ -22,9 +20,6 @@ import { MaterialsRow, materialsFromPublication } from "@/components/ui/Material
 import { AuthorList, statusText } from "./PaperParts";
 
 type Heading = "h2" | "h3" | "h4";
-
-/** A status that is only a version ("v2, as of …") continues the venue line with a comma. */
-const VERSION_ONLY = /^v\d+\b/;
 
 export function PublicationRow({
   pub,
@@ -60,7 +55,7 @@ export function PublicationRow({
         {(venue || status) && (
           <p className="bl-pub__venue">
             {venue && <cite>{venue}</cite>}
-            {venue && status ? (VERSION_ONLY.test(status) ? ", " : ". ") : null}
+            {venue && status ? ". " : null}
             {status && <span className="bl-pub__status">{status}</span>}
           </p>
         )}

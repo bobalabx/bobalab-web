@@ -5,8 +5,9 @@
  *   Site         About & contact, Accessibility, Privacy, RSS feed, site-issue mailto
  *   Lab members  site.yml member_links (e.g. the lab scheduler), then the
  *                "Reduce motion" switch
- * and a base line with "Last updated" and the maintainers. Same place on every
- * page (WCAG 3.2.6). Plain text links: no icons, no arrows.
+ * and a base line with the month of the last update and, when site.yml names
+ * them, the maintainers. Same place on every page (WCAG 3.2.6). Plain text
+ * links: no icons, no arrows.
  */
 import Link from "next/link";
 import type { SiteData } from "@/lib/content/schema";
@@ -78,13 +79,9 @@ export function SiteFooter({ site, lastUpdated }: { site: SiteData; lastUpdated:
           </section>
           <div className="bl-footer__base">
             <p>
-              Last updated <DateText value={lastUpdated} long />
+              Updated <DateText value={lastUpdated.slice(0, 7)} long />
             </p>
-            <p>
-              {site.maintainers
-                ? `Site maintained by ${site.maintainers}.`
-                : "Site maintained by the lab."}
-            </p>
+            {site.maintainers ? <p>Site maintained by {site.maintainers}.</p> : null}
           </div>
         </div>
       </div>

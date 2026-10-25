@@ -23,43 +23,15 @@ export function listJoin(items: readonly string[]): string {
 }
 
 /**
- * The counts sentence in the direction header's label column (P3 `.side`):
- * "4 papers, 1 in progress and 4 projects". Work in progress is counted
- * separately (D-05) and named only when there is some.
+ * A direction's counts as a short data label (research ledger, "More
+ * directions"): "4 papers · 2 in progress · 5 projects". Work in progress is
+ * counted separately (D-05) and named only when there is some.
  */
 export function countsSentence(counts: DirectionView["counts"]): string {
   const parts = [plural(counts.papers, "paper")];
   if (counts.inProgress > 0) parts.push(`${counts.inProgress} in progress`);
   parts.push(plural(counts.projects, "project"));
-  return listJoin(parts);
-}
-
-export interface SharedCount {
-  direction: DirectionView;
-  count: number;
-}
-
-/**
- * Other directions this direction shares counted papers with, most shared
- * first, then in editorial order (live directions before archived ones).
- * Drives "Shares 3 papers with Platform Work and 1 with Algorithmic Advice."
- */
-export function sharedWith(
-  c: Pick<Content, "directions" | "archivedDirections">,
-  d: Pick<DirectionView, "slug">,
-  papers: ReadonlyArray<{ directions: string[] }>,
-): SharedCount[] {
-  const all = [...c.directions, ...c.archivedDirections];
-  return all
-    .filter((o) => o.slug !== d.slug)
-    .map((o, i) => ({
-      direction: o,
-      count: papers.filter((p) => p.directions.includes(o.slug)).length,
-      i,
-    }))
-    .filter((x) => x.count > 0)
-    .sort((a, b) => b.count - a.count || a.i - b.i)
-    .map(({ direction, count }) => ({ direction, count }));
+  return parts.join(" · ");
 }
 
 /** "See all in Publications" keeps the direction filter (§D5.6; WP2 acceptance #5). */
@@ -116,18 +88,6 @@ export function workWithUs(
     openToCollaborators: d.open_to_collaborators,
     opportunities,
   };
-}
-
-/**
- * Direction "last updated" line (§D5.11). The site footer already prints
- * "Last updated {site date}" directly below the page, so the direction's own
- * date is shown only when it says something the footer does not: when its
- * content files last changed on a different (earlier) day (verify VIS-12).
- * Returns null when the footer already carries the same date.
- */
-export function directionUpdatedDate(directionDate: string, siteDate: string): string | null {
-  if (!directionDate || directionDate === siteDate) return null;
-  return directionDate;
 }
 
 /** Max publications listed on a direction page before "See all" carries the rest. */

@@ -5,32 +5,21 @@
 import type { Metadata } from "next";
 import { ViewTransition } from "react";
 import { getContent } from "@/lib/content/load";
-import { clipDescription, pageMetadata } from "@/lib/seo/metadata";
+import { pageMetadata } from "@/lib/seo/metadata";
 import { PeopleIndex } from "@/components/people/PeopleIndex";
-import { buildPeopleIndex } from "@/components/people/model";
 import { PAGE_ENTER_EXIT } from "@/lib/vt";
 
 export function generateMetadata(): Metadata {
   const c = getContent();
-  const m = buildPeopleIndex(c);
-  // Category names (plural group labels), not the counted summary ("1 Master's student").
-  // The PI is named by the sentence itself, so a lone role label never makes up the list.
-  const groups = [
-    ...m.groups.filter((g) => g.role !== "pi").map((g) => g.label),
-    ...(m.alumniItems.length ? ["alumni"] : []),
-  ];
-  const who =
-    groups.length > 1
-      ? `${groups.slice(0, -1).join(", ")} and ${groups[groups.length - 1]}`
-      : groups[0];
-  const lab = `${c.site.name}, the ${c.site.long_name}`;
+  // One plain sentence, no generated list of role groups (copy sweep).
+  const pi = c.people.find((p) => p.role === "pi" && !p.isAlumni);
+  const alumni = c.people.some((p) => p.isAlumni);
+  const who = pi
+    ? `${pi.name} and the students and research assistants of ${c.site.name}`
+    : `The students and research assistants of ${c.site.name}`;
   return pageMetadata({
     title: "People",
-    description: clipDescription(
-      who
-        ? `People of ${lab}: its principal investigator, ${who}.`
-        : `People of ${lab} and its principal investigator.`,
-    ),
+    description: `${who}${alumni ? ", plus former members of the lab" : ""}.`,
     path: "/people/",
   });
 }

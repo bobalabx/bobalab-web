@@ -12,7 +12,7 @@
  */
 import type { PublicationView } from "@/lib/content/load";
 import { scholarMeta } from "@/lib/seo/scholar";
-import { toCsl, typeWord, venueText } from "./csl";
+import { toCsl, typeWord } from "./csl";
 
 type ScholarInput = Parameters<typeof scholarMeta>[0] &
   Pick<PublicationView, "slug" | "links" | "status">;
@@ -46,17 +46,21 @@ function joinNames(names: string[]): string {
 }
 
 /**
- * Meta description when the lab has written no "In brief":
- * "Working paper by Haonan Deng and Wichinpong Park Sinchaisri. SSRN working paper 7151739, 2026."
+ * Meta description when the lab has written no "In brief": one plain sentence,
+ * after the project's own summary when there is one (copy sweep: no field dump
+ * like "Working paper by … SSRN working paper 7151739, 2026."):
+ *   "<project summary> A working paper by Haonan Deng and Wichinpong Park Sinchaisri."
+ *   "Work in progress by …, presented at the 2026 INFORMS MSOM Conference."
  */
 export function paperFallbackDescription(
-  p: Pick<
-    PublicationView,
-    "type" | "authors" | "venue" | "year" | "volume" | "issue" | "pages" | "date_online"
-  >,
+  p: Pick<PublicationView, "type" | "authors" | "venue">,
+  topic?: string,
 ): string {
   const who = joinNames(p.authors.map((a) => a.name));
-  const head = `${typeWord(p)}${who ? ` by ${who}` : ""}.`;
-  const venue = venueText(p);
-  return venue ? `${head} ${venue}.` : head;
+  const word = typeWord(p);
+  const kind = p.type === "work-in-progress" ? word : `A ${word.toLowerCase()}`;
+  const talk = /^(.+?)\s*\(presentation\)$/i.exec(p.venue?.trim() ?? "")?.[1];
+  const head = `${kind}${who ? ` by ${who}` : ""}${talk ? `, presented at the ${talk.replace(/^the\s+/i, "")}` : ""}.`;
+  const t = topic?.trim();
+  return t ? `${/[.!?]$/.test(t) ? t : `${t}.`} ${head}` : head;
 }

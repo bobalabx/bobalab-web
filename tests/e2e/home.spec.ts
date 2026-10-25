@@ -631,16 +631,15 @@ test.describe("motion", () => {
   });
 });
 
-test("people: round consented photos with first names, the team in one sentence with no numbers", async ({
+test("people: round consented photos with first names, the way to join, no team sentence and no numbers", async ({
   page,
 }) => {
   await home(page);
   const sec = page.locator('section[aria-labelledby="h-people"]');
   if (!(await sec.count())) test.skip(true, "no people");
-  const team = sec.locator(".hm-team");
-  await expect(team).toContainText(/leads the lab with .+\./);
-  // D-15: no count sentence ("one master's student and 23 undergraduate RAs").
-  expect(await team.innerText()).not.toMatch(/\d|\b(one|two|three|four|five|six|seven|eight)\b/i);
+  // Owner, copy sweep: no "… leads the lab with …" sentence and no "former members" line.
+  await expect(sec.locator(".hm-team")).toHaveCount(0);
+  expect(await sec.innerText()).not.toMatch(/leads the lab|former members|people page/i);
   // D-15: no people count anywhere in the section, the foot link included.
   expect(await sec.innerText()).not.toMatch(/\d+\s+(members?|alumni|former|students?|RAs?)\b/i);
   const faces = sec.locator(".hm-face");
@@ -660,13 +659,14 @@ test("people: round consented photos with first names, the team in one sentence 
     expect(alt.replace(/["“”()]/g, " ")).toContain(first.replace(/ [A-Z]\.$/, ""));
   }
   await expect(sec.locator(".hm-ini")).toHaveCount(0);
-  await expect(sec.getByRole("link", { name: /^People: current members/ })).toHaveAttribute(
+  await expect(sec.getByRole("link", { name: "Meet the lab", exact: true })).toHaveAttribute(
     "href",
     "/people/",
   );
-  await expect(sec.getByRole("link", { name: /Students & RAs/ })).toHaveAttribute(
+  await expect(sec.locator(".hm-join")).toContainText("Want to join or work with us?");
+  await expect(sec.getByRole("link", { name: "Join the lab", exact: true })).toHaveAttribute(
     "href",
-    "/join/#students",
+    "/join/",
   );
   await expect(sec.locator('a[href^="mailto:"]')).toHaveCount(1);
 });
@@ -690,10 +690,9 @@ test("new papers beside news: 3 ruled rows and 4 dated one-liners, each with its
   }
   const [a, b] = await Promise.all([papers.boundingBox(), news.boundingBox()]);
   expect(Math.abs(a!.y - b!.y)).toBeLessThanOrEqual(2);
-  await expect(papers.locator(".hm-more a")).toHaveText(
-    /^Publications: \d+ papers?(, \d+ in progress)?$/,
-  );
-  await expect(news.locator(".hm-more a")).toHaveText(/^News: \d+ items?( since \d{4})?$/);
+  // Plain links, no stats (copy sweep).
+  await expect(papers.locator(".hm-more a")).toHaveText("All publications");
+  await expect(news.locator(".hm-more a")).toHaveText("All news");
 });
 
 test("AI-tell probe: no gloss, numerals, pills, boxes, tracked caps, arrows or loops", async ({

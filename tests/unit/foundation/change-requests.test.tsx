@@ -44,7 +44,7 @@ describe("WP3 request 3: no bare working-paper status echo", () => {
   });
   it("keeps it when there is a note, or on another type", () => {
     expect(statusLine({ ...base, status_note: "v2" }, "working-paper")).toMatch(/v2/);
-    expect(statusLine(base, "journal")).toMatch(/^Working paper · as of/);
+    expect(statusLine(base, "journal")).toBe("Working paper");
   });
 });
 

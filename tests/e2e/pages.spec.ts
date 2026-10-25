@@ -13,7 +13,6 @@ import path from "node:path";
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { buildContent, loadRawContent } from "../../src/lib/content/load";
-import { formatDate } from "../../src/lib/content/dates";
 import { INTRO_STORAGE_KEY, MOTION_STORAGE_KEY } from "../../src/lib/site/motion";
 
 const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
@@ -65,7 +64,8 @@ test.describe("Join", () => {
       await expect(page.locator(`nav[aria-label="On this page"] a[href="#${id}"]`)).toBeVisible();
     }
 
-    // Every opportunity in content is shown with its status and as-of date; nothing else.
+    // Every opportunity in content is shown; a status only when the lab has set one,
+    // with no "as of" date (copy sweep).
     const cards = page.locator("article.pg-opp");
     await expect(cards).toHaveCount(c.opportunities.length);
     for (const o of c.opportunities) {
@@ -77,46 +77,23 @@ test.describe("Join", () => {
           ? "Open, rolling"
           : "Open"
         : o.status === "unknown"
-          ? "Status not confirmed"
+          ? null
           : "Closed";
-      await expect(status).toContainText(label);
-      if (o.as_of) await expect(status).toContainText(`as of ${formatDate(o.as_of)}`);
-      if (!o.closes_on) await expect(status).not.toContainText("Closes");
+      if (label) await expect(status).toContainText(label);
+      else if (!o.draft) await expect(status).toHaveCount(0);
+      await expect(card).not.toContainText("as of ");
+      if (label && !o.closes_on) await expect(status).not.toContainText("Closes");
       // "Apply" only while open.
       await expect(card.getByRole("link", { name: /^Apply/ })).toHaveCount(
         o.isOpen && o.apply_url ? 1 : 0,
       );
-      if (o.route) {
-        // The route is shown verbatim, after a short label ("How to join:").
-        await expect(card.locator(".pg-opp__route-text")).toHaveText(o.route);
-        await expect(card.locator(".pg-opp__label")).toHaveText(/^(How to join|Next step):$/);
-      }
+      // The route is a sentence of its own, shown as written (no "How to join:" label).
+      if (o.route) await expect(card.locator(".pg-opp__route")).toHaveText(o.route);
     }
-    // D-13 item 7: the hedge is said once. Unconfirmed rows show a dash (screen
-    // readers hear "Status not confirmed" in the row) and one footnote explains it;
-    // a shared "as of" date is stated once in that footnote.
-    const unconfirmed = c.opportunities.filter((o) => !o.isOpen && o.status === "unknown");
-    const shownHedges = await page.locator("main").evaluate((main) => {
-      const walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT);
-      const hits: string[] = [];
-      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-        if (!n.textContent?.includes("Status not confirmed")) continue;
-        if (!n.parentElement?.closest(".vh")) hits.push(n.parentElement?.className ?? "");
-      }
-      return hits;
-    });
-    expect(shownHedges, "visible 'Status not confirmed'").toEqual([]);
-    expect(await page.locator("main .vh", { hasText: "Status not confirmed" }).count()).toBe(
-      unconfirmed.length,
-    );
-    const note = page.locator("#join-note");
-    const asOf = [...new Set(c.opportunities.map((o) => o.as_of ?? ""))];
-    const shared = c.opportunities.length > 0 && asOf.length === 1 && Boolean(asOf[0]);
-    await expect(note).toHaveCount(unconfirmed.length || shared ? 1 : 0);
-    if (unconfirmed.length) await expect(note).toContainText("A dash marks");
-    if (shared) {
-      await expect(note).toContainText(`Statuses as of ${formatDate(asOf[0])}`);
-    }
+    // No "not confirmed" text, dash or legend anywhere (copy sweep).
+    await expect(page.locator("main")).not.toContainText("not confirmed");
+    await expect(page.locator("main")).not.toContainText("Statuses as of");
+    await expect(page.locator("#join-note")).toHaveCount(0);
     // The ledger has no card boxes: rows are ruled, not bordered.
     if (c.opportunities.length) {
       const box = await page

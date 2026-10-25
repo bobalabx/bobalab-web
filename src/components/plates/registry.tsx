@@ -34,18 +34,18 @@ export const PLATES: Readonly<Record<string, PlateDef>> = {
       "Orders arrive: four burger orders per round.",
       "Each order splits into three subtasks in a fixed order, chop then cook then plate. The player assigns every subtask to a worker.",
       "The chef leaves. In the disrupted configuration four of six rounds are understaffed, and the optimal finish moves from 20 to 34 ticks.",
-      "Phase II: after a first phase without tips, play is randomised into four arms.",
+      "Phase II: after a first phase without tips, players are randomly assigned to four arms.",
     ],
     caption: (
       <>
         Study design of Bastani, Bastani &amp; Sinchaisri (2026), <cite>Management Science</cite>{" "}
         72(1). (a) Players manage three virtual workers; each of the four burger orders in a round
         is three subtasks in a fixed order. (b) Line length is the optimal finish time. (c) Phase I
-        has no tips; R marks random assignment into the four Phase II arms. Redrawn as a schematic
-        from the paper&rsquo;s description; not data. No assignment schedule and no result is drawn.
+        has no tips; R marks random assignment to the four Phase II arms. A schematic of the design,
+        based on the paper; it shows no results.
       </>
     ),
-    source: "Source: the description of the experiment in arXiv:2108.08454, version 5.",
+    source: "Source: arXiv:2108.08454 (v5).",
     Body: BastaniPlate,
   },
 };

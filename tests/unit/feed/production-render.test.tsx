@@ -52,31 +52,32 @@ describe.skipIf(!present)("WP5 pages in a production build (drafts excluded)", (
     expect(c.opportunities.every((o) => !o.draft)).toBe(true);
   });
 
-  it("Join: one footnote carries the shared as-of date and explains unconfirmed statuses (D-13 item 7)", () => {
+  it("Join: no 'as of' dates, no 'not confirmed' rows and no legend for them (copy sweep)", () => {
     const c = getContent();
     const html = renderToStaticMarkup(<JoinPage />);
-    const unconfirmed = c.opportunities.filter((o) => !o.isOpen && o.status === "unknown");
-    // The hedge is never repeated as visible text: each unconfirmed row says it to
-    // screen readers only (visually hidden), and the page explains the dash once.
-    const visible = html.replace(/<span class="vh">[^<]*<\/span>/g, "");
-    expect(visible).not.toContain("Status not confirmed");
-    expect(html.match(/Status not confirmed/g)?.length ?? 0).toBe(unconfirmed.length);
-    expect(html.match(/class="pg-fn/g)?.length ?? 0).toBe(c.opportunities.length ? 1 : 0);
-    if (unconfirmed.length) expect(html.match(/A dash marks/g)?.length).toBe(1);
-    const asOf = new Set(c.opportunities.map((o) => o.as_of ?? ""));
-    if (asOf.size === 1 && [...asOf][0]) {
-      expect(html).toContain(`Statuses as of <time dateTime="${[...asOf][0]}">`);
+    expect(html).not.toMatch(
+      /Status not confirmed|not confirmed|A dash marks|Statuses as of|as of /,
+    );
+    expect(html).not.toContain("pg-opp__unconfirmed");
+    expect(html).not.toContain('class="pg-fn');
+    // A status shows only when the lab has set one; every row with one names it.
+    for (const o of c.opportunities) {
+      const start = html.indexOf(`<article class="pg-opp" aria-labelledby="opp-${o.slug}"`);
+      const row = html.slice(start, html.indexOf("</article>", start));
+      if (o.status === "unknown" && !o.isOpen) expect(row, o.slug).not.toContain("pg-opp__status");
+      else expect(row, o.slug).toContain("pg-opp__status");
     }
   });
 
-  it("Join: only published opportunities, status with as-of date, a mailto in every audience", () => {
+  it("Join: only published opportunities, each with its route as written, a mailto in every audience", () => {
     const c = getContent();
     const html = renderToStaticMarkup(<JoinPage />);
     keep("join", html);
     expect(html).not.toContain("Draft · pending lab review");
     for (const o of c.opportunities) {
       expect(html).toContain(o.title.replace(/&/g, "&amp;"));
-      if (o.as_of) expect(html).toContain(formatDate(o.as_of));
+      if (o.route)
+        expect(html).toContain(`<p class="pg-opp__route">${o.route.replace(/&/g, "&amp;")}</p>`);
     }
     for (const id of ["students", "partners", "press"]) {
       const start = html.indexOf(`<section class="pg-row pg-section" aria-labelledby="${id}"`);
@@ -126,7 +127,11 @@ describe.skipIf(!present)("WP5 pages in a production build (drafts excluded)", (
     const html = renderToStaticMarkup(<AboutPage />);
     const description = String(aboutMetadata().description ?? "");
     expect(description.length).toBeGreaterThan(0);
-    expect(description.length).toBeLessThanOrEqual(160);
+    // Whole sentences, never cut mid-phrase with "…" (copy sweep); a single long
+    // first sentence is kept whole (clipDescription).
+    expect(description.length).toBeLessThanOrEqual(240);
+    expect(description).not.toMatch(/…$/);
+    expect(description).toMatch(/[.!?]$/);
     if (!c.pages.about?.intro) {
       const showsMission = html.includes('id="about-mission"');
       expect(description.includes("mission")).toBe(showsMission);

@@ -1,5 +1,6 @@
 ---
 title: Personal Memory in AI Assistants
+summary: "Where an AI assistant's memory of its user breaks down: memories that are outdated, misattributed or retrieved too late."
 directions:
   - ai-at-work
 status: active

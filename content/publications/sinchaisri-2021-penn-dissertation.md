@@ -14,7 +14,7 @@ press: []
 awards: []
 directions:
   - platform-work
-in_brief: Park Sinchaisri's doctoral dissertation on managing gig-economy work through behavioral and operational lenses; the gig-driver paper is reported to be one chapter.
+in_brief: Park Sinchaisri's doctoral dissertation at the University of Pennsylvania; the gig-driver paper is one of its chapters.
 featured: false
 draft: false
 ---

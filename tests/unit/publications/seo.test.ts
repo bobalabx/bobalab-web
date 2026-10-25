@@ -115,7 +115,7 @@ describe("paper SEO by publication type", () => {
     expect(wantsScholarMeta({ counted: false, publicVersion: false })).toBe(false);
   });
 
-  it("the fallback description names the type, the authors and the venue", () => {
+  it("the fallback description is one plain sentence: type, authors, and where it was presented", () => {
     expect(
       paperFallbackDescription({
         ...base,
@@ -124,15 +124,20 @@ describe("paper SEO by publication type", () => {
         year: 2026,
       } as PublicationEntry),
     ).toBe(
-      "Work in progress by Jane Q. Doe, Ana de la Cruz, and Bo Li. 2026 INFORMS MSOM Conference (presentation).",
+      "Work in progress by Jane Q. Doe, Ana de la Cruz, and Bo Li, presented at the 2026 INFORMS MSOM Conference.",
     );
+    // No venue field dump ("SSRN working paper 7151739, 2026"), and the project's summary first.
     expect(
-      paperFallbackDescription({
-        ...base,
-        authors: [{ name: "Jane Q. Doe" }],
-        type: "working-paper",
-      } as PublicationEntry),
-    ).toBe("Working paper by Jane Q. Doe.");
+      paperFallbackDescription(
+        {
+          ...base,
+          authors: [{ name: "Jane Q. Doe" }],
+          type: "working-paper",
+          venue: "SSRN working paper 7151739",
+        } as PublicationEntry,
+        "When should an AI agent act, ask or defer?",
+      ),
+    ).toBe("When should an AI agent act, ask or defer? A working paper by Jane Q. Doe.");
   });
 });
 

@@ -8,7 +8,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getContent } from "@/lib/content/load";
-import { formatDate } from "@/lib/content/dates";
 import { pageMetadata } from "@/lib/seo/metadata";
 import { DraftBadge } from "@/components/ui/Badge";
 import {
@@ -18,7 +17,7 @@ import {
 } from "@/components/projects/model";
 import { ProjectStatusFilter } from "@/components/projects/ProjectStatusFilter";
 import { ProjectLedger } from "@/components/projects/ProjectLedger";
-import { listJoin, plural } from "@/components/direction/model";
+import { plural } from "@/components/direction/model";
 import "@/components/direction/direction.css";
 import "@/components/projects/projects.css";
 
@@ -28,7 +27,7 @@ export function generateMetadata(): Metadata {
   const { site } = getContent();
   return pageMetadata({
     title: "Projects",
-    description: `Research projects of ${site.name}, the ${site.long_name}, grouped by research direction.`,
+    description: `Current and past ${site.name} projects, from AI at work to gig platforms.`,
     path: "/projects/",
   });
 }
@@ -42,10 +41,6 @@ export default function ProjectsPage() {
     label: PROJECT_STATUS_LABELS[s],
     count: c.projects.filter((p) => p.status === s).length,
   }));
-  const byStatus = statuses.map(
-    (s) =>
-      `${c.projects.filter((p) => p.status === s).length} ${PROJECT_STATUS_LABELS[s].toLowerCase()}`,
-  );
 
   const list = (
     <div className="pj-groups">
@@ -64,20 +59,19 @@ export default function ProjectsPage() {
                 {d && <span className="bl-seg" aria-hidden="true" />}
                 {d ? <Link href={`/research/${d.slug}/`}>{d.short_label}</Link> : "Other projects"}
               </h2>
-              <p className="pj-group__meta">
-                {plural(g.projects.length, "project")}
-                {d?.status === "archived"
-                  ? ", earlier research"
-                  : d
-                    ? null
-                    : ", not yet in a direction"}
-                {d?.draft && (
-                  <>
-                    {" "}
-                    <DraftBadge />
-                  </>
-                )}
-              </p>
+              {d && (
+                <p className="pj-group__meta">
+                  {d.status === "archived"
+                    ? "Earlier research"
+                    : plural(g.projects.length, "project")}
+                  {d.draft && (
+                    <>
+                      {" "}
+                      <DraftBadge />
+                    </>
+                  )}
+                </p>
+              )}
             </div>
             <div className="dr-section__body">
               <ProjectLedger
@@ -108,20 +102,11 @@ export default function ProjectsPage() {
         <h1 tabIndex={-1} className="rs-title">
           Projects
         </h1>
-        <div className="rs-head__row">
-          <p className="rs-head__side">
-            {c.projects.length > 0
-              ? `${listJoin(byStatus)}, as of ${formatDate(c.today, { long: true })}.`
-              : null}
-          </p>
-          {c.projects.length > 0 ? (
-            <p className="t-lead rs-lede">
-              By research direction. A project in more than one direction is listed under its first.
-            </p>
-          ) : (
+        {c.projects.length === 0 && (
+          <div className="rs-head__row">
             <p className="t-lead rs-lede">Projects are coming soon.</p>
-          )}
-        </div>
+          </div>
+        )}
       </header>
       {groups.length > 0 &&
         (statuses.length > 1 ? (

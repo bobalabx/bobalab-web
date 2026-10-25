@@ -58,13 +58,17 @@ describe.skipIf(!has)("content/ wording and status rules", () => {
     },
   );
 
-  it("CON-08/CON-09: news names the PI in full on first mention and keeps the sources' tense", () => {
+  it("CON-08/CON-09 (copy sweep): news names the PI in full, without 'Prof.', and with no provenance hedge", () => {
     for (const n of E.news) {
       const first = /\bPark\b(?! Sinchaisri)/.exec(`${n.title} ${n.summary ?? ""}`);
       if (first) expect(`${n.title} ${n.summary}`, n.slug).toContain("Park Sinchaisri");
+      // "was announced to present" read as a pipeline hedge; a dated post speaks as of its date.
+      expect(n.summary ?? "", n.slug).not.toMatch(
+        /was announced|Prof\. Sinchaisri|received a major revision from/,
+      );
     }
     expect(E.news.find((n) => n.slug === "2024-11-13-tuck-seminar")?.summary).toMatch(
-      /was announced to present/,
+      /^Park Sinchaisri will present /,
     );
     expect(E.news.find((n) => n.slug === "2026-05-08-msom-three-papers")?.event_date).toBe(
       "2026-07-14",

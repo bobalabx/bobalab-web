@@ -7,12 +7,10 @@ import { TRANSITION } from "@/lib/vt";
 import {
   countsSentence,
   directionPeople,
-  directionUpdatedDate,
   listJoin,
   plural,
   publicationsHref,
   railTransition,
-  sharedWith,
   workWithUs,
 } from "@/components/direction/model";
 
@@ -26,11 +24,12 @@ const counts = (projects: number, papers: number, inProgress = 0) => ({
   inProgress,
 });
 
-describe("header counts sentence (P3 .side; computed)", () => {
+describe("direction counts label (computed; a data label, not a sentence)", () => {
   it("names papers, work in progress only when there is some, then projects", () => {
-    expect(countsSentence(counts(4, 4, 1))).toBe("4 papers, 1 in progress and 4 projects");
-    expect(countsSentence(counts(1, 1))).toBe("1 paper and 1 project");
-    expect(countsSentence(counts(0, 0))).toBe("0 papers and 0 projects");
+    expect(countsSentence(counts(4, 4, 1))).toBe("4 papers · 1 in progress · 4 projects");
+    expect(countsSentence(counts(1, 1))).toBe("1 paper · 1 project");
+    expect(countsSentence(counts(0, 0))).toBe("0 papers · 0 projects");
+    expect(countsSentence(counts(5, 4, 2))).not.toMatch(/ and |,/);
   });
   it("lists without a serial comma", () => {
     expect(listJoin([])).toBe("");
@@ -47,31 +46,6 @@ describe("header counts sentence (P3 .side; computed)", () => {
       const tagged = c.countedPublications.filter((p) => p.directions.includes(d.slug));
       expect(d.counts.papers).toBe(tagged.length);
     }
-  });
-});
-
-describe("shared papers ('Shares 3 papers with …')", () => {
-  it("counts this direction's papers that other directions also list, most first", () => {
-    const c = load("n4");
-    for (const d of c.directions) {
-      const papers = c.countedPublications.filter((p) => p.directions.includes(d.slug));
-      const shared = sharedWith(c, d, papers);
-      expect(shared.every((s) => s.direction.slug !== d.slug && s.count > 0)).toBe(true);
-      for (const s of shared)
-        expect(s.count).toBe(papers.filter((p) => p.directions.includes(s.direction.slug)).length);
-      for (let i = 1; i < shared.length; i++)
-        expect(shared[i - 1]!.count).toBeGreaterThanOrEqual(shared[i]!.count);
-    }
-  });
-  it("breaks ties in editorial order and is empty when nothing is shared", () => {
-    const dirs = [{ slug: "a" }, { slug: "b" }, { slug: "c" }] as never[];
-    const c = { directions: dirs, archivedDirections: [] } as never;
-    const papers = [{ directions: ["a", "c"] }, { directions: ["a", "b"] }];
-    expect(sharedWith(c, { slug: "a" }, papers).map((s) => s.direction)).toEqual([
-      dirs[1],
-      dirs[2],
-    ]);
-    expect(sharedWith(c, { slug: "a" }, [{ directions: ["a"] }])).toEqual([]);
   });
 });
 
@@ -124,15 +98,5 @@ describe("Work with us (§D5.9)", () => {
       open_to_collaborators: false,
     });
     expect(w.show).toBe(false);
-  });
-});
-
-describe("direction 'last updated' line (§D5.11; verify VIS-12)", () => {
-  it("is hidden when it repeats the footer's site-wide date", () => {
-    expect(directionUpdatedDate("2026-10-20", "2026-10-20")).toBeNull();
-    expect(directionUpdatedDate("", "2026-10-20")).toBeNull();
-  });
-  it("is shown when the direction's content last changed on another day", () => {
-    expect(directionUpdatedDate("2026-09-30", "2026-10-20")).toBe("2026-09-30");
   });
 });

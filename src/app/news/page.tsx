@@ -20,7 +20,7 @@ export function generateMetadata(): Metadata {
   return withFeedAlternate(
     pageMetadata({
       title: "News",
-      description: `Papers, talks, awards and other news from ${site.name}, newest first.`,
+      description: `New papers, talks and awards from ${site.name}.`,
       path: "/news/",
     }),
     site.name,
@@ -37,10 +37,7 @@ export default function NewsPage() {
 
   return (
     <div className="bl-container pg nw-page">
-      <PageHeader
-        title="News"
-        lead={`Papers, talks, awards and other news from ${c.site.name}, newest first.`}
-      />
+      <PageHeader title="News" lead="New papers, talks and awards from the lab." />
 
       <div className="pg-fset nw-tools">
         {years.length > 1 ? (
@@ -81,9 +78,6 @@ export default function NewsPage() {
                   <h2 id={id} className="t-year">
                     {g.year ?? "Undated"}
                   </h2>
-                  <p className="nw-year__count">
-                    {g.items.length} {g.items.length === 1 ? "item" : "items"}
-                  </p>
                 </div>
                 <ol className="nw-list">
                   {g.items.map((n) => (

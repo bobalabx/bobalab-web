@@ -96,7 +96,7 @@ test("DOM contract: one labelled nav of real links with counts, one pearl per la
   const map = page.locator("section#map");
   await expect(map).toHaveCount(1);
   await expect(map).toHaveAttribute("aria-labelledby", "map-h");
-  await expect(map.locator("h2#map-h")).toHaveText(/^Explore: how the \w+ directions connect$/);
+  await expect(map.locator("h2#map-h")).toHaveText("How the directions connect");
   await expect(map.locator("details, summary")).toHaveCount(0);
   await expect(map.locator("figure.f1-plate")).toBeVisible();
   const band = await page.evaluate(() => {
@@ -108,11 +108,11 @@ test("DOM contract: one labelled nav of real links with counts, one pearl per la
     return [getComputedStyle(document.getElementById("map")!).backgroundColor, want];
   });
   expect(band[0]).toBe(band[1]);
-  // The one-sentence key above the plate names the marks.
+  // The short key above the plate names the marks.
   const key = map.locator(".f1-key");
   await expect(key).toHaveCount(1);
-  await expect(key).toContainText("dot is a paper, placed by year");
-  await expect(key).toContainText("pearl marks now");
+  await expect(key).toContainText("each dot a paper, placed by year");
+  await expect(key).toContainText("pearl marks today");
   const fig = page.locator("figure.f1-plate");
   await expect(fig).toHaveCount(1);
   await expect(fig.locator("figcaption")).toContainText("Figure 1.");
@@ -557,9 +557,9 @@ test("touch screens: the caption does not ask to point at marks (hover: none); a
     await expect(hint).toHaveCount(1);
     if (touch) await expect(hint).toBeHidden();
     else await expect(hint).toBeVisible();
-    // The rest of the caption stays: what counts as a paper, and the date.
+    // The rest of the caption stays, with no date stamp (copy sweep).
     await expect(page.locator("#map figcaption")).toContainText("Figure 1.");
-    await expect(page.locator("#map figcaption")).toContainText("As of");
+    await expect(page.locator("#map figcaption")).not.toContainText("As of");
     await ctx.close();
   }
 });

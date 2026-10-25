@@ -14,7 +14,7 @@ venue: SSRN working paper 3634129
 year: 2020
 doi: 10.2139/ssrn.3634129
 status: major-revision
-status_note: (2nd round) at Manufacturing & Service Operations Management
+status_note: at Manufacturing & Service Operations Management (second round)
 status_source: self-reported
 as_of: "2026-10-20"
 links:
@@ -27,7 +27,7 @@ awards:
     source: self-reported
 directions:
   - pricing-experimentation
-in_brief: Models shoppers who see higher prices as a sign of higher quality and are disappointed by smaller-than-expected discounts, builds this into a retailer's markdown plan calibrated with a consumer study, and finds that announcing markdowns in advance can pay off.
+in_brief: Some shoppers read a higher price as a sign of higher quality and are let down by smaller-than-expected discounts. The paper builds this into a retailer's markdown plan, calibrated with a consumer study, and finds that announcing markdowns in advance can pay off.
 featured: false
 draft: false
 ---

@@ -236,7 +236,7 @@ test("every materials link's accessible name includes the paper title", async ({
   }
 });
 
-test("statuses are dated on the row; one footnote says they are reported by the lab (D-13 item 7)", async ({
+test("statuses are plain labels: no 'as of' date and no 'reported by the lab' footnote (copy sweep)", async ({
   page,
 }) => {
   await open(page, "/publications/");
@@ -248,18 +248,17 @@ test("statuses are dated on the row; one footnote says they are reported by the 
       x.status !== "published" &&
       x.status !== "working-paper" &&
       x.status !== "in-progress" &&
-      x.status_source === "self-reported" &&
+      x.status !== "preprint" &&
       x.as_of,
   );
-  test.skip(!p, "no self-reported status in this build");
+  test.skip(!p, "no dated review status in this build");
   const entry = page.locator(`.pubs-results article[aria-labelledby="pub-${p!.slug}"]`).first();
-  await expect(entry.locator(".bl-pub__status")).toContainText(", as of ");
-  // No per-row hedge: the page carries one provenance footnote instead.
-  await expect(page.locator(".pubs-results")).not.toContainText("reported by the lab");
-  await expect(page.locator(".pubs-fn")).toHaveCount(1);
-  await expect(page.locator(".pubs-fn")).toContainText("as reported by the lab");
+  await expect(entry.locator(".bl-pub__status")).toHaveText(/^\S.* (at|to) [^,]+$/);
+  await expect(page.locator("main")).not.toContainText("as of ");
+  await expect(page.locator("main")).not.toContainText("reported by the lab");
+  await expect(page.locator(".pubs-fn")).toHaveCount(0);
 
-  // Work in progress says so once (the type word), not again as "In progress, as of …".
+  // Work in progress says so once (the type word), not again as "In progress".
   const wipRow = c.countedPublications.find(
     (x) => x.type === "work-in-progress" && x.status === "in-progress" && !x.status_note,
   );
@@ -269,11 +268,11 @@ test("statuses are dated on the row; one footnote says they are reported by the 
     ).toHaveCount(0);
   }
 
-  // The paper page states its one status with the date and the source.
+  // The paper page states its status as one plain line, with no date or source note.
   await open(page, `/publications/${p!.slug}/`);
-  await expect(page.locator(".pub-status__meta")).toHaveText(
-    /^As of .+, as reported by the lab\.$/,
-  );
+  await expect(page.locator(".pub-status")).toHaveText(/^\S.* (at|to) [^,]+$/);
+  await expect(page.locator(".pub-status__meta")).toHaveCount(0);
+  await expect(page.locator("main")).not.toContainText("As of ");
 });
 
 test("ledger rows have one link in the main column: the title (names are plain, P3)", async ({
@@ -319,58 +318,33 @@ test("lab members are highlighted and linked only when listed; external authors 
   }
 });
 
-test("talks known only from the PI's CV say 'reported by the lab' (CON-03)", async ({ page }) => {
-  const slug = "lee-2025-non-adoption-algorithmic-advice";
-  await page.goto("/");
-  const c = await contentFor(page);
-  const p = c.getPublication(slug);
-  test.skip(!p, "draft paper not in this build");
-  await open(page, `/publications/${slug}/`);
-  const talks = page.locator('section[aria-labelledby="talks-h"]');
-  await expect(talks.locator(".pub-talks li")).toHaveCount(p!.presentations.length);
-  // All of them from the CV: one plain line under the list, no daggers.
-  expect(p!.presentations.every((t) => !t.url)).toBe(true);
-  await expect(talks.locator(".pub-talks__src")).toHaveText("Reported by the lab.");
-  await expect(talks.locator(".pub-award__src")).toHaveCount(0);
-
-  // Some from the CV, some documented: a dagger on each CV-only talk (announced
-  // as "reported by the lab") and the awards' footnote, never "talks without a link".
-  const mixed = c.publications.find(
-    (x) => x.presentations.some((t) => t.url) && x.presentations.some((t) => !t.url),
-  );
-  test.skip(!mixed, "no paper with both kinds of talk in this build");
-  await open(page, `/publications/${mixed!.slug}/`);
-  const rows = page.locator('section[aria-labelledby="talks-h"] .pub-talks li');
-  await expect(rows.locator(".pub-award__src")).toHaveCount(
-    mixed!.presentations.filter((t) => !t.url).length,
-  );
-  await expect(rows.locator(".pub-award__src").first()).toHaveText("†, reported by the lab");
-  await expect(page.locator(".pub-talks__src")).toHaveText("† Reported by the lab.");
-  await expect(page.locator("main")).not.toContainText("without a link");
-});
-
-test("awards known only from the PI's CV are marked as reported by the lab (CON-03)", async ({
+test("talks and awards carry no provenance marks or footnotes (copy sweep, owner ruling)", async ({
   page,
 }) => {
   await page.goto("/");
   const c = await contentFor(page);
+  const withTalks = c.publications.filter((x) => x.presentations.length > 0).slice(0, 3);
   const p = c.getPublication(MS_PAPER);
-  test.skip(!p, "paper not in this build");
-  const self = p!.awards.filter((a) => a.source === "self-reported");
-  expect(self.length, "the tips paper has PI-reported awards").toBeGreaterThan(0);
-  await open(page, `/publications/${MS_PAPER}/`);
-  const awards = page.locator('section[aria-labelledby="awards-h"] .pub-award');
-  await expect(awards).toHaveCount(p!.awards.length);
-  for (const a of p!.awards) {
-    const row = awards.filter({ has: page.getByText(a.name, { exact: true }) });
-    await expect(row).toHaveCount(1);
-    await expect(row.locator(".pub-award__src")).toHaveCount(a.source === "self-reported" ? 1 : 0);
+  for (const x of [...withTalks, ...(p ? [p] : [])]) {
+    await open(page, `/publications/${x.slug}/`);
+    await expect(page.locator("main")).not.toContainText(/reported by the lab/i);
+    await expect(page.locator(".pub-award__src, .pub-talks__src, .pub-fn")).toHaveCount(0);
+    if (x.presentations.length)
+      await expect(page.locator(".pub-talks li")).toHaveCount(x.presentations.length);
+    if (x.awards.length) {
+      await expect(page.locator('section[aria-labelledby="awards-h"] .pub-award')).toHaveCount(
+        x.awards.length,
+      );
+      // No generated "4 awards, 2019 to 2020" summary above the list.
+      await expect(page.locator(".pub-side")).not.toContainText(/\d+ awards?, \d{4}/);
+    }
   }
-  // A dagger on the row (announced as "reported by the lab"), one footnote below the list.
-  await expect(page.locator(".pub-award__src").first()).toHaveText("†, reported by the lab");
-  await expect(page.locator('section[aria-labelledby="awards-h"] .pub-fn')).toHaveText(
-    "† Reported by the lab.",
-  );
+  // An earlier title is a short parenthesis, not a repeated "Under its earlier title" line.
+  if (p?.awards.some((a) => a.under_title)) {
+    await open(page, `/publications/${MS_PAPER}/`);
+    await expect(page.locator("main")).not.toContainText("Under its earlier title");
+    await expect(page.locator(".pub-award__under").first()).toHaveText(/^\(as “.+”\)$/);
+  }
 });
 
 // ---------------------------------------------------------------------------
@@ -452,8 +426,12 @@ test("work in progress pages say so and carry no Scholar meta", async ({ page })
   const wip = c.inProgress[0];
   test.skip(!wip, "no work in progress in this build");
   await open(page, `/publications/${wip!.slug}/`);
-  // "Work in progress" (the type) or "In progress: no public version yet" (other types, D-05).
-  await expect(page.locator(".pub-side .pub-type")).toContainText(/in progress/i);
+  // The type word only (copy sweep: no "In progress: no public version yet" line); the
+  // page has no PDF or DOI to offer, and the list files it under "Work in progress".
+  await expect(page.locator(".pub-side .pub-type")).toHaveText(
+    /^(Work in progress|Working paper|Journal article|Conference paper|Book chapter|Thesis|Dissertation|Other)$/,
+  );
+  await expect(page.locator("main")).not.toContainText("no public version");
   await expect(page.locator('meta[name="citation_title"]')).toHaveCount(0);
   await expect(page.locator(".pub-cite")).toHaveCount(0);
 });
@@ -567,7 +545,7 @@ test("the Bastani plate shows only when verified or in preview, with its source 
   const plate = page.locator("figure.plate");
   await expect(plate).toHaveCount(want ? 1 : 0);
   test.skip(!want, "plate not verified and not a preview build");
-  await expect(plate.locator("figcaption")).toContainText("not data");
+  await expect(plate.locator("figcaption")).toContainText("it shows no results");
   await expect(plate.locator(".plate-src")).toContainText("arXiv:2108.08454");
   // Labels are HTML, never SVG text.
   expect(await plate.locator("svg text").count()).toBe(0);

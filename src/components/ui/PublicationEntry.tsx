@@ -6,21 +6,17 @@
  *   meta  — the type word and year as plain words, direction names with their
  *           16 px line segment, and the materials as plain text links.
  * Two columns from 64rem (main | 17.5rem meta), stacked below.
- * Review-status provenance ("reported by the lab") is no longer repeated on
- * every row (D-13 item 7): pages print one footnote instead (see
- * `needsProvenanceNote`); `statusLine(…, { provenance: true })` keeps the
- * inline wording where a page still needs it.
+ * The review status is a plain academic label, with no "as of" date and no
+ * provenance note (copy sweep, docs/CONTENT-QUESTIONS.md).
  */
 import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
 import type { PublicationView, AuthorView } from "@/lib/content/load";
-import { formatDate } from "@/lib/content/dates";
 import { pageRange, typeWord } from "@/lib/publications/csl";
 import { Badge, DraftBadge } from "./Badge";
 import { PearlTagList } from "./PearlTag";
 import { MaterialsRow, materialsFromPublication } from "./MaterialsRow";
 import { PUBLICATION_STATUS_LABELS } from "./labels";
-import { SELF_REPORTED_WORDING, isSelfReportedAward } from "@/lib/publications/provenance";
 
 type Heading = "h2" | "h3" | "h4";
 
@@ -63,42 +59,21 @@ function Authors({ authors, currentPerson }: { authors: AuthorView[]; currentPer
 }
 
 /**
- * "Major revision at M&SOM · as of Apr 2026".
- * Pass the publication `type` so a bare "Working paper" status on a working
- * paper (which only repeats the type word and claims nothing) is dropped
- * (WP3 request 3). `provenance: true` appends "reported by the lab" for a
- * self-reported status; by default the page carries one provenance footnote
- * instead of an inline hedge on every row (D-13 item 7).
+ * "Major revision at Manufacturing & Service Operations Management": the status
+ * as a plain label. Pass the publication `type` so a bare "Working paper" status
+ * on a working paper (which only repeats the type word and claims nothing) is
+ * dropped (WP3 request 3). Pass the `venue` too: after "arXiv preprint" the
+ * status "Preprint v2" only adds the version, so it is left out.
  */
 export function statusLine(
-  p: Pick<PublicationView, "status" | "status_note" | "as_of" | "status_source">,
+  p: Pick<PublicationView, "status" | "status_note"> & { venue?: string },
   type?: PublicationView["type"],
-  opts: { provenance?: boolean } = {},
 ): string | null {
   if (p.status === "published") return null;
   if (p.status === "working-paper" && type === "working-paper" && !p.status_note) return null;
   if (p.status === "in-progress" && type === "work-in-progress" && !p.status_note) return null;
-  const parts = [
-    `${PUBLICATION_STATUS_LABELS[p.status]}${p.status_note ? ` ${p.status_note}` : ""}`,
-  ];
-  if (p.as_of) parts.push(`as of ${formatDate(p.as_of)}`);
-  if (opts.provenance && p.status_source === "self-reported") parts.push(SELF_REPORTED_WORDING);
-  return parts.join(" · ");
-}
-
-/**
- * True when any listed paper shows a status or award the lab reported itself,
- * so the page should print its one provenance footnote (D-13 item 7), e.g.
- * "Review status and dates are as reported by the lab." (wording pending PI sign-off).
- */
-export function needsProvenanceNote(
-  pubs: Array<Pick<PublicationView, "status" | "status_source" | "awards">>,
-): boolean {
-  return pubs.some(
-    (p) =>
-      (p.status !== "published" && p.status_source === "self-reported") ||
-      p.awards.some((a) => isSelfReportedAward(a)),
-  );
+  if (p.status === "preprint" && /preprint/i.test(p.venue ?? "")) return null;
+  return `${PUBLICATION_STATUS_LABELS[p.status]}${p.status_note ? ` ${p.status_note}` : ""}`;
 }
 
 export function PublicationEntry({

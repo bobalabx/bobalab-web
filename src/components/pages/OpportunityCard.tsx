@@ -1,11 +1,10 @@
 /**
- * One opportunity on /join/ (DECISIONS D-05), a ruled ledger row: title, route,
- * body and links in the track; status, closing date and "as of" date at the
- * right. Nothing is inferred and statuses stay honest: an unknown status shows
- * a dash (the page's one footnote explains it, D-13 item 7; screen readers
- * still hear "Status not confirmed" in the row), and "Apply" appears only while
- * the opportunity is open. The "as of" date is shown per row unless the page
- * states one shared date in its footnote (`asOfInNote`).
+ * One opportunity on /join/ (DECISIONS D-05), a ruled ledger row: title, route
+ * (a sentence of its own, from content), body and links in the track; status
+ * and closing date at the right. Nothing is inferred and statuses stay honest:
+ * a status the lab has not set ("unknown") is simply not shown (copy sweep: no
+ * dash, no "not confirmed" legend, no "as of" dates), and "Apply" appears only
+ * while the opportunity is open.
  */
 import type { OpportunityView } from "@/lib/content/load";
 import { Badge, DraftBadge } from "@/components/ui/Badge";
@@ -14,21 +13,10 @@ import { Prose } from "@/components/ui/Prose";
 import { mailtoHref } from "./MailLink";
 import "./pages.css";
 
-/**
- * Label in front of `route` (how to take part). A bare route such as "Email
- * the lab" reads like a stray line without it. UI wording only, no lab facts.
- */
-const ROUTE_LABELS: Record<OpportunityView["audience"], string> = {
-  students: "How to join",
-  "phd-postdoc": "How to join",
-  partners: "Next step",
-  press: "Next step",
-};
-
-/** The status in words; "Status not confirmed" for an unknown status. */
-export function statusLabel(o: Pick<OpportunityView, "status" | "isOpen">): string {
+/** The status in words, or null when the lab has not set one ("unknown" shows nothing). */
+export function statusLabel(o: Pick<OpportunityView, "status" | "isOpen">): string | null {
   if (o.isOpen) return o.status === "rolling" ? "Open, rolling" : "Open";
-  if (o.status === "unknown") return "Status not confirmed";
+  if (o.status === "unknown") return null;
   return "Closed";
 }
 
@@ -49,46 +37,27 @@ export function urlLabel(url: string): string {
   return host;
 }
 
-/** True when the lab has not confirmed whether the opportunity is open. */
-export const isUnconfirmed = (o: Pick<OpportunityView, "status" | "isOpen">) =>
-  !o.isOpen && o.status === "unknown";
-
 /** Open first, then closed (a known status), then unconfirmed; published before drafts; then title. */
 export function compareOpportunities(a: OpportunityView, b: OpportunityView): number {
   const rank = (o: OpportunityView) => (o.isOpen ? 0 : o.status === "unknown" ? 2 : 1);
   return rank(a) - rank(b) || Number(a.draft) - Number(b.draft) || a.title.localeCompare(b.title);
 }
 
-/** The one "as of" date every opportunity shares, if they all carry the same one. */
-export function sharedAsOf(opps: Array<Pick<OpportunityView, "as_of">>): string | undefined {
-  const dates = new Set(opps.map((o) => o.as_of ?? ""));
-  if (dates.size !== 1) return undefined;
-  const [d] = [...dates];
-  return d || undefined;
-}
-
-export function OpportunityStatus({
-  o,
-  asOfInNote = false,
-}: {
-  o: OpportunityView;
-  asOfInNote?: boolean;
-}) {
+export function OpportunityStatus({ o }: { o: OpportunityView }) {
+  const label = statusLabel(o);
   const pastClose = (o.status === "open" || o.status === "rolling") && !o.isOpen && o.closes_on;
+  if (!label && !o.draft) return null;
   return (
     <p className="pg-opp__status">
-      {/* Phones have no column head, so the row names its status column. */}
-      <span className="pg-opp__statlabel" aria-hidden="true">
-        Status:
-      </span>
-      {isUnconfirmed(o) ? (
-        <span className="pg-opp__unconfirmed">
-          <span aria-hidden="true">–</span>
-          <span className="vh">{statusLabel(o)}</span>
-        </span>
-      ) : (
-        <Badge>{statusLabel(o)}</Badge>
-      )}
+      {label ? (
+        <>
+          {/* Phones have no column head, so the row names its status column. */}
+          <span className="pg-opp__statlabel" aria-hidden="true">
+            Status:
+          </span>
+          <Badge>{label}</Badge>
+        </>
+      ) : null}
       {o.isOpen && o.closes_on ? (
         <span>
           Closes <DateText value={o.closes_on} />
@@ -99,11 +68,6 @@ export function OpportunityStatus({
           on <DateText value={o.closes_on} />
         </span>
       ) : null}
-      {o.as_of ? (
-        <span className={asOfInNote ? "vh" : undefined}>
-          as of <DateText value={o.as_of} />
-        </span>
-      ) : null}
       <DraftBadge show={o.draft} />
     </p>
   );
@@ -111,12 +75,10 @@ export function OpportunityStatus({
 
 export function OpportunityCard({
   o,
-  asOfInNote = false,
   headingLevel: H = "h3",
   labEmail,
 }: {
   o: OpportunityView;
-  asOfInNote?: boolean;
   headingLevel?: "h3" | "h4";
   /**
    * The lab's own address, which the page already gives in its lead and in every
@@ -132,13 +94,8 @@ export function OpportunityCard({
       <H className="pg-opp__title" id={id}>
         {o.title}
       </H>
-      <OpportunityStatus o={o} asOfInNote={asOfInNote} />
-      {o.route ? (
-        <p className="pg-opp__route">
-          <span className="pg-opp__label">{ROUTE_LABELS[o.audience]}:</span>{" "}
-          <span className="pg-opp__route-text">{o.route}</span>
-        </p>
-      ) : null}
+      <OpportunityStatus o={o} />
+      {o.route ? <p className="pg-opp__route">{o.route}</p> : null}
       {o.body?.trim() ? <Prose source={o.body} /> : null}
       {o.url || (o.isOpen && o.apply_url) || email ? (
         <ul className="pg-links" aria-label={`Links for ${o.title}`}>

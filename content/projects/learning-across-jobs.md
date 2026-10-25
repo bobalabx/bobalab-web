@@ -1,5 +1,6 @@
 ---
 title: Learning Across Jobs
+summary: Does skill learned in one job carry over to another?
 directions:
   - learning-on-the-job
 status: active

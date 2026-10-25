@@ -339,7 +339,7 @@ test("PI profile: h1, breadcrumb, ProfilePage + Person JSON-LD", async ({ page }
     p.authorList.some((a) => a.person?.slug === pi!.slug),
   );
   const counted = authored.filter((p) => p.counted).length;
-  // The newest five are listed; "See all N" carries the rest (VIS-08).
+  // The newest five are listed; "All N publications" carries the rest (VIS-08).
   if (counted)
     await expect(page.locator('section[aria-labelledby="publications"] .bl-pub')).toHaveCount(
       Math.min(counted, 5),
@@ -384,9 +384,7 @@ test("PI profile: h1, breadcrumb, ProfilePage + Person JSON-LD", async ({ page }
     await expect(
       // (Chromium puts a space before the visually hidden part of the name.)
       page.getByRole("link", {
-        name: new RegExp(
-          `^(View in Publications|See all ${counted} in Publications) ?, filtered to ${pi!.name}$`,
-        ),
+        name: new RegExp(`^(View in Publications|All ${counted} publications) ?by ${pi!.name}$`),
       }),
     ).toHaveAttribute("href", `/publications/?member=${pi!.slug}`);
 });

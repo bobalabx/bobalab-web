@@ -23,7 +23,7 @@ import { JsonLd } from "@/components/ui/JsonLd";
 import { Prose } from "@/components/ui/Prose";
 import { NEWS_TYPE_LABELS } from "@/components/ui/labels";
 import { PageHeader } from "@/components/pages/PageHeader";
-import { NewsRelated, hasRelated, showsReportedStatus } from "@/components/news/NewsRelated";
+import { NewsRelated, hasRelated } from "@/components/news/NewsRelated";
 import { NewsPager } from "@/components/news/NewsPager";
 import { withFeedAlternate } from "@/components/news/FeedLink";
 import "@/components/news/news.css";
@@ -161,11 +161,6 @@ export default async function NewsItemPage({ params }: { params: Promise<Params>
             </div>
             <div>
               <NewsRelated item={item} />
-              {/* Only when a status the lab reported is printed in this row (awards
-                  are not shown here); same wording as the direction and project pages. */}
-              {showsReportedStatus(item) ? (
-                <p className="pg-fn">Review status and dates are as reported by the lab.</p>
-              ) : null}
             </div>
           </aside>
         ) : null}

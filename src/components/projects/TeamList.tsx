@@ -13,7 +13,7 @@
 import Link from "next/link";
 import type { ProjectView } from "@/lib/content/load";
 import type { PublicPerson } from "@/lib/content/people";
-import { ROLE_LABELS, initials } from "@/lib/content/people";
+import { ROLE_LABELS, formerRole, initials } from "@/lib/content/people";
 import { Pearl } from "@/components/ui/Pearl";
 import { Img } from "@/components/ui/Img";
 import { DraftBadge } from "@/components/ui/Badge";
@@ -23,12 +23,13 @@ export function hasTeam(p: ProjectView): boolean {
   return projectTeamRows(p).length + p.visibleCollaborators.length + p.visiblePartners.length > 0;
 }
 
+/** "PhD student, IEOR" · "Former PhD student, IEOR" · the PI's title. */
 export function roleLine(m: PublicPerson): string {
   const role =
     m.role === "pi" && m.title
       ? m.title
       : m.isAlumni
-        ? `Alumni, ${ROLE_LABELS[m.role].one}`
+        ? formerRole(m.role)
         : ROLE_LABELS[m.role].one;
   return m.program && m.role !== "pi" ? `${role}, ${m.program}` : role;
 }

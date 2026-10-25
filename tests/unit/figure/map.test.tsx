@@ -56,7 +56,7 @@ const textOf = (html: string, cls: string) => {
 
 describe("map variant markup", () => {
   for (const set of ["n2", "n3", "n4", "n8", "content"]) {
-    it(`${set}: heading + one key sentence before the plate, short caption`, () => {
+    it(`${set}: heading + a short plain-sentence key before the plate, short caption`, () => {
       const m = model(set);
       const html = renderToStaticMarkup(<PearlFigure model={m} heading={H} />);
       expect(html).toContain('class="f1 f1--map"');
@@ -67,15 +67,18 @@ describe("map variant markup", () => {
       // Every glyph of the key is decorative.
       for (const g of html.match(/<i class="f1-k [^"]+"[^>]*>/g) ?? [])
         expect(g).toContain('aria-hidden="true"');
-      // One sentence: exactly one full stop, at the end (each layout variant).
+      // Short plain sentences, not one colon-and-semicolon chain (copy sweep).
       const key = textOf(html, "f1-key");
-      expect(key.startsWith("One line per direction: each dot is a paper, placed by year")).toBe(
+      expect(key.startsWith("Each line is a direction and each dot a paper, placed by year.")).toBe(
         true,
       );
-      expect((key.match(/\./g) ?? []).length).toBe(1);
+      expect(key).not.toMatch(/: /);
       expect(key.trim().endsWith(".")).toBe(true);
-      // The short caption leaves the encoding to the key.
-      expect(html).toContain("<b>Figure 1.</b>");
+      // The short caption leaves the encoding to the key, with no inclusion rule or date stamp.
+      expect(html).toContain("<b>Figure 1.</b> The lab’s papers by direction and year.");
+      expect(html).not.toMatch(
+        /with a public version or a documented talk|Order within a year|As of /,
+      );
       expect(html).not.toContain("Lines follow the lab");
       expect(html).not.toContain("a vertical link joins a paper that belongs");
       // The figure itself is unchanged: one pearl per lane, links with counts.
@@ -87,10 +90,10 @@ describe("map variant markup", () => {
     const m = model("content");
     const html = renderToStaticMarkup(<PearlFigure model={m} heading={H} />);
     if (m.papers.some((p) => p.lanes.length > 1)) {
-      expect(html).toMatch(/class="f1-cv-l">a <i[^>]*><\/i>vertical link joins a paper shared by/);
-      expect(html).toMatch(/class="f1-cv-r">a <i[^>]*><\/i>ringed dot is a paper shared by/);
+      expect(html).toMatch(/class="f1-cv-l">A <i[^>]*><\/i>vertical link joins a paper shared by/);
+      expect(html).toMatch(/class="f1-cv-r">A <i[^>]*><\/i>ringed dot is a paper shared by/);
       expect(html).toContain(
-        'class="f1-cap-m">; papers shared with another direction are named under each line',
+        'class="f1-cap-m"> Papers shared with another direction are listed under each line.',
       );
     }
     if (m.lanes.some((l) => l.wip.length))
@@ -105,7 +108,7 @@ describe("map variant markup", () => {
     expect(h2).not.toContain("vertical link");
     expect(h2).not.toContain("open rings");
     expect(textOf(h2, "f1-key")).toBe(
-      "One line per direction: each dot is a paper, placed by year; the pearl marks now.",
+      "Each line is a direction and each dot a paper, placed by year. The pearl marks today.",
     );
   });
 
@@ -114,7 +117,8 @@ describe("map variant markup", () => {
     expect(html).not.toContain("f1-key");
     expect(html).not.toContain("f1-head");
     expect(html).toContain('class="f1"');
-    expect(html).toContain("Lines follow the lab’s own order of directions.");
+    expect(html).toContain("<b>Figure 1.</b> Papers in the lab’s");
+    expect(html).not.toMatch(/Order within a year|As of |documented talk/);
   });
 });
 

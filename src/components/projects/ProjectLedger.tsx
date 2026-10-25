@@ -11,8 +11,9 @@
  * "Archived". "Active" is the default state of almost every project, so it is
  * left out (P3 project row: "Completed" only when true; AUDIT P1).
  * Used on direction pages (`currentSlug` = that direction) and on /projects/
- * (`currentSlug` = the group's direction). `li[data-status]` feeds the
- * optional status filter.
+ * (`currentSlug` = the group's direction). "Also in" only when the project
+ * belongs to `currentSlug` too; a related project from another direction just
+ * names its directions. `li[data-status]` feeds the optional status filter.
  */
 import Link from "next/link";
 import type { ProjectView } from "@/lib/content/load";
@@ -51,6 +52,7 @@ export function ProjectLedger({
       </div>
       <ol className="pj-table__rows" role="list" aria-label={label}>
         {projects.map((p) => {
+          const inCurrent = p.directionRefs.some((d) => d.slug === currentSlug);
           const others = p.directionRefs.filter((d) => d.slug !== currentSlug);
           const papers = projectPapersCell(p);
           const people = projectTeamRows(p).length + p.visibleCollaborators.length;
@@ -64,7 +66,7 @@ export function ProjectLedger({
                 {p.summary && <p className="dr-project__summary">{p.summary}</p>}
                 {others.length > 0 && (
                   <p className="pj-also">
-                    Also in{" "}
+                    {inCurrent ? "Also in " : null}
                     {others.map((o, i) => (
                       <span key={o.slug} className="pj-also__d" data-swatch={o.color}>
                         {i > 0 ? (i === others.length - 1 ? " and " : ", ") : null}

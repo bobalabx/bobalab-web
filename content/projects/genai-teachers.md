@@ -1,6 +1,6 @@
 ---
 title: Generative AI and Teachers' Work
-summary: A close look at how K-12 teachers use ChatGPT, how it changes their productivity and task choices, and what that says about AI at work.
+summary: How K-12 teachers use ChatGPT, and how it changes their productivity and the tasks they choose.
 directions:
   - ai-at-work
 status: active

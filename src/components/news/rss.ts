@@ -15,7 +15,8 @@
 import type { Content, NewsView } from "@/lib/content/load";
 import { absoluteUrl } from "@/lib/seo/jsonld";
 import { markdownToHtml } from "@/lib/content/markdoc";
-import { buildDate, formatDate, LAB_TIME_ZONE } from "@/lib/content/dates";
+import { buildDate, LAB_TIME_ZONE } from "@/lib/content/dates";
+import { labTagline } from "@/lib/seo/metadata";
 import { NEWS_TYPE_LABELS } from "@/components/ui/labels";
 
 export const FEED_PATH = "/news/feed.xml";
@@ -134,14 +135,9 @@ export interface FeedOptions {
   limit?: number;
 }
 
+/** The item's summary as written; no templated "Event: …" line (the summary says it). */
 function itemDescription(n: NewsView): string {
-  const parts: string[] = [];
-  if (n.summary) parts.push(n.summary);
-  if (n.event_date) {
-    const when = formatDate(n.event_date);
-    parts.push(`Event: ${when}${n.location ? `, ${n.location}` : ""}.`);
-  }
-  return parts.join(" ");
+  return n.summary ?? "";
 }
 
 function renderItem(n: NewsView, c: Content): string {
@@ -172,7 +168,8 @@ export function buildRssFeed(c: Content, opts: FeedOptions = {}): string {
   const items = c.news.slice(0, opts.limit ?? FEED_MAX_ITEMS);
   const newsUrl = absoluteUrl("/news/", site.site_url);
   const selfUrl = absoluteUrl(FEED_PATH, site.site_url);
-  const description = `News from ${site.name}, the ${site.long_name} at the ${site.affiliation_text}.`;
+  const pi = c.people.find((p) => p.role === "pi" && !p.isAlumni);
+  const description = `News from ${labTagline(site, pi?.name)}.`;
   const newest = items[0] ? contentDateToInstant(items[0].date) : null;
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
