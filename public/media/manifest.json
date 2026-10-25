@@ -72,12 +72,12 @@
       ]
     },
     "/uploads/people/jiaming-guan.jpg": {
-      "width": 480,
-      "height": 480,
+      "width": 400,
+      "height": 400,
       "variants": [
         {
-          "width": 480,
-          "src": "/media/people/jiaming-guan-480.webp"
+          "width": 400,
+          "src": "/media/people/jiaming-guan-400.webp"
         }
       ]
     },
