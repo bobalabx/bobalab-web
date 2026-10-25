@@ -1,0 +1,133 @@
+/* Prototype A, "Four Pearls". Base: src/styles/tokens.css (P3 "Lines" tokens). */
+@font-face {
+  font-family: "Archivo";
+  src: url("fonts/archivo-latin-wdth-normal.woff2") format("woff2");
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+}
+@view-transition { navigation: auto; }
+
+:root {
+  color-scheme: light dark;
+  --paper: #ffffff;
+  --band: #f2f3f1;
+  --ink: #111410;
+  --muted: #50564f;
+  --rule: #80877f;
+  --hairline: #d9dcd6;
+  --sans: "Archivo", Arial, Helvetica, sans-serif;
+  --gutter: 16px;
+  --max: 86rem;
+  --lab: 100%;
+  --sec-gap: 72px;
+  --t-meta: 0.875rem;
+  --t-body: 1.0625rem;
+  --t-title: 1.25rem;
+  --t-h2: 2rem;
+  --t-hero: clamp(2.5rem, 0.6rem + 5.1vw, 5.25rem);
+  --t-lede: clamp(1.125rem, 0.95rem + 0.5vw, 1.375rem);
+  --ease: cubic-bezier(.2, .7, .2, 1);
+
+  /* Pearl flavours: each research direction is a tapioca pearl, tinted with the
+     boba flavour its swatch is named after (tokens.css [data-swatch]). */
+  --bp: #2b4fa8;  --bp-c: #2c4282; --bp-e: #18244f;   /* butterfly pea */
+  --ly: #a12c5a;  --ly-c: #7d2749; --ly-e: #471128;   /* lychee */
+  --ma: #4c7a1e;  --ma-c: #40621f; --ma-e: #22360f;   /* matcha */
+  --oo: #6b4500;  --oo-c: #5f3f10; --oo-e: #321e04;   /* oolong */
+  --wm-pearl: var(--ink);
+}
+@media (min-width: 40rem) { :root { --gutter: 24px; } }
+@media (min-width: 64rem) { :root { --gutter: 32px; --lab: 17rem; --sec-gap: 112px; } }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #101210;
+    --band: #181b18;
+    --ink: #e7eae5;
+    --muted: #a6aca4;
+    --rule: #7a8178;
+    --hairline: #2b302b;
+    --bp: #8ea4f7;  --bp-c: #7086cc; --bp-e: #5066b0;
+    --ly: #f590ae;  --ly-c: #be6890; --ly-e: #9c4a70;
+    --ma: #a8da84;  --ma-c: #7aa553; --ma-e: #557d33;
+    --oo: #c4943a;  --oo-c: #b08444; --oo-e: #8a6329;
+  }
+}
+[data-d="algorithmic-advice"] { --c: var(--bp); --pc: var(--bp-c); --pe: var(--bp-e); }
+[data-d="ai-at-work"]         { --c: var(--ly); --pc: var(--ly-c); --pe: var(--ly-e); }
+[data-d="learning-on-the-job"]{ --c: var(--ma); --pc: var(--ma-c); --pe: var(--ma-e); }
+[data-d="platform-work"]      { --c: var(--oo); --pc: var(--oo-c); --pe: var(--oo-e); }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 var(--t-body)/1.6 var(--sans);
+  font-stretch: 100%;
+  font-kerning: normal;
+  font-variant-numeric: tabular-nums;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 0.22em; text-decoration-color: var(--rule); }
+a:hover { text-decoration-color: currentColor; text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+.skip { position: absolute; left: 8px; top: -60px; background: var(--ink); color: var(--paper); padding: 8px 12px; z-index: 10; }
+.skip:focus { top: 8px; }
+
+/* ---------- header ---------- */
+.site-head { padding-top: 20px; }
+.site-head .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 32px; }
+.brand { display: inline-flex; color: var(--ink); padding: 6px 0; }
+.wordmark { height: 26px; width: auto; display: block; }
+.wordmark .wm-pearl { fill: var(--wm-pearl); transition: fill .35s var(--ease); }
+.nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px 28px; flex-wrap: wrap; }
+.nav a { display: inline-block; padding: 10px 0; text-decoration: none; font-size: 1rem; }
+.nav a:hover, .nav a[aria-current="page"] { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.35em; }
+@media (max-width: 39.99rem) {
+  .site-head .wrap { display: block; }
+  .nav ul { justify-content: space-between; gap: 0; margin-top: 4px; }
+  .nav a { padding: 10px 0; font-size: 0.97rem; }
+  .wordmark { height: 22px; }
+}
+
+/* ---------- type ---------- */
+h1, h2, h3 { margin: 0; font-weight: 700; }
+.display { font-stretch: 70%; letter-spacing: -0.005em; line-height: 0.98; }
+h2.sec-title { font-size: var(--t-h2); font-stretch: 72%; line-height: 1.05; }
+.meta { font-size: var(--t-meta); color: var(--muted); line-height: 1.45; }
+
+/* ---------- sections ---------- */
+.sec { margin-top: var(--sec-gap); }
+.sec__grid { display: grid; grid-template-columns: var(--lab) 1fr; gap: 16px 32px; border-top: 1px solid var(--ink); padding-top: 20px; }
+@media (max-width: 63.99rem) { .sec__grid { grid-template-columns: 1fr; } }
+.sec__more { margin-top: 24px; font-size: 1rem; }
+
+/* ---------- footer ---------- */
+.site-foot { margin-top: var(--sec-gap); padding-bottom: 40px; }
+.site-foot .grid { display: grid; grid-template-columns: var(--lab) repeat(3, 1fr); gap: 24px 32px; border-top: 1px solid var(--ink); padding-top: 24px; font-size: var(--t-meta); line-height: 1.55; }
+.site-foot h2 { font-size: var(--t-meta); font-weight: 600; margin-bottom: 6px; }
+.site-foot ul { list-style: none; padding: 0; margin: 0; }
+.site-foot li { margin: 2px 0; }
+.site-foot p { margin: 0; color: var(--muted); }
+.colophon { margin-top: 28px; font-size: var(--t-meta); color: var(--muted); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.flav { display: inline-flex; align-items: center; gap: 6px; }
+.flav i { width: 9px; height: 9px; border-radius: 50%; background: var(--pe); display: inline-block; }
+@media (max-width: 63.99rem) { .site-foot .grid { grid-template-columns: 1fr 1fr; } }
+
+/* ---------- the pearl (shared by both pages) ---------- */
+.disc { display: block; width: 100%; height: auto; overflow: visible; }
+.disc .ring { fill: none; stroke: var(--ink); stroke-width: 3; opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}
+::view-transition-group(pearl) { animation-duration: .5s; animation-timing-function: cubic-bezier(.3,.7,.1,1); }
+@media (forced-colors: active) { .disc circle { fill: CanvasText !important; } }
+.pdisc { display: block; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .28s; }
+.sec__grid > * { min-width: 0; }

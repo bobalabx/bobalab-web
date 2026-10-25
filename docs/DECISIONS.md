@@ -134,3 +134,28 @@ Labels: DOCUMENTED (primary source), MEASURED (we ran it), HYPOTHESIS, UNKNOWN.
   9. **Unchanged:** all URLs, content, the CMS, the static export, accessibility (WCAG 2.2 AA), budgets and tests. Tests are updated to the new structure, never deleted to make them pass.
 - **Not deployed:** the work lives on branch `redesign`. `main` and the live site are untouched until the owner and PI approve.
 - **Rollback:** `git checkout main`.
+
+## D-14 Simpler homepage: "the boba cup" (owner feedback on D-13, 2026-10-25)
+- **Problem (owner):** the D-13 homepage was too complicated. The research timeline needed a legend: years, dots, cross-links, pearls, rings. The site had also lost BOBALAB's warmth.
+- **Evidence:** `docs/simplify/`.
+  - `REFS-SIMPLE.md`: 12 clear-and-original reference sites, 10 principles and a first-screen checklist.
+  - Four homepage prototypes (`prototypes/a–d`) and `JUDGE.md`.
+  - Simulated five-second tests with three no-context personas per design.
+  - Measured complexity: the current homepage scores 5/7, every prototype 2/7.
+- **Decision:** prototype **C "The beaker"** is the base, with the judge's hybrid refinements R1–R18 in `docs/simplify/JUDGE.md`.
+  - **First screen:** the hero is a large plain statement; a "who" line naming Prof. Park Sinchaisri and UC Berkeley Haas; a concrete "why" line (≤ 60 words in all); and two links, "Explore the research" and "Read the papers".
+  - **The cup:** a flat, line-drawn boba cup (tea-tinted fill, straw, three faint graduation ticks). The four direction pearls rest on its floor, labelled like a scientific illustration with leader lines. The pearls are flat (no gloss, gradient or shadow), about 56 px on desktop and 36 px on mobile, with ≥ 48 px hit areas.
+  - **Labels look clickable at rest** (thin underline in the direction colour). A hint reads "Pick a pearl…" (desktop) or "Tap a pearl…" (touch).
+  - **Picking a pearl** (click, tap, Enter or Space) makes it rise (buoyancy, about 350 ms, finite). It reveals at most three items: a short human `home_question` (new optional field, ≤ 90 characters, falling back to `question`); one finding, only when `findings[]` is filled (otherwise "A first read: <a paper>"); and "Explore <direction>" with counts. "Explore" morphs the pearl into the direction page (the existing `pearl-{slug}` view transition).
+  - **Closing:** one pearl at a time; Esc, picking it again or tapping outside sinks it and returns focus. Hover only lifts the pearl and underlines its label.
+  - **Wordmark:** the O tints to the open direction's colour.
+  - **No JS:** the server renders an `<ol>` of links to `/research/<slug>/`.
+  - **Geometry** is defined for 3, 4 and 5 live directions, plus an empty state.
+  - **Below the fold:** new papers (3 ruled rows) beside news (4 dated lines); then people (round consented photos with first names, counts as a sentence, no initials discs); then the footer.
+- **The timeline is not deleted.** It moves to `/research/` as `<section id="map">`, "Explore: how the four directions connect", in a tinted band with a one-sentence key, using the existing `PearlFigure`. The homepage links to it once: "See how the four directions connect".
+- **Tokens:**
+  - a scoped `--t-display` for the home h1, about 5–5.5rem desktop and 2.5–2.75rem mobile. This is the only exception to the 2.25rem cap.
+  - `--tea` #F4ECE2 and `--tea-dark` #211C17, used for the cup fill only.
+  - The rest of D-13 stays: Archivo, ink on white, ledgers, no cards or pills, and real figures.
+- **Copy:** new hero lines and the `home_question` texts are paraphrases of existing content. They are logged for PI approval in `CONTENT-QUESTIONS.md`.
+- **Not deployed:** this work is on branch `simplify`. Merge only with the owner's explicit approval. **Rollback:** `git checkout main`.

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOBALAB · How people learn to work with algorithms</title>
+<meta name="description" content="BOBALAB is Prof. Park Sinchaisri's research lab at Berkeley Haas. We study how people learn, decide and work alongside algorithms and AI.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/archivo-latin-wdth-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="c.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+  <header class="hd">
+    <a class="mark" href="index.html" aria-label="BOBALAB, home"><svg viewBox="0 0 546.55 109.5" role="img" aria-label="BOBALAB" focusable="false"><g fill="currentColor"><path d="M4 105.5V5.34H39.2Q47.65 5.34 53.53 8.21Q59.4 11.07 62.46 16.43Q65.51 21.78 65.51 29.32Q65.51 35.55 63.61 40.3Q61.71 45.05 58.51 48.21Q55.3 51.38 51.1 53.15V53.73Q55.68 55.08 59.39 57.84Q63.1 60.6 65.24 65.34Q67.38 70.09 67.38 77.48Q67.38 87.42 63.39 93.61Q59.41 99.79 52.01 102.65Q44.61 105.5 34.49 105.5ZM23.18 88.82H36.4Q42.41 88.82 45.13 85.51Q47.84 82.19 47.84 75.32Q47.84 71.46 46.71 68.57Q45.58 65.68 43.1 64.1Q40.62 62.52 36.54 62.52H23.18ZM23.18 46.93H35.57Q39.29 46.93 41.64 45.24Q43.98 43.56 45.14 40.56Q46.3 37.57 46.3 33.51Q46.3 28.08 43.59 24.91Q40.87 21.73 35.79 21.73H23.18Z"/><circle class="pearl-o" cx="127.29" cy="55.5" r="51.5"/><path d="M191.7 105.5V5.34H226.9Q235.36 5.34 241.23 8.21Q247.11 11.07 250.16 16.43Q253.21 21.78 253.21 29.32Q253.21 35.55 251.32 40.3Q249.42 45.05 246.21 48.21Q243 51.38 238.81 53.15V53.73Q243.38 55.08 247.09 57.84Q250.8 60.6 252.94 65.34Q255.08 70.09 255.08 77.48Q255.08 87.42 251.1 93.61Q247.12 99.79 239.72 102.65Q232.32 105.5 222.19 105.5ZM210.88 88.82H224.1Q230.12 88.82 232.83 85.51Q235.55 82.19 235.55 75.32Q235.55 71.46 234.42 68.57Q233.28 65.68 230.8 64.1Q228.32 62.52 224.25 62.52H210.88ZM210.88 46.93H223.27Q227 46.93 229.34 45.24Q231.69 43.56 232.85 40.56Q234 37.57 234 33.51Q234 28.08 231.29 24.91Q228.58 21.73 223.49 21.73H210.88Z"/><path d="M258.53 105.5 283.24 5.34H308.82L333.64 105.5H313.16L308.28 84.41H283.08L278.33 105.5ZM286.15 68.19H305.23L299.13 39.14Q298.92 38.08 298.56 36.26Q298.2 34.44 297.78 32.22Q297.35 30 296.96 27.78Q296.57 25.55 296.21 23.66H295.27Q294.89 25.96 294.35 28.9Q293.81 31.84 293.28 34.61Q292.74 37.38 292.34 39.14Z"/><path d="M341.56 105.5V5.34H361.03V88.66H394.1V105.5Z"/><path d="M396.14 105.5 420.85 5.34H446.43L471.25 105.5H450.77L445.89 84.41H420.69L415.94 105.5ZM423.76 68.19H442.84L436.74 39.14Q436.53 38.08 436.17 36.26Q435.81 34.44 435.39 32.22Q434.96 30 434.57 27.78Q434.18 25.55 433.82 23.66H432.87Q432.5 25.96 431.96 28.9Q431.42 31.84 430.89 34.61Q430.35 37.38 429.95 39.14Z"/><path d="M479.17 105.5V5.34H514.37Q522.82 5.34 528.7 8.21Q534.57 11.07 537.62 16.43Q540.68 21.78 540.68 29.32Q540.68 35.55 538.78 40.3Q536.88 45.05 533.68 48.21Q530.47 51.38 526.27 53.15V53.73Q530.85 55.08 534.56 57.84Q538.26 60.6 540.41 65.34Q542.55 70.09 542.55 77.48Q542.55 87.42 538.56 93.61Q534.58 99.79 527.18 102.65Q519.78 105.5 509.66 105.5ZM498.34 88.82H511.57Q517.58 88.82 520.3 85.51Q523.01 82.19 523.01 75.32Q523.01 71.46 521.88 68.57Q520.75 65.68 518.27 64.1Q515.79 62.52 511.71 62.52H498.34ZM498.34 46.93H510.73Q514.46 46.93 516.81 45.24Q519.15 43.56 520.31 40.56Q521.47 37.57 521.47 33.51Q521.47 28.08 518.76 24.91Q516.04 21.73 510.96 21.73H498.34Z"/></g></svg></a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav"><span class="bars" aria-hidden="true"><i></i><i></i></span>Menu</button>
+    <nav aria-label="Main"><ul class="nav" id="nav">
+      <li><a href="research.html">Research</a></li>
+      <li><a href="#publications">Publications</a></li>
+      <li><a href="#people">People</a></li>
+      <li><a href="#news">News</a></li>
+      <li><a href="#join">Join</a></li>
+    </ul></nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="h1">
+      <div class="hero-text">
+        <h1 class="h1" id="h1">How people learn to work with algorithms</h1>
+        <p class="who">BOBALAB is a research lab at UC&nbsp;Berkeley’s Haas School of Business, led by Prof.&nbsp;Park&nbsp;Sinchaisri.</p>
+        <p class="why">Algorithms now assign gig work, give advice and help teachers plan lessons. Using field data and experiments, we study how people learn and decide alongside them, so that work with AI goes better for people.</p>
+      </div>
+      <ul class="ctas">
+        <li><a href="research.html">Explore the research</a></li>
+        <li><a href="#publications">Read the papers</a></li>
+      </ul>
+
+      <figure class="stage-fig" id="beaker" aria-labelledby="beaker-cap">
+        <figcaption class="sr" id="beaker-cap">Our four research directions, drawn as four tapioca pearls in a lab beaker. Choose one to read the question it asks.</figcaption>
+        <!-- Source of the drawing; also the no-JS fallback. -->
+        <ol class="dirs-fallback" id="dirs">
+          <li data-d="algorithmic-advice" data-title="Algorithmic Advice &amp; Human Decisions" data-count="4 papers, 2 in progress">
+            <a href="research.html#algorithmic-advice"><span class="n">Algorithmic Advice</span></a>
+            <p class="q">When should advice name the exact next move, and when should it give a broader rule people can carry into new situations?</p>
+            <p class="start"><i>Improving Human Sequential Decision Making with Reinforcement Learning</i>, Management Science (2026).</p>
+          </li>
+          <li data-d="ai-at-work" data-title="Generative &amp; Agentic AI at Work" data-count="5 papers, 2 in progress">
+            <a href="research.html#ai-at-work"><span class="n">AI at Work</span></a>
+            <p class="q">What kinds of help do teachers ask ChatGPT for on their own real tasks, and do their conversations stick to one kind?</p>
+            <p class="start"><i>Making ChatGPT Work for Me</i>, Proc. ACM HCI (2025).</p>
+          </li>
+          <li data-d="learning-on-the-job" data-title="Learning on the Job with Algorithms" data-count="4 papers, 1 in progress">
+            <a href="research.html#learning-on-the-job"><span class="n">Learning on the Job</span></a>
+            <p class="q">Do gig workers get faster and more reliable with experience, and do they lean on or drift away from the app’s recommendations as they learn?</p>
+            <p class="start"><i>Learning on the Go</i>, Proc. ACM HCI (2025).</p>
+          </li>
+          <li data-d="platform-work" data-title="Gig &amp; Platform Work Design" data-count="6 papers, 2 in progress">
+            <a href="research.html#platform-work"><span class="n">Platform Work</span></a>
+            <p class="q">What drives a ride-hail driver’s choice to log on and log off: the pay rate, an earnings target, or the momentum of a long shift?</p>
+            <p class="start"><i>The Impact of Behavioral and Economic Drivers on Gig Economy Workers</i>, M&amp;SOM (2023).</p>
+          </li>
+        </ol>
+        <p class="stage-cap nojs"><a href="research.html#map">See how the four directions connect</a></p>
+      </figure>
+    </section>
+
+    <section class="sec" aria-labelledby="lately-h">
+      <h2 class="sr" id="lately-h">Lately</h2>
+      <div class="lately">
+        <div id="publications">
+          <div class="sec-h"><h2>New papers</h2><a href="#publications">All 17 papers and 8 in progress</a></div>
+          <ul class="pubs">
+            <li>
+              <p class="t"><a href="#">Stale, Misattributed, or Late: Where Personal Memory Fails Before Generation</a></p>
+              <p class="au">Haonan Deng and <a href="#">Wichinpong Park Sinchaisri</a></p>
+              <p class="meta"><span>Preprint, arXiv, 2026</span><span class="dot" data-d="ai-at-work">AI at Work</span></p>
+            </li>
+            <li>
+              <p class="t"><a href="#">Dispatching to Develop: Worker Agency and Workforce Development in Gig Platforms</a></p>
+              <p class="au">Haonan Deng and <a href="#">Wichinpong Park Sinchaisri</a></p>
+              <p class="meta"><span>Working paper, SSRN, 2026</span><span class="dot" data-d="learning-on-the-job">Learning on the Job</span><span class="dot" data-d="platform-work">Platform Work</span></p>
+            </li>
+            <li>
+              <p class="t"><a href="#">Strategic Advice in the Age of Personal AI</a></p>
+              <p class="au">Yueyang Liu and <a href="#">Wichinpong Park Sinchaisri</a></p>
+              <p class="meta"><span>Preprint, arXiv, 2026</span><span class="dot" data-d="ai-at-work">AI at Work</span><span class="dot" data-d="algorithmic-advice">Algorithmic Advice</span></p>
+            </li>
+          </ul>
+        </div>
+        <div id="news">
+          <div class="sec-h"><h2>News</h2><a href="#news">All news</a></div>
+          <ul class="news">
+            <li><time datetime="2026-10-07">Oct 7, 2026</time><a href="#">New preprint on where AI assistants’ personal memory fails</a></li>
+            <li><time datetime="2026-08-04">Aug 4, 2026</time><a href="#">Dispatching to Develop posted on SSRN</a></li>
+            <li><time datetime="2026-05-11">May 11, 2026</time><a href="#">Learning to Gig gets a major revision at M&amp;SOM</a></li>
+            <li><time datetime="2026-04-10">Apr 10, 2026</time><a href="#">Park Sinchaisri wins a second Cheit Teaching Award</a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="people" aria-labelledby="people-h">
+      <div class="sec-h"><h2 id="people-h">The people</h2><a href="#people">Everyone, including alumni</a></div>
+      <ul class="people-row">
+        <li><a href="#people"><img src="img/alex-chen-480.webp" alt="Alex Hanyu Chen" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/andrew-li-480.webp" alt="Andrew Li" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/brian-hwang-480.webp" alt="Brian Seong Hyun Hwang" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/chloe-xiao-480.webp" alt="Chloe Xiao" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/clinton-nguyen-480.webp" alt="Clinton Nguyen" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/daniil-kardava-480.webp" alt="Daniil Kardava" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/felicia-ye-480.webp" alt="Felicia Ye" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/jiaming-guan-400.webp" alt="Jiaming Guan" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/jian-kweon-480.webp" alt="Jian Kweon" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/mete-ehliz-480.webp" alt="Mete Ehliz" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/milosz-platek-480.webp" alt="Milosz Rafal Platek" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/nathaniel-kung-480.webp" alt="Nathaniel Xian-Zhi Kung" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/nicholas-chen-480.webp" alt="Nicholas Chen" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/ryan-chan-480.webp" alt="Ryan Sing Chan" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/ryan-jesubalan-480.webp" alt="Ryan Jesubalan" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/ryan-lam-480.webp" alt="Ryan Shek Wah Lam" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/siddhartha-chatterjee-480.webp" alt="Siddhartha Chatterjee" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/suyang-ma-480.webp" alt="Suyang Ma" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/tanish-kher-480.webp" alt="Tanish Kher" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/thomas-morelli-480.webp" alt="Thomas Michael Morelli" width="96" height="96" loading="lazy"></a></li>
+        <li><a href="#people"><img src="img/zixian-li-480.webp" alt="Zixian &quot;Amy&quot; Li" width="96" height="96" loading="lazy"></a></li>
+      </ul>
+      <div class="people-txt" id="join">
+        <p class="lead">Prof. Park Sinchaisri, a master’s student and 23 undergraduate researchers, working with co-authors at other universities.</p>
+        <div>
+          <p>Berkeley undergraduates join through the Undergraduate Research Apprentice Program (URAP). Collaborators and press can write to <a href="mailto:bobalab@berkeley.edu">bobalab@berkeley.edu</a>.</p>
+          <p class="more" style="margin-top:12px"><a href="#join">How to join the lab</a></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="ft">
+    <div><a class="mark" href="index.html" aria-label="BOBALAB, home"><svg viewBox="0 0 546.55 109.5" role="img" aria-label="BOBALAB" focusable="false"><g fill="currentColor"><path d="M4 105.5V5.34H39.2Q47.65 5.34 53.53 8.21Q59.4 11.07 62.46 16.43Q65.51 21.78 65.51 29.32Q65.51 35.55 63.61 40.3Q61.71 45.05 58.51 48.21Q55.3 51.38 51.1 53.15V53.73Q55.68 55.08 59.39 57.84Q63.1 60.6 65.24 65.34Q67.38 70.09 67.38 77.48Q67.38 87.42 63.39 93.61Q59.41 99.79 52.01 102.65Q44.61 105.5 34.49 105.5ZM23.18 88.82H36.4Q42.41 88.82 45.13 85.51Q47.84 82.19 47.84 75.32Q47.84 71.46 46.71 68.57Q45.58 65.68 43.1 64.1Q40.62 62.52 36.54 62.52H23.18ZM23.18 46.93H35.57Q39.29 46.93 41.64 45.24Q43.98 43.56 45.14 40.56Q46.3 37.57 46.3 33.51Q46.3 28.08 43.59 24.91Q40.87 21.73 35.79 21.73H23.18Z"/><circle class="pearl-o" cx="127.29" cy="55.5" r="51.5"/><path d="M191.7 105.5V5.34H226.9Q235.36 5.34 241.23 8.21Q247.11 11.07 250.16 16.43Q253.21 21.78 253.21 29.32Q253.21 35.55 251.32 40.3Q249.42 45.05 246.21 48.21Q243 51.38 238.81 53.15V53.73Q243.38 55.08 247.09 57.84Q250.8 60.6 252.94 65.34Q255.08 70.09 255.08 77.48Q255.08 87.42 251.1 93.61Q247.12 99.79 239.72 102.65Q232.32 105.5 222.19 105.5ZM210.88 88.82H224.1Q230.12 88.82 232.83 85.51Q235.55 82.19 235.55 75.32Q235.55 71.46 234.42 68.57Q233.28 65.68 230.8 64.1Q228.32 62.52 224.25 62.52H210.88ZM210.88 46.93H223.27Q227 46.93 229.34 45.24Q231.69 43.56 232.85 40.56Q234 37.57 234 33.51Q234 28.08 231.29 24.91Q228.58 21.73 223.49 21.73H210.88Z"/><path d="M258.53 105.5 283.24 5.34H308.82L333.64 105.5H313.16L308.28 84.41H283.08L278.33 105.5ZM286.15 68.19H305.23L299.13 39.14Q298.92 38.08 298.56 36.26Q298.2 34.44 297.78 32.22Q297.35 30 296.96 27.78Q296.57 25.55 296.21 23.66H295.27Q294.89 25.96 294.35 28.9Q293.81 31.84 293.28 34.61Q292.74 37.38 292.34 39.14Z"/><path d="M341.56 105.5V5.34H361.03V88.66H394.1V105.5Z"/><path d="M396.14 105.5 420.85 5.34H446.43L471.25 105.5H450.77L445.89 84.41H420.69L415.94 105.5ZM423.76 68.19H442.84L436.74 39.14Q436.53 38.08 436.17 36.26Q435.81 34.44 435.39 32.22Q434.96 30 434.57 27.78Q434.18 25.55 433.82 23.66H432.87Q432.5 25.96 431.96 28.9Q431.42 31.84 430.89 34.61Q430.35 37.38 429.95 39.14Z"/><path d="M479.17 105.5V5.34H514.37Q522.82 5.34 528.7 8.21Q534.57 11.07 537.62 16.43Q540.68 21.78 540.68 29.32Q540.68 35.55 538.78 40.3Q536.88 45.05 533.68 48.21Q530.47 51.38 526.27 53.15V53.73Q530.85 55.08 534.56 57.84Q538.26 60.6 540.41 65.34Q542.55 70.09 542.55 77.48Q542.55 87.42 538.56 93.61Q534.58 99.79 527.18 102.65Q519.78 105.5 509.66 105.5ZM498.34 88.82H511.57Q517.58 88.82 520.3 85.51Q523.01 82.19 523.01 75.32Q523.01 71.46 521.88 68.57Q520.75 65.68 518.27 64.1Q515.79 62.52 511.71 62.52H498.34ZM498.34 46.93H510.73Q514.46 46.93 516.81 45.24Q519.15 43.56 520.31 40.56Q521.47 37.57 521.47 33.51Q521.47 28.08 518.76 24.91Q516.04 21.73 510.96 21.73H498.34Z"/></g></svg></a><p class="muted" style="margin-top:8px">Berkeley Operations and Behavioral Analytics Lab</p></div>
+    <p>Haas School of Business, University of California, Berkeley<br>2220 Piedmont Avenue, Berkeley, CA 94720<br><a href="mailto:bobalab@berkeley.edu">bobalab@berkeley.edu</a></p>
+    <ul><li><a href="#">About</a></li><li><a href="#">Accessibility</a></li><li><a href="#">Privacy</a></li><li><a href="#">RSS</a></li><li><a href="#">Lab scheduler</a></li></ul>
+  </footer>
+</div>
+<script src="c.js"></script>
+</body>
+</html>

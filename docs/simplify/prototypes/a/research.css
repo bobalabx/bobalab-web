@@ -1,0 +1,65 @@
+.r-head { padding-top: 56px; display: grid; grid-template-columns: var(--lab) minmax(0, 44em); gap: 16px 32px; align-items: start; }
+.r-title { font-size: clamp(2.5rem, 1rem + 4vw, 4.5rem); margin-top: -0.08em; }
+.r-lede { font-size: var(--t-lede); line-height: 1.5; margin: 0; text-wrap: pretty; }
+@media (max-width: 63.99rem) { .r-head { grid-template-columns: 1fr; padding-top: 28px; } }
+
+.dirs-list { list-style: none; margin: 56px 0 0; padding: 0; border-top: 1px solid var(--ink); }
+.dir { display: grid; grid-template-columns: var(--lab) minmax(0, 1fr) 13rem; gap: 12px 32px; padding: 28px 0; border-bottom: 1px solid var(--hairline); scroll-margin-top: 24px; }
+.dir__pearl { width: 112px; }
+.dir__name { font-size: var(--t-h2); font-stretch: 74%; line-height: 1.05; }
+.dir__name a { text-decoration: none; }
+.dir__name a:hover { text-decoration: underline; text-decoration-thickness: 2px; }
+.dir__q { font-size: var(--t-lede); line-height: 1.4; margin: 10px 0 0; max-width: 34em; text-wrap: pretty; }
+.dir__sum { color: var(--muted); margin: 8px 0 0; max-width: 40em; }
+.dir__meta { margin: 6px 0 0; font-size: var(--t-meta); color: var(--muted); line-height: 1.6; }
+.seedrow { display: flex; gap: 4px; margin-bottom: 6px; }
+.seedrow i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.seedrow i.w { background: transparent; box-shadow: inset 0 0 0 1.5px var(--c); }
+.dir:target .dir__pearl .disc { animation: arrive .6s var(--ease); }
+@keyframes arrive { from { transform: scale(.94); } to { transform: none; } }
+@media (max-width: 63.99rem) {
+  .dir { grid-template-columns: 72px minmax(0, 1fr); gap: 8px 20px; }
+  .dir__pearl { width: 72px; grid-row: 1 / span 2; }
+  .dir__meta { grid-column: 2; }
+  .dir__name { font-size: 1.625rem; }
+}
+
+/* optional exploration */
+.explore__lede { margin: 0; max-width: 40em; font-size: 1.125rem; }
+.explore__btn {
+  margin-top: 20px; font: inherit; font-size: 1rem; color: var(--ink); background: transparent; cursor: pointer;
+  border: 1px solid var(--ink); border-radius: 0; padding: 10px 16px; min-height: 44px;
+}
+.explore__btn:hover { background: var(--ink); color: var(--paper); }
+.tl { margin: 28px 0 0; }
+.tl__scroll { overflow-x: auto; }
+.tl__svg { display: block; width: 100%; min-width: 760px; height: auto; overflow: visible; font-family: var(--sans); }
+.tl__svg text { fill: var(--muted); font-size: 13px; }
+.tl__svg .yr { fill: var(--ink); font-weight: 600; }
+.tl__svg .lane-name { fill: var(--ink); font-size: 15px; font-weight: 650; }
+.tl__svg .lane-n { font-size: 12.5px; }
+.tl__svg .ln { stroke-width: 2; }
+.tl__svg .lk { stroke: var(--ink); stroke-width: 1.25; }
+.tl__svg .gap { stroke: var(--paper); stroke-width: 5; }
+.tl__svg .ring { fill: var(--paper); stroke-width: 1.75; }
+.tl__svg .hit { fill: transparent; cursor: default; }
+.tl__svg .zone { fill: var(--band); }
+.tl__svg .now { stroke: var(--ink); stroke-dasharray: 2 3; }
+.tl__svg [data-s], .tl__svg .ln { transition: opacity .2s; }
+.tl__svg.is-focus [data-s]:not(.on), .tl__svg.is-focus .ln:not(.on) { opacity: .18; }
+.tl__live { min-height: 3em; margin: 12px 0 0; color: var(--ink); max-width: 60em; }
+.tl__cap { margin: 4px 0 0; max-width: 60em; }
+.tl__cap .keys { display: flex; flex-wrap: wrap; gap: 4px 20px; margin-top: 6px; }
+.tl__cap b { color: var(--ink); font-weight: 600; }
+.k { display: inline-flex; align-items: center; gap: 6px; margin-right: 12px; white-space: nowrap; }
+.k i { display: inline-block; }
+.k-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+.k-link { width: 1.5px; height: 14px; background: var(--ink); }
+.k-ring { width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--muted); }
+
+.earlier { list-style: none; margin: 0; padding: 0; }
+.earlier li { padding: 12px 0; border-bottom: 1px solid var(--hairline); display: grid; grid-template-columns: 22rem 1fr; gap: 4px 24px; }
+.earlier li:first-child { padding-top: 0; }
+.earlier a { font-weight: 600; }
+.sep { color: var(--muted); margin: 0 8px; }
+@media (max-width: 47.99rem) { .earlier li { grid-template-columns: 1fr; } }

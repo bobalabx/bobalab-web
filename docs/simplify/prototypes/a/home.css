@@ -1,0 +1,174 @@
+/* ---------- hero ---------- */
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "text" "pile" "read";
+  padding-top: 40px;
+}
+.hero__text { grid-area: text; }
+@media (min-width: 64rem) {
+  .hero__text { display: contents; }
+  .hero__title { grid-area: title; }
+  .hero__lede { grid-area: lede; align-self: start; margin-top: 36px; }
+}
+.hero__title { font-size: var(--t-hero); max-width: 12em; text-wrap: balance; }
+.hero__lede { font-size: var(--t-lede); line-height: 1.5; max-width: 34em; margin: 24px 0 0; text-wrap: pretty; }
+
+/* The pile: three pearls settled on the floor, one resting on their shoulders
+   (the brand's favicon motif at hero scale). Geometry in pearl radii u:
+   bottom centres at 1, 3.08, 5.16; the top pearl at 2.04, 2.78 above the floor. */
+.pile {
+  grid-area: pile;
+  position: relative;
+  container-type: inline-size;
+  width: 100%;
+  margin: 40px 0 0;
+}
+.pile__list { list-style: none; margin: 0; padding: 0; position: relative; aspect-ratio: 6.16 / 3.8; }
+.pile__list::after { /* the floor: one rule, the bottom of the cup */
+  content: ""; position: absolute; left: calc(-1 * var(--gutter)); right: calc(-1 * var(--gutter)); bottom: 0; height: 1px; background: var(--ink);
+}
+.pile { --u: calc(100cqw / 6.16); }
+.p { position: absolute; width: calc(2 * var(--u)); aspect-ratio: 1; bottom: calc(var(--yb) * var(--u)); left: calc((var(--cx) - 1) * var(--u)); }
+.p--top { --cx: 2.04; --yb: 1.78; z-index: 2; }
+.p--b1  { --cx: 1;    --yb: 0; }
+.p--b2  { --cx: 3.08; --yb: 0; }
+.p--b3  { --cx: 5.16; --yb: 0; }
+
+.pearl { position: absolute; inset: 0; display: block; color: var(--ink); text-decoration: none; border-radius: 50%; -webkit-tap-highlight-color: transparent; }
+.pearl:focus-visible { outline: none; }
+.pearl .disc { transition: transform .45s var(--ease), opacity .3s var(--ease); transform-origin: 50% 50%; }
+.pearl:focus-visible .ring { opacity: 1; }
+
+.pearl__label { position: absolute; display: block; line-height: 1.25; transition: opacity .3s var(--ease); }
+.pearl__name { display: block; font-weight: 650; font-size: clamp(0.9375rem, 0.8rem + 0.45vw, 1.1875rem); font-stretch: 100%; }
+.pearl__gloss { display: block; color: var(--muted); font-size: 0.9375rem; margin-top: 4px; text-wrap: balance; }
+/* bottom pearls: label under the floor, centred */
+.p--b1 .pearl__label, .p--b2 .pearl__label, .p--b3 .pearl__label {
+  top: calc(100% + 14px); left: 50%; width: calc(2.05 * var(--u)); transform: translateX(-50%); text-align: center;
+}
+/* top pearl: label beside it, in the space above the right-hand pearl */
+.p--top .pearl__label { left: calc(100% + 0.24 * var(--u)); top: 50%; transform: translateY(-50%); width: calc(2.6 * var(--u)); }
+
+/* reserve the label band under the floor */
+.pile { padding-bottom: 76px; }
+
+/* seeds: one per paper, out of the pearl on hover/focus/tap */
+.seeds { position: absolute; inset: 0; pointer-events: none; }
+.seed {
+  position: absolute; left: 50%; top: 50%;
+  width: var(--sd); height: var(--sd); margin: calc(var(--sd) / -2) 0 0 calc(var(--sd) / -2);
+  border-radius: 50%; background: var(--c);
+  opacity: 0; transform: translate(0, 0) scale(.3);
+  transition: transform .45s var(--ease), opacity .25s var(--ease);
+  pointer-events: none;
+}
+.seed.is-wip { background: transparent; box-shadow: inset 0 0 0 1.5px var(--c); }
+.seed::after { content: ""; position: absolute; inset: -9px; border-radius: 50%; }
+.pile { --sd: max(7px, calc(0.1 * var(--u))); }
+.p.is-on .seed { opacity: 1; transform: translate(var(--sx), var(--sy)) scale(1); transition-delay: calc(var(--i) * 35ms); pointer-events: auto; }
+.seed.is-hot { transform: translate(var(--sx), var(--sy)) scale(1.5) !important; }
+
+/* active state: the chosen pearl lifts, the others step back */
+.p.is-on .disc { transform: scale(1.035); }
+.p--top.is-on .disc { transform: translateY(calc(-0.1 * var(--u))) scale(1.035); }
+.pile.has-on .p:not(.is-on) .disc { opacity: .42; }
+.pile.has-on .p:not(.is-on) .pearl__name { color: var(--muted); font-weight: 500; }
+
+/* first visit: the pearls settle into the cup, once */
+.pile.is-settling .p .disc { animation: settle .7s var(--ease) both; animation-delay: calc(var(--k) * 90ms); }
+.p--b1 { --k: 0; } .p--b2 { --k: 1; } .p--b3 { --k: 2; } .p--top { --k: 3.4; }
+@keyframes settle { from { transform: translateY(-32px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* reading panel */
+.reading { grid-area: read; margin-top: 28px; min-height: 12.5rem; }
+.reading p { margin: 0; }
+.reading__rest { color: var(--muted); font-size: 1rem; max-width: 30em; }
+.when-touch { display: none; }
+@media (hover: none) { .when-hover { display: none; } .when-touch { display: inline; } }
+.reading__dir { animation: rise .35s var(--ease) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.reading__name { font-weight: 650; font-size: 1rem; color: var(--c); display: flex; align-items: center; gap: 8px; }
+.reading__name::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--pe); }
+.reading__q { font-size: var(--t-lede); line-height: 1.38; margin-top: 8px !important; max-width: 26em; text-wrap: pretty; }
+.reading__count { margin-top: 14px !important; color: var(--muted); font-size: var(--t-meta); display: flex; align-items: center; gap: 10px; min-height: 1.5em; }
+.reading__seeds { display: inline-flex; gap: 4px; }
+.reading__seeds i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.reading__seeds i.w { background: transparent; box-shadow: inset 0 0 0 1.5px var(--c); }
+.reading__go { margin-top: 10px !important; font-size: 1rem; }
+
+@media (min-width: 64rem) {
+  .hero {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    grid-template-areas: "title title" "lede pile" "read pile";
+    grid-template-rows: auto auto 1fr;
+    column-gap: 56px;
+    padding-top: 56px;
+  }
+  .pile__list::after { display: none; }
+  .hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 76px; height: 1px; background: var(--ink); }
+  .pile { align-self: end; margin: 0; max-width: 660px; justify-self: end; }
+  .reading { align-self: end; margin: 24px 0 calc(76px + 20px); min-height: 0; height: 12rem; display: flex; flex-direction: column; justify-content: flex-end; }
+}
+@media (max-width: 39.99rem) {
+  .pearl__gloss { display: none; }
+  .pile { padding-bottom: 52px; margin-top: 36px; }
+  .p--b1 .pearl__label, .p--b2 .pearl__label, .p--b3 .pearl__label { top: calc(100% + 10px); }
+  .reading { margin-top: 8px; min-height: 11rem; }
+  .reading__q { font-size: 1.0625rem; }
+  .hero { padding-top: 28px; }
+  .hero__lede { margin-top: 16px; font-size: 1.0625rem; }
+}
+
+/* ---------- inside a study ---------- */
+.study__body { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px 56px; align-items: start; }
+@media (max-width: 47.99rem) { .study__body { grid-template-columns: 1fr; } }
+.study__fig { margin: 0; }
+.kitchen { width: 100%; height: auto; display: block; max-width: 520px; }
+.kitchen text { fill: var(--muted); font-family: var(--sans); }
+.k-net path { stroke: var(--c); stroke-width: 1.5; fill: none; }
+.k-net path.ah { fill: var(--c); stroke: none; }
+.k-net circle { fill: var(--pe); }
+.study__fig figcaption { margin-top: 14px; max-width: 34em; }
+.study__fig figcaption b { color: var(--ink); font-weight: 600; }
+.study__h { font-size: 1.625rem; font-stretch: 85%; line-height: 1.15; }
+.study__text p { margin: 14px 0 0; max-width: 34em; }
+.study__links { display: flex; gap: 8px 24px; flex-wrap: wrap; }
+
+/* ---------- papers ---------- */
+.papers { list-style: none; margin: 0; padding: 0; }
+.papers li { padding: 18px 0; border-bottom: 1px solid var(--hairline); }
+.papers li:first-child { padding-top: 0; }
+.papers h3 { font-size: var(--t-title); font-weight: 600; line-height: 1.3; }
+.papers h3 a { text-decoration: none; }
+.papers h3 a:hover { text-decoration: underline; }
+.papers p { margin: 4px 0 0; }
+.dirs { display: inline-flex; gap: 16px; margin-left: 14px; flex-wrap: wrap; }
+.dm { display: inline-flex; align-items: center; gap: 6px; }
+.dm i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+@media (max-width: 39.99rem) { .dirs { display: flex; margin: 4px 0 0; } }
+
+/* ---------- people ---------- */
+.people__lede { margin: 0 0 24px; max-width: 40em; font-size: 1.125rem; }
+.faces { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 24px 20px; }
+.faces li { font-size: 0.8125rem; line-height: 1.3; color: var(--muted); }
+.faces img { width: 100%; max-width: 104px; aspect-ratio: 1; height: auto; border-radius: 50%; object-fit: cover; margin-bottom: 8px; background: var(--band); transition: transform .3s var(--ease); }
+.faces li:hover img { transform: translateY(-3px); }
+@media (max-width: 39.99rem) { .faces { grid-template-columns: repeat(4, 1fr); gap: 18px 12px; } .faces li { font-size: 0.75rem; } }
+
+/* ---------- news ---------- */
+.news { list-style: none; margin: 0; padding: 0; }
+.news li { display: grid; grid-template-columns: 8rem 1fr; gap: 4px 24px; padding: 12px 0; border-bottom: 1px solid var(--hairline); }
+.news li:first-child { padding-top: 0; }
+.news time { color: var(--muted); font-size: var(--t-meta); padding-top: 2px; }
+.news a { text-decoration: none; }
+.news a:hover { text-decoration: underline; }
+@media (max-width: 39.99rem) { .news li { grid-template-columns: 1fr; } }
+
+/* ---------- join ---------- */
+.join__inner { background: var(--band); padding: 40px clamp(20px, 4vw, 56px); display: grid; grid-template-columns: var(--lab) minmax(0, 40em); gap: 12px 32px; align-items: baseline; }
+.join__inner p { margin: 0; font-size: 1.125rem; }
+.join__inner p + p { grid-column: 2; }
+@media (max-width: 63.99rem) { .join__inner { grid-template-columns: 1fr; } .join__inner p + p { grid-column: 1; } }
+html:not(.js) .reading { visibility: hidden; }
