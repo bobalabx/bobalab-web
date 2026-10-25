@@ -193,10 +193,11 @@ test.describe("prefers-reduced-motion: reduce", () => {
       await poke(page);
       for (const v of await motionViolations(page)) problems.push(`${path} on hover/focus: ${v}`);
     }
-    // A pearl click (client navigation with a view transition) from home.
+    // D-14: pick a cup pearl (it rises), then "Explore …" (client navigation with
+    // the pearl morph). Wait for the island first: before hydration the cup's
+    // labels are links that hydration replaces with buttons.
     await page.goto("/");
-    const pearl = page.getByRole("navigation", { name: "Research directions" }).getByRole("link");
-    if (await pearl.count()) {
+    const sample = async (what: string, act: () => Promise<void>) => {
       const seen: string[] = [];
       const sampler = (async () => {
         for (let i = 0; i < 20; i++) {
@@ -204,9 +205,15 @@ test.describe("prefers-reduced-motion: reduce", () => {
           await page.waitForTimeout(25);
         }
       })();
-      await pearl.first().click();
+      await act();
       await sampler;
-      problems.push(...new Set(seen.map((v) => `pearl click: ${v}`)));
+      problems.push(...new Set(seen.map((v) => `${what}: ${v}`)));
+    };
+    if (await page.locator(".cup-stage").count()) {
+      await page.waitForSelector(".cup-stage[data-js]");
+      const item = page.locator(".cup-item").first();
+      await sample("pearl pick", () => item.locator(".cup-lab").click());
+      await sample("explore morph", () => item.locator(".cup-panel a[href^='/research/']").click());
     }
     expect(problems).toEqual([]);
   });
