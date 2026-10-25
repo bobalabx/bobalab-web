@@ -472,6 +472,16 @@ export const siteSchema = z.strictObject({
   launched: z.boolean().default(false),
   /** D-04: editorial order of live directions (slugs). */
   direction_order: z.array(slugRef).default([]),
+  /** Tools for lab members (e.g. the lab scheduler), linked from the footer and /people/. */
+  member_links: z
+    .array(
+      z.strictObject({
+        label: z.string().trim().min(1).max(40),
+        url: externalUrlField,
+        description: z.string().trim().max(140).optional(),
+      }),
+    )
+    .default([]),
   /** D-05: static meta-refresh stubs. `from` is a site path ending in "/". */
   redirects: z
     .array(

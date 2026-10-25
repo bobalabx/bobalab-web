@@ -2,6 +2,7 @@
 name: Marcus Koh
 role: undergrad
 program: Physics
+end: "2026-09"
 links:
   linkedin: https://www.linkedin.com/in/marcus-koh05
 directions: []

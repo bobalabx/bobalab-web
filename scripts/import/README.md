@@ -1,5 +1,7 @@
 # scripts/import (WP7)
 
+> **Retired (DECISIONS D-11, 2026-10-24).** `content/` is now edited directly (CMS or by hand). Do not run this importer with `--write`; it would overwrite those edits.
+
 Re-runnable importer from the research dataset (`content-dataset.json`, kept **outside** the repo because it mentions people who are not on the public roster) to `content/**`.
 
 ```sh

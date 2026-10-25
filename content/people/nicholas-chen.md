@@ -5,7 +5,9 @@ program: EECS
 links:
   website: https://www.nicholaschen.dev
 directions: []
-photo_consent: false
+photo: /uploads/people/nicholas-chen.jpg
+photo_alt: Headshot of Nicholas Chen
+photo_consent: true
 email_public: false
 now_at_public: false
 listed: true

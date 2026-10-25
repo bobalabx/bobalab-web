@@ -18,4 +18,8 @@ direction_order:
   - ai-at-work
   - learning-on-the-job
   - platform-work
+member_links:
+  - label: Lab scheduler
+    url: https://scheduler.bobalab.org/
+    description: Weekly lab meeting scheduling (lab members sign in with Google).
 redirects: []

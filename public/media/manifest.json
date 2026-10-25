@@ -1,4 +1,215 @@
 {
   "version": 1,
-  "images": {}
+  "images": {
+    "/uploads/people/alex-chen.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/alex-chen-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/andrew-li.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/andrew-li-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/brian-hwang.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/brian-hwang-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/chloe-xiao.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/chloe-xiao-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/clinton-nguyen.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/clinton-nguyen-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/daniil-kardava.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/daniil-kardava-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/felicia-ye.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/felicia-ye-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/jiaming-guan.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/jiaming-guan-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/jian-kweon.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/jian-kweon-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/mete-ehliz.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/mete-ehliz-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/milosz-platek.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/milosz-platek-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/nathaniel-kung.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/nathaniel-kung-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/nicholas-chen.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/nicholas-chen-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/ryan-chan.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/ryan-chan-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/ryan-jesubalan.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/ryan-jesubalan-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/ryan-lam.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/ryan-lam-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/siddhartha-chatterjee.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/siddhartha-chatterjee-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/suyang-ma.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/suyang-ma-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/tanish-kher.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/tanish-kher-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/thomas-morelli.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/thomas-morelli-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/zixian-li.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/zixian-li-480.webp"
+        }
+      ]
+    }
+  }
 }

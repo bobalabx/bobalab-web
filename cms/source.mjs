@@ -1018,6 +1018,23 @@ export const fileCollections = [
               filters: [{ field: "status", values: ["active", "emerging"] }],
             },
           },
+          member_links: {
+            label: "Links for lab members",
+            label_singular: "link",
+            hint: "Internal tools for lab members, such as the lab scheduler. They appear in the site footer and at the top of the People page.",
+            summary: "{{fields.label}}",
+            fields: {
+              label: {
+                label: "Link text",
+                hint: "Short, e.g. Lab scheduler (40 characters at most).",
+              },
+              url: { label: "Address", hint: "A full address starting with https://." },
+              description: {
+                label: "Description (optional)",
+                hint: "One short line, e.g. Weekly lab meeting scheduling (sign in with Google).",
+              },
+            },
+          },
           redirects: {
             label: "Redirects",
             hint: "When a published page’s address changes or a page is removed, send the old address somewhere useful.",

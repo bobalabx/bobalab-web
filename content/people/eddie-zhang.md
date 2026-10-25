@@ -2,6 +2,7 @@
 name: Eddie Zhang
 role: undergrad
 program: Applied Math
+end: "2026-09"
 links:
   linkedin: https://www.linkedin.com/in/ezhang345
 directions: []

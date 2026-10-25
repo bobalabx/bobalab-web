@@ -9,7 +9,7 @@
  * Groups without people are not rendered.
  */
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import type { Content } from "@/lib/content/load";
 import { Icon } from "@/components/ui/icons";
 import { AlumniEntry, PeopleCard } from "./PeopleCard";
@@ -215,6 +215,21 @@ export function PeopleIndex({ content }: { content: Content }) {
           </p>
         ) : m.summary.length === 0 ? (
           <p className="pp-summary">No one is listed yet.</p>
+        ) : null}
+        {/* Internal tools for lab members (site.yml member_links), e.g. the lab scheduler. */}
+        {content.site.member_links.length > 0 ? (
+          <p className="pp-members">
+            <span className="pp-members__label">For lab members:</span>{" "}
+            {content.site.member_links.map((l, i) => (
+              <Fragment key={l.url}>
+                {i > 0 ? <span aria-hidden="true"> · </span> : null}
+                <a href={l.url} rel="noopener noreferrer">
+                  {l.label}
+                  <Icon name="external" />
+                </a>
+              </Fragment>
+            ))}
+          </p>
         ) : null}
       </header>
 

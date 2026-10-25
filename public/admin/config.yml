@@ -2113,6 +2113,41 @@ collections:
             hint: "The order of the pearls in Fig. 1. Each item shows the direction’s address (e.g. ai-at-work). Drag an item by its handle, or focus the handle and use Space, the arrow keys and Space again. Each live direction once; remove archived directions (×). An item that opens as an empty choice is an archived direction: remove it."
             label_singular: direction
             summary: "{{fields.direction}}"
+          - label: Links for lab members
+            name: member_links
+            widget: list
+            fields:
+              - label: Link text
+                name: label
+                widget: string
+                pattern:
+                  - (?=^[\s\S]{0,40}$)
+                  - At most 40 characters.
+                required: true
+                hint: Short, e.g. Lab scheduler (40 characters at most).
+              - label: Address
+                name: url
+                widget: string
+                pattern:
+                  - (?=^https://\S+$)
+                  - Use a full address starting with https://.
+                required: true
+                hint: A full address starting with https://.
+              - label: Description (optional)
+                name: description
+                widget: string
+                pattern:
+                  - (?=^[\s\S]{0,140}$)
+                  - At most 140 characters.
+                required: false
+                hint: One short line, e.g. Weekly lab meeting scheduling (sign in with Google).
+            collapsed: true
+            allow_add: true
+            required: false
+            default: []
+            hint: Internal tools for lab members, such as the lab scheduler. They appear in the site footer and at the top of the People page.
+            label_singular: link
+            summary: "{{fields.label}}"
           - label: Redirects
             name: redirects
             widget: list

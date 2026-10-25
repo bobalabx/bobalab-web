@@ -151,6 +151,7 @@ export const DEFAULT_SITE: SiteData = {
   figure_mode: "cluster",
   launched: false,
   direction_order: [],
+  member_links: [],
   redirects: [],
 };
 

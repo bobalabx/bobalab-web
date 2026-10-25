@@ -1,7 +1,8 @@
 /**
  * Site footer (brief §D1): affiliation + address, lab email, About & contact,
  * Accessibility, Privacy, RSS, "Site issue?" mailto (same place on every page,
- * WCAG 3.2.6), maintainers, "Last updated", and the Reduce motion toggle.
+ * WCAG 3.2.6), links for lab members (site.yml member_links, e.g. the lab
+ * scheduler), maintainers, "Last updated", and the Reduce motion toggle.
  */
 import Link from "next/link";
 import type { SiteData } from "@/lib/content/schema";
@@ -43,6 +44,23 @@ export function SiteFooter({ site, lastUpdated }: { site: SiteData; lastUpdated:
             </li>
           </ul>
         </nav>
+        {site.member_links.length > 0 ? (
+          <nav aria-labelledby="ft-members">
+            <h2 id="ft-members">Lab members</h2>
+            <ul>
+              {site.member_links.map((l) => (
+                <li key={l.url}>
+                  <a href={l.url} rel="noopener noreferrer">
+                    {l.label} <Icon name="external" />
+                  </a>
+                  {l.description ? (
+                    <span className="bl-footer__meta bl-footer__desc">{l.description}</span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : null}
         <section aria-labelledby="ft-help">
           <h2 id="ft-help">Help</h2>
           <ul>

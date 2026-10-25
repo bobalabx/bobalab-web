@@ -28,6 +28,17 @@
     line-height: var(--lh-lg);
   }
 }
+.pp-members {
+  margin-top: var(--s-3);
+  color: var(--ink-muted);
+  font-size: var(--fs-sm);
+}
+.pp-members a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  min-height: 24px;
+}
 .pp-summary__part {
   white-space: nowrap;
 }

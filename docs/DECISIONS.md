@@ -80,3 +80,22 @@ Labels: DOCUMENTED (primary source), MEASURED (we ran it), HYPOTHESIS, UNKNOWN.
 - **Still protected (consent, not draft):** `listed: false` people (the 4 "Others") never render. No photos, emails or "now at" lines are shown (`photo_consent`, `email_public` and `now_at_public` stay false). `site.yml launched` stays false, because `true` blocks deploys until the CMS sign-in `base_url` is configured.
 - **Why:** the owner judged the lab-drafted wording acceptable to show while Park reviews it. Open questions remain in `docs/CONTENT-QUESTIONS.md`, and corrections go through the CMS.
 - **Rollback:** set `PUBLISH_ALL = false` and re-run the importer with `--write`. Alternatively, set `draft: true` on individual entries in the CMS.
+
+## D-11 content/ is the source of truth; the dataset importer is retired (2026-10-24)
+- **Decision:** from now on, `content/**` is edited directly, through the CMS (`/admin/`) or by hand. `scripts/import/import-dataset.mjs` was the one-time migration (WP7, D-10). **Do not re-run it with `--write`.** It would overwrite every edit made since, including the October 2026 roster and headshots (D-12). `--check` is expected to report differences from now on.
+- **Rollback:** none needed. The importer stays in the repo for reference.
+
+## D-12 October 2026 roster and headshots (owner, 2026-10-24)
+- **Source:** the owner's roster list (24 names) and the Google Form "Submit a headshot for Park's website" (file responses). Submitting a photo through that form is treated as consent to show it on the lab site (`photo_consent: true`).
+- **Roster:**
+  - 19 new member records. All are `role: undergrad` (inferred: the list marked only William Deng as "grad"). No program, links or directions until members add them.
+  - Display names follow the owner's list. For example, "Haonan (William) Deng" becomes "William Deng" (the slug and paper links are unchanged).
+  - Eddie Zhang, Hannah Yu, Marcus Koh and Ryan Xu were current on the PI site but are not on the October 2026 list, so they move to alumni with `end: "2026-09"`. The month is approximate; the site shows only the year. **Confirm with the lab.**
+- **Photos:**
+  - 21 submitted photos were cropped to 480×480 head-and-shoulders JPEGs with all metadata (EXIF/GPS) stripped and stored in `public/uploads/people/<slug>.jpg`. `npm run media` builds the WebP variants. Three iPhone HEIC files were converted with the Windows codecs first.
+  - **Placeholders (pearl initials):**
+    - Aaron Tu: he submitted a photo of his student ID card, which shows his ID number. Never publish it; ask him for a regular headshot.
+    - Vinayak Sarkar: he submitted a generic silhouette.
+    - William Deng: he submitted nothing.
+  - One file in the form export ("Jazz Beecham") is not on the roster and was not used.
+- **Scheduler link:** `site.yml` → `member_links` (new schema field and CMS list "Links for lab members"). It holds "Lab scheduler" → https://scheduler.bobalab.org/ and is shown in the footer ("Lab members") and at the top of `/people/`. It is a link only: the scheduler sends `frame-ancestors 'none'` and uses Google sign-in, so it cannot be embedded.

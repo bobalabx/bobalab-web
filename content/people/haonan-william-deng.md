@@ -1,5 +1,5 @@
 ---
-name: Haonan (William) Deng
+name: William Deng
 role: masters
 program: IEOR
 links:

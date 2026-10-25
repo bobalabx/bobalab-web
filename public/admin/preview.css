@@ -1178,6 +1178,15 @@ a.bl-tag:hover {
   .bl-footer__grid {
     grid-template-columns: 1.4fr 1fr 1.2fr;
   }
+  /* Four sections when site.yml has member_links (e.g. the lab scheduler). */
+  .bl-footer__grid:has(> :nth-child(4)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 64rem) {
+  .bl-footer__grid:has(> :nth-child(4)) {
+    grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+  }
 }
 .bl-footer h2 {
   font-family: var(--font-data);
@@ -1203,6 +1212,10 @@ a.bl-tag:hover {
 }
 .bl-footer__meta {
   color: var(--ink-muted);
+}
+.bl-footer__desc {
+  display: block;
+  max-width: 28ch;
 }
 .bl-footer__base {
   border-top: 1px solid var(--hairline);
