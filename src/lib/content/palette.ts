@@ -1,40 +1,51 @@
 /**
- * Colour tokens and direction swatches (brief §C2–§C3).
+ * Colour tokens and direction swatches (DECISIONS D-13 item 4: P3 "Lines").
  *
  * This module is the machine-readable copy of src/styles/tokens.css.
  * tests/unit/foundation/palette.test.ts checks that both agree, recomputes
- * every contrast pair listed in the brief and fails below WCAG thresholds.
+ * every contrast pair and fails below WCAG thresholds.
+ *
+ * Paper is white, ink is near-black, and there is no brand accent: links are
+ * ink with an underline. Colour encodes research directions and nothing else.
+ * The older token names (surface, paper-alt, plate, ink-muted, accent, …) are
+ * kept as aliases of the new set so that every page keeps rendering while the
+ * page packages move to the new names; none of them is cream or clay any more.
  */
 
 export const CORE_LIGHT = {
-  paper: "#FCFAF6",
+  paper: "#FFFFFF",
+  band: "#F2F3F1",
+  ink: "#111410",
+  muted: "#50564F",
+  rule: "#80877F",
+  hairline: "#D9DCD6",
+  // aliases (legacy names, same values as above)
   surface: "#FFFFFF",
-  "paper-alt": "#F4F0EA",
-  plate: "#F7F1E8",
-  ink: "#1F1712",
-  "ink-muted": "#5C4F45",
-  accent: "#8A4515",
-  "accent-strong": "#6B3410",
-  rule: "#857463",
-  hairline: "#D8CAB6",
-  pearl: "#2B1D15",
-  "pearl-index": "#F7F1E8",
+  "paper-alt": "#F2F3F1",
+  plate: "#FFFFFF",
+  "ink-muted": "#50564F",
+  accent: "#111410",
+  "accent-strong": "#111410",
+  pearl: "#111410",
+  "pearl-index": "#FFFFFF",
 } as const;
 
 export const CORE_DARK = {
-  paper: "#17110E",
-  surface: "#221A15",
-  "paper-alt": "#1C1511",
-  plate: "#1E1713",
-  ink: "#F3ECE2",
-  "ink-muted": "#BFB2A5",
-  accent: "#E0A46B",
-  "accent-strong": "#EDBD8F",
-  rule: "#8A7766",
-  hairline: "#3D3129",
-  pearl: "#3A2C22",
-  "pearl-rim": "#A47E62",
-  "pearl-index": "#F3ECE2",
+  paper: "#101210",
+  band: "#181B18",
+  ink: "#E7EAE5",
+  muted: "#A6ACA4",
+  rule: "#7A8178",
+  hairline: "#2B302B",
+  surface: "#101210",
+  "paper-alt": "#181B18",
+  plate: "#101210",
+  "ink-muted": "#A6ACA4",
+  accent: "#E7EAE5",
+  "accent-strong": "#E7EAE5",
+  /** Dark mode: the pearl is a flat light-ink disc (a black disc would vanish on the dark paper). */
+  pearl: "#E7EAE5",
+  "pearl-index": "#101210",
 } as const;
 
 export type CoreToken = keyof typeof CORE_LIGHT;
@@ -54,113 +65,118 @@ export type SwatchId = (typeof SWATCH_IDS)[number];
 export interface Swatch {
   id: SwatchId;
   name: string;
-  /** Text and accents (light mode). */
+  /** Light mode: text, lines and marks (the "deep" tone). */
   deep: string;
-  /** Light-mode header band. */
+  /** Light-mode tint: deep at 8% over paper (a highlight, never a page band). */
   tint: string;
-  /** Dark-mode accent. */
+  /** Dark mode: text, lines and marks (the "light" tone). */
   light: string;
-  /** Seed dot, light mode: deep at 40% over --plate. */
+  /** Faint mark, light mode: deep at 40% over paper (decorative). */
   seedLight: string;
-  /** Seed dot, dark mode: light at 35% over the dark plate. */
+  /** Faint mark, dark mode: light at 35% over the dark paper (decorative). */
   seedDark: string;
-  /** Dark header band: light at 10% over night. */
+  /** Dark-mode tint: light at 10% over the dark paper. */
   bandDark: string;
   reserve: boolean;
 }
 
+/**
+ * The four live directions use the DIRECTION.md §5.0 tones (minimum CVD
+ * ΔE_OK×100 8.2 between them, deep and light). Jasmine, Black sesame, Taro and
+ * Thai tea keep their earlier deep/light tones (archived or reserve colours).
+ */
 export const SWATCHES: Record<SwatchId, Swatch> = {
   "butterfly-pea": {
     id: "butterfly-pea",
     name: "Butterfly pea",
-    deep: "#2F519B",
-    tint: "#DFE6F5",
-    light: "#A9C0F2",
-    seedLight: "#A7B1C9",
-    seedDark: "#4F5261",
-    bandDark: "#262325",
+    deep: "#2B4FA8",
+    tint: "#EEF1F8",
+    light: "#8EA4F7",
+    seedLight: "#AAB9DC",
+    seedDark: "#3C4561",
+    bandDark: "#1D2127",
     reserve: false,
   },
   oolong: {
     id: "oolong",
     name: "Oolong",
-    deep: "#7A5913",
-    tint: "#F1E8CC",
-    light: "#E3C26E",
-    seedLight: "#C5B493",
-    seedDark: "#635333",
-    bandDark: "#2B2318",
+    deep: "#6B4500",
+    tint: "#F3F0EB",
+    light: "#C4943A",
+    seedLight: "#C4B599",
+    seedDark: "#4F401F",
+    bandDark: "#221F14",
     reserve: false,
   },
   lychee: {
     id: "lychee",
     name: "Lychee",
-    deep: "#993452",
-    tint: "#F5DFE5",
-    light: "#F0A5BC",
-    seedLight: "#D1A5AC",
-    seedDark: "#68494E",
-    bandDark: "#2D201F",
+    deep: "#A12C5A",
+    tint: "#F7EEF2",
+    light: "#F590AE",
+    seedLight: "#D9ABBD",
+    seedDark: "#603E47",
+    bandDark: "#271F20",
     reserve: false,
   },
   matcha: {
     id: "matcha",
     name: "Matcha",
-    deep: "#3E6A2F",
-    tint: "#E3ECD8",
-    light: "#A9CF8F",
-    seedLight: "#ADBB9E",
-    seedDark: "#4F573E",
-    bandDark: "#26241B",
+    deep: "#4C7A1E",
+    tint: "#F1F4ED",
+    light: "#A8DA84",
+    seedLight: "#B7CAA5",
+    seedDark: "#455839",
+    bandDark: "#1F261C",
     reserve: false,
   },
   jasmine: {
     id: "jasmine",
     name: "Jasmine",
     deep: "#1E6660",
-    tint: "#D8EBE8",
+    tint: "#EDF3F2",
     light: "#8FD3C9",
-    seedLight: "#A0B9B2",
-    seedDark: "#465953",
-    bandDark: "#232421",
+    seedLight: "#A5C2BF",
+    seedDark: "#3C5651",
+    bandDark: "#1D2523",
     reserve: false,
   },
   "black-sesame": {
     id: "black-sesame",
     name: "Black sesame",
     deep: "#45413C",
-    tint: "#E6E2DC",
+    tint: "#F0F0EF",
     light: "#CFC8C0",
-    seedLight: "#B0ABA3",
-    seedDark: "#5C5550",
-    bandDark: "#292320",
+    seedLight: "#B5B3B1",
+    seedDark: "#53524E",
+    bandDark: "#232422",
     reserve: false,
   },
   taro: {
     id: "taro",
     name: "Taro (reserve)",
     deep: "#5E4391",
-    tint: "#ECE5F4",
+    tint: "#F2F0F6",
     light: "#C6B3EB",
-    seedLight: "#BAABC5",
-    seedDark: "#594E5F",
-    bandDark: "#282124",
+    seedLight: "#BFB4D3",
+    seedDark: "#504A5D",
+    bandDark: "#222226",
     reserve: true,
   },
   "thai-tea": {
     id: "thai-tea",
     name: "Thai tea (reserve)",
     deep: "#A0461C",
-    tint: "#F7E3D3",
+    tint: "#F7F0ED",
     light: "#F2A57A",
-    seedLight: "#D4AD96",
-    seedDark: "#684937",
-    bandDark: "#2D2019",
+    seedLight: "#D9B5A4",
+    seedDark: "#5F4535",
+    bandDark: "#27211B",
     reserve: true,
   },
 };
 
-/** Default assignment order (CVD-checked, brief §C3). */
+/** Default assignment order (CVD-checked). */
 export const DEFAULT_SWATCH_ORDER: SwatchId[] = [
   "butterfly-pea",
   "oolong",
@@ -170,11 +186,22 @@ export const DEFAULT_SWATCH_ORDER: SwatchId[] = [
   "black-sesame",
 ];
 
-/** Pairs that are confusable under colour-vision deficiency (validator warns). */
+/**
+ * Pairs that are confusable under colour-vision deficiency (validator warns).
+ * Smallest ΔE_OK×100 over normal vision and Machado-2009 protan/deutan/tritan
+ * simulations, in either the deep or the light tone (recomputed 2026-10-24 for
+ * the D-13 tones; every pair below 5).
+ */
 export const CONFUSABLE_PAIRS: Array<[SwatchId, SwatchId, string]> = [
-  ["taro", "butterfly-pea", "ΔE 3.2 under protan simulation"],
-  ["thai-tea", "oolong", "ΔE 3.3 under deutan simulation"],
-  ["matcha", "thai-tea", "ΔE 6.4"],
+  ["jasmine", "black-sesame", "ΔE 1.4 under protan simulation (dark mode)"],
+  ["matcha", "thai-tea", "ΔE 1.6 under deutan simulation"],
+  ["lychee", "thai-tea", "ΔE 3.2 under tritan simulation"],
+  ["butterfly-pea", "jasmine", "ΔE 3.3 under tritan simulation"],
+  ["taro", "butterfly-pea", "ΔE 4.1 under protan simulation"],
+  ["black-sesame", "taro", "ΔE 4.1 under tritan simulation (dark mode)"],
+  ["lychee", "jasmine", "ΔE 4.5 under deutan simulation"],
+  ["thai-tea", "oolong", "ΔE 4.8 under protan simulation"],
+  ["matcha", "jasmine", "ΔE 4.9 under tritan simulation (dark mode)"],
 ];
 
 // ---------------------------------------------------------------------------

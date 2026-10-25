@@ -1,5 +1,5 @@
 /**
- * WP0 kit page checks (brief WP0 acceptance #5–#6). Needs a server started with
+ * FOUNDATION kit page checks (brief WP0 acceptance #5–#6; D-13 primitives). Needs a server started with
  * NEXT_PUBLIC_KIT=1, e.g.:
  *   NEXT_PUBLIC_KIT=1 npx next dev --port 3101
  *   BASE_URL=http://localhost:3101 npx playwright test tests/e2e/kit.spec.ts
@@ -133,4 +133,59 @@ test("data-intro is set on the first home view only", async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.hasAttribute("data-intro"))).toBe(
     false,
   );
+});
+
+// D-13: the restyled primitives carry none of the AI-tell markers (DIRECTION §5.0 probe).
+test("primitives: no pills, rounded boxes, tracked caps, mono, gradients, shadows or loops", async ({
+  page,
+}) => {
+  await openKit(page);
+  const found = await page.evaluate(() => {
+    const out: string[] = [];
+    for (const el of Array.from(document.querySelectorAll<HTMLElement>("body *"))) {
+      const cs = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      if (!r.width || !r.height) continue;
+      const border = parseFloat(cs.borderTopWidth) + parseFloat(cs.borderLeftWidth);
+      const radius = parseFloat(cs.borderTopLeftRadius);
+      const tag = `${el.tagName.toLowerCase()}.${el.className}`;
+      if (border > 0 && radius >= r.height / 2 - 1 && r.width > r.height * 1.3)
+        out.push(`pill ${tag}`);
+      // Pearls (discs) and photos are exempt, as in the DIRECTION §5.0 probe.
+      const exempt = el.tagName === "IMG" || el.classList.contains("bl-pearl");
+      if (r.height > 60 && radius > 2 && !exempt) out.push(`rounded box ${tag}`);
+      if (cs.textTransform === "uppercase" && parseFloat(cs.letterSpacing) > 0.3)
+        out.push(`tracked caps ${tag}`);
+      const text = Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent?.trim());
+      if (
+        text &&
+        /mono|consolas|plex/i.test(cs.fontFamily) &&
+        !el.closest("code, pre, .doi, .bibtex")
+      )
+        out.push(`mono ${tag}`);
+      if (/gradient/.test(cs.backgroundImage)) out.push(`gradient ${tag}`);
+      if (cs.boxShadow !== "none") out.push(`shadow ${tag}`);
+    }
+    if (/[→↗↘›]/.test(document.body.innerText)) out.push("arrow glyph");
+    const loops = document
+      .getAnimations()
+      .filter((a) => a.effect?.getTiming().iterations === Infinity).length;
+    if (loops) out.push(`${loops} infinite animations`);
+    return out;
+  });
+  expect(found).toEqual([]);
+});
+
+test("header: the outlined BOBALAB wordmark is the home link; five nav items", async ({ page }) => {
+  await openKit(page);
+  const home = page.getByRole("banner").getByRole("link", { name: "BOBALAB home" });
+  await expect(home.locator("svg.bl-wordmark circle")).toHaveCount(1);
+  await expect(home.locator("svg.bl-wordmark path")).toHaveCount(6);
+  await expect(page.locator(".bl-nav__link")).toHaveText([
+    "Research",
+    "Publications",
+    "People",
+    "News",
+    "Join",
+  ]);
 });

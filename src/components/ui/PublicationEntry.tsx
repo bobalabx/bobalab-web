@@ -1,17 +1,25 @@
 /**
- * One publication in a list (brief §D7 entry anatomy): title link, authors
- * (lab members highlighted and linked), venue/year, status with "as of" and
- * self-reported wording, awards, direction tags, materials row.
+ * One publication as a ruled ledger row (D-13 item 5; P3 `.row`):
+ *   main  — title link (t-title 600), authors (lab members in weight 600, the CV
+ *           convention, never a disc), venue and status in muted meta, the
+ *           lab's `in_brief` line (clamped to 2 lines), awards;
+ *   meta  — the type word and year as plain words, direction names with their
+ *           16 px line segment, and the materials as plain text links.
+ * Two columns from 64rem (main | 17.5rem meta), stacked below.
+ * Review-status provenance ("reported by the lab") is no longer repeated on
+ * every row (D-13 item 7): pages print one footnote instead (see
+ * `needsProvenanceNote`); `statusLine(…, { provenance: true })` keeps the
+ * inline wording where a page still needs it.
  */
 import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
 import type { PublicationView, AuthorView } from "@/lib/content/load";
 import { formatDate } from "@/lib/content/dates";
-import { pageRange } from "@/lib/publications/csl";
+import { pageRange, typeWord } from "@/lib/publications/csl";
 import { Badge, DraftBadge } from "./Badge";
 import { PearlTagList } from "./PearlTag";
 import { MaterialsRow, materialsFromPublication } from "./MaterialsRow";
-import { PUBLICATION_STATUS_LABELS, PUBLICATION_TYPE_LABELS } from "./labels";
+import { PUBLICATION_STATUS_LABELS } from "./labels";
 import { SELF_REPORTED_WORDING, isSelfReportedAward } from "@/lib/publications/provenance";
 
 type Heading = "h2" | "h3" | "h4";
@@ -55,23 +63,42 @@ function Authors({ authors, currentPerson }: { authors: AuthorView[]; currentPer
 }
 
 /**
- * "Major revision at M&SOM · as of Apr 2026 · reported by the lab".
+ * "Major revision at M&SOM · as of Apr 2026".
  * Pass the publication `type` so a bare "Working paper" status on a working
- * paper (which only repeats the type badge and claims nothing) is dropped
- * (WP3 request 3).
+ * paper (which only repeats the type word and claims nothing) is dropped
+ * (WP3 request 3). `provenance: true` appends "reported by the lab" for a
+ * self-reported status; by default the page carries one provenance footnote
+ * instead of an inline hedge on every row (D-13 item 7).
  */
 export function statusLine(
   p: Pick<PublicationView, "status" | "status_note" | "as_of" | "status_source">,
   type?: PublicationView["type"],
+  opts: { provenance?: boolean } = {},
 ): string | null {
   if (p.status === "published") return null;
   if (p.status === "working-paper" && type === "working-paper" && !p.status_note) return null;
+  if (p.status === "in-progress" && type === "work-in-progress" && !p.status_note) return null;
   const parts = [
     `${PUBLICATION_STATUS_LABELS[p.status]}${p.status_note ? ` ${p.status_note}` : ""}`,
   ];
   if (p.as_of) parts.push(`as of ${formatDate(p.as_of)}`);
-  if (p.status_source === "self-reported") parts.push("reported by the lab");
+  if (opts.provenance && p.status_source === "self-reported") parts.push(SELF_REPORTED_WORDING);
   return parts.join(" · ");
+}
+
+/**
+ * True when any listed paper shows a status or award the lab reported itself,
+ * so the page should print its one provenance footnote (D-13 item 7), e.g.
+ * "Review status and dates are as reported by the lab." (wording pending PI sign-off).
+ */
+export function needsProvenanceNote(
+  pubs: Array<Pick<PublicationView, "status" | "status_source" | "awards">>,
+): boolean {
+  return pubs.some(
+    (p) =>
+      (p.status !== "published" && p.status_source === "self-reported") ||
+      p.awards.some((a) => isSelfReportedAward(a)),
+  );
 }
 
 export function PublicationEntry({
@@ -80,6 +107,7 @@ export function PublicationEntry({
   showTags = true,
   showType = true,
   showAwards = true,
+  showBrief = true,
   currentPerson,
 }: {
   pub: PublicationView;
@@ -88,6 +116,8 @@ export function PublicationEntry({
   showType?: boolean;
   /** false leaves the award list out entirely (home digest, brief §D3.3; WP1 request 5). */
   showAwards?: boolean;
+  /** false leaves out the lab's `in_brief` line (shown clamped to 2 lines by default). */
+  showBrief?: boolean;
   /** Slug of the person whose page this list is on: their name is not linked (WP4 request 4). */
   currentPerson?: string;
 }) {
@@ -99,54 +129,65 @@ export function PublicationEntry({
   ]
     .filter(Boolean)
     .join(", ");
+  const materials = materialsFromPublication(pub);
   return (
     <article className="bl-pub" aria-labelledby={`pub-${pub.slug}`}>
-      <div className="bl-card__meta">
-        {showType && <Badge>{PUBLICATION_TYPE_LABELS[pub.type]}</Badge>}
-        {pub.year && <span className="t-mono">{pub.year}</span>}
-        <DraftBadge show={pub.draft} />
-      </div>
-      <H className="bl-pub__title" id={`pub-${pub.slug}`}>
-        <Link href={`/publications/${pub.slug}/`}>{pub.title}</Link>
-      </H>
-      <p className="bl-pub__authors">
-        <Authors authors={pub.authorList} currentPerson={currentPerson} />
-      </p>
-      {(venue || status) && (
-        <p className="bl-pub__venue">
-          {venue && <cite>{venue}</cite>}
-          {venue && status && <span aria-hidden="true"> · </span>}
-          {status && <span className="bl-pub__status">{status}</span>}
+      <div className="bl-pub__main">
+        <H className="bl-pub__title" id={`pub-${pub.slug}`}>
+          <Link href={`/publications/${pub.slug}/`}>{pub.title}</Link>
+        </H>
+        <p className="bl-pub__authors">
+          <Authors authors={pub.authorList} currentPerson={currentPerson} />
         </p>
-      )}
-      {showAwards && pub.awards.length > 0 && (
-        <ul className="bl-pub__awards" aria-label="Awards">
-          {pub.awards.slice(0, LIST_AWARDS).map((a) => (
-            <li key={`${a.name}-${a.year}`}>
-              <Badge tone="strong">
-                {a.name}, {a.year}
-              </Badge>
-              {a.under_title && (
-                <span className="t-sm t-muted"> (as &ldquo;{a.under_title}&rdquo;)</span>
-              )}
-              {isSelfReportedAward(a) && (
-                <span className="t-sm t-muted"> · {SELF_REPORTED_WORDING}</span>
-              )}
-            </li>
-          ))}
-          {pub.awards.length > LIST_AWARDS && (
-            <li>
-              <Link href={`/publications/${pub.slug}/#awards-h`}>
-                {pub.awards.length - LIST_AWARDS} more{" "}
-                {pub.awards.length - LIST_AWARDS === 1 ? "award" : "awards"}
-                <span className="vh"> for {pub.title}</span>
-              </Link>
-            </li>
-          )}
-        </ul>
-      )}
-      {showTags && <PearlTagList items={pub.directionRefs} />}
-      <MaterialsRow title={pub.title} items={materialsFromPublication(pub)} />
+        {(venue || status) && (
+          <p className="bl-pub__venue">
+            {venue && <cite>{venue}</cite>}
+            {venue && status && <span aria-hidden="true">. </span>}
+            {status && <span className="bl-pub__status">{status}</span>}
+          </p>
+        )}
+        {showBrief && pub.in_brief && <p className="bl-pub__brief">{pub.in_brief}</p>}
+        {showAwards && pub.awards.length > 0 && (
+          <ul className="bl-pub__awards" aria-label="Awards">
+            {pub.awards.slice(0, LIST_AWARDS).map((a) => (
+              <li key={`${a.name}-${a.year}`}>
+                <Badge tone="strong">
+                  {a.name}, {a.year}
+                </Badge>
+                {a.under_title && (
+                  <span className="t-muted"> (as &ldquo;{a.under_title}&rdquo;)</span>
+                )}
+              </li>
+            ))}
+            {pub.awards.length > LIST_AWARDS && (
+              <li>
+                <Link href={`/publications/${pub.slug}/#awards-h`}>
+                  {pub.awards.length - LIST_AWARDS} more{" "}
+                  {pub.awards.length - LIST_AWARDS === 1 ? "award" : "awards"}
+                  <span className="vh"> for {pub.title}</span>
+                </Link>
+              </li>
+            )}
+          </ul>
+        )}
+      </div>
+      <div className="bl-pub__meta">
+        {(showType || pub.year || pub.draft) && (
+          <p className="bl-pub__type">
+            {showType && <Badge>{typeWord(pub)}</Badge>}
+            {showType && pub.year ? ", " : null}
+            {pub.year && <span className="t-num">{pub.year}</span>}
+            {pub.draft && (
+              <>
+                {" "}
+                <DraftBadge />
+              </>
+            )}
+          </p>
+        )}
+        {showTags && <PearlTagList items={pub.directionRefs} />}
+        <MaterialsRow title={pub.title} items={materials} />
+      </div>
     </article>
   );
 }

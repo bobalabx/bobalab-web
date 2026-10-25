@@ -1,5 +1,6 @@
 /**
- * Direction tag: a 10 px flat dot in the direction tone plus a text label (§C9).
+ * Direction tag: a 16 px line segment in the direction's tone plus the
+ * direction's name (D-13 item 5; the same legend mark as Fig. 1's lanes).
  * Never colour alone. With `href` it is a link (≥ 24 px target).
  */
 import Link from "next/link";
@@ -13,7 +14,7 @@ export interface PearlTagProps {
 }
 
 export function PearlTag({ label, swatch, href, size = "md" }: PearlTagProps) {
-  const dot = (
+  const seg = (
     <span
       className={size === "sm" ? "bl-dot bl-dot--sm" : "bl-dot"}
       data-swatch={swatch}
@@ -23,14 +24,14 @@ export function PearlTag({ label, swatch, href, size = "md" }: PearlTagProps) {
   if (href) {
     return (
       <Link className="bl-tag" href={href} data-swatch={swatch}>
-        {dot}
+        {seg}
         {label}
       </Link>
     );
   }
   return (
     <span className="bl-tag" data-swatch={swatch}>
-      {dot}
+      {seg}
       {label}
     </span>
   );

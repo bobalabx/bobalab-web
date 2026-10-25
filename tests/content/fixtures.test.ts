@@ -11,11 +11,14 @@ const EXPECTED_WARNINGS: Record<string, string[]> = {
   n2: [],
   n3: [],
   n4: [],
-  n6: [],
+  // D-13 tones: Jasmine (kept from the earlier palette) is CVD-confusable with the new
+  // Butterfly pea / Lychee / Matcha tones (palette.ts CONFUSABLE_PAIRS), so any
+  // five- or six-direction set that uses it now warns, as it should.
+  n6: ["W_COLOR_CONFUSABLE"],
   n7: ["W_DIR_COUNT_HIGH", "W_COLOR_CONFUSABLE"],
   n8: ["W_DIR_COUNT_HIGH", "W_COLOR_CONFUSABLE"],
   "long-labels": [],
-  "seeds-0-1-7-12-24": [],
+  "seeds-0-1-7-12-24": ["W_COLOR_CONFUSABLE"],
   "consent-edge-cases": [
     "W_CONSENT_PHOTO",
     "W_CONSENT_EMAIL",

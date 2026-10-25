@@ -120,88 +120,92 @@ export function buildField(name, node, ui, ctx) {
   };
   const sub = { ...ctx, path };
 
-  switch (node.kind) {
-    case "string": {
-      if (node.format === "slug") {
-        if (!ui.relation) throw new Error(`${path}: slug field needs \`relation\``);
-        Object.assign(f, relationProps(ui.relation, ctx.relations, path), { multiple: false });
+  // A retired field kept in the schema so old files still parse: editors never see
+  // it, but it keeps the schema's required flag and default (redesign home-2).
+  if (ui.widget === "hidden") f.widget = "hidden";
+  else
+    switch (node.kind) {
+      case "string": {
+        if (node.format === "slug") {
+          if (!ui.relation) throw new Error(`${path}: slug field needs \`relation\``);
+          Object.assign(f, relationProps(ui.relation, ctx.relations, path), { multiple: false });
+          break;
+        }
+        const widget = ui.widget ?? (node.format === "date" ? "datetime" : "string");
+        f.widget = widget;
+        if (widget === "datetime" && !ui.format) {
+          // Without `format` Decap stores a Date, which YAML would not keep as our string.
+          throw new Error(`${path}: datetime field needs an explicit storage \`format\``);
+        }
+        const pat = stringPattern(node);
+        // No pattern on file/image widgets: MEASURED in Decap 3.17.1 a valid
+        // https:// value in a file widget fails pattern validation, which blocks
+        // saving. Uploads always produce /uploads/… paths; a typed http:// link is
+        // still caught by the validator (E_HTTP_URL) in the validate-content check.
+        if (pat && !NO_PATTERN_WIDGETS.has(widget))
+          put("pattern", [pat.regex, ui.message ?? pat.message]);
         break;
       }
-      const widget = ui.widget ?? (node.format === "date" ? "datetime" : "string");
-      f.widget = widget;
-      if (widget === "datetime" && !ui.format) {
-        // Without `format` Decap stores a Date, which YAML would not keep as our string.
-        throw new Error(`${path}: datetime field needs an explicit storage \`format\``);
-      }
-      const pat = stringPattern(node);
-      // No pattern on file/image widgets: MEASURED in Decap 3.17.1 a valid
-      // https:// value in a file widget fails pattern validation, which blocks
-      // saving. Uploads always produce /uploads/… paths; a typed http:// link is
-      // still caught by the validator (E_HTTP_URL) in the validate-content check.
-      if (pat && !NO_PATTERN_WIDGETS.has(widget))
-        put("pattern", [pat.regex, ui.message ?? pat.message]);
-      break;
-    }
-    case "number":
-      f.widget = "number";
-      f.value_type = node.int ? "int" : "float";
-      put("min", node.min);
-      if (!node.dynamicMax) put("max", node.max);
-      if (node.int) f.step = 1;
-      break;
-    case "boolean":
-      f.widget = "boolean";
-      break;
-    case "enum":
-      f.widget = "select";
-      f.options = enumOptions(node, ui, path);
-      f.multiple = false;
-      break;
-    case "array": {
-      const items = node.items;
-      if (items.kind === "string" && items.format === "slug" && !ui.field) {
-        if (!ui.relation) throw new Error(`${path}: list of slugs needs \`relation\``);
-        Object.assign(f, relationProps(ui.relation, ctx.relations, path), { multiple: true });
+      case "number":
+        f.widget = "number";
+        f.value_type = node.int ? "int" : "float";
+        put("min", node.min);
+        if (!node.dynamicMax) put("max", node.max);
+        if (node.int) f.step = 1;
+        break;
+      case "boolean":
+        f.widget = "boolean";
+        break;
+      case "enum":
+        f.widget = "select";
+        f.options = enumOptions(node, ui, path);
+        f.multiple = false;
+        break;
+      case "array": {
+        const items = node.items;
+        if (items.kind === "string" && items.format === "slug" && !ui.field) {
+          if (!ui.relation) throw new Error(`${path}: list of slugs needs \`relation\``);
+          Object.assign(f, relationProps(ui.relation, ctx.relations, path), { multiple: true });
+          put("min", node.minItems);
+          put("max", node.maxItems);
+          break;
+        }
+        f.widget = "list";
+        if (items.kind === "object") {
+          if (!ui.fields) throw new Error(`${path}: list of objects needs \`fields\``);
+          f.fields = buildFields(items, ui.fields, sub);
+          f.collapsed = true;
+        } else {
+          const itemUi = ui.field ?? { label: humanize(name) };
+          const itemName = (itemUi.label ?? "item").toLowerCase().replace(/[^a-z0-9]+/g, "_");
+          f.field = buildField(itemName, { ...items, required: true }, itemUi, sub);
+        }
+        f.allow_add = true;
         put("min", node.minItems);
         put("max", node.maxItems);
         break;
       }
-      f.widget = "list";
-      if (items.kind === "object") {
-        if (!ui.fields) throw new Error(`${path}: list of objects needs \`fields\``);
-        f.fields = buildFields(items, ui.fields, sub);
-        f.collapsed = true;
-      } else {
-        const itemUi = ui.field ?? { label: humanize(name) };
-        const itemName = (itemUi.label ?? "item").toLowerCase().replace(/[^a-z0-9]+/g, "_");
-        f.field = buildField(itemName, { ...items, required: true }, itemUi, sub);
+      case "object": {
+        if (!ui.fields) throw new Error(`${path}: object needs \`fields\``);
+        f.widget = "object";
+        // Decap enforces `required` subfields even when an optional object is left
+        // empty, so inside an optional object they become optional in the editor and
+        // cms-hooks.js enforces "all or nothing" on save (rules from allOrNothingRules).
+        const objCtx = node.required ? sub : { ...sub, optionalParent: { path, label: f.label } };
+        f.fields = buildFields(node, ui.fields, objCtx);
+        break;
       }
-      f.allow_add = true;
-      put("min", node.minItems);
-      put("max", node.maxItems);
-      break;
+      case "record": {
+        if (!ui.keys) throw new Error(`${path}: record needs \`keys\``);
+        f.widget = "object";
+        f.fields = Object.entries(ui.keys).map(([k, kUi]) =>
+          buildField(k, { ...node.values, required: false }, kUi, sub),
+        );
+        break;
+      }
+      default:
+        throw new Error(`${path}: unsupported kind ${node.kind}`);
     }
-    case "object": {
-      if (!ui.fields) throw new Error(`${path}: object needs \`fields\``);
-      f.widget = "object";
-      // Decap enforces `required` subfields even when an optional object is left
-      // empty, so inside an optional object they become optional in the editor and
-      // cms-hooks.js enforces "all or nothing" on save (rules from allOrNothingRules).
-      const objCtx = node.required ? sub : { ...sub, optionalParent: { path, label: f.label } };
-      f.fields = buildFields(node, ui.fields, objCtx);
-      break;
-    }
-    case "record": {
-      if (!ui.keys) throw new Error(`${path}: record needs \`keys\``);
-      f.widget = "object";
-      f.fields = Object.entries(ui.keys).map(([k, kUi]) =>
-        buildField(k, { ...node.values, required: false }, kUi, sub),
-      );
-      break;
-    }
-    default:
-      throw new Error(`${path}: unsupported kind ${node.kind}`);
-  }
 
   f.required = node.required;
   if (node.required && ctx.optionalParent) {

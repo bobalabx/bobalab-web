@@ -1,8 +1,13 @@
 /*
- * Motion tokens and every view-transition rule (brief §C6, §E3, §E5, §E7;
- * DECISIONS D-02). The figure package (WP1) owns figure-specific motion
- * (hover lift, idle float, buoyancy, seed bloom) but must use these tokens
- * and the motion-last gate below.
+ * Motion tokens and every view-transition rule (DECISIONS D-13 item 6, which
+ * supersedes D-02/D-02a; curves from IDENTITY-RESEARCH §5 and DIRECTION §5.3).
+ *
+ * Motion is purposeful and finite. Kept: papers arriving year by year on the
+ * settle curve (figure package), linked highlighting, the pearl-{slug} morph
+ * (below), the study-design plate's step-through, results steeping in after a
+ * filter change. Removed: idle float, pointer buoyancy, stir, halos, gloss,
+ * overshoot ("bounce") and the in-figure Pause button. Nothing loops, so no
+ * Pause control is needed (WCAG 2.2.2); the footer "Reduce motion" switch stays.
  *
  * Motion-last gate — every transform animation sits inside:
  *   @media (prefers-reduced-motion: no-preference) { :root:not([data-motion="reduce"]) … }
@@ -15,26 +20,42 @@
   --dur-fast: 160ms;
   --dur-base: 200ms;
   --dur-caption: 180ms;
+  --dur-steep: 240ms;
   --dur-page-exit: 150ms;
   --dur-page-enter: 210ms;
   --dur-morph: 420ms;
+  --dur-settle: 400ms;
   --dur-slide: 400ms;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-emph: cubic-bezier(0.2, 0, 0, 1);
-  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --lift-max: 3px;
-  --scale-max: 1.06;
+  /* Settling (arrival): critically damped, no overshoot.
+     p(t) = 1 − (1 + ωt)·e^(−ωt), ω = 9.23 (IDENTITY-RESEARCH §5). */
+  --ease-settle: linear(
+    0,
+    0.18,
+    0.455,
+    0.671,
+    0.812,
+    0.896,
+    0.944,
+    0.971,
+    0.985,
+    0.992,
+    0.996,
+    0.998,
+    0.999,
+    1
+  );
+  /* Steeping (state change, e.g. filter results): p(t) = (1 − e^(−4t)) / (1 − e^(−4)). */
+  --ease-steep: linear(0, 0.336, 0.561, 0.712, 0.813, 0.881, 0.926, 0.957, 0.977, 0.991, 1);
+  /* Diffusion (belonging): radius ∝ √t. */
+  --ease-diffuse: linear(0, 0.316, 0.447, 0.548, 0.632, 0.707, 0.775, 0.837, 0.894, 0.949, 1);
   --slide-distance: 60px;
-  /* D-02 idle float limits (used by WP1) */
-  --float-amp: 3px;
-  --float-min: 7s;
-  --float-max: 11s;
-  --lean-max: 4px;
 }
 
 /* ---------------------------------------------------------------------------
- * View transitions (§E5). React <ViewTransition> assigns view-transition-class
+ * View transitions. React <ViewTransition> assigns view-transition-class
  * from `share`/`enter`/`exit` props; these rules style those classes.
  * ------------------------------------------------------------------------- */
 
@@ -43,30 +64,24 @@
   pointer-events: none;
 }
 
-/* Pearl → direction header morph: <ViewTransition name="pearl-{slug}" share="pearl-morph" default="none"> */
+/* Pearl → direction page morph: <ViewTransition name="pearl-{slug}" share="pearl-morph" default="none">.
+   The pearl travels and lands on the settle curve (no blur, no overshoot). */
 ::view-transition-group(.pearl-morph) {
   animation-duration: var(--dur-morph);
-  animation-timing-function: var(--ease-emph);
+  animation-timing-function: var(--ease-settle);
   /* Paint the travelling pearl above every page-level group (verify VIS-01).
      Groups paint in capture order: the pearl is captured from the OLD page, so the
-     NEW page's boundary group (React's `_t_N_`, fading in from 150 ms) would
-     otherwise sit on top of it and wash it out for the second half of the morph.
+     NEW page's boundary group would otherwise sit on top of it and wash it out.
      Stays below the anchored site header (z-index 100). */
   z-index: 10;
 }
 ::view-transition-image-pair(.pearl-morph) {
-  animation-name: bl-via-blur;
   animation-duration: var(--dur-morph);
-}
-@keyframes bl-via-blur {
-  30% {
-    filter: blur(3px);
-  }
+  animation-timing-function: var(--ease-settle);
 }
 
-/* Morph companions (WP1 request 6): every Fig. 1 pearl carries a pearl-{slug} name, so
-   on a pearl click the OTHER pearls become exit-only groups (and, coming back, enter-only
-   ones). Let them follow the page swap instead of lingering 420 ms over the destination.
+/* Morph companions (WP1 request 6): pearls that only exist on one side become
+   exit-only / enter-only groups; they follow the page swap instead of lingering.
    Reduced motion still wins (the !important rules below set them to 0 s). */
 @media (prefers-reduced-motion: no-preference) {
   :root:not([data-motion="reduce"])::view-transition-old(.pearl-morph):only-child {
@@ -80,7 +95,7 @@
   }
 }
 
-/* Page swap for the root snapshot: old out 150 ms, new in 210 ms after 150 ms. */
+/* Page swap for the root snapshot: an opacity crossfade, old out 150 ms, new in 210 ms after 150 ms. */
 ::view-transition-old(root) {
   animation: var(--dur-page-exit) var(--ease-in) both bl-page-out;
 }
@@ -90,11 +105,9 @@
 @keyframes bl-page-out {
   from {
     opacity: 1;
-    transform: translateY(0);
   }
   to {
     opacity: 0;
-    transform: translateY(8px);
   }
 }
 @keyframes bl-page-in {
@@ -106,7 +119,7 @@
   }
 }
 
-/* Page-level wrappers (WP1/WP2 put <ViewTransition enter/exit={{'pearl-open': 'page-swap', ...}}> in page.tsx). */
+/* Page-level wrappers (<ViewTransition enter/exit={PAGE_ENTER_EXIT}> in page.tsx). */
 ::view-transition-old(.page-swap) {
   animation: var(--dur-page-exit) var(--ease-in) both bl-page-out;
 }
@@ -114,41 +127,41 @@
   animation: var(--dur-page-enter) var(--ease-out) var(--dur-page-exit) both bl-page-in;
 }
 
-/* Direction header band crossfades to the direction tint: <ViewTransition name="dir-band" share="band-fade"> */
+/* Direction header crossfade: <ViewTransition name="dir-band" share="band-fade"> */
 ::view-transition-group(.band-fade) {
   animation-duration: var(--dur-morph);
-  animation-timing-function: var(--ease-emph);
+  animation-timing-function: var(--ease-settle);
 }
 ::view-transition-old(.band-fade),
 ::view-transition-new(.band-fade) {
   animation-duration: var(--dur-morph);
-  animation-timing-function: var(--ease-emph);
+  animation-timing-function: var(--ease-settle);
 }
 
-/* Sibling rail: directional slides, 60 px (Next VT guide timings). */
+/* Sibling rail: directional slides, 60 px, landing on the settle curve. */
 ::view-transition-old(.nav-forward) {
   --slide-offset: calc(-1 * var(--slide-distance));
   animation:
     var(--dur-page-exit) var(--ease-in) both bl-fade reverse,
-    var(--dur-slide) ease-in-out both bl-slide reverse;
+    var(--dur-slide) var(--ease-settle) both bl-slide reverse;
 }
 ::view-transition-new(.nav-forward) {
   --slide-offset: var(--slide-distance);
   animation:
     var(--dur-page-enter) ease-out var(--dur-page-exit) both bl-fade,
-    var(--dur-slide) ease-in-out both bl-slide;
+    var(--dur-slide) var(--ease-settle) both bl-slide;
 }
 ::view-transition-old(.nav-back) {
   --slide-offset: var(--slide-distance);
   animation:
     var(--dur-page-exit) var(--ease-in) both bl-fade reverse,
-    var(--dur-slide) ease-in-out both bl-slide reverse;
+    var(--dur-slide) var(--ease-settle) both bl-slide reverse;
 }
 ::view-transition-new(.nav-back) {
   --slide-offset: calc(-1 * var(--slide-distance));
   animation:
     var(--dur-page-enter) ease-out var(--dur-page-exit) both bl-fade,
-    var(--dur-slide) ease-in-out both bl-slide;
+    var(--dur-slide) var(--ease-settle) both bl-slide;
 }
 @keyframes bl-fade {
   from {
@@ -180,22 +193,30 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Intro (D-02a): first home view per session only. PrePaintScript sets
- * <html data-intro> and removes it after 2 s; the Fig. 1 intro itself (sink,
- * halo bloom, seed spread on `.f1-group`) lives in WP1's figure.css. The
- * brief's generic `.pearl-group` settle was retired (WP1 request 3).
+ * Shared finite motion primitives (opt-in classes for page packages).
+ * The Fig. 1 arrival itself lives in the figure package's CSS; <html data-intro>
+ * is set by PrePaintScript on the first home view per session and cleared after 2 s.
  * ------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: no-preference) {
-  /* Generic press feedback for controls that opt in. */
-  :root:not([data-motion="reduce"]) .press:active {
-    transform: scale(0.98);
-    transition: transform var(--dur-press) var(--ease-out);
+  /* Results steep in after a filter or search change (opacity only, no slide). */
+  :root:not([data-motion="reduce"]) .bl-steep {
+    animation: bl-fade var(--dur-steep) var(--ease-steep) both;
+  }
+  /* Something new has landed: a 6 px settle, opacity 1 from frame 0. */
+  :root:not([data-motion="reduce"]) .bl-settle {
+    animation: bl-settle var(--dur-settle) var(--ease-settle) both;
+  }
+}
+@keyframes bl-settle {
+  from {
+    transform: translateY(-6px);
   }
 }
 
 /* ---------------------------------------------------------------------------
- * Reduced motion (§E7): OS setting OR the footer toggle.
- * View transitions collapse to a ≤120 ms opacity-only crossfade; nothing moves.
+ * Reduced motion: OS setting OR the footer switch.
+ * View transitions collapse to a ≤120 ms opacity-only crossfade; nothing moves;
+ * every transition is instant.
  * ------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
@@ -215,6 +236,7 @@
   *::before,
   *::after {
     scroll-behavior: auto !important;
+    transition-duration: 0ms !important;
   }
 }
 
@@ -235,4 +257,5 @@
 :root[data-motion="reduce"] *::before,
 :root[data-motion="reduce"] *::after {
   scroll-behavior: auto !important;
+  transition-duration: 0ms !important;
 }

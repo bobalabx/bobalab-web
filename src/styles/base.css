@@ -1,9 +1,9 @@
-/* Base element styles, layout helpers and focus (brief §C4–§C5, §G1). */
+/* Base element styles, layout primitives and focus ("Lines", D-13; p3.css). */
 
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  /* WCAG 2.4.11: anchors and focus never hide under the sticky header. */
+  /* WCAG 2.4.11: anchors and focus never hide under a sticky element. */
   scroll-padding-top: calc(var(--header-h) + var(--s-4));
   background: var(--paper);
 }
@@ -15,11 +15,13 @@ body {
   flex-direction: column;
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-text);
-  font-size: var(--fs-base);
-  line-height: var(--lh-base);
+  font-family: var(--font-sans);
+  font-stretch: var(--wdth-text);
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
   font-weight: 400;
   font-kerning: normal;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-wrap: break-word;
@@ -29,36 +31,43 @@ main {
   flex: 1 0 auto;
 }
 
+/* Headings. Condensed (wdth 68, wght 700) only for the h1, figure lane labels
+   and year headings; h2/h3 are normal width (D-13 item 3). */
 h1,
 h2,
-h3 {
-  font-family: var(--font-display);
-  font-weight: 600;
+h3,
+h4 {
+  font-family: var(--font-sans);
   color: var(--ink);
   margin: 0;
-  text-wrap: balance;
-  font-optical-sizing: auto;
+  letter-spacing: 0;
 }
 h1 {
-  font-size: var(--fs-3xl);
-  line-height: var(--lh-3xl);
-  letter-spacing: -0.01em;
+  font-stretch: var(--wdth-cond);
+  font-weight: 700;
+  font-size: var(--t-head);
+  line-height: 1.05;
+  text-wrap: balance;
 }
 h2 {
-  font-size: var(--fs-2xl);
-  line-height: var(--lh-2xl);
-  letter-spacing: -0.005em;
+  font-stretch: var(--wdth-text);
+  font-weight: 600;
+  font-size: var(--t-h2);
+  line-height: 1.2;
+  text-wrap: balance;
 }
 h3 {
-  font-size: var(--fs-xl);
-  line-height: var(--lh-xl);
+  font-stretch: var(--wdth-text);
+  font-weight: 600;
+  font-size: var(--t-title);
+  line-height: var(--lh-title);
+  text-wrap: pretty;
 }
 h4 {
-  font-family: var(--font-text);
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
-  font-weight: 500;
-  margin: 0;
+  font-stretch: var(--wdth-text);
+  font-weight: 600;
+  font-size: var(--t-body);
+  line-height: 1.4;
 }
 h1:focus {
   outline: none;
@@ -71,27 +80,33 @@ h1:focus-visible {
 p {
   margin: 0;
 }
+b,
+strong {
+  font-weight: 600;
+}
 
+/* Links: ink with an underline; no colour accent, no arrows (D-13 item 4). */
 a {
-  color: var(--accent);
+  color: inherit;
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
+  text-decoration-color: var(--rule);
   text-underline-offset: 0.18em;
 }
 a:hover {
-  color: var(--accent-strong);
+  color: inherit;
+  text-decoration-color: var(--ink);
   text-decoration-thickness: 2px;
 }
 
 :focus-visible {
   outline: 2px solid var(--focus-ring);
-  outline-offset: 3px;
-  border-radius: var(--r-xs);
+  outline-offset: 2px;
 }
 
 ::selection {
-  background: var(--accent);
-  color: var(--on-accent);
+  background: var(--ink);
+  color: var(--paper);
 }
 
 img,
@@ -101,12 +116,15 @@ video {
   height: auto;
 }
 
+/* Monospace only for DOI and BibTeX (system stack, no webfont). */
 code,
 kbd,
 samp,
-pre {
-  font-family: var(--font-data);
-  font-size: var(--fs-mono);
+pre,
+.doi,
+.bibtex {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
 }
 
 hr {
@@ -120,7 +138,7 @@ button {
   color: inherit;
 }
 
-/* Layout helpers ---------------------------------------------------------- */
+/* Layout primitives ------------------------------------------------------- */
 .bl-container {
   width: 100%;
   max-width: calc(var(--content-max) + 2 * var(--gutter));
@@ -134,41 +152,150 @@ button {
 .bl-stack > * + * {
   margin-top: var(--s-4);
 }
+/* Section rhythm: sections are separated by space, not by boxes or heavy rules. */
+.bl-sec {
+  margin-top: var(--sec-gap);
+}
 
-/* Typographic helpers */
+/*
+ * The label-column grid (P3 "timetable" grid): an 18rem label column plus the
+ * track from 64rem, 12.5rem from 48rem, stacked below. Use it for section
+ * heads ("Recent publications" in the label column), the hero, filters and
+ * figure lanes, so every page shares one alignment system.
+ *   <section class="bl-grid"><h2 class="bl-grid__label">…</h2><div class="bl-grid__track">…</div></section>
+ */
+.bl-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--s-3);
+}
+@media (min-width: 48rem) {
+  .bl-grid {
+    grid-template-columns: var(--lab) minmax(0, 1fr);
+  }
+  .bl-grid__label {
+    padding-right: var(--s-5);
+  }
+  .bl-grid__track {
+    min-width: 0;
+  }
+  .bl-grid > .bl-grid__full {
+    grid-column: 1 / -1;
+  }
+}
+
+/*
+ * Ruled ledger: a list whose rows are separated by hairlines, opened by a 1 px
+ * ink rule. `.bl-ledger--major` (2 px ink, top and bottom) is reserved for
+ * figures, plates and the full publications ledger (≤ 2 heavy rules per screen).
+ */
+.bl-ledger {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--rule-w) solid var(--ink);
+}
+.bl-ledger > li,
+.bl-ledger > .bl-ledger__row {
+  border-top: 1px solid var(--hairline);
+  padding-block: var(--s-4) 1.125rem;
+}
+.bl-ledger > :first-child {
+  border-top: 0;
+}
+.bl-ledger--major {
+  border-top-width: var(--rule-heavy);
+  border-bottom: var(--rule-heavy) solid var(--ink);
+}
+.bl-ledger--closed {
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* Section head: a plain-noun title with optional muted meta on the same baseline. */
+.bl-sec-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--s-4);
+  margin-bottom: 14px;
+}
+.bl-sec-h > :not(h2, h3) {
+  color: var(--muted);
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+}
+
+/* Typographic helpers ------------------------------------------------------ */
+/* Condensed display voice: h1-like lines, lane labels, year headings (≥ 2rem only). */
+.t-cond {
+  font-stretch: var(--wdth-cond);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
 .t-display {
-  font-family: var(--font-display);
-  font-size: var(--fs-display);
-  line-height: var(--lh-display);
-  font-weight: 580;
-  letter-spacing: -0.015em;
+  font-family: var(--font-sans);
+  font-stretch: var(--wdth-cond);
+  font-weight: 700;
+  font-size: var(--t-head);
+  line-height: 1.05;
+  letter-spacing: 0;
+  text-wrap: balance;
 }
-.t-lead {
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
-  font-weight: 500;
-}
-.t-sm {
-  font-size: var(--fs-sm);
-  line-height: var(--lh-sm);
-}
-.t-muted {
-  color: var(--ink-muted);
-}
-.t-mono {
-  font-family: var(--font-data);
-  font-size: var(--fs-mono);
-  line-height: var(--lh-mono);
-  letter-spacing: var(--tracking-mono);
-  font-weight: 500;
+/* Year heading in a ledger ("2026"), condensed, tabular. */
+.t-year {
+  font-stretch: var(--wdth-cond);
+  font-weight: 700;
+  font-size: var(--t-lane);
+  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
+.t-lead {
+  font-size: var(--t-title);
+  line-height: 1.5;
+  font-weight: 400;
+  max-width: 62ch;
+}
+.t-sm,
+.t-meta {
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+}
+.t-muted {
+  color: var(--muted);
+}
+.t-num {
+  font-variant-numeric: tabular-nums;
+}
+/* Formerly the mono "data" voice: now Archivo meta with tabular figures (no mono). */
+.t-mono {
+  font-family: var(--font-sans);
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  letter-spacing: 0;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+/* Formerly a tracked mono-caps eyebrow: now a plain muted meta line (no caps, no tracking). */
 .t-eyebrow {
-  font-family: var(--font-data);
-  font-size: var(--fs-mono);
-  letter-spacing: var(--tracking-mono);
-  text-transform: uppercase;
-  color: var(--ink-muted);
+  font-family: var(--font-sans);
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* Direction legend segment: a 16 × 2 px line in the direction colour (P3 `.seg`). */
+.bl-seg {
+  display: inline-block;
+  flex: none;
+  width: 16px;
+  height: 2px;
+  background: var(--dir, var(--ink));
+  vertical-align: 0.3em;
+  margin-right: 6px;
 }
 
 /* Visually hidden but available to assistive tech */

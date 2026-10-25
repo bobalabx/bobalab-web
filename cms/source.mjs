@@ -537,6 +537,10 @@ export const collections = [
       },
       teaser: imageObject("Teaser image", "Optional figure from the paper (with permission)."),
       featured: { label: "Featured", hint: "Show on the home page." },
+      plate_verified: {
+        label: "Study-design figure checked by the authors",
+        hint: "Turn on only after the authors have checked the paper's study-design figure. Until then the figure shows only in preview builds.",
+      },
       bibtex_override: {
         label: "BibTeX override",
         widget: "text",
@@ -902,10 +906,14 @@ export const fileCollections = [
         file: "content/pages/home.yml",
         schema: "pages/home",
         fields: {
+          statement: {
+            label: "Statement (page heading)",
+            hint: "The large first line of the home page, ≤ 80 characters. Leave empty for the default.",
+          },
           mission: {
             label: "Mission",
             widget: "text",
-            hint: "One or two sentences under the lab name (≤ 240 characters).",
+            hint: "One or two sentences beside the lab name, before the research directions (≤ 240 characters).",
           },
           featured_findings: {
             label: "Featured findings",
@@ -923,7 +931,7 @@ export const fileCollections = [
       },
       {
         name: "join",
-        label: "Join / Work with us",
+        label: "Join the lab",
         file: "content/pages/join.yml",
         schema: "pages/join",
         fields: {
@@ -990,13 +998,8 @@ export const fileCollections = [
             widget: "text",
             hint: "Who maintains the site (shown in the footer).",
           },
-          figure_mode: {
-            label: "Fig. 1 layout",
-            options: {
-              cluster: "Cluster (default)",
-              dotplot: "Dot plot (better for 7–8 directions)",
-            },
-          },
+          // Retired by D-13 (Fig. 1 "Lines" has one layout); kept so old site.yml files parse.
+          figure_mode: { label: "Fig. 1 layout (retired)", widget: "hidden" },
           editors_note: {
             label: "Editors’ note",
             widget: "text",

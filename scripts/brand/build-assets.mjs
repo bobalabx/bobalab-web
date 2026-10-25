@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * Raster brand assets from the outlined wordmark (sharp, build-time only):
- *   src/app/apple-icon.png                180×180 pearl on the plate colour
- *   public/brand/og-default.png           1200×630 default Open Graph still
- *                                         (WP1 may replace it with a Fig. 1 still)
+ * Raster brand assets (sharp, build-time only; DECISIONS D-13 item 2):
+ *   src/app/apple-icon.png                180×180 "shoulder on floor" mark (four pearls on a rule)
+ *   public/brand/og-default.png           1200×630 default Open Graph still: the outlined
+ *                                         wordmark on white over a 2 px ink rule
  *   public/brand/fixtures/portrait.webp   128×128 neutral placeholder used by
  *                                         the consent-edge-cases fixture (no real person)
  *
@@ -23,26 +23,37 @@ const W = JSON.parse(geoSrc.slice(geoSrc.indexOf("{"), geoSrc.lastIndexOf("}") +
 const [, , VW, VH] = W.viewBox;
 const P = W.pearl;
 
-const INK = "#1F1712";
-const PLATE = "#F7F1E8";
-const PAPER = "#FCFAF6";
-const MUTED = "#5C4F45";
-const HAIR = "#D8CAB6";
+// P3 "Lines" tokens (src/styles/tokens.css)
+const INK = "#111410";
+const PAPER = "#FFFFFF";
+const BAND = "#F2F3F1";
 
-function crescent(cx, cy, pr) {
-  const r = pr * 0.68;
-  const a0 = (200 * Math.PI) / 180;
-  const a1 = (252 * Math.PI) / 180;
-  const f = (n) => n.toFixed(2);
-  return `M${f(cx + r * Math.cos(a0))} ${f(cy + r * Math.sin(a0))}A${f(r)} ${f(r)} 0 0 1 ${f(cx + r * Math.cos(a1))} ${f(cy + r * Math.sin(a1))}`;
+/** The favicon geometry in a 16-unit box (src/app/icon.svg, components/brand/PearlMark.tsx). */
+const SHOULDER = {
+  floor: [0, 14.5, 16, 1.5],
+  r: 2.3,
+  pearls: [
+    [2.8, 12.2],
+    [8, 12.2],
+    [13.2, 12.2],
+    [5.4, 7.7],
+  ],
+};
+function shoulder(x, y, scale, fill) {
+  const [fx, fy, fw, fh] = SHOULDER.floor;
+  return `<g transform="translate(${x} ${y}) scale(${scale})" fill="${fill}">
+    <rect x="${fx}" y="${fy}" width="${fw}" height="${fh}"/>
+    ${SHOULDER.pearls.map(([cx, cy]) => `<circle cx="${cx}" cy="${cy}" r="${SHOULDER.r}"/>`).join("")}
+  </g>`;
 }
 
 function wordmarkGroup(x, y, scale) {
+  const [b1, ...restBoba] = W.boba;
   return `<g transform="translate(${x} ${y}) scale(${scale})" fill="${INK}">
-    ${W.boba.map((d) => `<path d="${d}"/>`).join("")}
+    <path d="${b1}"/>
     <circle cx="${P.cx}" cy="${P.cy}" r="${P.r}"/>
+    ${restBoba.map((d) => `<path d="${d}"/>`).join("")}
     ${W.lab.map((d) => `<path d="${d}"/>`).join("")}
-    <path d="${crescent(P.cx, P.cy, P.r)}" fill="none" stroke="${PLATE}" stroke-opacity=".25" stroke-width="${(P.r * 0.13).toFixed(2)}" stroke-linecap="round"/>
   </g>`;
 }
 
@@ -55,30 +66,27 @@ async function write(file, svg, fmt) {
   console.log("wrote", file, fs.statSync(out).size, "bytes");
 }
 
-// apple-icon: pearl on plate
+// apple-icon: the shoulder-on-floor mark on paper (iOS adds its own rounded mask).
+const appleScale = 120 / 16;
 await write(
   "src/app/apple-icon.png",
   `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
-    <rect width="180" height="180" fill="${PLATE}"/>
-    <circle cx="90" cy="90" r="62" fill="#2B1D15"/>
-    <path d="${crescent(90, 90, 62)}" fill="none" stroke="${PLATE}" stroke-opacity=".25" stroke-width="8" stroke-linecap="round"/>
+    <rect width="180" height="180" fill="${PAPER}"/>
+    ${shoulder(30, 10, appleScale, INK)}
   </svg>`,
   "png",
 );
 
-// OG default: plate card, wordmark, a hairline frame. No text other than the outlined mark.
-const ogScale = 820 / VW;
+// OG default: white card, the wordmark, one 2 px ink rule beneath it. No other text.
+const ogScale = 760 / VW;
 const ogX = (1200 - VW * ogScale) / 2;
-const ogY = 250 - (VH * ogScale) / 2;
+const ogY = 290 - (VH * ogScale) / 2;
 await write(
   "public/brand/og-default.png",
   `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
     <rect width="1200" height="630" fill="${PAPER}"/>
-    <rect x="48" y="48" width="1104" height="534" rx="20" fill="${PLATE}" stroke="${HAIR}" stroke-width="2"/>
     ${wordmarkGroup(ogX, ogY, ogScale)}
-    <g fill="${MUTED}">
-      ${[0, 1, 2, 3, 4, 5].map((i) => `<circle cx="${510 + i * 36}" cy="430" r="${i === 2 ? 12 : 7}" fill-opacity="${i === 2 ? 1 : 0.55}"/>`).join("")}
-    </g>
+    <rect x="${ogX}" y="${ogY + VH * ogScale + 48}" width="${VW * ogScale}" height="2" fill="${INK}"/>
   </svg>`,
   "png",
 );
@@ -87,9 +95,9 @@ await write(
 await write(
   "public/brand/fixtures/portrait.webp",
   `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-    <rect width="128" height="128" fill="#DFE6F5"/>
-    <circle cx="64" cy="52" r="22" fill="#A7B1C9"/>
-    <path d="M22 128c4-26 22-40 42-40s38 14 42 40z" fill="#A7B1C9"/>
+    <rect width="128" height="128" fill="${BAND}"/>
+    <circle cx="64" cy="52" r="22" fill="#AAB9DC"/>
+    <path d="M22 128c4-26 22-40 42-40s38 14 42 40z" fill="#AAB9DC"/>
   </svg>`,
   "webp",
 );

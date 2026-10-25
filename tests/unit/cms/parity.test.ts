@@ -157,6 +157,10 @@ function compareField(
     p(`config default ${JSON.stringify(cfg.default)} but zod has none`);
   }
 
+  // A retired field (redesign home-2: site.figure_mode) is hidden from editors; only
+  // its presence, required flag and default are compared above.
+  if (cfg.widget === "hidden") return;
+
   switch (node.kind) {
     case "string": {
       if (node.format === "slug") {

@@ -1,25 +1,25 @@
 /**
- * Materials row (brief §D7–§D8): PDF · SSRN · arXiv · DOI · Code · Data · Slides · Video · Press.
- * Every link's accessible name includes the paper title (WCAG 2.4.4), e.g.
- * "PDF of Learning on the Go".
+ * Materials row (brief §D7–§D8; D-13 item 5): plain text links
+ * "PDF  SSRN  arXiv  DOI  Code  Data  Slides  Video  Press", separated by space,
+ * with no icons, buttons or arrows. Every link's accessible name includes the
+ * paper title (WCAG 2.4.4), e.g. "PDF of Learning on the Go". Targets ≥ 24 px.
  */
-import { Icon, type IconName } from "./icons";
 import { withBasePath } from "@/lib/site/paths";
 
 export type MaterialKind =
   "pdf" | "ssrn" | "arxiv" | "doi" | "publisher" | "code" | "data" | "slides" | "video" | "press";
 
-const META: Record<MaterialKind, { label: string; icon: IconName; prep: string }> = {
-  pdf: { label: "PDF", icon: "file-pdf", prep: "of" },
-  ssrn: { label: "SSRN", icon: "external", prep: "page for" },
-  arxiv: { label: "arXiv", icon: "external", prep: "page for" },
-  doi: { label: "DOI", icon: "external", prep: "link for" },
-  publisher: { label: "Publisher", icon: "external", prep: "page for" },
-  code: { label: "Code", icon: "code", prep: "for" },
-  data: { label: "Data", icon: "database", prep: "for" },
-  slides: { label: "Slides", icon: "slides", prep: "for" },
-  video: { label: "Video", icon: "video", prep: "for" },
-  press: { label: "Press", icon: "external", prep: "about" },
+const META: Record<MaterialKind, { label: string; prep: string }> = {
+  pdf: { label: "PDF", prep: "of" },
+  ssrn: { label: "SSRN", prep: "page for" },
+  arxiv: { label: "arXiv", prep: "page for" },
+  doi: { label: "DOI", prep: "link for" },
+  publisher: { label: "Publisher", prep: "page for" },
+  code: { label: "Code", prep: "for" },
+  data: { label: "Data", prep: "for" },
+  slides: { label: "Slides", prep: "for" },
+  video: { label: "Video", prep: "for" },
+  press: { label: "Press", prep: "about" },
 };
 
 export interface MaterialLink {
@@ -66,13 +66,10 @@ export function MaterialsRow({ title, items }: { title: string; items: MaterialL
               href={external ? m.href : withBasePath(m.href)}
               rel={external ? "noopener noreferrer" : undefined}
             >
-              <Icon name={meta.icon} />
-              <span>
-                {m.kind === "press" ? `Press: ${label}` : label}
-                <span className="vh">
-                  {" "}
-                  {meta.prep} {title}
-                </span>
+              {m.kind === "press" ? `Press: ${label}` : label}
+              <span className="vh">
+                {" "}
+                {meta.prep} {title}
               </span>
             </a>
           </li>

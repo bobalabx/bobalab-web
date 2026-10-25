@@ -1,6 +1,7 @@
 /**
- * Component kit (WP0): every shared primitive on one page, for visual and
- * accessibility review. Rendered only when NEXT_PUBLIC_KIT=1, otherwise 404.
+ * Component kit (FOUNDATION): every shared primitive of the "Lines" design
+ * system (DECISIONS D-13) on one page, for visual and accessibility review.
+ * Rendered only when NEXT_PUBLIC_KIT=1, otherwise 404.
  *   NEXT_PUBLIC_KIT=1 npm run dev  →  http://localhost:3100/kit/
  * Sample data comes from the fictional fixture set "consent-edge-cases".
  */
@@ -12,7 +13,7 @@ import "./kit.css";
 import { buildContent, loadRawContent } from "@/lib/content/load";
 import { CORE_DARK, CORE_LIGHT, SWATCHES, SWATCH_IDS } from "@/lib/content/palette";
 import { Wordmark, WordmarkLockup } from "@/components/brand/Wordmark";
-import { PearlMark } from "@/components/brand/PearlMark";
+import { PearlMark, ShoulderMark } from "@/components/brand/PearlMark";
 import { Pearl } from "@/components/ui/Pearl";
 import { PearlTag } from "@/components/ui/PearlTag";
 import { Badge, DraftBadge, OpenToRAsBadge } from "@/components/ui/Badge";
@@ -41,7 +42,7 @@ export const metadata: Metadata = KIT_ENABLED
 
 const PROSE_SAMPLE = `## A heading inside a body (h1 is demoted)
 
-Body text runs at 17 px with a 66-character measure. Links are [always underlined](/research/) in prose,
+Body text runs at 17 px with a 68-character measure. Links are [always underlined](/research/) in prose,
 and [external links](https://example.org) get \`rel="noopener noreferrer"\`.
 
 - A list item with **strong** and _emphasis_
@@ -52,9 +53,11 @@ and [external links](https://example.org) get \`rel="noopener noreferrer"\`.
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
-    <section aria-labelledby={id} className="kit-section">
-      <h2 id={id}>{title}</h2>
-      {children}
+    <section aria-labelledby={id} className="kit-section bl-grid">
+      <h2 id={id} className="bl-grid__label kit-h2">
+        {title}
+      </h2>
+      <div className="bl-grid__track kit-track">{children}</div>
     </section>
   );
 }
@@ -82,54 +85,54 @@ export default function KitPage() {
   return (
     <div className="bl-container kit">
       <header className="kit-head">
-        <p className="t-eyebrow">WP0 · design system</p>
         <h1 tabIndex={-1}>Component kit</h1>
         <p className="t-lead bl-measure">
-          Every shared primitive, rendered with fictional fixture data. Check it in light, dark and
-          forced-colours modes.
+          Every shared primitive of the &ldquo;Lines&rdquo; system (D-13), rendered with fictional
+          fixture data. Check it in light, dark and forced-colours modes.
         </p>
       </header>
 
       <Section id="kit-brand" title="Brand">
         <div className="kit-row kit-row--center">
           <Wordmark height="3.5rem" />
-          <Wordmark height="2rem" />
-          <Wordmark height="1.25rem" small />
+          <Wordmark height="1.375rem" />
+          <Wordmark height="1.125rem" />
         </div>
         <div className="kit-row kit-row--center">
           <WordmarkLockup
             descriptor="Berkeley Operations and Behavioral Analytics Lab"
-            height="2.75rem"
+            height="2.5rem"
           />
-          <PearlMark size={48} title="BOBALAB pearl mark" />
-          <PearlMark size={24} />
+          <PearlMark size={48} title="BOBALAB pearl" />
+          <ShoulderMark size={48} title="BOBALAB mark: four pearls resting on a rule" />
+          <ShoulderMark size={32} />
+          <ShoulderMark size={16} />
         </div>
       </Section>
 
-      <Section id="kit-colour" title="Colour tokens">
-        <h3 className="kit-h3">Core (light | dark)</h3>
+      <Section id="kit-colour" title="Colour">
+        <h3 className="kit-h3">Core tokens (light | dark)</h3>
         <ul className="kit-swatches" role="list">
           {Object.entries(CORE_LIGHT).map(([k, v]) => (
             <li key={k}>
               <span className="kit-chip" style={{ background: `var(--${k})` }} />
               <span className="t-sm">--{k}</span>
-              <span className="t-mono t-muted">
+              <span className="t-sm t-muted t-num">
                 {v} | {(CORE_DARK as Record<string, string>)[k] ?? "—"}
               </span>
             </li>
           ))}
         </ul>
-        <h3 className="kit-h3">Direction swatches (deep · tint · light · seed · band)</h3>
+        <h3 className="kit-h3">Direction tones (deep in light mode | light in dark mode)</h3>
         <ul className="kit-dirswatches" role="list">
           {SWATCH_IDS.map((id) => (
             <li key={id} data-swatch={id}>
-              <span className="kit-chip" style={{ background: "var(--dir-deep)" }} />
-              <span className="kit-chip" style={{ background: "var(--dir-tint)" }} />
-              <span className="kit-chip" style={{ background: "var(--dir-light)" }} />
-              <span className="kit-chip" style={{ background: "var(--dir-seed)" }} />
-              <span className="kit-chip" style={{ background: "var(--dir-band)" }} />
+              <span className="kit-line" aria-hidden="true" />
               <span className="t-sm" style={{ color: "var(--dir-text)" }}>
                 {SWATCHES[id].name}
+              </span>
+              <span className="t-sm t-muted t-num">
+                {SWATCHES[id].deep} | {SWATCHES[id].light}
               </span>
             </li>
           ))}
@@ -137,55 +140,51 @@ export default function KitPage() {
       </Section>
 
       <Section id="kit-type" title="Type">
-        <p className="t-display">The display line, Fraunces 580</p>
-        <p
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "var(--fs-3xl)",
-            fontWeight: 600,
-            lineHeight: 1.1,
-          }}
-        >
-          Heading 1 size
-        </p>
-        <p
-          style={{ fontFamily: "var(--font-display)", fontSize: "var(--fs-2xl)", fontWeight: 600 }}
-        >
-          Heading 2 size
-        </p>
-        <h3>Heading 3, Fraunces 600</h3>
-        <h4>Heading 4, Inter 500</h4>
-        <p className="t-lead">Lead text, Inter 500 at 20 px.</p>
+        <p className="t-display">Condensed display, Archivo wdth 68, 700</p>
+        <p className="t-year">2026</p>
+        <p className="kit-h2-sample">Heading 2, Archivo 600 at 1.625rem</p>
+        <h3>Heading 3 and list titles, Archivo 600 at 1.25rem</h3>
+        <h4>Heading 4, Archivo 600</h4>
+        <p className="t-lead">Lead text, Archivo 400 at 20 px.</p>
         <p className="bl-measure">
-          Body text, Inter 400 at 17 px with 1.6 line height. The quick brown fox studies operations
-          under uncertainty.
+          Body text, Archivo 400 at 17 px with 1.6 line height. The quick brown fox studies
+          operations under uncertainty.
         </p>
-        <p className="t-sm t-muted">Small metadata text, 14 px, muted ink.</p>
-        <p className="t-mono">01 · 2026 · 10.5555/fixture.12</p>
-        <p className="t-eyebrow">Eyebrow label</p>
+        <p className="t-sm t-muted">Metadata, 14 px, muted ink.</p>
+        <p className="t-sm">
+          Years and counts use tabular figures: <span className="t-num">2021 2023 2025 2026</span>
+        </p>
+        <p className="doi">10.5555/fixture.12</p>
+      </Section>
+
+      <Section id="kit-layout" title="Grid and ledger">
+        <p className="bl-measure">
+          This section is itself the label-column grid: an 18rem label column plus the track from
+          64rem, 12.5rem from 48rem, stacked below.
+        </p>
+        <ol className="bl-ledger bl-ledger--closed">
+          <li>A ledger opens with a 1 px ink rule; rows are separated by hairlines.</li>
+          <li>2 px ink rules are reserved for figures, plates and the full publications list.</li>
+          <li>Sections are separated by space, not by boxes.</li>
+        </ol>
       </Section>
 
       <Section id="kit-pearls" title="Pearls">
         <div className="kit-row kit-row--center">
           {(["rail", "row", "card", "avatar", "hero"] as const).map((s, i) => (
             <figure key={s} className="kit-fig">
-              <Pearl size={s} swatch={SWATCH_IDS[i]} index={i + 1} />
+              <Pearl size={s} swatch={SWATCH_IDS[i]} />
               <figcaption className="t-sm t-muted">{s}</figcaption>
             </figure>
           ))}
           <figure className="kit-fig">
             <Pearl size="avatar" initials={initials(pi.name)} swatch="matcha" />
-            <figcaption className="t-sm t-muted">avatar initials</figcaption>
+            <figcaption className="t-sm t-muted">initials, no photo</figcaption>
           </figure>
-        </div>
-        <div className="kit-row">
-          {SWATCH_IDS.map((id, i) => (
-            <Pearl key={id} size="row" swatch={id} index={i + 1} />
-          ))}
         </div>
       </Section>
 
-      <Section id="kit-tags" title="Tags, badges, labels, dates">
+      <Section id="kit-tags" title="Words and links">
         <ul className="bl-tags" aria-label="Direction tags">
           {SWATCH_IDS.slice(0, 6).map((id) => (
             <li key={id}>
@@ -197,34 +196,32 @@ export default function KitPage() {
             </li>
           ))}
         </ul>
-        <div className="kit-row">
+        <p className="kit-row t-sm">
           <Badge>Journal article</Badge>
-          <Badge tone="strong">Active</Badge>
-          <Badge tone="accent">Accent</Badge>
-          <Badge tone="solid">Solid</Badge>
+          <Badge tone="strong">Completed</Badge>
           <OpenToRAsBadge />
           <DraftBadge />
-        </div>
+        </p>
         <div className="kit-row">
           <EvidenceLabel level="published" />
           <EvidenceLabel level="working-paper" />
           <EvidenceLabel level="preliminary" />
         </div>
         <p className="kit-row t-sm">
-          <DateText value="2026-10-20" /> · <DateText value="2026-05" /> · <DateText value="2025" />{" "}
-          · <DateText value="2026-09" long />
+          <DateText value="2026-10-20" />
+          <DateText value="2026-05" />
+          <DateText value="2025" />
+          <DateText value="2026-09" long />
         </p>
         <div className="kit-row">
           <a className="bl-cta" href="#kit-tags">
-            Explore our research <Icon name="arrow-right" />
+            Research directions <Icon name="arrow-right" />
           </a>
-          <a className="bl-cta bl-cta--quiet" href="#kit-tags">
-            All publications <Icon name="arrow-right" />
-          </a>
+          <a href="#kit-tags">An ordinary link</a>
         </div>
       </Section>
 
-      <Section id="kit-icons" title="Icons">
+      <Section id="kit-icons" title="Icons (controls only)">
         <ul className="kit-icons" role="list">
           {ICON_NAMES.map((n) => (
             <li key={n}>
@@ -235,7 +232,7 @@ export default function KitPage() {
         </ul>
       </Section>
 
-      <Section id="kit-materials" title="Materials row and filter chips">
+      <Section id="kit-materials" title="Materials and filters">
         <MaterialsRow
           title={pubCounted.title}
           items={[
@@ -260,26 +257,38 @@ export default function KitPage() {
             { value: "other", label: "Other", count: 2 },
           ]}
         />
+        <ChipsDemo
+          legend="Direction"
+          options={SWATCH_IDS.slice(0, 4).map((id) => ({
+            value: id,
+            label: SWATCHES[id].name,
+            swatch: id,
+          }))}
+        />
       </Section>
 
       <Section id="kit-prose" title="Prose (Markdoc)">
         <Prose source={PROSE_SAMPLE} />
       </Section>
 
-      <Section id="kit-pubs" title="Publication entries">
-        <PublicationEntry pub={pubCounted} />
-        <PublicationEntry pub={pubStatus} />
-        {pubWip && <PublicationEntry pub={pubWip} />}
+      <Section id="kit-pubs" title="Publication rows">
+        <div className="bl-ledger">
+          <PublicationEntry pub={pubCounted} />
+          <PublicationEntry pub={pubStatus} />
+          {pubWip && <PublicationEntry pub={pubWip} />}
+        </div>
       </Section>
 
-      <Section id="kit-news" title="News items">
-        {c.news.slice(0, 2).map((n) => (
-          <NewsItem key={n.slug} item={n} />
-        ))}
+      <Section id="kit-news" title="News rows">
+        <div className="bl-ledger">
+          {c.news.slice(0, 2).map((n) => (
+            <NewsItem key={n.slug} item={n} />
+          ))}
+        </div>
       </Section>
 
-      <Section id="kit-people" title="People cards">
-        <div className="kit-grid">
+      <Section id="kit-people" title="People rows">
+        <div className="bl-ledger">
           <PersonCard person={pi} />
           <PersonCard
             person={phd}
@@ -290,20 +299,20 @@ export default function KitPage() {
         </div>
       </Section>
 
-      <Section id="kit-cards" title="Project and direction cards">
-        <div className="kit-grid">
+      <Section id="kit-cards" title="Project and direction rows">
+        <div className="bl-ledger">
           {c.projects.slice(0, 2).map((p) => (
             <ProjectCard key={p.slug} project={p} />
           ))}
         </div>
-        <div className="kit-grid">
+        <div className="bl-ledger">
           {dirs.map((d) => (
             <DirectionCard key={d.slug} direction={d} />
           ))}
         </div>
       </Section>
 
-      <Section id="kit-media" title="Image and visually hidden text">
+      <Section id="kit-media" title="Image and hidden text">
         <div className="kit-row kit-row--center">
           <Img
             src="/brand/fixtures/portrait.webp"

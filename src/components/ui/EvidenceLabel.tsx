@@ -1,4 +1,4 @@
-/** Evidence label for findings: Published / Working paper / Preliminary (§D3, §D5). */
+/** Evidence label for findings: Published / Working paper / Preliminary (§D3, §D5). Plain words, no glyph (RC-8). */
 import type { EvidenceLevel } from "@/lib/content/schema";
 
 export const EVIDENCE_LABELS: Record<EvidenceLevel, string> = {
@@ -10,7 +10,6 @@ export const EVIDENCE_LABELS: Record<EvidenceLevel, string> = {
 export function EvidenceLabel({ level }: { level: EvidenceLevel }) {
   return (
     <span className={`bl-evidence bl-evidence--${level}`}>
-      <span className="bl-evidence__glyph" aria-hidden="true" />
       <span>
         <span className="vh">Evidence: </span>
         {EVIDENCE_LABELS[level]}

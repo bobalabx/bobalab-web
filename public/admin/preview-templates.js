@@ -35,6 +35,19 @@
   function data(entry) {
     return js(entry.get("data")) || {};
   }
+  // Same words as src/components/pages/OpportunityCard.tsx `urlLabel` (content-4b).
+  function urlLabel(url) {
+    var host;
+    try {
+      host = new URL(url).hostname.replace(/^www\./, "");
+    } catch (e) {
+      return "Details";
+    }
+    if (host === "urapprojects.berkeley.edu") return "URAP listing";
+    if (host === "classes.berkeley.edu") return "Class listing";
+    if (host === "parksinchaisri.github.io") return "Park Sinchaisri’s website";
+    return host;
+  }
   function has(v) {
     if (v === null || v === undefined) return false;
     if (typeof v === "string") return v.trim() !== "";
@@ -960,7 +973,7 @@
     var title = d.title || "this opportunity";
     var links = [];
     if (open && has(d.apply_url)) links.push({ text: "Apply", href: d.apply_url });
-    if (has(d.url)) links.push({ text: "More information", href: d.url });
+    if (has(d.url)) links.push({ text: urlLabel(d.url), href: d.url });
     if (has(d.email)) links.push({ text: d.email, href: "mailto:" + d.email });
     return Frame([
       Note(
@@ -1055,7 +1068,7 @@
         h(
           "header",
           { className: "cms-preview__head", key: "head" },
-          h("h1", null, "Work with us"),
+          h("h1", null, "Join the lab"),
           has(d.intro) ? h("div", { className: "t-lead" }, Markdown(props, "intro")) : null,
           d.draft ? h("p", { className: "cms-preview__meta" }, DraftBadge(true)) : null,
         ),

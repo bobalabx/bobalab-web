@@ -1,4 +1,8 @@
-/** Project card (brief §D4, §D6): title, summary, status, years, direction tags. */
+/**
+ * Project as a ruled row (brief §D4, §D6; D-13 item 5): status and years as
+ * plain words, title, summary, direction names with their line segments.
+ * `.bl-card` stays on the element (selector-based tests) but draws no box.
+ */
 import Link from "next/link";
 import type { ProjectView } from "@/lib/content/load";
 import { Badge, DraftBadge } from "./Badge";
@@ -36,7 +40,7 @@ export function ProjectCard({
         <Badge tone={project.status === "active" ? "strong" : "neutral"}>
           {STATUS_LABELS[project.status]}
         </Badge>
-        {years && <span className="t-mono">{years}</span>}
+        {years && <span className="t-num">{years}</span>}
         <DraftBadge show={project.draft} />
       </div>
       <H className="bl-card__title" id={`project-${project.slug}`}>

@@ -35,20 +35,35 @@ describe("Markdoc rendering (§G4 content safety)", () => {
   });
 });
 
-describe("fonts (§C4 budget ≤ 100 KiB)", () => {
-  const files = [
-    "fraunces-latin-wght-normal.woff2",
-    "inter-latin-wght-normal.woff2",
-    "ibm-plex-mono-latin-500-normal.woff2",
-  ];
+describe("fonts (D-13 item 3: one family, ≤ 100 KiB)", () => {
+  const files = ["archivo-latin-wdth-normal.woff2"];
   it("preloaded fonts total ≤ 100 KiB and carry the OFL", () => {
     const total = files.reduce((s, f) => s + fs.statSync(root(`src/fonts/${f}`)).size, 0);
     expect(total / 1024).toBeLessThanOrEqual(100);
     expect(fs.readFileSync(root("src/fonts/OFL.txt"), "utf8")).toContain("SIL Open Font License");
+    expect(fs.readFileSync(root("src/fonts/OFL.txt"), "utf8")).toContain("Archivo Project Authors");
   });
-  it("loader references exactly these files", () => {
+  it("loader references exactly these files, with both variable axes", () => {
     const src = fs.readFileSync(root("src/fonts/index.ts"), "utf8");
     for (const f of files) expect(src).toContain(f);
+    expect(src).toMatch(/weight: "100 900"/);
+    expect(src).toMatch(/prop: "font-stretch", value: "62% 125%"/);
+    expect(src.match(/localFont\(/g)).toHaveLength(1);
+  });
+  it("Fraunces, Inter and IBM Plex are gone from src/fonts and the styles", () => {
+    const left = fs.readdirSync(root("src/fonts")).filter((f) => f.endsWith(".woff2"));
+    expect(left).toEqual(files);
+    for (const f of ["tokens.css", "base.css", "components.css", "prose.css"]) {
+      const css = fs.readFileSync(root(`src/styles/${f}`), "utf8");
+      expect(css, f).not.toMatch(/fraunces|--font-inter|plex/i);
+    }
+  });
+  it("monospace is the system stack and only for code, DOI and BibTeX", () => {
+    const base = fs.readFileSync(root("src/styles/base.css"), "utf8");
+    expect(base).toMatch(/\.doi,\s*\.bibtex \{\s*font-family: var\(--font-mono\)/);
+    const tokens = fs.readFileSync(root("src/styles/tokens.css"), "utf8");
+    expect(tokens).toMatch(/--font-mono: ui-monospace/);
+    expect(tokens).toMatch(/--font-data: var\(--font-sans\)/);
   });
 });
 
@@ -126,36 +141,30 @@ describe("pre-paint script", () => {
   });
 });
 
-describe("wordmark geometry", () => {
-  it("is outlined: 3 BOBA glyph paths (B, B, A) + pearl + 3 LAB paths", () => {
+describe("wordmark geometry (D-13 item 2)", () => {
+  it("is outlined Archivo condensed bold: B, the pearl, then B A L A B", () => {
+    expect(WORDMARK.word).toBe("BOBALAB");
+    expect(WORDMARK.axes).toEqual({ wdth: 68, wght: 700 });
     expect(WORDMARK.boba).toHaveLength(3);
     expect(WORDMARK.lab).toHaveLength(3);
-    expect(WORDMARK.pearl.r).toBeGreaterThan(40);
-    expect(WORDMARK.axes).toMatchObject({ wght: 680, opsz: 144, SOFT: 100 });
+    for (const d of [...WORDMARK.boba, ...WORDMARK.lab]) expect(d).toMatch(/^M[\d.]+ [\d.]+/);
   });
-
-  // verify VIS-02: the mark read "BOBAL AB" (A->L ink 1 unit, L->A 23 units).
-  it("reads as one word: the A->L join is never tighter than a gap inside LAB", () => {
-    const { boba, join, lab, minClear } = WORDMARK.spacing;
-    const rhythm = boba.reduce((a, b) => a + b, 0) / boba.length;
-    for (const g of lab) expect(join).toBeGreaterThanOrEqual(g - 0.01);
-    // ...and not a word space: within 1.35x of the BOBA rhythm.
-    expect(join / rhythm).toBeLessThan(1.35);
-    for (const g of lab) expect(g / rhythm).toBeGreaterThan(0.9);
-    // No two LAB neighbours touch (the mono L's long foot vs the A's leg).
-    expect(minClear).toBeGreaterThanOrEqual(5);
-    // Raw ink: the BOBA A -> LAB L bounding-box gap is at least every LAB one.
-    const xs = (d: string) =>
-      [...d.matchAll(/([MLQCHV])([^MLQCHVZ]*)/g)].flatMap(([, op = "", args = ""]) => {
-        const n = args.match(/-?\d+(?:\.\d+)?/g)?.map(Number) ?? [];
-        if (op === "V") return [];
-        return op === "H" ? n : n.filter((_, i) => i % 2 === 0);
-      });
-    const box = (d: string) => ({ left: Math.min(...xs(d)), right: Math.max(...xs(d)) });
-    const [a, l, a2, b] = [WORDMARK.boba[2], ...WORDMARK.lab].map(box);
-    if (!a || !l || !a2 || !b) throw new Error("wordmark glyphs missing");
-    const joinInk = l.left - a.right;
-    expect(joinInk).toBeGreaterThanOrEqual(a2.left - l.right);
-    expect(joinInk).toBeGreaterThanOrEqual(b.left - a2.right);
+  it("the pearl is a disc of cap height (+ overshoot) sitting on the baseline", () => {
+    const { pearl, cap, baseline } = WORDMARK;
+    expect(pearl.r * 2).toBeGreaterThanOrEqual(cap);
+    expect(pearl.r * 2).toBeLessThanOrEqual(cap * 1.05);
+    expect(Math.abs(pearl.cy - (baseline - cap / 2))).toBeLessThanOrEqual(0.01);
+  });
+  // verify VIS-02 (the old mark read "BOBAL AB"): no gap between neighbours may read as a word space.
+  it("reads as one word: every gap between neighbours is under a fifth of the cap height", () => {
+    expect(WORDMARK.gaps).toHaveLength(6);
+    for (const g of WORDMARK.gaps) {
+      expect(g).toBeGreaterThan(0);
+      expect(g).toBeLessThan(WORDMARK.cap / 5);
+    }
+    // The pearl is set into the word, not spaced off it.
+    const mean = WORDMARK.gaps.reduce((a, b) => a + b, 0) / WORDMARK.gaps.length;
+    expect(WORDMARK.gaps[0]! / mean).toBeLessThan(2);
+    expect(WORDMARK.gaps[1]! / mean).toBeLessThan(2);
   });
 });

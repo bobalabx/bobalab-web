@@ -12,43 +12,64 @@
 @import "../styles/motion.css";
 @import "../styles/forced-colors.css";
 
-/* Expose design tokens to Tailwind (bg-paper, text-ink, font-display, …). */
+/* Expose design tokens to Tailwind (bg-paper, text-ink, font-sans, …). */
 @theme inline {
   --color-paper: var(--paper);
-  --color-surface: var(--surface);
-  --color-paper-alt: var(--paper-alt);
-  --color-plate: var(--plate);
+  --color-band: var(--band);
   --color-ink: var(--ink);
-  --color-ink-muted: var(--ink-muted);
-  --color-accent: var(--accent);
-  --color-accent-strong: var(--accent-strong);
+  --color-muted: var(--muted);
   --color-rule: var(--rule);
   --color-hairline: var(--hairline);
   --color-pearl: var(--pearl);
+  /* legacy names */
+  --color-surface: var(--surface);
+  --color-paper-alt: var(--paper-alt);
+  --color-plate: var(--plate);
+  --color-ink-muted: var(--ink-muted);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-dir: var(--dir);
   --color-dir-deep: var(--dir-deep);
   --color-dir-tint: var(--dir-tint);
   --color-dir-light: var(--dir-light);
   --color-dir-seed: var(--dir-seed);
   --color-dir-band: var(--dir-band);
   --color-dir-text: var(--dir-text);
-  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  --font-sans: var(--font-inter), system-ui, "Segoe UI", Arial, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, Consolas, monospace;
-  --text-mono: 0.8125rem;
+  /* One family: Archivo. Mono is the system stack, for DOI and BibTeX only. */
+  --font-sans: var(--font-archivo), Arial, Helvetica, sans-serif;
+  --font-display: var(--font-archivo), Arial, Helvetica, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+  --text-meta: 0.875rem;
+  --text-mono: 0.875rem;
   --text-sm: 0.875rem;
   --text-base: 1.0625rem;
   --text-lg: 1.25rem;
-  --text-xl: 1.5625rem;
-  --text-2xl: clamp(1.75rem, 1.35rem + 1.6vw, 2.25rem);
-  --text-3xl: clamp(2.25rem, 1.6rem + 2.6vw, 3.25rem);
-  --text-display: clamp(2.5rem, 1.7rem + 3.4vw, 3.75rem);
-  --radius-xs: 2px;
-  --radius-md: 10px;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.625rem;
+  --text-3xl: 2.25rem;
+  --text-display: 2.25rem;
+  --radius-xs: 0;
+  --radius-md: 0;
   --radius-pill: 9999px;
-  --container-content: 72rem;
-  --container-prose: 66ch;
+  --container-content: 80rem;
+  --container-prose: 68ch;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-emph: cubic-bezier(0.2, 0, 0, 1);
-  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-settle: linear(
+    0,
+    0.18,
+    0.455,
+    0.671,
+    0.812,
+    0.896,
+    0.944,
+    0.971,
+    0.985,
+    0.992,
+    0.996,
+    0.998,
+    0.999,
+    1
+  );
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
 }

@@ -1,78 +1,59 @@
-/* Windows contrast themes / forced colours (brief §E7, §G1).
-   Gradients and shadows are dropped by the UA; restore shape with system colours. */
+/* Windows contrast themes / forced colours (brief §E7, §G1; D-13; judge item 5).
+   Directions stay identifiable by position, shape and their text label;
+   pearls, segments and rules are mapped to system colours. */
 
 @media (forced-colors: active) {
   .bl-pearl,
   .pearl {
-    border: 2px solid CanvasText;
+    forced-color-adjust: none;
+    background: CanvasText;
+    color: Canvas;
+  }
+  .bl-pearl--initials {
     background: Canvas;
     color: CanvasText;
-    forced-color-adjust: none;
-  }
-  .bl-pearl--gloss::before {
-    display: none;
+    border: 1px solid CanvasText;
   }
   .bl-dot,
+  .bl-seg,
   .seed {
-    background: CanvasText;
     forced-color-adjust: none;
+    background: CanvasText;
   }
   a:focus-visible .bl-pearl,
   a:focus-visible .pearl {
     outline: 2px solid Highlight;
     outline-offset: 3px;
   }
-  .bl-badge,
   .bl-chip,
-  .bl-materials a,
-  .bl-card,
-  .bl-switch__track {
-    border-color: CanvasText;
+  .bl-chip .bl-chip__label {
+    color: ButtonText;
+    text-decoration-color: ButtonText;
   }
-  .bl-badge--solid {
-    background: Canvas;
-    color: CanvasText;
-    border-color: CanvasText;
+  .bl-chip[aria-pressed="true"],
+  .bl-chip[aria-pressed="true"] .bl-chip__label {
     forced-color-adjust: none;
+    color: Highlight;
+    text-decoration-color: Highlight;
   }
-  .bl-chip[aria-pressed="true"] {
-    background: Highlight;
-    color: HighlightText;
-    border-color: Highlight;
-    forced-color-adjust: none;
-  }
-  .bl-switch__thumb {
-    background: CanvasText;
-    forced-color-adjust: none;
-  }
-  .bl-switch[aria-checked="true"] .bl-switch__track {
-    background: Highlight;
-    border-color: Highlight;
-    forced-color-adjust: none;
-  }
-  .bl-switch[aria-checked="true"] .bl-switch__thumb {
-    background: HighlightText;
-  }
-  .bl-evidence__glyph {
-    border-color: CanvasText;
-  }
-  .bl-evidence--published .bl-evidence__glyph {
-    background: CanvasText;
-    forced-color-adjust: none;
+  .bl-switch[aria-checked="true"] .bl-switch__label {
+    text-decoration-color: Highlight;
   }
   .bl-wordmark,
-  .bl-wordmark__pearl {
-    fill: CanvasText;
+  .bl-pearlmark,
+  .bl-shouldermark {
     color: CanvasText;
-  }
-  .bl-wordmark__hl {
-    display: none;
+    fill: CanvasText;
   }
   .bl-preview {
     background: Canvas;
     color: CanvasText;
     border-bottom: 1px solid CanvasText;
     forced-color-adjust: none;
+  }
+  .bl-header__inner,
+  .bl-footer__grid {
+    border-color: CanvasText;
   }
   :focus-visible {
     outline: 2px solid Highlight;

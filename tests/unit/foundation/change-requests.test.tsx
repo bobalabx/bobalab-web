@@ -91,8 +91,8 @@ describe("WP4 request 1: shared avatar swatch", () => {
   });
 });
 
-describe("WP4 request 3: FilterChips direction dot", () => {
-  it("renders the swatch dot before the label", () => {
+describe("WP4 request 3 / D-13: FilterChips direction segment", () => {
+  it("renders the 16 px direction segment before the label, as a text toggle", () => {
     const html = renderToStaticMarkup(
       <FilterChips
         legend="Direction"
@@ -101,7 +101,9 @@ describe("WP4 request 3: FilterChips direction dot", () => {
         onToggle={() => {}}
       />,
     );
-    expect(html).toContain('<span class="bl-dot" data-swatch="matcha" aria-hidden="true"></span>');
+    expect(html).toContain(
+      '<button type="button" class="bl-chip press" aria-pressed="false"><span class="bl-seg" data-swatch="matcha" aria-hidden="true"></span><span class="bl-chip__label">A</span></button>',
+    );
   });
 });
 

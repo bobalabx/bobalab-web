@@ -48,8 +48,8 @@ describe("preview templates", () => {
     const css = fs.readFileSync(path.join(ROOT, "public/admin/preview.css"), "utf8");
     // Built from the site tokens (both modes) and component classes the templates use.
     for (const s of [
-      "--paper: #fcfaf6",
-      "--paper: #17110e",
+      "--paper: #ffffff",
+      "--paper: #101210",
       ".bl-news",
       ".bl-person",
       ".bl-pub",
@@ -306,7 +306,7 @@ describe("preview templates", () => {
         data_statement: "We keep data safe.",
       }),
     );
-    expect(join).toContain("Work with us");
+    expect(join).toContain("Join the lab");
     expect(join).toContain("Students & research assistants");
     expect(join).toContain("How we handle data");
     expect(join).not.toContain("Press"); // no press text → no section

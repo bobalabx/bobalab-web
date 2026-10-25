@@ -1,61 +1,91 @@
 /*
- * BOBALAB design tokens (brief §C1–§C6).
- * Hex values must match src/lib/content/palette.ts (unit-tested).
- * Light/dark switch on prefers-color-scheme only (no manual theme toggle in v1).
+ * BOBALAB design tokens: the "Lines" system (DECISIONS D-13; prototype
+ * docs/redesign/prototypes/p3/p3.css). Hex values must match
+ * src/lib/content/palette.ts (unit-tested).
+ *
+ * Ink on white. Colour encodes research directions and nothing else: there is
+ * no brand accent, links are ink with an underline. Light/dark follow
+ * prefers-color-scheme (no manual theme toggle).
+ *
+ * The pre-redesign token names (--surface, --paper-alt, --plate, --ink-muted,
+ * --accent, --accent-strong, --hairline, --fs-*, --font-display/-text/-data …)
+ * stay defined as aliases of the new set, so every page renders in the new
+ * palette and type while page packages move to the new names.
  */
 
 :root {
   color-scheme: light dark;
 
-  /* §C2 core palette, light */
-  --paper: #fcfaf6;
+  /* Core palette, light (P3) */
+  --paper: #ffffff;
+  --band: #f2f3f1;
+  --ink: #111410;
+  --muted: #50564f;
+  --rule: #80877f;
+  --hairline: #d9dcd6;
+  --hair: var(--hairline);
+
+  /* Legacy names (aliases with literal values; palette.test checks them) */
   --surface: #ffffff;
-  --paper-alt: #f4f0ea;
-  --plate: #f7f1e8;
-  --ink: #1f1712;
-  --ink-muted: #5c4f45;
-  --accent: #8a4515;
-  --accent-strong: #6b3410;
-  --rule: #857463;
-  --hairline: #d8cab6;
-  --pearl: #2b1d15;
+  --paper-alt: #f2f3f1;
+  --plate: #ffffff;
+  --ink-muted: #50564f;
+  --accent: #111410;
+  --accent-strong: #111410;
+  --pearl: #111410;
+  --pearl-index: #ffffff;
+  --on-accent: #ffffff;
   --pearl-rim: transparent;
-  --pearl-index: #f7f1e8;
-  --on-accent: #fcfaf6;
+  --pearl-hi: var(--pearl);
+  --pearl-lo: var(--pearl);
+  --pearl-gloss: transparent;
+  --pearl-sheen: transparent;
   --focus-ring: var(--ink);
-  --preview-bg: #1f1712;
-  --preview-ink: #f7f1e8;
+  --preview-bg: var(--band);
+  --preview-ink: var(--ink);
 
-  /* Pearl material (§E2) */
-  --pearl-hi: #3a281d;
-  --pearl-lo: #1a110c;
-  --pearl-gloss: rgb(247 241 232 / 0.22);
-  /* Satin sheen: one soft radial ellipse, shared by Pearl and Fig. 1 (WP2 request 4). */
-  --pearl-sheen: rgb(255 248 238 / 0.16);
+  /* Type: one family, Archivo (variable wdth 62–125 × wght 100–900) */
+  --font-sans: var(--font-archivo), Arial, Helvetica, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+  --font-display: var(--font-sans);
+  --font-text: var(--font-sans);
+  /* "data" text (years, counts) is Archivo with tabular figures; mono is only for DOI and BibTeX. */
+  --font-data: var(--font-sans);
+  --wdth-cond: 68%;
+  --wdth-text: 100%;
+  --wdth-mark: 112%;
 
-  /* §C4 type */
-  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  --font-text: var(--font-inter), system-ui, "Segoe UI", Arial, sans-serif;
-  --font-data: var(--font-plex-mono), ui-monospace, Consolas, monospace;
-  --fs-mono: 0.8125rem;
+  /* Type scale (P3, six sizes). Condensed widths only at ≥ 2rem. */
+  --t-meta: 0.875rem;
+  --t-body: 1.0625rem;
+  --t-title: 1.25rem;
+  --t-h2: 1.625rem;
+  --t-lane: 2rem;
+  --t-head: 2.25rem;
+  --lh-meta: 1.45;
+  --lh-body: 1.6;
+  --lh-title: 1.3;
+
+  /* Legacy size names mapped onto the new scale (nothing above 2.25rem). */
+  --fs-mono: 0.875rem;
   --fs-sm: 0.875rem;
   --fs-base: 1.0625rem;
   --fs-lg: 1.25rem;
-  --fs-xl: 1.5625rem;
-  --fs-2xl: clamp(1.75rem, 1.35rem + 1.6vw, 2.25rem);
-  --fs-3xl: clamp(2.25rem, 1.6rem + 2.6vw, 3.25rem);
-  --fs-display: clamp(2.5rem, 1.7rem + 3.4vw, 3.75rem);
-  --lh-mono: 1.4;
+  --fs-xl: 1.25rem;
+  --fs-2xl: var(--t-h2);
+  --fs-3xl: var(--t-head);
+  --fs-display: var(--t-head);
+  --lh-mono: 1.45;
   --lh-sm: 1.45;
   --lh-base: 1.6;
-  --lh-lg: 1.45;
+  --lh-lg: 1.4;
   --lh-xl: 1.3;
   --lh-2xl: 1.2;
-  --lh-3xl: 1.1;
+  --lh-3xl: 1.05;
   --lh-display: 1.05;
-  --tracking-mono: 0.06em;
+  --tracking-mono: 0;
 
-  /* §C5 spacing (4 px base) */
+  /* Spacing (4 px base) */
   --s-1: 0.25rem;
   --s-2: 0.5rem;
   --s-3: 0.75rem;
@@ -65,129 +95,146 @@
   --s-7: 3rem;
   --s-8: 4rem;
   --s-9: 6rem;
+  /* Section rhythm (P3: 88 px between sections, 64 px on phones) */
+  --sec-gap: 88px;
 
-  /* §C5 layout */
+  /* Layout: one 18rem label column + track on every page (P3 timetable grid). */
   --gutter: 16px;
-  --content-max: 72rem;
-  --prose-max: 66ch;
-  --header-h: 4.3125rem; /* = .bl-header at >= 48rem: 44 px link + 2 x 12 px padding + 1 px border (WP5 request 9) */
+  --content-max: 80rem;
+  --prose-max: 68ch;
+  --lab: 100%;
+  /* The header is not sticky (P3); page rails that stick use top: var(--header-h) + … */
+  --header-h: 0px;
 
-  /* §C5 radius */
-  --r-xs: 2px;
-  --r-md: 10px;
+  /* Rules: 1 px ink or hairline; 2 px ink only around figures and plates. */
+  --rule-w: 1px;
+  --rule-heavy: 2px;
+
+  /* Radius: no rounded boxes (AI-tell probe). Discs use 50% directly. */
+  --r-xs: 0;
+  --r-md: 0;
   --r-pill: 9999px;
 
   /* Direction scope defaults (overridden by [data-swatch]) */
-  --dir-deep: var(--ink-muted);
-  --dir-tint: var(--paper-alt);
-  --dir-light: var(--ink-muted);
+  --dir-deep: var(--ink);
+  --dir-tint: var(--band);
+  --dir-light: var(--ink);
   --dir-seed: var(--hairline);
   --dir-band: var(--dir-tint);
   --dir-dot: var(--dir-deep);
   --dir-text: var(--dir-deep);
+  /* The mode-aware line colour (deep in light mode, light in dark mode). */
+  --dir: var(--dir-dot);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 40rem) {
   :root {
     --gutter: 24px;
   }
 }
-@media (min-width: 1024px) {
+@media (min-width: 48rem) {
+  :root {
+    --lab: 12.5rem;
+  }
+}
+@media (min-width: 64rem) {
   :root {
     --gutter: 32px;
+    --lab: 18rem;
+  }
+}
+@media (max-width: 39.99rem) {
+  :root {
+    --t-head: 2rem;
+    --sec-gap: 64px;
   }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #17110e;
-    --surface: #221a15;
-    --paper-alt: #1c1511;
-    --plate: #1e1713;
-    --ink: #f3ece2;
-    --ink-muted: #bfb2a5;
-    --accent: #e0a46b;
-    --accent-strong: #edbd8f;
-    --rule: #8a7766;
-    --hairline: #3d3129;
-    --pearl: #3a2c22;
-    --pearl-rim: #a47e62;
-    --pearl-index: #f3ece2;
-    --on-accent: #17110e;
-    --focus-ring: var(--accent);
-    --preview-bg: #e0a46b;
-    --preview-ink: #17110e;
-    --pearl-hi: #4a3829;
-    --pearl-lo: #2a1e16;
-    --pearl-gloss: rgb(243 236 226 / 0.18);
-    --pearl-sheen: rgb(255 248 238 / 0.1);
+    --paper: #101210;
+    --band: #181b18;
+    --ink: #e7eae5;
+    --muted: #a6aca4;
+    --rule: #7a8178;
+    --hairline: #2b302b;
+    --surface: #101210;
+    --paper-alt: #181b18;
+    --plate: #101210;
+    --ink-muted: #a6aca4;
+    --accent: #e7eae5;
+    --accent-strong: #e7eae5;
+    /* A flat light-ink disc: a black pearl would vanish on the dark paper. */
+    --pearl: #e7eae5;
+    --pearl-index: #101210;
+    --on-accent: #101210;
   }
 }
 
-/* §C3 direction swatches: deep / tint / light, seeds and dark band */
+/* Direction swatches: deep (light mode) / light (dark mode), plus decorative blends. */
 [data-swatch="butterfly-pea"] {
-  --dir-deep: #2f519b;
-  --dir-tint: #dfe6f5;
-  --dir-light: #a9c0f2;
-  --dir-seed-l: #a7b1c9;
-  --dir-seed-d: #4f5261;
-  --dir-band-d: #262325;
+  --dir-deep: #2b4fa8;
+  --dir-tint: #eef1f8;
+  --dir-light: #8ea4f7;
+  --dir-seed-l: #aab9dc;
+  --dir-seed-d: #3c4561;
+  --dir-band-d: #1d2127;
 }
 [data-swatch="oolong"] {
-  --dir-deep: #7a5913;
-  --dir-tint: #f1e8cc;
-  --dir-light: #e3c26e;
-  --dir-seed-l: #c5b493;
-  --dir-seed-d: #635333;
-  --dir-band-d: #2b2318;
+  --dir-deep: #6b4500;
+  --dir-tint: #f3f0eb;
+  --dir-light: #c4943a;
+  --dir-seed-l: #c4b599;
+  --dir-seed-d: #4f401f;
+  --dir-band-d: #221f14;
 }
 [data-swatch="lychee"] {
-  --dir-deep: #993452;
-  --dir-tint: #f5dfe5;
-  --dir-light: #f0a5bc;
-  --dir-seed-l: #d1a5ac;
-  --dir-seed-d: #68494e;
-  --dir-band-d: #2d201f;
+  --dir-deep: #a12c5a;
+  --dir-tint: #f7eef2;
+  --dir-light: #f590ae;
+  --dir-seed-l: #d9abbd;
+  --dir-seed-d: #603e47;
+  --dir-band-d: #271f20;
 }
 [data-swatch="matcha"] {
-  --dir-deep: #3e6a2f;
-  --dir-tint: #e3ecd8;
-  --dir-light: #a9cf8f;
-  --dir-seed-l: #adbb9e;
-  --dir-seed-d: #4f573e;
-  --dir-band-d: #26241b;
+  --dir-deep: #4c7a1e;
+  --dir-tint: #f1f4ed;
+  --dir-light: #a8da84;
+  --dir-seed-l: #b7caa5;
+  --dir-seed-d: #455839;
+  --dir-band-d: #1f261c;
 }
 [data-swatch="jasmine"] {
   --dir-deep: #1e6660;
-  --dir-tint: #d8ebe8;
+  --dir-tint: #edf3f2;
   --dir-light: #8fd3c9;
-  --dir-seed-l: #a0b9b2;
-  --dir-seed-d: #465953;
-  --dir-band-d: #232421;
+  --dir-seed-l: #a5c2bf;
+  --dir-seed-d: #3c5651;
+  --dir-band-d: #1d2523;
 }
 [data-swatch="black-sesame"] {
   --dir-deep: #45413c;
-  --dir-tint: #e6e2dc;
+  --dir-tint: #f0f0ef;
   --dir-light: #cfc8c0;
-  --dir-seed-l: #b0aba3;
-  --dir-seed-d: #5c5550;
-  --dir-band-d: #292320;
+  --dir-seed-l: #b5b3b1;
+  --dir-seed-d: #53524e;
+  --dir-band-d: #232422;
 }
 [data-swatch="taro"] {
   --dir-deep: #5e4391;
-  --dir-tint: #ece5f4;
+  --dir-tint: #f2f0f6;
   --dir-light: #c6b3eb;
-  --dir-seed-l: #baabc5;
-  --dir-seed-d: #594e5f;
-  --dir-band-d: #282124;
+  --dir-seed-l: #bfb4d3;
+  --dir-seed-d: #504a5d;
+  --dir-band-d: #222226;
 }
 [data-swatch="thai-tea"] {
   --dir-deep: #a0461c;
-  --dir-tint: #f7e3d3;
+  --dir-tint: #f7f0ed;
   --dir-light: #f2a57a;
-  --dir-seed-l: #d4ad96;
-  --dir-seed-d: #684937;
-  --dir-band-d: #2d2019;
+  --dir-seed-l: #d9b5a4;
+  --dir-seed-d: #5f4535;
+  --dir-band-d: #27211b;
 }
 
 /* Mode-dependent roles derived from the swatch */
@@ -196,6 +243,7 @@
   --dir-band: var(--dir-tint);
   --dir-dot: var(--dir-deep);
   --dir-text: var(--dir-deep);
+  --dir: var(--dir-deep);
 }
 @media (prefers-color-scheme: dark) {
   [data-swatch] {
@@ -203,5 +251,6 @@
     --dir-band: var(--dir-band-d);
     --dir-dot: var(--dir-light);
     --dir-text: var(--dir-light);
+    --dir: var(--dir-light);
   }
 }

@@ -298,6 +298,12 @@ export const publicationSchema = z.strictObject({
   in_brief: z.string().trim().max(400).optional(),
   teaser: imageObject.optional(),
   featured: z.boolean().default(false),
+  /**
+   * The paper's study-design plate (a code component keyed by the publication
+   * slug) has been checked by the authors (D-13 item 8). Plates render only
+   * when this is true, or in preview builds.
+   */
+  plate_verified: z.boolean().default(false),
   bibtex_override: z.string().optional(),
   draft: draftField,
   body: bodyField,
@@ -412,6 +418,8 @@ export const opportunitySchema = z.strictObject({
 // pages (file collection: content/pages/<name>.yml)
 
 export const homePageSchema = z.strictObject({
+  /** Home h1, the display statement (P3 "Lines"); falls back to the HomeHero constant. */
+  statement: z.string().trim().min(1).max(80).optional(),
   mission: z.string().trim().max(240).optional(),
   featured_findings: z
     .array(

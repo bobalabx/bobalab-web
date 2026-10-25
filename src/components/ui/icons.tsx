@@ -1,6 +1,9 @@
 /**
  * Hand-drawn inline icons (brief §C7): 24×24, 1.5 px stroke, currentColor,
  * aria-hidden. An icon is never the only label — always pair it with text.
+ * D-13 item 5: links carry no arrows. "arrow-right", "external" and "chevron"
+ * inside a link are hidden by CSS (`a .bl-icon--arrow-right` …); the link text
+ * says where it goes. Use icons only in controls (search, copy, close).
  */
 import type { SVGProps } from "react";
 
@@ -92,7 +95,7 @@ export function Icon({ name, className, ...rest }: { name: IconName } & SVGProps
       strokeLinejoin="round"
       aria-hidden="true"
       focusable="false"
-      className={["bl-icon", className].filter(Boolean).join(" ")}
+      className={["bl-icon", `bl-icon--${name}`, className].filter(Boolean).join(" ")}
       {...rest}
     >
       {PATHS[name]}

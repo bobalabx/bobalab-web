@@ -1,18 +1,23 @@
 /**
- * The pearl-O on its own (favicon motif, small brand marks). Decorative by
- * default; pass `title` to give it an accessible name.
- * In dark mode the body gets the mandatory --pearl-rim (brief §C2).
+ * Brand marks without the word.
+ *  - `PearlMark`: the pearl on its own, a flat matte disc in currentColor
+ *    (no gloss, no rim, no numeral). Decorative by default.
+ *  - `ShoulderMark`: the favicon motif (P2 "shoulder on floor"): three pearls
+ *    resting on a rule and one settled on the left shoulder, as tapioca pearls
+ *    settle at the bottom of a cup. Same geometry as src/app/icon.svg.
+ * Pass `title` to give either an accessible name.
  */
-export function PearlMark({
-  size = 32,
-  title,
-  className,
-}: {
+type MarkProps = {
   size?: number | string;
   title?: string;
   className?: string;
-}) {
-  const a11y = title ? { role: "img", "aria-label": title } : { "aria-hidden": true as const };
+};
+
+function a11yOf(title?: string) {
+  return title ? { role: "img", "aria-label": title } : { "aria-hidden": true as const };
+}
+
+export function PearlMark({ size = 32, title, className }: MarkProps) {
   return (
     <svg
       viewBox="0 0 64 64"
@@ -20,19 +25,44 @@ export function PearlMark({
       height={size}
       className={["bl-pearlmark", className].filter(Boolean).join(" ")}
       focusable="false"
-      {...a11y}
+      {...a11yOf(title)}
     >
       {title ? <title>{title}</title> : null}
-      <circle cx="32" cy="32" r="29" className="bl-wordmark__pearl" />
-      <circle cx="32" cy="32" r="28.5" className="bl-wordmark__rim" strokeWidth="1" />
-      <path
-        d="M14.9 25.8A18.6 18.6 0 0 1 26.3 14.3"
-        fill="none"
-        stroke="#F7F1E8"
-        strokeOpacity="0.25"
-        strokeWidth="3.8"
-        strokeLinecap="round"
-      />
+      <circle cx="32" cy="32" r="30" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** Geometry of the shoulder-on-floor mark in a 16 × 16 box (shared with icon.svg). */
+export const SHOULDER = {
+  floor: { x: 0, y: 14.5, w: 16, h: 1.5 },
+  r: 2.3,
+  pearls: [
+    [2.8, 12.2],
+    [8, 12.2],
+    [13.2, 12.2],
+    [5.4, 7.7],
+  ],
+} as const;
+
+export function ShoulderMark({ size = 16, title, className }: MarkProps) {
+  const { floor, r, pearls } = SHOULDER;
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      width={size}
+      height={size}
+      className={["bl-shouldermark", className].filter(Boolean).join(" ")}
+      focusable="false"
+      {...a11yOf(title)}
+    >
+      {title ? <title>{title}</title> : null}
+      <g fill="currentColor">
+        <rect x={floor.x} y={floor.y} width={floor.w} height={floor.h} />
+        {pearls.map(([cx, cy]) => (
+          <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={r} />
+        ))}
+      </g>
     </svg>
   );
 }

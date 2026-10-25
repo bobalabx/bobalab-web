@@ -1,9 +1,12 @@
 "use client";
 /**
- * Footer "Reduce motion" switch (brief §D1, §E7; decision H-14).
- * Writes localStorage "bobalab-motion" and <html data-motion="reduce">.
- * Server render and hydration use the "off" snapshot; the real state follows
- * immediately after hydration (useSyncExternalStore), so there is no mismatch.
+ * Footer "Reduce motion" switch (brief §D1, §E7; decision H-14; D-13 item 6),
+ * styled as a text toggle (P3 `.tbtn`): underlined like a link, a 2 px ink
+ * underline and the word "on" when active. Still a real switch
+ * (role="switch", aria-checked). Writes localStorage "bobalab-motion" and
+ * <html data-motion="reduce">. Server render and hydration use the "off"
+ * snapshot; the real state follows immediately after hydration
+ * (useSyncExternalStore), so there is no mismatch.
  */
 import { useSyncExternalStore } from "react";
 import {
@@ -29,15 +32,13 @@ export function MotionToggle() {
       className="bl-switch"
       onClick={() => setMotionPreference(!on)}
     >
-      <span className="bl-switch__track" aria-hidden="true">
-        <span className="bl-switch__thumb" />
+      <span className="bl-switch__label">Reduce motion</span>
+      <span className="bl-switch__state" aria-hidden="true">
+        {on ? "on" : "off"}
       </span>
-      <span>
-        Reduce motion
-        {viaSystem && (
-          <span className="bl-switch__note"> (already reduced by your system setting)</span>
-        )}
-      </span>
+      {viaSystem && (
+        <span className="bl-switch__note">(already reduced by your system setting)</span>
+      )}
     </button>
   );
 }

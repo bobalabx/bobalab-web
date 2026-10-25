@@ -1,6 +1,6 @@
 /* Layout helpers for the component kit page only. */
 .kit {
-  padding-block: var(--s-7);
+  padding-block: 44px var(--s-7);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--s-8);
@@ -11,14 +11,25 @@
 }
 .kit-section {
   min-width: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--ink);
+}
+.kit-track {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--s-5);
-  padding-top: var(--s-6);
-  border-top: 1px solid var(--hairline);
+}
+.kit-h2 {
+  font-size: var(--t-title);
+  line-height: var(--lh-title);
+}
+.kit-h2-sample {
+  font-size: var(--t-h2);
+  line-height: 1.2;
+  font-weight: 600;
 }
 .kit-h3 {
-  font-size: var(--fs-lg);
+  font-size: var(--t-body);
 }
 .kit-row {
   display: flex;
@@ -51,15 +62,20 @@
 .kit-dirswatches li {
   display: flex;
   align-items: center;
-  gap: var(--s-2);
+  gap: var(--s-2) var(--s-3);
   flex-wrap: wrap;
 }
 .kit-chip {
   width: 2rem;
   height: 2rem;
-  border-radius: var(--r-xs);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--hairline);
   flex: none;
+}
+.kit-line {
+  display: inline-block;
+  width: 4rem;
+  height: 2px;
+  background: var(--dir);
 }
 .kit-icons {
   grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
@@ -73,8 +89,9 @@
   width: 24px;
   height: 24px;
 }
-.kit-grid {
-  display: grid;
-  gap: var(--s-5);
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+@media (forced-colors: active) {
+  .kit-line {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
 }

@@ -1,4 +1,4 @@
-/* Markdown bodies rendered by <Prose> (Markdoc). Max measure 66ch. */
+/* Markdown bodies rendered by <Prose> (Markdoc). Max measure 68ch. */
 
 .prose {
   max-width: var(--prose-max);
@@ -12,14 +12,13 @@
   margin-top: var(--s-4);
 }
 .prose h2 {
-  font-size: var(--fs-xl);
-  line-height: var(--lh-xl);
+  font-size: var(--t-title);
+  line-height: var(--lh-title);
   margin-top: var(--s-6);
 }
 .prose h3 {
-  font-family: var(--font-text);
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
+  font-size: var(--t-body);
+  line-height: 1.4;
   font-weight: 600;
   margin-top: var(--s-5);
 }
@@ -31,7 +30,7 @@
   margin-top: var(--s-5);
 }
 .prose a {
-  color: var(--accent);
+  color: var(--ink);
 }
 .prose ul,
 .prose ol {
@@ -56,14 +55,11 @@
   color: var(--ink-muted);
 }
 .prose code {
-  background: var(--paper-alt);
+  background: var(--band);
   padding: 0.1em 0.3em;
-  border-radius: var(--r-xs);
 }
 .prose pre {
-  background: var(--paper-alt);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-md);
+  background: var(--band);
   padding: var(--s-4);
   overflow-x: auto;
   line-height: var(--lh-mono);
@@ -77,15 +73,18 @@
   width: 100%;
   font-size: var(--fs-sm);
 }
+.prose table {
+  border-top: 1px solid var(--ink);
+}
+.prose th {
+  font-weight: 600;
+}
 .prose th,
 .prose td {
-  border-bottom: 1px solid var(--rule);
-  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--hairline);
+  padding: var(--s-2) var(--s-4) var(--s-2) 0;
   text-align: left;
   vertical-align: top;
-}
-.prose img {
-  border-radius: var(--r-md);
 }
 .prose hr {
   margin: var(--s-6) 0;

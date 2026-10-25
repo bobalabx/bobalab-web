@@ -1,8 +1,11 @@
 "use client";
 /**
- * Accessible filter chips (brief §D7, §D9, §G1): real <button aria-pressed>
- * inside a labelled group; one scrolling row on mobile, wrapping on desktop.
+ * Accessible filter toggles (brief §D7, §D9, §G1; D-13 item 5): real
+ * <button aria-pressed> inside a labelled group, styled as text toggles
+ * (pressed = ink with a 3 px ink underline; unpressed = muted with a 1 px rule
+ * underline). Direction options are prefixed by their 16 px line segment.
  * State is owned by the caller (e.g. a URL-synced filter island).
+ * The `.bl-chips` / `.bl-chip` class names stay for the selector-based tests.
  */
 import type { SwatchId } from "@/lib/content/palette";
 
@@ -10,7 +13,7 @@ export interface ChipOption {
   value: string;
   label: string;
   count?: number;
-  /** Direction colour: renders the flat 10 px dot before the label (§C9; WP4 request 3). */
+  /** Direction colour: renders the 16 px line segment before the label. */
   swatch?: SwatchId;
 }
 
@@ -38,8 +41,8 @@ export function FilterChips({ legend, options, selected, onToggle, hideLegend }:
                 aria-pressed={on}
                 onClick={() => onToggle(o.value)}
               >
-                {o.swatch && <span className="bl-dot" data-swatch={o.swatch} aria-hidden="true" />}
-                <span>{o.label}</span>
+                {o.swatch && <span className="bl-seg" data-swatch={o.swatch} aria-hidden="true" />}
+                <span className="bl-chip__label">{o.label}</span>
                 {o.count !== undefined && (
                   <span className="bl-chip__count">
                     <span className="vh">, </span>

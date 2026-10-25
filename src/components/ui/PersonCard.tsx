@@ -1,5 +1,7 @@
 /**
- * Person card (brief §D9). Takes a PublicPerson, whose consent-gated fields
+ * Person row (brief §D9; D-13 item 5): a square photo, or a square initials
+ * tile when there is no consented photo, then name, role and links as plain
+ * text. Takes a PublicPerson, whose consent-gated fields
  * (photo, email, now_at) are already removed unless the flag is true.
  * Unlisted people must never reach this component (the loader drops them).
  */
@@ -36,7 +38,7 @@ export function PersonCard({
     [string, string]
   >;
   const role = person.isAlumni
-    ? `Alumni · ${ROLE_LABELS[person.role].one}`
+    ? `Alumni, ${ROLE_LABELS[person.role].one}`
     : person.title || ROLE_LABELS[person.role].one;
   return (
     <article className="bl-person" aria-labelledby={`person-${person.slug}`}>
@@ -44,8 +46,8 @@ export function PersonCard({
         <Img
           src={person.photo}
           alt={person.photo_alt ?? ""}
-          width={64}
-          height={64}
+          width={72}
+          height={72}
           className="bl-person__photo"
         />
       ) : (
@@ -65,12 +67,12 @@ export function PersonCard({
         </H>
         <p className="bl-person__role">
           {role}
-          {person.program ? ` · ${person.program}` : ""}
+          {person.program ? `, ${person.program}` : ""}
         </p>
         <DraftBadge show={person.draft} />
         {person.now_at && <p className="t-sm">Now at {person.now_at}</p>}
         {person.interests.length > 0 && (
-          <p className="t-sm t-muted">{person.interests.join(" · ")}</p>
+          <p className="t-sm t-muted">{person.interests.join(", ")}</p>
         )}
         <PearlTagList items={directions} />
         {(links.length > 0 || person.email) && (

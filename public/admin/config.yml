@@ -666,6 +666,12 @@ collections:
         required: false
         default: false
         hint: Show on the home page.
+      - label: Study-design figure checked by the authors
+        name: plate_verified
+        widget: boolean
+        required: false
+        default: false
+        hint: Turn on only after the authors have checked the paper's study-design figure. Until then the figure shows only in preview builds.
       - label: BibTeX override
         name: bibtex_override
         widget: text
@@ -1652,6 +1658,14 @@ collections:
         label: Home page
         file: content/pages/home.yml
         fields:
+          - label: Statement (page heading)
+            name: statement
+            widget: string
+            pattern:
+              - (?=^[\s\S]{1,80}$)
+              - At most 80 characters. At least 1 characters.
+            required: false
+            hint: The large first line of the home page, ≤ 80 characters. Leave empty for the default.
           - label: Mission
             name: mission
             widget: text
@@ -1659,7 +1673,7 @@ collections:
               - (?=^[\s\S]{0,240}$)
               - At most 240 characters.
             required: false
-            hint: One or two sentences under the lab name (≤ 240 characters).
+            hint: One or two sentences beside the lab name, before the research directions (≤ 240 characters).
           - label: Featured findings
             name: featured_findings
             widget: list
@@ -1725,7 +1739,7 @@ collections:
             default: false
             hint: "On: shown only in preview builds, with a “Draft · pending lab review” badge; the live site leaves it out. Turn it off once the lab has approved the text. This is separate from the CMS’s own Draft → In review → Ready board."
       - name: join
-        label: Join / Work with us
+        label: Join the lab
         file: content/pages/join.yml
         fields:
           - label: Introduction
@@ -2063,15 +2077,9 @@ collections:
             widget: text
             required: false
             hint: Who maintains the site (shown in the footer).
-          - label: Fig. 1 layout
+          - label: Fig. 1 layout (retired)
             name: figure_mode
-            widget: select
-            options:
-              - label: Cluster (default)
-                value: cluster
-              - label: Dot plot (better for 7–8 directions)
-                value: dotplot
-            multiple: false
+            widget: hidden
             required: false
             default: cluster
           - label: Editors’ note

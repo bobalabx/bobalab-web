@@ -205,6 +205,19 @@ export function publicationDetail(c: Content, slug: string): PublicationDetail |
   };
 }
 
+/**
+ * Study-design plates (D-13 item 8): a paper's plate is a code component in a
+ * registry keyed by publication slug, and it renders only when the authors have
+ * checked it (`plate_verified: true`) or in a preview build (which shows drafts
+ * for lab review). Pass `isPreview()` from load.ts as `preview`.
+ */
+export function showStudyPlate(
+  pub: Pick<PublicationView, "plate_verified">,
+  preview: boolean,
+): boolean {
+  return pub.plate_verified === true || preview;
+}
+
 export interface PersonDetail {
   person: PublicPerson;
   directions: DirectionView[];

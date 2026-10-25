@@ -93,10 +93,9 @@ describe("production config.yml", () => {
     expect(order.field.filters).toEqual([{ field: "status", values: ["active", "emerging"] }]);
     expect(field(f, "launched").widget).toBe("boolean");
     expect(field(f, "redirects").fields.map((x: Cfg) => x.name)).toEqual(["from", "to"]);
-    expect(field(f, "figure_mode").options.map((o: Cfg) => o.value)).toEqual([
-      "cluster",
-      "dotplot",
-    ]);
+    // Retired by D-13 (one Fig. 1 layout); kept in the schema, hidden from editors.
+    expect(field(f, "figure_mode").widget).toBe("hidden");
+    expect(field(f, "figure_mode").options).toBeUndefined();
   });
 
   it("publications: authors {name, person relation, url}; PDF and slides are file widgets with Insert-from-URL", () => {
