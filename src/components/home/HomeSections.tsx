@@ -1,20 +1,20 @@
 /**
- * Home sections after Fig. 1 (DECISIONS D-13; prototype p3/index.html, with P2's
- * people lattice, JUDGE refinement 8). Each renders only when content provides
- * something to show (no placeholders). Section heads are a plain h2 (P3); lists
- * are ruled ledgers. The way on is one line at the foot of the list that states
- * what the page holds ("Publications: 17 papers, 8 in progress", P2 `.more`), not
- * an "All N" link beside the heading (AUDIT: h2 + "All →" on every section).
+ * Home sections below the cup (DECISIONS D-14; JUDGE.md §5 "Below the fold",
+ * R18, R19): "New papers" (3 ruled rows: title, authors, one meta line) beside
+ * "News" (4 dated one-liners), then "People" (one sentence that counts everyone,
+ * the routes to join, and the consented photos cropped round with first names).
+ * Featured findings render only when content has them (R19). Each section
+ * renders only what content provides (no placeholders); its way on is one
+ * factual line at the foot of the list ("Publications: 17 papers, 8 in progress").
  */
 import Link from "next/link";
-import type { ReactNode } from "react";
-import type { NewsView, PublicationView } from "@/lib/content/load";
+import { Fragment, type ReactNode } from "react";
+import type { AuthorView, NewsView, PublicationView } from "@/lib/content/load";
 import type { FindingView } from "@/lib/content/queries";
-import type { PublicPerson } from "@/lib/content/people";
-import { initials } from "@/lib/content/people";
-import { roleLine } from "@/components/people/model";
-import { PublicationEntry } from "@/components/ui/PublicationEntry";
-import { PearlTag, PearlTagList } from "@/components/ui/PearlTag";
+import { ROLE_LABELS, ROLE_ORDER, type PublicPerson } from "@/lib/content/people";
+import { typeWord } from "@/lib/publications/csl";
+import { numberWord } from "@/lib/figure/buildFigure";
+import { PearlTag } from "@/components/ui/PearlTag";
 import { EvidenceLabel } from "@/components/ui/EvidenceLabel";
 import { Badge, DraftBadge } from "@/components/ui/Badge";
 import { DateText } from "@/components/ui/DateText";
@@ -25,7 +25,6 @@ function Section({
   id,
   title,
   more,
-  note,
   children,
   className,
 }: {
@@ -33,8 +32,6 @@ function Section({
   title: string;
   /** The foot line: where the full list lives and what it holds. */
   more?: { href: string; label: string };
-  /** A note between the list and the foot line. */
-  note?: ReactNode;
   children: ReactNode;
   className?: string;
 }) {
@@ -44,7 +41,6 @@ function Section({
         <h2 id={id}>{title}</h2>
       </div>
       {children}
-      {note}
       {more && (
         <p className="hm-more">
           <Link href={more.href}>{more.label}</Link>
@@ -56,7 +52,7 @@ function Section({
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
-/** "Publications: 17 papers, 8 in progress" (the lane-label wording of Fig. 1). */
+/** "Publications: 17 papers, 8 in progress". */
 export function publicationsLine(papers: number, inProgress: number): string {
   return `Publications: ${plural(papers, "paper")}${inProgress ? `, ${inProgress} in progress` : ""}`;
 }
@@ -68,6 +64,58 @@ export function peopleLine(members: number, alumni: number): string {
 export function newsLine(total: number, since?: string): string {
   const y = since?.slice(0, 4);
   return `News: ${plural(total, "item")}${y && /^\d{4}$/.test(y) ? ` since ${y}` : ""}`;
+}
+
+/** "a, b and c" */
+function and(parts: string[]): string {
+  return parts.length < 2
+    ? (parts[0] ?? "")
+    : `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
+}
+
+/** "Journal article, Management Science, 2026": the paper's one meta line. */
+export function paperMeta(p: Pick<PublicationView, "type" | "venue" | "year">): string {
+  return [typeWord(p), p.venue, p.year].filter(Boolean).join(", ");
+}
+
+/**
+ * Display first names for the photo row: the quoted or bracketed preferred name
+ * when there is one ('Zixian "Amy" Li' → Amy), else the first word; a first name
+ * shared by several people gets their last initial (Ryan C., Ryan J.).
+ */
+export function firstNames(
+  people: Array<Pick<PublicPerson, "slug" | "name">>,
+): Map<string, string> {
+  const first = (name: string) =>
+    /["“(]([^"”)]+)["”)]/.exec(name)?.[1]?.trim() ?? name.trim().split(/\s+/)[0]!;
+  const last = (name: string) => name.trim().split(/\s+/).at(-1)!.charAt(0);
+  const count = new Map<string, number>();
+  for (const p of people) count.set(first(p.name), (count.get(first(p.name)) ?? 0) + 1);
+  return new Map(
+    people.map((p) => {
+      const f = first(p.name);
+      return [p.slug, (count.get(f) ?? 0) > 1 ? `${f} ${last(p.name)}.` : f];
+    }),
+  );
+}
+
+/** "Master’s student" → "master’s student"; a first word with more capitals ("PhD") stays. */
+const lower = (label: string) =>
+  /^[A-Z][a-z]*(?=[\s’'-]|$)/.test(label) ? label.charAt(0).toLowerCase() + label.slice(1) : label;
+
+/**
+ * The team as words, by role in ROLE_ORDER, everyone counted (with or without a
+ * photo): "one master’s student and 23 undergraduate RAs".
+ */
+export function teamWords(people: Array<Pick<PublicPerson, "role">>): string {
+  return and(
+    ROLE_ORDER.filter((r) => r !== "pi").flatMap((role) => {
+      const n = people.filter((p) => p.role === role).length;
+      if (!n) return [];
+      const l = ROLE_LABELS[role];
+      return [`${n <= 8 ? numberWord(n) : n} ${lower(n === 1 ? l.one : l.group)}`];
+    }),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -102,8 +150,27 @@ export function FindingsSection({ findings }: { findings: FindingView[] }) {
   );
 }
 
-/** The newest papers; hovering or focusing a row lights its dots in Fig. 1. */
-export function PublicationsSection({
+function Authors({ authors }: { authors: AuthorView[] }) {
+  return (
+    <>
+      {authors.map((a, i) => (
+        <Fragment key={`${a.name}-${i}`}>
+          {i === 0
+            ? ""
+            : i === authors.length - 1
+              ? authors.length > 2
+                ? ", and "
+                : " and "
+              : ", "}
+          {a.isLab ? <strong>{a.name}</strong> : a.name}
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
+/** "New papers": title, authors (lab members in 600) and one meta line. */
+export function PapersSection({
   items,
   total,
   inProgress = 0,
@@ -117,13 +184,28 @@ export function PublicationsSection({
   return (
     <Section
       id="h-pubs"
-      title="Recent publications"
+      title="New papers"
+      className="hm-papers-sec"
       more={{ href: "/publications/", label: publicationsLine(total, inProgress) }}
     >
-      <ol role="list" className="hm-pubs">
+      <ol role="list" className="hm-papers">
         {items.map((p) => (
-          <li key={p.slug} data-f1-row={p.slug}>
-            <PublicationEntry pub={p} as="h3" showAwards={false} />
+          <li key={p.slug}>
+            <h3 className="hm-paper-t">
+              <Link href={`/publications/${p.slug}/`}>{p.title}</Link>
+            </h3>
+            {p.authorList.length > 0 && (
+              <p className="hm-paper-au">
+                <Authors authors={p.authorList} />
+              </p>
+            )}
+            <p className="hm-paper-meta">
+              <span>{paperMeta(p)}</span>
+              {p.directionRefs.map((d) => (
+                <PearlTag key={d.slug} label={d.short_label} swatch={d.color} size="sm" />
+              ))}
+              {p.draft && <DraftBadge />}
+            </p>
           </li>
         ))}
       </ol>
@@ -131,7 +213,7 @@ export function PublicationsSection({
   );
 }
 
-/** A news log: date, title, directions (P3 `.log`). */
+/** "News": dated one-liners. */
 export function NewsSection({
   items,
   total,
@@ -144,7 +226,12 @@ export function NewsSection({
 }) {
   if (!items.length) return null;
   return (
-    <Section id="h-news" title="News" more={{ href: "/news/", label: newsLine(total, since) }}>
+    <Section
+      id="h-news"
+      title="News"
+      className="hm-news-sec"
+      more={{ href: "/news/", label: newsLine(total, since) }}
+    >
       <ol role="list" className="hm-log">
         {items.map((n) => (
           <li key={n.slug}>
@@ -164,7 +251,6 @@ export function NewsSection({
                 </>
               )}
             </p>
-            <PearlTagList items={n.directionRefs} linked={false} label={`Directions: ${n.title}`} />
           </li>
         ))}
       </ol>
@@ -173,69 +259,86 @@ export function NewsSection({
 }
 
 /**
- * The lab's own faces (P2 lattice; D-13 item 5): square photos, or a square
- * initials tile where there is no consented photo. Then the routes to join.
+ * "People" (R18): a sentence that counts everyone, the routes to join, then the
+ * people with a consented photo, cropped round, with their first names (alt = full
+ * name). Nobody without a photo is drawn (no initials discs); they are counted.
  */
 export function PeopleSection({
   people,
-  max = 16,
+  lead,
   alumni = 0,
   email,
 }: {
   people: PublicPerson[];
-  max?: number;
+  /** "Prof. Park Sinchaisri" (homeWho), when the lab has a listed PI. */
+  lead?: string;
   alumni?: number;
   email?: string;
 }) {
   if (!people.length) return null;
-  const shown = people.slice(0, max);
+  const faces = people.filter((p) => p.photo);
+  const names = firstNames(faces);
+  const team = teamWords(people);
   return (
     <Section
       id="h-people"
       title="People"
+      className="hm-people-sec"
       more={{ href: "/people/", label: peopleLine(people.length, alumni) }}
-      note={
-        <p className="hm-join">
-          To work with the lab, see the notes for <Link href="/join/#students">Students & RAs</Link>{" "}
-          and for <Link href="/join/#partners">Partners & data collaborators</Link>
-          {email ? (
-            <>
-              , or email <a href={`mailto:${email}`}>{email}</a>.
-            </>
-          ) : (
-            "."
-          )}
-        </p>
-      }
     >
-      <ul role="list" className="hm-people">
-        {shown.map((p) => (
-          <li key={p.slug} className="hm-person">
-            <div className="hm-ph">
-              {p.photo ? (
-                // Consent-gated by the loader (D-06): photo is present only with photo_consent.
+      <div className="hm-people-in">
+        <div className="hm-people-txt">
+          <p className="hm-team">
+            {lead && team ? (
+              <>
+                {lead} leads the lab with {team}.
+              </>
+            ) : (
+              <>The lab has {team || plural(people.length, "member")}.</>
+            )}
+            {alumni > 0 && (
+              <>
+                {" "}
+                The people page also lists {alumni <= 8 ? numberWord(alumni) : alumni} former{" "}
+                {alumni === 1 ? "member" : "members"}.
+              </>
+            )}
+          </p>
+          <p className="hm-join">
+            To work with the lab, see the notes for{" "}
+            <Link href="/join/#students">Students & RAs</Link> and for{" "}
+            <Link href="/join/#partners">Partners & data collaborators</Link>
+            {email ? (
+              <>
+                , or email <a href={`mailto:${email}`}>{email}</a>.
+              </>
+            ) : (
+              "."
+            )}
+          </p>
+        </div>
+        {faces.length > 0 && (
+          <ul role="list" className="hm-faces">
+            {faces.map((p) => (
+              <li key={p.slug} className="hm-face">
+                {/* Consent-gated by the loader (D-06): photo is present only with photo_consent. */}
                 <Img
-                  src={p.photo}
-                  alt={p.photo_alt ?? ""}
-                  width={240}
-                  height={240}
-                  sizes="(min-width: 64rem) 120px, 30vw"
-                  className="hm-photo"
+                  src={p.photo!}
+                  alt={p.name}
+                  width={160}
+                  height={160}
+                  sizes="72px"
+                  className="hm-face-img"
                 />
-              ) : (
-                <span className="hm-ini" aria-hidden="true">
-                  {initials(p.name)}
+                <span className="hm-face-name" aria-hidden="true">
+                  {names.get(p.slug)}
                 </span>
-              )}
-            </div>
-            <p className="hm-person-name">
-              {p.hasProfile ? <Link href={`/people/${p.slug}/`}>{p.name}</Link> : p.name}
-            </p>
-            <p className="hm-person-role">{roleLine(p)}</p>
-            {p.draft && <DraftBadge />}
-          </li>
-        ))}
-      </ul>
+                {p.draft && <DraftBadge />}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </Section>
   );
 }

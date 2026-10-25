@@ -1,89 +1,134 @@
 /*
- * Home (DECISIONS D-13; prototype docs/redesign/prototypes/p3/p3.css "home hero",
- * "ledger", "news log"; P2 people lattice). Fig. 1 is styled in figure.css.
+ * Home (DECISIONS D-14; docs/simplify/JUDGE.md §5, R1, R6, R15, R18; prototype
+ * docs/simplify/prototypes/c/c.css "hero", "sections"). The cup is styled in
+ * src/components/cup/cup.css.
  */
 
-/* ---- statement and lede (P3 .hero) ---------------------------------------- */
+/* ---- first screen ---------------------------------------------------------- */
 .hm-hero {
-  padding-top: 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 22px;
+  padding-top: 20px;
 }
 .hm-h1 {
   margin: 0;
+  max-width: 11ch;
   font-stretch: var(--wdth-cond);
-  font-weight: 700;
-  font-size: var(--t-head);
-  line-height: 1.05;
-  letter-spacing: 0;
+  font-weight: 750;
+  font-size: var(--t-display);
+  line-height: var(--lh-display-home);
+  letter-spacing: -0.005em;
   text-wrap: balance;
 }
 .hm-h1:focus {
   outline: none;
 }
-.hm-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  row-gap: 14px;
-  margin-top: 18px;
-}
-.hm-aff {
-  order: 2;
-  margin: 0;
-  font-size: var(--t-meta);
-  line-height: 1.5;
-  color: var(--muted);
-}
-.hm-aff > span {
-  display: block;
-  max-width: 16rem;
-  text-wrap: balance;
-}
-.hm-lede {
-  margin: 0;
-  max-width: 62ch;
-  font-size: 1.125rem;
-  line-height: 1.5;
+.hm-who {
+  margin: 16px 0 0;
+  max-width: 38ch;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.42;
   text-wrap: pretty;
 }
-.hm-lede .bl-badge {
+.hm-why {
+  margin: 8px 0 0;
+  max-width: 44ch;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.hm-why .bl-badge {
   vertical-align: 0.1em;
 }
-@media (min-width: 40rem) {
-  .hm-lede {
-    font-size: var(--t-title);
-  }
+/* One primary link, one secondary (R6). */
+.hm-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 26px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
 }
-@media (min-width: 48rem) {
-  .hm-row {
-    grid-template-columns: var(--lab) minmax(0, 1fr);
-  }
-  .hm-aff {
-    order: 0;
-    padding: 6px 32px 0 0;
-  }
+.hm-links a {
+  display: inline-block;
+  padding-block: 6px;
+  font-weight: 500;
+  color: var(--ink);
 }
-/* A direction word: its line segment, underlined in its own colour (P3 .dl). */
-.hm-dl {
-  white-space: nowrap;
-  text-decoration-color: var(--dir);
-}
-.hm-dl:hover,
-.hm-dl:focus-visible,
-.hm-dl.is-on {
-  text-decoration-color: var(--dir);
+.hm-links a.hm-go {
+  font-weight: 650;
+  text-decoration-color: currentColor;
   text-decoration-thickness: 2px;
+  text-underline-offset: 0.28em;
 }
-.hm-dl .bl-seg {
-  margin-right: 5px;
+.hm-links a.hm-go:hover {
+  text-decoration-thickness: 3px;
+}
+.hm-cup {
+  min-width: 0;
 }
 
-/* ---- sections -------------------------------------------------------------- */
+@media (max-width: 47.99rem) {
+  .hm-h1 {
+    max-width: none;
+  }
+}
+@media (min-width: 40rem) {
+  .hm-who {
+    font-size: 1.1875rem;
+  }
+}
+/* Tablets: text left, the squat cup right. */
+@media (min-width: 48rem) {
+  .hm-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    column-gap: 40px;
+    align-items: center;
+    padding-top: 32px;
+  }
+  .hm-why {
+    font-size: var(--t-body);
+  }
+}
+/* Desktop: the tall cup beside the text, the hero filling the first screen. */
+@media (min-width: 80rem) {
+  .hm-hero {
+    grid-template-columns: minmax(0, 29rem) minmax(0, 1fr);
+    column-gap: 48px;
+    min-height: min(calc(100svh - 80px), 860px);
+    padding-top: 8px;
+  }
+  .hm-who {
+    max-width: none;
+    margin-top: 24px;
+    font-size: 1.3125rem;
+    line-height: 1.4;
+  }
+  .hm-why {
+    margin-top: 12px;
+    font-size: 1.0625rem;
+  }
+  .hm-links {
+    margin-top: 24px;
+    gap: 4px 30px;
+    font-size: 1.0625rem;
+  }
+  .hm-cup {
+    max-width: 50rem;
+  }
+}
+
+/* ---- sections ---------------------------------------------------------------- */
 .hm-sec {
   margin-top: var(--sec-gap);
 }
 .hm-sec-h h2 {
   margin: 0;
 }
-/* The way on, at the foot of the list (P1/P2 `.more`): what the full page holds. */
+/* The way on, at the foot of the list: what the full page holds. */
 .hm-more {
   margin: 12px 0 0;
   font-size: var(--t-meta);
@@ -95,37 +140,97 @@
   padding-block: 4px;
   color: var(--ink);
 }
-.hm-soon h2 {
-  margin: 0 0 4px;
+
+/* New papers beside news (C's "Lately"). */
+.hm-lately {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 64rem) {
+  .hm-lately {
+    grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+    column-gap: 64px;
+  }
 }
 
-/* Recent publications: a hovered or focused row lights its dots in Fig. 1, and a
-   dot lights its row (P3 .row.hl). */
-.hm-pubs {
+.hm-papers,
+.hm-log {
   margin: 0;
   padding: 0;
   list-style: none;
   border-top: 1px solid var(--ink);
+}
+.hm-papers > li {
+  padding: 16px 0 18px;
   border-bottom: 1px solid var(--hairline);
 }
-.hm-pubs > li:first-child .bl-pub {
-  border-top: 0;
+.hm-paper-t {
+  margin: 0;
+  font-size: var(--t-title);
+  font-weight: 600;
+  line-height: var(--lh-title);
 }
-.hm-pubs > li {
-  position: relative;
-  z-index: 0;
+.hm-paper-t a {
+  text-decoration: none;
 }
-.hm-pubs > li::before {
-  content: "";
-  position: absolute;
-  inset: 0 -14px;
-  z-index: -1;
-  background: var(--band);
-  opacity: 0;
-  transition: opacity var(--dur-fast) ease-out;
+.hm-paper-t a:hover,
+.hm-paper-t a:focus-visible {
+  text-decoration: underline 2px;
+  text-underline-offset: 0.18em;
 }
-.hm-pubs > li.is-hl::before {
-  opacity: 1;
+.hm-paper-au {
+  margin: 6px 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+.hm-paper-au strong {
+  font-weight: 600;
+}
+.hm-paper-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 16px;
+  margin: 4px 0 0;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+}
+.hm-paper-meta .bl-tag {
+  min-height: 0;
+  color: var(--muted);
+}
+
+.hm-log > li {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  column-gap: 14px;
+  align-items: baseline;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.hm-log-date {
+  font-size: var(--t-meta);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.hm-log-title {
+  margin: 0;
+  line-height: 1.4;
+}
+.hm-log-title a {
+  text-decoration: none;
+}
+.hm-log-title a:hover,
+.hm-log-title a:focus-visible {
+  text-decoration: underline 2px;
+  text-underline-offset: 0.18em;
+}
+@media (max-width: 23.99rem) {
+  .hm-log > li {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2px;
+  }
 }
 
 /* Findings (only when content has them). */
@@ -144,144 +249,75 @@
   font-size: var(--t-meta);
 }
 
-/* ---- people: square photos (P2 lattice) ------------------------------------ */
-/* Columns have a minimum width in rem, so enlarged text gives fewer, wider
-   columns instead of names and roles broken mid-word (WCAG 1.4.4). At the
-   default size: 3 columns on phones (320–390 px), 5–6 on tablets, 8 from 64rem. */
-.hm-people {
-  --hm-col: 5.25rem;
+/* ---- people: one sentence, the routes to join, round faces (R18) ------------ */
+.hm-people-in {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--hm-col), 1fr));
-  gap: 22px 12px;
-  margin: 0;
-  padding: 18px 0 0;
-  list-style: none;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 26px;
+  padding-top: 18px;
   border-top: 1px solid var(--ink);
 }
-@media (min-width: 40rem) {
-  .hm-people {
-    --hm-col: 6.5rem;
-    gap: 24px 16px;
-  }
-}
 @media (min-width: 64rem) {
-  .hm-people {
-    /* Eight across at any desktop width (16 people = two full rows). */
-    --hm-col: max(6.5rem, (100% - 7 * 16px) / 8 - 1px);
+  .hm-people-in {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    column-gap: 64px;
   }
 }
-.hm-people + .hm-join {
-  margin-top: 26px;
-}
-.hm-person {
-  min-width: 0;
-}
-.hm-person p {
+.hm-team {
   margin: 0;
-  border-bottom: 0;
-}
-.hm-ph {
-  aspect-ratio: 1;
-  overflow: hidden;
-  background: var(--band);
-}
-.hm-ph img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.hm-ini {
-  display: grid;
-  place-items: center;
-  height: 100%;
-  font-weight: 700;
-  font-size: 1.5rem;
-  line-height: 1;
-  color: var(--ink);
-}
-.hm-person-name {
-  margin-top: 10px !important;
-  font-weight: 600;
-  font-size: 1rem;
-  line-height: 1.3;
-  overflow-wrap: anywhere;
-}
-.hm-person-name a {
-  text-decoration-color: var(--rule);
-}
-.hm-person-role {
-  margin-top: 2px !important;
-  font-size: var(--t-meta);
-  line-height: 1.4;
-  color: var(--muted);
-  /* Only a word longer than its tile ("Undergraduate" with enlarged text on a
-     phone) is hyphenated; names never are. */
-  hyphens: auto;
-  hyphenate-limit-chars: 12 5 5;
+  max-width: 34ch;
+  font-size: var(--t-title);
+  font-weight: 500;
+  line-height: 1.45;
+  text-wrap: pretty;
 }
 .hm-join {
-  margin: 0;
-  max-width: 72ch;
+  margin: 14px 0 0;
+  max-width: 44ch;
   color: var(--muted);
 }
 .hm-join a {
   color: var(--ink);
 }
-
-/* ---- news log (P3 .log) ----------------------------------------------------- */
-.hm-log {
+.hm-faces {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4.25rem, 1fr));
+  gap: 18px 8px;
   margin: 0;
-  padding: 0;
+  padding: 0 0 16px;
   list-style: none;
   border-bottom: 1px solid var(--hairline);
 }
-.hm-log > li {
+@media (min-width: 40rem) {
+  .hm-faces {
+    grid-template-columns: repeat(auto-fill, minmax(5.25rem, 1fr));
+    gap: 22px 10px;
+  }
+}
+.hm-face {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  row-gap: 2px;
-  padding: 11px 0;
-  border-top: 1px solid var(--hairline);
+  justify-items: center;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
 }
-.hm-log > li:first-child {
-  border-top: 1px solid var(--ink);
+.hm-face-img {
+  display: block;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
 }
-.hm-log-date {
+@media (min-width: 40rem) {
+  .hm-face-img {
+    width: 72px;
+    height: 72px;
+  }
+}
+.hm-face-name {
+  max-width: 100%;
   font-size: var(--t-meta);
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-.hm-log-title {
-  margin: 0;
-}
-.hm-log-title a {
-  text-decoration: none;
-}
-.hm-log-title a:hover {
-  text-decoration: underline 2px var(--ink);
-  text-underline-offset: 0.18em;
-}
-.hm-log .bl-tags {
-  color: var(--muted);
-  column-gap: 16px;
-}
-.hm-log .bl-tag {
-  color: var(--muted);
-}
-@media (min-width: 48rem) {
-  .hm-log > li {
-    grid-template-columns: 10rem minmax(0, 1fr) auto;
-    column-gap: 24px;
-    align-items: baseline;
-  }
-  .hm-log .bl-tags {
-    justify-content: flex-end;
-  }
-}
-
-/* Phones: three rows of faces; the section link leads to everyone. */
-@media (max-width: 39.99rem) {
-  .hm-person:nth-child(n + 10) {
-    display: none;
-  }
+  line-height: 1.25;
+  text-align: center;
+  overflow-wrap: anywhere;
 }

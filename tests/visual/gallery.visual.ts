@@ -7,6 +7,9 @@
  *    one "now" x for every pearl; every dot between the label column and "now";
  *    rings inside the plate; year labels never overlap.
  *  - No horizontal scroll at 390 and 320 px.
+ * D-14: `cup-<set>` pages hold the real home page with the boba cup for 0–8 live
+ * directions (R17): screenshots of the hero, and checks that no two pearls or
+ * labels overlap and every label stays inside the viewport.
  * Needs `npx vitest run --config tests/visual/vitest.render.config.ts` first.
  */
 import { expect, test, type Page } from "@playwright/test";
@@ -58,6 +61,24 @@ async function layoutProblems(page: Page): Promise<string[]> {
   });
 }
 
+/** The cup: pearls never overlap, label rows never overlap, labels stay on screen. */
+async function cupProblems(page: Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const out: string[] = [];
+    const boxes = (sel: string) =>
+      [...document.querySelectorAll(sel)].map((e) => e.getBoundingClientRect());
+    const pearls = boxes(".cup-pearl");
+    for (let i = 1; i < pearls.length; i++)
+      if (pearls[i]!.left < pearls[i - 1]!.right - 0.5) out.push(`pearls ${i - 1}/${i} overlap`);
+    const labs = boxes(".cup-lab-t");
+    for (let i = 1; i < labs.length; i++)
+      if (labs[i]!.top < labs[i - 1]!.bottom - 1) out.push(`labels ${i - 1}/${i} overlap`);
+    for (const l of labs)
+      if (l.right > document.documentElement.clientWidth) out.push("label past the viewport");
+    return out;
+  });
+}
+
 for (const file of pages) {
   const name = file.replace(/\.html$/, "");
   const url = pathToFileURL(path.join(DIR, file)).href;
@@ -75,9 +96,10 @@ for (const file of pages) {
       const page = await ctx.newPage();
       await page.goto(url);
       await page.evaluate(() => document.fonts.ready);
-      const fig = page.locator(".f1, .hm-soon").first();
+      const fig = page.locator(".f1, .hm-soon, .hm-hero").first();
       if (await fig.count())
         await fig.screenshot({ path: path.join(DIR, `${name}-${width}-${scheme}.png`) });
+      expect(await cupProblems(page), `${name} cup at ${width} px`).toEqual([]);
       if (scheme === "light") {
         for (const zoom of ["100%", "200%"]) {
           await page.evaluate((z) => (document.documentElement.style.fontSize = z), zoom);
@@ -96,6 +118,9 @@ for (const file of pages) {
       await page.evaluate(() => document.fonts.ready);
       if (width === 390 && (await page.locator(".f1").count()))
         await page.locator(".f1").screenshot({ path: path.join(DIR, `${name}-390.png`) });
+      if (width === 390 && (await page.locator(".cup").count()))
+        await page.locator(".cup").screenshot({ path: path.join(DIR, `${name}-390.png`) });
+      expect(await cupProblems(page), `${name} cup at ${width} px`).toEqual([]);
       const over = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       );

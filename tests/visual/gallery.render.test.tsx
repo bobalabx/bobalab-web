@@ -1,6 +1,8 @@
 /**
  * Writes one static HTML page per fixture set for the Fig. 1 "Lines" gallery
- * (screenshots and layout checks are in gallery.visual.ts).
+ * (screenshots and layout checks are in gallery.visual.ts), plus, since D-14,
+ * one page per set with the real home page and its boba cup (`cup-<set>.html`,
+ * 0–8 live directions; `cup-n5.html` is built from n6's first five).
  *
  * Each page is the real home page (src/app/page.tsx) rendered to static markup
  * with the site CSS and the real self-hosted Archivo (inlined as a data: URI), so
@@ -29,6 +31,8 @@ import {
 } from "@/lib/content/load";
 import { buildFigureModel, type FigureModel } from "@/lib/figure/buildFigure";
 import { PearlFigure } from "@/components/figure/PearlFigure";
+import { BobaCup } from "@/components/cup/BobaCup";
+import { homePearls } from "@/lib/content/queries";
 import HomePage from "@/app/page";
 
 const ROOT = process.cwd();
@@ -43,6 +47,7 @@ const CSS = [
   "src/styles/forced-colors.css",
   "src/components/figure/figure.css",
   "src/components/home/home.css",
+  "src/components/cup/cup.css",
 ];
 
 export const GALLERY_SETS = [
@@ -150,8 +155,41 @@ it("renders the fixture gallery", () => {
   fs.writeFileSync(path.join(OUT, "style.css"), `${fontCss()}\n${css}`);
 
   for (const set of GALLERY_SETS) {
+    // D-14: Fig. 1 left the home page (it is on /research/ now), so the fixture
+    // figure is rendered on its own, and the real home page (the cup with that
+    // set's live directions, JUDGE R17) gets its own page.
+    const c = content(path.join(FIX, set));
+    const m = buildFigureModel({
+      directions: c.directions,
+      countedPublications: c.countedPublications,
+      inProgress: c.inProgress,
+      today: c.today,
+    });
+    fs.writeFileSync(path.join(OUT, `${set}.html`), page(`Fig. 1 ${set}`, renderFigure(m)));
     const html = renderHome(path.join(FIX, set), false);
-    fs.writeFileSync(path.join(OUT, `${set}.html`), page(`Fig. 1 ${set}`, html));
+    fs.writeFileSync(path.join(OUT, `cup-${set}.html`), page(`Home cup ${set}`, html));
+  }
+  // Five live directions (no fixture has exactly five): the n6 set's first five.
+  {
+    const c = content(path.join(FIX, "n6"));
+    fs.writeFileSync(
+      path.join(OUT, "cup-n5.html"),
+      page(
+        "Home cup n5",
+        renderToStaticMarkup(
+          <div className="bl-container hm">
+            <section className="hm-hero">
+              <div className="hm-copy">
+                <h1 className="hm-h1">Five directions</h1>
+              </div>
+              <div className="hm-cup">
+                <BobaCup pearls={homePearls(c).slice(0, 5)} />
+              </div>
+            </section>
+          </div>,
+        ),
+      ),
+    );
   }
   fs.writeFileSync(
     path.join(OUT, "home-production.html"),

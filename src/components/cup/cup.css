@@ -1,0 +1,520 @@
+/*
+ * The homepage boba cup (DECISIONS D-14; JUDGE.md R2–R5, R8–R11, R14–R16;
+ * prototype docs/simplify/prototypes/c/c.css "the beaker stage").
+ *
+ * Coordinates are drawing units from geometry.ts; 1 unit = --u = 100cqw / --W
+ * (.cup is the size container). Two proportions: narrow below 80rem, wide from
+ * 80rem; .cup and each .cup-item carry both sets inline (--W-n/--W-w, --x-n/--x-w …)
+ * and pick one here.
+ *
+ * Flat only (R14): one stroke weight for the drawing, matte discs for the pearls,
+ * no gradient, shadow, gloss or grain. --tea fills the drawing and nothing else;
+ * direction-coloured TEXT never sits on it (matcha is 4.37:1 on tea), only pearls
+ * and leader lines do. Motion is finite and lives behind the motion gate.
+ */
+
+.cup {
+  --W: var(--W-n);
+  --H: var(--H-n);
+  --r: var(--r-n);
+  --cy: var(--cy-n);
+  --rise: var(--rise-n);
+  --lx: var(--lx-n);
+  --hy: var(--hy-n);
+  --R: var(--R-n);
+  position: relative;
+  margin: 0;
+  container-type: inline-size;
+}
+.cup-item {
+  --x: var(--x-n);
+  --ly: var(--ly-n);
+}
+@media (min-width: 80rem) {
+  .cup {
+    --W: var(--W-w);
+    --H: var(--H-w);
+    --r: var(--r-w);
+    --cy: var(--cy-w);
+    --rise: var(--rise-w);
+    --lx: var(--lx-w);
+    --hy: var(--hy-w);
+    --R: var(--R-w);
+  }
+  .cup-item {
+    --x: var(--x-w);
+    --ly: var(--ly-w);
+  }
+}
+
+.cup-stage {
+  --u: calc(100cqw / var(--W));
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--W) / var(--H);
+  margin-bottom: var(--cup-pad, 0px);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---- the drawing ---------------------------------------------------------- */
+.cup-draw {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.cup-draw--wide {
+  display: none;
+}
+@media (min-width: 80rem) {
+  .cup-draw--wide {
+    display: block;
+  }
+  .cup-draw--narrow {
+    display: none;
+  }
+}
+.cup-draw path {
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.cup-wall {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.cup-base {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+.cup-tea {
+  fill: var(--tea);
+}
+.cup-surface {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+/* R5: three faint ticks, a hairline in --rule, on the far wall. */
+.cup-tick {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.cup-straw {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.cup-straw-in {
+  fill: var(--tea);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+/* ---- pearls, leader lines, labels ------------------------------------------ */
+.cup-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /* One stacking context for the pearls, so every padded hit area (z -1) sits
+     under every visible disc: on phones the 48 px areas overlap the 2 px gaps,
+     and a tap on a pearl's edge must open that pearl, not its neighbour. */
+  isolation: isolate;
+}
+/* No z-index: pearls paint after their own leader lines (tree order), and a
+   rising pearl crosses only earlier items' lines, which paint before it. */
+.cup-pearl {
+  position: absolute;
+  left: calc((var(--x) - var(--r)) * var(--u));
+  top: calc((var(--cy) - var(--r)) * var(--u));
+  width: calc(2 * var(--r) * var(--u));
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--dir);
+}
+/* Hit area ≥ 48 px around the pearl (D-14), centred on it, below the discs. */
+.cup-pearl::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 50%;
+  width: max(100%, 48px);
+  height: max(100%, 48px);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+[data-js] .cup-pearl {
+  cursor: pointer;
+}
+.cup-item.is-up .cup-pearl {
+  transform: translateY(calc((var(--rise) - var(--cy)) * var(--u)));
+}
+.cup-stage[data-sel] .cup-item:not(.is-up) .cup-pearl {
+  background: color-mix(in srgb, var(--dir) 78%, var(--tea));
+}
+
+/* The leader: up from the pearl, then out through the right wall to the label. */
+.cup-ld,
+.cup-ext,
+.cup-sfc {
+  position: absolute;
+  pointer-events: none;
+  border: 0 solid var(--dir);
+  box-sizing: border-box;
+}
+.cup-ld {
+  left: calc(var(--x) * var(--u) - 0.625px);
+  top: calc(var(--ly) * var(--u) - 0.625px);
+  width: calc((var(--lx) - 10 - var(--x)) * var(--u));
+  height: max(0px, calc((var(--cy) - var(--r) - var(--ly)) * var(--u)));
+  border-left-width: 1.25px;
+  border-top-width: 1.25px;
+}
+/* While the pearl is up: the line it rose along (risen pearl → label row) … */
+.cup-ext {
+  left: calc(var(--x) * var(--u) - 0.625px);
+  top: calc((var(--rise) + var(--r)) * var(--u));
+  height: max(0px, calc((var(--ly) - var(--rise) - var(--r)) * var(--u)));
+  border-left-width: 1.25px;
+  transform: scaleY(0);
+  transform-origin: 50% 100%;
+}
+/* … and (wide) a leader from the risen pearl to its panel. */
+.cup-sfc {
+  display: none;
+  left: calc((var(--x) + var(--r) + 3) * var(--u));
+  top: calc(var(--rise) * var(--u) - 0.625px);
+  width: calc((var(--lx) - 10 - var(--x) - var(--r) - 3) * var(--u));
+  border-top-width: 1.25px;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+.cup-item.is-up .cup-ext {
+  transform: none;
+}
+@media (min-width: 80rem) {
+  .cup-sfc {
+    display: block;
+  }
+  .cup-item.is-up .cup-sfc {
+    transform: none;
+  }
+}
+.cup-stage[data-sel] .cup-item:not(.is-up) .cup-ld {
+  opacity: 0.3;
+}
+
+/* Labels look clickable at rest (R2): the site's thin underline, in the
+   direction's colour. Hover, focus and the open one: 2 px. */
+.cup-lab {
+  position: absolute;
+  left: calc(var(--lx) * var(--u));
+  top: calc(var(--ly) * var(--u));
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  max-width: calc((var(--W) - var(--lx)) * var(--u) + var(--gutter) - 4px);
+  margin: 0;
+  padding: 0 4px 0 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: clamp(0.75rem, 3.9cqw, 0.9375rem);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  z-index: 3;
+}
+.cup-lab-t {
+  text-decoration: underline 1px var(--dir);
+  text-underline-offset: 0.24em;
+  transition: text-decoration-color var(--dur-fast) ease-out;
+}
+.cup-lab:focus-visible .cup-lab-t,
+.cup-item.is-up .cup-lab-t {
+  text-decoration-thickness: 2px;
+}
+/* Hover only where there is hover: a tap leaves :hover stuck on phones. */
+@media (hover: hover) {
+  .cup-item:hover .cup-lab-t {
+    text-decoration-thickness: 2px;
+  }
+}
+.cup-lab:focus-visible {
+  outline: none;
+}
+.cup-lab:focus-visible .cup-lab-t {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+.cup-stage[data-sel] .cup-item:not(.is-up) .cup-lab {
+  color: var(--muted);
+}
+@media (min-width: 80rem) {
+  .cup-lab {
+    min-height: 32px;
+    font-size: 1.0625rem;
+    white-space: nowrap;
+  }
+}
+
+/* ---- the reveal panel -------------------------------------------------------- */
+.cup-panel {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 12px);
+  width: 100%;
+  padding-top: 14px;
+  border-top: 1px solid var(--hairline);
+  z-index: 3;
+}
+.cup-panel[hidden] {
+  display: none;
+}
+@media (min-width: 80rem) {
+  /* Level with the risen pearl, in the label column (on paper, never on tea). */
+  .cup-panel {
+    left: calc(var(--lx) * var(--u));
+    top: calc(var(--rise) * var(--u));
+    width: calc((var(--W) - var(--lx)) * var(--u));
+    padding-top: 0;
+    border-top: 0;
+    transform: translateY(-0.82em);
+  }
+}
+.cup-q {
+  margin: 0;
+  max-width: 30ch;
+  font-size: 1.1875rem;
+  font-weight: 500;
+  line-height: 1.32;
+  text-wrap: pretty;
+}
+.cup-read {
+  margin: 10px 0 0;
+  max-width: 44ch;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.cup-read a {
+  color: var(--ink);
+}
+.cup-go {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin: 12px 0 0;
+}
+.cup-go a {
+  font-weight: 600;
+  text-decoration-color: var(--dir);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.26em;
+}
+.cup-count {
+  font-size: var(--t-meta);
+  color: var(--muted);
+  white-space: nowrap;
+}
+@media (min-width: 80rem) {
+  .cup-q {
+    font-size: 1.375rem;
+  }
+}
+
+/* Wide, when a long question would reach the labels (CupIsland fit()). */
+.cup-stage[data-tight] .cup-q {
+  font-size: 1.125rem;
+}
+.cup-stage[data-tight="2"] .cup-read {
+  display: none;
+}
+
+/* ---- hint and the quiet link to the timeline ------------------------------ */
+.cup-hint {
+  margin: 12px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+}
+.cup-pick {
+  color: var(--ink);
+}
+.cup-pick-t {
+  display: none;
+}
+@media (hover: none) and (pointer: coarse) {
+  .cup-pick-m {
+    display: none;
+  }
+  .cup-pick-t {
+    display: inline;
+  }
+}
+/* Without the script the labels are plain links: no "pick" promise (space kept,
+   so nothing moves when the script arrives). */
+.cup:not(:has([data-js])) .cup-pick {
+  visibility: hidden;
+}
+/* With a pearl up the promise is kept: drop it (the panel has already moved the
+   hint), so the timeline link starts the line instead of floating after a gap. */
+.cup:has([data-sel]) .cup-pick {
+  display: none;
+}
+.cup-map {
+  color: var(--ink);
+}
+.cup-hint--soon {
+  color: var(--muted);
+}
+@media (min-width: 80rem) {
+  .cup-hint {
+    position: absolute;
+    left: calc(var(--lx) * 100cqw / var(--W));
+    top: calc(var(--hy) * 100cqw / var(--W));
+    transform: translateY(-50%);
+    display: block;
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+  .cup-hint > * {
+    display: block;
+  }
+}
+
+/* ---- the header wordmark's O takes the open direction's colour (R10) -------- */
+.bl-header .bl-wordmark__pearl-o {
+  transition: fill var(--dur-base) ease-out;
+}
+:root[data-cup-open] .bl-header .bl-wordmark__pearl-o {
+  fill: var(--cup-o, currentColor);
+}
+
+/* ---- motion (finite; transform and opacity only; off when motion is reduced) */
+.cup-bub {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="reduce"]) .cup-pearl {
+    transition:
+      transform 350ms var(--ease-settle),
+      background-color var(--dur-base) ease-out;
+  }
+  :root:not([data-motion="reduce"]) .cup-ld,
+  :root:not([data-motion="reduce"]) .cup-lab {
+    transition:
+      opacity var(--dur-base) ease-out,
+      color var(--dur-base) ease-out;
+  }
+  :root:not([data-motion="reduce"]) .cup-ext {
+    transition: transform 350ms var(--ease-settle);
+  }
+  :root:not([data-motion="reduce"]) .cup-sfc {
+    transition: transform 240ms var(--ease-out);
+  }
+  :root:not([data-motion="reduce"]) .cup-item.is-up .cup-sfc {
+    transition-delay: 300ms;
+  }
+  /* Hover and focus only lift (R8: hover never opens). Hover only where there
+     is hover: on phones :hover sticks after a tap and kept a sunk pearl lifted. */
+  :root:not([data-motion="reduce"]) .cup-item:not(.is-up):has(.cup-lab:focus-visible) .cup-pearl {
+    transform: translateY(calc(-7 * var(--u)));
+  }
+  @media (hover: hover) {
+    :root:not([data-motion="reduce"]) .cup-item:not(.is-up):hover .cup-pearl {
+      transform: translateY(calc(-7 * var(--u)));
+    }
+  }
+  /* 2–3 bubbles as the pearl rises: one pass, then gone. */
+  :root:not([data-motion="reduce"]) .cup-item.is-up .cup-bub {
+    display: block;
+    position: absolute;
+    left: calc((var(--x) - 9 + var(--k) * 8) * var(--u));
+    top: calc((var(--cy) - var(--r) - 6 - var(--k) * 5) * var(--u));
+    width: max(5px, calc(8 * var(--u)));
+    aspect-ratio: 1;
+    border: 1.25px solid var(--dir);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    animation: cup-bub 700ms ease-out calc(var(--k) * 90ms) forwards;
+  }
+  /* Settle once per session (R11): the pearls sink to the floor, then the words. */
+  :root[data-cup-intro]:not([data-motion="reduce"]) .cup-pearl {
+    animation: cup-settle 540ms var(--ease-settle) calc(var(--i) * 70ms + 60ms) backwards;
+  }
+  :root[data-cup-intro]:not([data-motion="reduce"]) :is(.cup-ld, .cup-lab) {
+    animation: cup-fade 240ms ease-out calc(var(--i) * 55ms + 440ms) backwards;
+  }
+  /* "Pick a pearl" arrives with the labels, not before the pearls exist. */
+  :root[data-cup-intro]:not([data-motion="reduce"]) .cup-hint {
+    animation: cup-fade 240ms ease-out 600ms backwards;
+  }
+}
+@keyframes cup-bub {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(calc((var(--rise) - var(--cy)) * 0.8 * var(--u))) scale(1);
+  }
+}
+@keyframes cup-settle {
+  from {
+    opacity: 0;
+    transform: translateY(calc((var(--rise) - var(--cy)) * var(--u)));
+  }
+  40% {
+    opacity: 1;
+  }
+}
+@keyframes cup-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---- forced colours: the drawing and pearls in system ink ------------------ */
+@media (forced-colors: active) {
+  .cup-pearl {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+  .cup-stage[data-sel] .cup-item:not(.is-up) .cup-pearl {
+    background: GrayText;
+  }
+  .cup-tea {
+    fill: Canvas;
+  }
+  .cup-draw path:not(.cup-tea) {
+    stroke: CanvasText;
+  }
+  .cup-straw {
+    fill: Canvas;
+  }
+  .cup-straw-in {
+    fill: Canvas;
+  }
+  :root[data-cup-open] .bl-header .bl-wordmark__pearl-o {
+    fill: currentColor;
+  }
+}
