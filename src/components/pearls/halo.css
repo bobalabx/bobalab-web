@@ -1,0 +1,53 @@
+/*
+ * The direction pearl's halo (DECISIONS D-15; JUDGE.md "Halo", rebalanced per
+ * swatch so the halos read with equal weight). Shared by the homepage pearls
+ * (pearls.css, .pl-body) and DirectionPearl "hero" on the direction page, so
+ * the pearl-{slug} morph from one to the other reads as one continuous pearl:
+ * the halo is a box-shadow on the named element itself, so it is inside both
+ * view-transition snapshots. Forced colours drop box-shadows by themselves.
+ *
+ * --pl-ha  the halo's strength (alpha of the direction's light tone);
+ * --pl-k   a multiplier (1 at rest; the homepage brightens / dims it).
+ */
+:is(.pl-item, .f1-dp--hero) {
+  --pl-ha: 38%;
+  --pl-k: 1;
+}
+:is(.pl-item, .f1-dp--hero)[data-swatch="butterfly-pea"] {
+  --pl-ha: 46%;
+}
+:is(.pl-item, .f1-dp--hero)[data-swatch="lychee"] {
+  --pl-ha: 36%;
+}
+:is(.pl-item, .f1-dp--hero)[data-swatch="matcha"] {
+  --pl-ha: 40%;
+}
+:is(.pl-item, .f1-dp--hero)[data-swatch="oolong"] {
+  --pl-ha: 32%;
+}
+:is(.pl-item, .f1-dp--hero)[data-swatch="jasmine"] {
+  --pl-ha: 36%;
+}
+:is(.pl-item, .f1-dp--hero)[data-swatch="black-sesame"] {
+  --pl-ha: 42%;
+}
+:is(.pl-item, .f1-dp--hero)[data-swatch="taro"] {
+  --pl-ha: 40%;
+}
+:is(.pl-item, .f1-dp--hero)[data-swatch="thai-tea"] {
+  --pl-ha: 32%;
+}
+@media (prefers-color-scheme: dark) {
+  :is(.pl-item, .f1-dp--hero),
+  :is(.pl-item, .f1-dp--hero)[data-swatch] {
+    --pl-ha: 30%;
+  }
+}
+
+/* The direction header's pearl (96 px; 64 px beside the h1 on narrow screens):
+   the homepage halo at D = 96 px. Outranks direction.css's `box-shadow: none`. */
+.f1-dp.f1-dp--hero:not(.f1-dp--quiet) .f1-pearl {
+  box-shadow:
+    0 0 12px 6px color-mix(in oklab, var(--dir-light) var(--pl-ha), transparent),
+    0 0 48px 15px color-mix(in oklab, var(--dir-light) calc(var(--pl-ha) * 0.55), transparent);
+}

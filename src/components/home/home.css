@@ -1,7 +1,7 @@
 /*
- * Home (DECISIONS D-14; docs/simplify/JUDGE.md §5, R1, R6, R15, R18; prototype
- * docs/simplify/prototypes/c/c.css "hero", "sections"). The cup is styled in
- * src/components/cup/cup.css.
+ * Home (DECISIONS D-14, D-15; docs/simplify/JUDGE.md §5, R1, R6, R15, R18;
+ * prototype docs/simplify/prototypes/c/c.css "hero", "sections"). The pearl
+ * figure is styled in src/components/pearls/pearls.css.
  */
 
 /* ---- first screen ---------------------------------------------------------- */
@@ -67,7 +67,7 @@
 .hm-links a.hm-go:hover {
   text-decoration-thickness: 3px;
 }
-.hm-cup {
+.hm-fig {
   min-width: 0;
 }
 
@@ -81,7 +81,7 @@
     font-size: 1.1875rem;
   }
 }
-/* Tablets: text left, the squat cup right. */
+/* Tablets: text left, the pearls right. */
 @media (min-width: 48rem) {
   .hm-hero {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
@@ -93,7 +93,7 @@
     font-size: var(--t-body);
   }
 }
-/* Desktop: the tall cup beside the text, the hero filling the first screen. */
+/* Desktop: the pearl figure beside the text, the hero filling the first screen. */
 @media (min-width: 80rem) {
   .hm-hero {
     grid-template-columns: minmax(0, 29rem) minmax(0, 1fr);
@@ -116,7 +116,7 @@
     gap: 4px 30px;
     font-size: 1.0625rem;
   }
-  .hm-cup {
+  .hm-fig {
     max-width: 50rem;
   }
 }

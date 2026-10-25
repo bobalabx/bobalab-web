@@ -1,23 +1,25 @@
 /**
- * Home (DECISIONS D-14 "the boba cup", building on D-13; docs/simplify/JUDGE.md
- * §5 and R1–R19; prototype docs/simplify/prototypes/c). In order:
- *   first screen — statement (h1), who, why, two links, and the cup with the live
- *                  directions' pearls (src/components/cup);
+ * Home (DECISIONS D-15, building on D-14 and D-13; docs/simplify/JUDGE.md §5 and
+ * R1–R19). In order:
+ *   first screen — statement (h1), who, why, two links, and the pearl figure
+ *                  with the live directions (src/components/pearls, D-15: the
+ *                  original Fig. 1 pearl cluster, polished);
  *   featured findings (only when content has them, R19);
  *   new papers beside news;
  *   people.
  * The footer is the layout's. The research timeline (Fig. 1) lives on /research/
- * (#map) now; the cup links to it once.
+ * (#map) now; the pearl figure links to it once.
  */
 import type { Metadata } from "next";
 import { ViewTransition } from "react";
 import { getContent } from "@/lib/content/load";
-import { currentPeople, featuredFindings, homeHeroCopy, homePearls } from "@/lib/content/queries";
+import { currentPeople, featuredFindings, homeHeroCopy } from "@/lib/content/queries";
+import { buildPearls } from "@/lib/pearls/model";
 import { organizationLd } from "@/lib/seo/jsonld";
 import { pageMetadata, SITE_TITLE_HOME } from "@/lib/seo/metadata";
 import { PAGE_ENTER_EXIT } from "@/lib/vt";
 import { JsonLd } from "@/components/ui/JsonLd";
-import { BobaCup } from "@/components/cup/BobaCup";
+import { HomePearls } from "@/components/pearls/HomePearls";
 import { HomeHero } from "@/components/home/HomeHero";
 import {
   FindingsSection,
@@ -47,7 +49,7 @@ export default function HomePage() {
     <ViewTransition enter={PAGE_ENTER_EXIT} exit={PAGE_ENTER_EXIT} default="none">
       <div className="bl-container hm">
         <JsonLd data={organizationLd(site)} />
-        <HomeHero copy={copy} cup={<BobaCup pearls={homePearls(c)} />} />
+        <HomeHero copy={copy} figure={<HomePearls model={buildPearls(c.directions)} />} />
         <FindingsSection findings={featuredFindings(c)} />
         <div className="hm-lately">
           <PapersSection

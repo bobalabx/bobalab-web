@@ -7,8 +7,8 @@
  *    one "now" x for every pearl; every dot between the label column and "now";
  *    rings inside the plate; year labels never overlap.
  *  - No horizontal scroll at 390 and 320 px.
- * D-14: `cup-<set>` pages hold the real home page with the boba cup for 0–8 live
- * directions (R17): screenshots of the hero, and checks that no two pearls or
+ * D-15: `pearls-<set>` pages hold the real home page with the pearl figure for
+ * 0–8 live directions: screenshots of the hero, and checks that no two pearls or
  * labels overlap and every label stays inside the viewport.
  * Needs `npx vitest run --config tests/visual/vitest.render.config.ts` first.
  */
@@ -61,20 +61,28 @@ async function layoutProblems(page: Page): Promise<string[]> {
   });
 }
 
-/** The cup: pearls never overlap, label rows never overlap, labels stay on screen. */
-async function cupProblems(page: Page): Promise<string[]> {
+/** The pearls (D-15): no two pearls, orbits or labels overlap; labels stay on screen. */
+async function pearlProblems(page: Page): Promise<string[]> {
   return page.evaluate(() => {
     const out: string[] = [];
     const boxes = (sel: string) =>
       [...document.querySelectorAll(sel)].map((e) => e.getBoundingClientRect());
-    const pearls = boxes(".cup-pearl");
-    for (let i = 1; i < pearls.length; i++)
-      if (pearls[i]!.left < pearls[i - 1]!.right - 0.5) out.push(`pearls ${i - 1}/${i} overlap`);
-    const labs = boxes(".cup-lab-t");
-    for (let i = 1; i < labs.length; i++)
-      if (labs[i]!.top < labs[i - 1]!.bottom - 1) out.push(`labels ${i - 1}/${i} overlap`);
-    for (const l of labs)
+    const hit = (a: DOMRect, b: DOMRect) =>
+      a.left < b.right - 0.5 &&
+      b.left < a.right - 0.5 &&
+      a.top < b.bottom - 0.5 &&
+      b.top < a.bottom - 0.5;
+    for (const sel of [".pl-ring", ".pl-label", ".pl-count"]) {
+      const b = boxes(sel);
+      for (let i = 0; i < b.length; i++)
+        for (let j = i + 1; j < b.length; j++)
+          if (hit(b[i]!, b[j]!)) out.push(`${sel} ${i}/${j} overlap`);
+    }
+    const rings = boxes(".pl-ring");
+    for (const l of boxes(".pl-label")) {
       if (l.right > document.documentElement.clientWidth) out.push("label past the viewport");
+      if (rings.some((r) => hit(r, l))) out.push("a label touches an orbit");
+    }
     return out;
   });
 }
@@ -99,7 +107,7 @@ for (const file of pages) {
       const fig = page.locator(".f1, .hm-soon, .hm-hero").first();
       if (await fig.count())
         await fig.screenshot({ path: path.join(DIR, `${name}-${width}-${scheme}.png`) });
-      expect(await cupProblems(page), `${name} cup at ${width} px`).toEqual([]);
+      expect(await pearlProblems(page), `${name} pearls at ${width} px`).toEqual([]);
       if (scheme === "light") {
         for (const zoom of ["100%", "200%"]) {
           await page.evaluate((z) => (document.documentElement.style.fontSize = z), zoom);
@@ -118,9 +126,9 @@ for (const file of pages) {
       await page.evaluate(() => document.fonts.ready);
       if (width === 390 && (await page.locator(".f1").count()))
         await page.locator(".f1").screenshot({ path: path.join(DIR, `${name}-390.png`) });
-      if (width === 390 && (await page.locator(".cup").count()))
-        await page.locator(".cup").screenshot({ path: path.join(DIR, `${name}-390.png`) });
-      expect(await cupProblems(page), `${name} cup at ${width} px`).toEqual([]);
+      if (width === 390 && (await page.locator(".pl").count()))
+        await page.locator(".pl").screenshot({ path: path.join(DIR, `${name}-390.png`) });
+      expect(await pearlProblems(page), `${name} pearls at ${width} px`).toEqual([]);
       const over = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       );

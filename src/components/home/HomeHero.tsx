@@ -1,5 +1,6 @@
 /**
- * Home first screen (DECISIONS D-14; docs/simplify/JUDGE.md §5, R1, R6, R15):
+ * Home first screen (DECISIONS D-14 text column, D-15 figure; docs/simplify/JUDGE.md
+ * §5, R1, R6, R15):
  *
  *   h1    the statement, in the scoped display size (--t-display; the only text
  *         above 2.25rem), the page's only h1;
@@ -8,8 +9,8 @@
  *   why   home.why, else the mission (homeHeroCopy);
  *   links exactly one primary ("Explore the research") and one secondary ("Read
  *         the papers");
- *   cup   the boba cup (src/components/cup), beside the text from 48rem, below
- *         it on phones (h1 → who → why → links → cup → hint).
+ *   figure the pearl figure (src/components/pearls), beside the text from 48rem,
+ *         below it on phones (h1 → who → why → links → pearls → caption → map link).
  */
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -25,7 +26,7 @@ export function affiliationText(text: string): string {
   return text.replace(/University of California/g, "University of California");
 }
 
-export function HomeHero({ copy, cup }: { copy: HomeHeroCopy; cup: ReactNode }) {
+export function HomeHero({ copy, figure }: { copy: HomeHeroCopy; figure: ReactNode }) {
   return (
     <section className="hm-hero" aria-labelledby="hm-h1">
       <div className="hm-copy">
@@ -55,7 +56,7 @@ export function HomeHero({ copy, cup }: { copy: HomeHeroCopy; cup: ReactNode }) 
           </li>
         </ul>
       </div>
-      <div className="hm-cup">{cup}</div>
+      <div className="hm-fig">{figure}</div>
     </section>
   );
 }

@@ -1,20 +1,24 @@
 /**
- * Home page (DECISIONS D-14 "the boba cup"; docs/simplify/JUDGE.md R1–R18):
- *   - first screen: one h1, the who line, the why line, one primary + one secondary
- *     link, then the cup; every pearl and its label inside the first viewport at
- *     1440×900 and 390×844 (and the hint on phones);
- *   - the cup: real buttons after hydration; Enter / Space / click / tap open one
- *     pearl at a time (it rises, its panel shows, the wordmark O tints); Tab
- *     reaches "Explore"; Esc, picking it again or pressing outside sinks it and
- *     returns focus (Esc never pulls focus back from elsewhere); hover only lifts;
- *     "Explore" morphs the pearl (pearl-{slug});
- *   - phones: a tap on a link below the open panel follows that link (closing
- *     waits for the click), a scroll drag never closes, a pearl's edge is its own;
- *   - motion: settle once per session; nothing moves under reduced motion;
- *   - below the fold: new papers beside news, then people (round consented photos,
- *     first names, the team in one sentence);
- *   - the AI-tell probe, no horizontal scroll at 390/320, no-JS (an <ol> of links),
- *     zero off-origin requests, axe in light, dark, mobile, open and forced colours.
+ * Home page (DECISIONS D-15 "the pearl figure", on the D-14 hero; the original
+ * Fig. 1 behaviours of 4740e10 tests/e2e/figure.spec.ts):
+ *   - first screen: one h1, the who line, the why line, one primary + one
+ *     secondary link, then the pearl figure on a flat tea panel and the quiet
+ *     link to /research/#map; every pearl and its label inside the first
+ *     viewport at 1440×900, 1366×768 and 390×844 (a 2×2 grid on phones);
+ *   - the figure: the original slot templates (2×2 offset cluster for 4); real
+ *     links whose Tab order follows the pearls; hover (after the 80 ms intent)
+ *     or focus lifts the pearl ≤ 3 px / ≤ 1.05, brightens its halo, blooms its
+ *     seeds, dims the other pearls' graphics (never text) and swaps the caption
+ *     to the direction's question and counts; the wordmark O takes the
+ *     direction colour; Esc and leaving reset; Enter opens the direction with
+ *     the pearl-{slug} morph (one element per name) and focus lands on its h1;
+ *   - motion: settle once per session (its own session key), transform and
+ *     opacity only, nothing under reduced motion or the site's switch;
+ *   - below the fold: new papers beside news, then people (round consented
+ *     photos, first names, the team in one sentence with no numbers);
+ *   - the AI-tell probe (no gloss, numerals, pills, boxes, loops), no
+ *     horizontal scroll at 390/320, no-JS links, zero off-origin requests, axe
+ *     in light, dark, mobile and forced colours.
  * Runs against BASE_URL (default: the shared dev server).
  */
 import {
@@ -27,7 +31,8 @@ import {
 import AxeBuilder from "@axe-core/playwright";
 
 const TAGS = ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"];
-const CUP_KEY = "bobalab-cup-intro";
+/** The homepage pearls' settle-once key (privacy.yml; the research map has "bobalab-intro"). */
+const KEY = "bobalab-cup-intro";
 
 /** Next's dev overlay is not part of the site. */
 const axe = (page: Page) => new AxeBuilder({ page }).withTags(TAGS).exclude("nextjs-portal");
@@ -43,10 +48,13 @@ test.beforeEach(async ({ context }) => {
   await context.addInitScript(skipIntro);
 });
 
-/** Home, hydrated (labels are buttons). */
+const items = (page: Page) => page.locator(".pl-item");
+const links = (page: Page) => page.locator(".pl-link");
+
+/** Home, hydrated (the island has wired the figure). */
 async function home(page: Page) {
   await page.goto("/");
-  await page.locator(".cup-stage[data-js]").waitFor();
+  await page.locator(".pl[data-js]").waitFor();
   await page.evaluate(() => document.fonts.ready);
 }
 
@@ -57,9 +65,8 @@ async function ctxPage(browser: Browser, opts: BrowserContextOptions) {
 }
 
 /**
- * The key that moves focus through links in this browser (as in figure.spec):
- * "Tab" (Chromium), "Alt+Tab" (WebKit on macOS), or null (Playwright's WebKit on
- * Windows, whose Tab visits buttons only).
+ * The key that moves focus through links in this browser: "Tab" (Chromium),
+ * "Alt+Tab" (WebKit on macOS), or null (Playwright's WebKit on Windows).
  */
 async function linkTabKey(page: Page): Promise<string | null> {
   const probe = await page.context().newPage();
@@ -78,16 +85,17 @@ async function linkTabKey(page: Page): Promise<string | null> {
   }
 }
 
-const labels = (page: Page) => page.locator(".cup-lab");
-const expanded = (page: Page) =>
-  page.locator(".cup-lab").evaluateAll((els) => els.map((e) => e.getAttribute("aria-expanded")));
-const pearlTop = (page: Page, i: number) =>
-  page
-    .locator(".cup-pearl")
-    .nth(i)
-    .evaluate((e) => e.getBoundingClientRect().top);
+const shownCap = (page: Page) =>
+  page.locator(".pl-cap-l.is-on").evaluate((e) => (e as HTMLElement).dataset.cap);
+const opacity = (page: Page, sel: string) =>
+  page.locator(sel).evaluateAll((els) => els.map((e) => Number(getComputedStyle(e).opacity)));
+/** The halo strength multiplier per pearl (--pl-k: 1 rest, > 1 active, < 1 dimmed). */
+const haloK = (page: Page) =>
+  items(page).evaluateAll((els) =>
+    els.map((e) => Number(getComputedStyle(e).getPropertyValue("--pl-k").trim() || 1)),
+  );
 
-test("first screen: one h1, who, why, two links (one primary), then the cup; sections in order", async ({
+test("first screen: one h1, who, why, two links (one primary), then the pearls; sections in order", async ({
   page,
 }) => {
   await home(page);
@@ -99,37 +107,46 @@ test("first screen: one h1, who, why, two links (one primary), then the cup; sec
   );
   await expect(page.locator(".hm-who")).toContainText(/led by Prof\.\s?Park Sinchaisri\./);
   expect((await page.locator(".hm-why").innerText()).split(/\s+/).length).toBeLessThanOrEqual(40);
-  const links = page.locator(".hm-links a");
-  await expect(links).toHaveCount(2);
-  await expect(links.nth(0)).toHaveText("Explore the research");
-  await expect(links.nth(0)).toHaveAttribute("href", "/research/");
-  await expect(links.nth(1)).toHaveText("Read the papers");
-  await expect(links.nth(1)).toHaveAttribute("href", "/publications/");
-  const weights = await links.evaluateAll((els) =>
+  const hl = page.locator(".hm-links a");
+  await expect(hl).toHaveCount(2);
+  await expect(hl.nth(0)).toHaveText("Explore the research");
+  await expect(hl.nth(0)).toHaveAttribute("href", "/research/");
+  await expect(hl.nth(1)).toHaveText("Read the papers");
+  await expect(hl.nth(1)).toHaveAttribute("href", "/publications/");
+  const weights = await hl.evaluateAll((els) =>
     els.map((e) => Number(getComputedStyle(e).fontWeight)),
   );
-  expect(weights[0]).toBeGreaterThan(weights[1]!); // exactly one visually primary action
+  expect(weights[0]).toBeGreaterThan(weights[1]!);
 
-  // DOM order: hero (copy, cup), then findings?, papers, news, people. No Fig. 1 here.
+  // DOM order: hero (copy, pearls, map link), then findings?, papers, news, people.
   const order = await page.evaluate(() => {
     const all = [...document.querySelectorAll("main *")];
-    return [".hm-h1", ".hm-links", ".cup", "#h-findings", "#h-pubs", "#h-news", "#h-people"].map(
-      (s) => {
-        const el = document.querySelector(s);
-        return el ? all.indexOf(el) : -1;
-      },
-    );
+    return [
+      ".hm-h1",
+      ".hm-links",
+      ".pl",
+      ".pl-more",
+      "#h-findings",
+      "#h-pubs",
+      "#h-news",
+      "#h-people",
+    ].map((s) => {
+      const el = document.querySelector(s);
+      return el ? all.indexOf(el) : -1;
+    });
   });
   const present = order.filter((i) => i >= 0);
   expect(present).toEqual([...present].sort((a, b) => a - b));
-  await expect(page.locator(".f1-plate")).toHaveCount(0);
+  await expect(page.locator(".f1-plate, .cup, .cup-stage")).toHaveCount(0); // no timeline, no cup
+  const more = page.locator(".pl-more a");
+  await expect(more).toHaveAttribute("href", "/research/#map");
+  await expect(more).toHaveText(/^See how the \w+ directions connect$/);
   const h2s = (await page.locator("main h2").allInnerTexts()).map((t) => t.trim());
   expect(h2s.filter((t) => ["New papers", "News", "People"].includes(t))).toEqual([
     "New papers",
     "News",
     "People",
   ]);
-  // The h1 is the largest text, at least 2× the next level (REFS C5).
   const sizes = await page.evaluate(() => {
     const px = (s: string) => parseFloat(getComputedStyle(document.querySelector(s)!).fontSize);
     return { h1: px(".hm-h1"), who: px(".hm-who"), h2: px("main h2") };
@@ -137,65 +154,157 @@ test("first screen: one h1, who, why, two links (one primary), then the cup; sec
   expect(sizes.h1).toBeGreaterThanOrEqual(2 * Math.max(sizes.who, sizes.h2));
 });
 
+test("the panel: flat --tea, no border, radius or crop marks; the default caption is one plain sentence", async ({
+  page,
+}) => {
+  await home(page);
+  const s = await page.locator(".pl").evaluate((el) => {
+    const cs = getComputedStyle(el);
+    const probe = document.createElement("i");
+    probe.style.color = "var(--tea)";
+    document.body.append(probe);
+    const tea = getComputedStyle(probe).color;
+    probe.remove();
+    const after = getComputedStyle(el, "::after");
+    return {
+      bg: cs.backgroundColor,
+      tea,
+      border: parseFloat(cs.borderTopWidth) + parseFloat(cs.borderLeftWidth),
+      radius: cs.borderTopLeftRadius,
+      after: after.content,
+    };
+  });
+  expect(s.bg).toBe(s.tea);
+  expect(s.border).toBe(0);
+  expect(s.radius).toBe("0px");
+  expect(s.after).toBe("none");
+  await expect(page.locator(".pl-cap-l.is-on")).toHaveText(
+    "Each pearl is a research direction; each small dot is one of its papers.",
+  );
+});
+
+test("the original layout: 2×2 offset cluster for four, slot order = DOM order, seeds within ±75°", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await home(page);
+  const n = await items(page).count();
+  test.skip(n !== 4, "the four-direction template");
+  await expect(page.locator(".pl")).toHaveAttribute("data-state", "cluster");
+  const c = await page.locator(".pl-body").evaluateAll((els) =>
+    els.map((e) => {
+      const r = e.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width };
+    }),
+  );
+  // Row 1: 01, 02; row 2 (offset right by half a slot): 03, 04.
+  expect(c[0]!.x).toBeLessThan(c[2]!.x);
+  expect(c[2]!.x).toBeLessThan(c[1]!.x);
+  expect(c[1]!.x).toBeLessThan(c[3]!.x);
+  expect(Math.min(c[2]!.y, c[3]!.y)).toBeGreaterThan(Math.max(c[0]!.y, c[1]!.y));
+  expect(c[0]!.w).toBeGreaterThanOrEqual(80); // D = clamp(5rem, 14cqi, 6.5rem)
+  // Every seed sits above its pearl's equator (the ±75° cap).
+  const below = await items(page).evaluateAll((els) =>
+    els.flatMap((li) => {
+      const b = li.querySelector(".pl-body")!.getBoundingClientRect();
+      const cy = b.top + b.height / 2;
+      return [...li.querySelectorAll(".pl-seed")]
+        .map((s) => s.getBoundingClientRect())
+        .filter((r) => r.top + r.height / 2 > cy - 2);
+    }),
+  );
+  expect(below).toEqual([]);
+  // One seed per paper (≤ 12), and the count is in the label.
+  for (const li of await items(page).all()) {
+    const papers = Number((await li.locator(".pl-count").innerText()).match(/\d+/)![0]);
+    await expect(li.locator(".pl-seed")).toHaveCount(Math.min(12, papers));
+  }
+});
+
 for (const vp of [
   { width: 1440, height: 900 },
-  { width: 390, height: 844 },
   { width: 1366, height: 768 },
+  { width: 390, height: 844 },
 ]) {
   test(`every pearl and its label are in the first viewport at ${vp.width}×${vp.height}`, async ({
     page,
   }) => {
     await page.setViewportSize(vp);
     await home(page);
-    const n = await page.locator(".cup-pearl").count();
+    const n = await items(page).count();
     expect(n).toBeGreaterThan(0);
     const boxes = await page
-      .locator(".cup-pearl, .cup-lab")
+      .locator(".pl-body, .pl-label, .pl-count")
       .evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()));
     for (const b of boxes) {
       expect(b.top).toBeGreaterThanOrEqual(0);
       expect(b.bottom).toBeLessThanOrEqual(vp.height);
       expect(b.right).toBeLessThanOrEqual(vp.width);
     }
-    // The h1 and the links come first; on phones the hint is on the first screen too.
     const linksBottom = await page
       .locator(".hm-links")
       .evaluate((e) => e.getBoundingClientRect().bottom);
-    expect(linksBottom).toBeLessThanOrEqual(vp.height);
     if (vp.width < 500) {
-      const hint = await page.locator(".cup-hint").evaluate((e) => e.getBoundingClientRect());
-      expect(hint.bottom).toBeLessThanOrEqual(vp.height);
-      expect(hint.top).toBeGreaterThan(linksBottom); // order: links, cup, hint
+      // Phones: under the text, a compact 2×2 grid of ~56 px pearls with halos.
+      const first = await page.locator(".pl").evaluate((e) => e.getBoundingClientRect().top);
+      expect(first).toBeGreaterThan(linksBottom);
+      await expect(page.locator(".pl")).toHaveAttribute("data-state", "cluster");
+      const cols = await page
+        .locator(".pl-list")
+        .evaluate((e) => getComputedStyle(e).gridTemplateColumns.split(" ").length);
+      expect(cols).toBe(2);
+      const w = await page
+        .locator(".pl-body")
+        .first()
+        .evaluate((e) => e.getBoundingClientRect().width);
+      expect(w).toBeGreaterThanOrEqual(52);
+      expect(w).toBeLessThanOrEqual(60);
+      const rows = new Set(
+        await page
+          .locator(".pl-body")
+          .evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top))),
+      );
+      expect(rows.size).toBe(Math.ceil(n / 2));
+      // Tap targets: the whole pearl + label + count is one link, ≥ 48 px tall.
+      const h = await links(page)
+        .first()
+        .evaluate((e) => e.getBoundingClientRect().height);
+      expect(h).toBeGreaterThanOrEqual(48);
+    } else {
+      expect(linksBottom).toBeLessThanOrEqual(vp.height);
     }
-    // Pearl size (R4): about 56 px on desktop, about 36 px on phones; hit areas ≥ 48 px.
-    const w = await page
-      .locator(".cup-pearl")
-      .first()
-      .evaluate((e) => e.getBoundingClientRect().width);
-    if (vp.width >= 1440) expect(w).toBeGreaterThanOrEqual(52);
-    if (vp.width < 500) expect(w).toBeGreaterThanOrEqual(30);
-    const hit = await page
-      .locator(".cup-pearl")
-      .first()
-      .evaluate((e) => {
-        const s = getComputedStyle(e, "::after");
-        return Math.min(parseFloat(s.width), parseFloat(s.height));
-      });
-    expect(hit).toBeGreaterThanOrEqual(48);
   });
 }
 
-test("labels look clickable at rest: an underline in the direction colour; the hint is in body colour", async ({
+test("labels look like links: Archivo, ink, an underline in the direction colour; counts are muted", async ({
   page,
 }) => {
   await home(page);
   const t = await page
-    .locator(".cup-lab-t")
+    .locator(".pl-label")
     .first()
     .evaluate((e) => {
       const s = getComputedStyle(e);
-      const dir = getComputedStyle(e.closest(".cup-item")!).getPropertyValue("--dir").trim();
-      return { line: s.textDecorationLine, color: s.textDecorationColor, dir };
+      const li = e.closest(".pl-item")!;
+      const dir = getComputedStyle(li).getPropertyValue("--dir").trim();
+      const count = getComputedStyle(li.querySelector(".pl-count")!);
+      const probe = document.createElement("i");
+      probe.style.color = "var(--muted)";
+      document.body.append(probe);
+      const muted = getComputedStyle(probe).color;
+      probe.style.color = "var(--ink)";
+      const ink = getComputedStyle(probe).color;
+      probe.remove();
+      return {
+        line: s.textDecorationLine,
+        deco: s.textDecorationColor,
+        color: s.color,
+        family: s.fontFamily,
+        dir,
+        count: count.color,
+        muted,
+        ink,
+      };
     });
   expect(t.line).toContain("underline");
   const hex = (rgb: string) =>
@@ -205,336 +314,118 @@ test("labels look clickable at rest: an underline in the direction colour; the h
       .slice(0, 3)
       .map((v) => Number(v).toString(16).padStart(2, "0"))
       .join("");
-  expect(hex(t.color)).toBe(t.dir.toLowerCase());
-  await expect(page.locator(".cup-pick-m")).toHaveText("Pick a pearl");
-  await expect(page.locator(".cup-pick")).toBeVisible();
-  await expect(page.locator(".cup-map")).toHaveAttribute("href", "/research/#map");
-  await expect(page.locator(".cup-map")).toHaveText(/^See how the \w+ directions connect$/);
+  expect(hex(t.deco)).toBe(t.dir.toLowerCase());
+  expect(t.color).toBe(t.ink);
+  expect(t.family).toMatch(/Archivo/i);
+  expect(t.count).toBe(t.muted);
 });
 
-test("keyboard: Enter opens, Tab reaches Explore, Space switches, Esc sinks and returns focus", async ({
+test("keyboard: Tab order follows the pearls; focus swaps the caption and tints the O; Esc resets", async ({
   page,
+  browserName,
 }) => {
-  const tabKey = await linkTabKey(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
-  const lab = labels(page);
-  const n = await lab.count();
-  // Tab from the h1 reaches the first label (after the two hero links).
-  await page.locator("main h1").focus();
-  for (let i = 0; i < 6; i++) {
-    await page.keyboard.press("Tab");
-    if (await lab.first().evaluate((e) => e === document.activeElement)) break;
-  }
-  await expect(lab.first()).toBeFocused();
-  expect(await lab.first().evaluate((e) => e.tagName)).toBe("BUTTON");
-  const rest = await pearlTop(page, 0);
-
-  await page.keyboard.press("Enter");
-  await expect(lab.first()).toHaveAttribute("aria-expanded", "true");
-  const panel = page.locator(`#${await lab.first().getAttribute("aria-controls")}`);
-  await expect(panel).toBeVisible();
-  await expect.poll(() => pearlTop(page, 0)).toBeLessThan(rest - 40); // it rose
-  await expect(page.locator("html")).toHaveAttribute("data-cup-open", /.+/);
-
-  // The panel follows its button in the DOM: the next focusable things after the
-  // button are the panel's links, ending with "Explore".
-  const after = await lab.first().evaluate((b) => {
-    const all = [...document.querySelectorAll<HTMLElement>("a[href], button")].filter(
-      (e) => e.offsetParent !== null,
+  const tabKey = await linkTabKey(page);
+  const n = await items(page).count();
+  await page.locator(".hm-links a").last().focus();
+  const slugs = await items(page).evaluateAll((els) =>
+    els.map((e) => (e as HTMLElement).dataset.slug),
+  );
+  for (let i = 0; i < n; i++) {
+    if (tabKey) await page.keyboard.press(tabKey);
+    else await links(page).nth(i).focus();
+    const focused = await page.evaluate(
+      () => (document.activeElement?.closest(".pl-item") as HTMLElement | null)?.dataset.slug,
     );
-    const i = all.indexOf(b as HTMLElement);
-    return all.slice(i + 1, i + 4).map((e) => Boolean(e.closest(".cup-panel")));
+    expect(focused, `Tab ${i + 1}`).toBe(slugs[i]);
+    expect(await shownCap(page)).toBe(slugs[i]);
+    await expect(items(page).nth(i)).toHaveClass(/is-on/);
+    await expect(page.locator(".pl")).toHaveAttribute("data-active", "");
+    await expect(page.locator("html")).toHaveAttribute("data-pearl-on", slugs[i]!);
+  }
+  // The live caption names the direction's question and its counts.
+  const cap = page.locator(".pl-cap-l.is-on");
+  await expect(cap.locator(".pl-cap-c")).toHaveText(/^\d+ papers?(, \d+ in progress)?$/);
+  // A visible focus ring on the pearl.
+  const ring = await page.evaluate(() => {
+    const b = document.activeElement!.querySelector(".pl-body")!;
+    const s = getComputedStyle(b);
+    return { style: s.outlineStyle, width: parseFloat(s.outlineWidth) };
   });
-  expect(after[0]).toBe(true);
-  // Tab lands inside it and reaches "Explore" (in browsers whose Tab visits links:
-  // Playwright's WebKit on Windows visits buttons only, see linkTabKey).
-  let reached = false;
-  for (let i = 0; tabKey && i < 3 && !reached; i++) {
-    await page.keyboard.press(tabKey);
-    reached = await page.evaluate(() =>
-      /^Explore /.test(document.activeElement?.textContent ?? ""),
-    );
-  }
-  if (!tabKey) await panel.getByRole("link", { name: /^Explore / }).focus();
-  else expect(reached).toBe(true);
-  const explore = page.locator(":focus");
-  await expect(explore).toHaveText(/^Explore /);
-  await expect(explore).toHaveAttribute("href", /^\/research\/[a-z0-9-]+\/$/);
-
-  // Esc from inside the panel sinks the pearl and returns focus to its button.
+  expect(ring.style).toBe("solid");
+  expect(ring.width).toBeGreaterThanOrEqual(2);
   await page.keyboard.press("Escape");
-  await expect(lab.first()).toHaveAttribute("aria-expanded", "false");
-  await expect(lab.first()).toBeFocused();
-  await expect(panel).toBeHidden();
-  await expect(page.locator("html")).not.toHaveAttribute("data-cup-open", /.*/);
-  // Back on the floor (the focused label may still lift it by a hair, as hover does).
-  await expect.poll(() => pearlTop(page, 0)).toBeGreaterThan(rest - 10);
-
-  if (n > 1) {
-    // Space on another label: one pearl at a time.
-    await lab.nth(1).focus();
-    await page.keyboard.press("Space");
-    await expect(lab.nth(1)).toHaveAttribute("aria-expanded", "true");
-    await lab.first().focus();
-    await page.keyboard.press("Space");
-    expect((await expanded(page)).filter((v) => v === "true")).toHaveLength(1);
-    await expect(lab.first()).toHaveAttribute("aria-expanded", "true");
-    // Picking it again sinks it.
-    await page.keyboard.press("Enter");
-    expect((await expanded(page)).every((v) => v === "false")).toBe(true);
-  }
+  expect(await shownCap(page)).toBe("legend");
+  await expect(page.locator(".pl")).not.toHaveAttribute("data-active", /.*/);
+  await expect(page.locator("html")).not.toHaveAttribute("data-pearl-on", /.*/);
+  test.info().annotations.push({ type: "browser", description: browserName });
 });
 
-test("the open panel never covers a label or leaves the screen (1200–1920 wide, phones)", async ({
-  page,
-}) => {
-  for (const [width, height] of [
-    [1920, 1080],
-    [1440, 900],
-    [1366, 768],
-    [1280, 800],
-    [1200, 800],
-    [1024, 768],
-    [390, 844],
-  ] as const) {
-    await page.setViewportSize({ width, height });
-    await home(page);
-    const n = await labels(page).count();
-    for (let i = 0; i < n; i++) {
-      await labels(page).nth(i).click();
-      await page.waitForTimeout(50);
-      const r = await page.evaluate((k) => {
-        const panel = document.querySelectorAll(".cup-panel")[k]!.getBoundingClientRect();
-        const hits = [...document.querySelectorAll(".cup-lab-t, .cup-hint > *")]
-          .map((e) => e.getBoundingClientRect())
-          .filter(
-            (b) =>
-              b.height > 0 &&
-              b.left < panel.right &&
-              b.right > panel.left &&
-              b.top < panel.bottom &&
-              b.bottom > panel.top,
-          ).length;
-        return { hits, right: panel.right };
-      }, i);
-      expect(r.hits, `pearl ${i} at ${width}`).toBe(0);
-      expect(r.right, `pearl ${i} at ${width}`).toBeLessThanOrEqual(width);
-    }
-  }
-});
-
-test("click: the pearl itself opens it; a click outside the cup closes it; hover only lifts", async ({
+test("hover: the pearl lifts ≤ 3 px and ≤ 1.05, its halo brightens and seeds bloom; others dim graphics only; leaving resets", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
-  const rest = await pearlTop(page, 1);
-  await page.locator(".cup-lab").nth(1).hover();
-  await expect.poll(() => pearlTop(page, 1)).toBeLessThan(rest - 2); // lift
-  expect((await expanded(page)).every((v) => v === "false")).toBe(true); // hover never opens
-  await page.locator(".cup-pearl").nth(1).click();
-  await expect(page.locator(".cup-lab").nth(1)).toHaveAttribute("aria-expanded", "true");
-  await page.locator(".hm-h1").click();
-  await expect(page.locator(".cup-lab").nth(1)).toHaveAttribute("aria-expanded", "false");
-});
-
-test("wordmark: the header O takes the open direction's colour and returns to ink", async ({
-  page,
-}) => {
-  await home(page);
+  const n = await items(page).count();
+  const li = items(page).nth(1);
+  const slug = (await li.getAttribute("data-slug"))!;
+  const restBody = await li.locator(".pl-body").evaluate((e) => e.getBoundingClientRect().toJSON());
+  const restSeed = await li.locator(".pl-ring").evaluate((e) => e.getBoundingClientRect().width);
+  await li.locator(".pl-body").hover();
+  await expect(li).toHaveClass(/is-on/);
+  expect(await shownCap(page)).toBe(slug);
+  await page.waitForTimeout(500); // transitions settle
+  const t = await li
+    .locator(".pl-g")
+    .evaluate((e) => new DOMMatrixReadOnly(getComputedStyle(e).transform));
+  expect(t.f).toBeGreaterThanOrEqual(-3);
+  expect(t.f).toBeLessThan(0);
+  expect(t.a).toBeLessThanOrEqual(1.05);
+  expect(t.a).toBeGreaterThan(1);
+  const body = await li.locator(".pl-body").evaluate((e) => e.getBoundingClientRect().toJSON());
+  expect(restBody.top - body.top).toBeLessThanOrEqual(3 + restBody.height * 0.05);
+  const ring = await li.locator(".pl-ring").evaluate((e) => e.getBoundingClientRect().width);
+  expect(ring / restSeed).toBeGreaterThan(1.12); // ~10 % bloom on top of the 1.05 lift
+  const k = await haloK(page);
+  expect(k[1]).toBeGreaterThan(1);
+  for (let i = 0; i < n; i++) if (i !== 1) expect(k[i]).toBeLessThan(1);
+  // Other pearls: orbit and seeds dim; bodies, labels and counts never do.
+  const seeds = await opacity(page, ".pl-seeds");
+  const rings = await opacity(page, ".pl-ring");
+  for (let i = 0; i < n; i++) {
+    if (i === 1) continue;
+    expect(seeds[i]).toBeLessThan(0.6);
+    expect(rings[i]).toBeLessThan(0.6);
+  }
+  for (const sel of [".pl-body", ".pl-label", ".pl-count", ".pl-link"])
+    expect(
+      (await opacity(page, sel)).every((o) => o === 1),
+      sel,
+    ).toBe(true);
+  // The wordmark O takes the direction colour.
   const fill = () =>
     page.locator(".bl-header .bl-wordmark__pearl-o").evaluate((e) => getComputedStyle(e).fill);
-  const ink = await fill();
-  await labels(page).first().click();
-  const dir = await page
-    .locator(".cup-item")
-    .first()
-    .evaluate((e) => getComputedStyle(e).getPropertyValue("--dir").trim().toLowerCase());
-  const hex = async () =>
-    "#" +
-    (await fill())
-      .match(/\d+/g)!
-      .slice(0, 3)
-      .map((v) => Number(v).toString(16).padStart(2, "0"))
-      .join("");
-  await expect.poll(hex).toBe(dir);
-  await labels(page).first().click();
-  await expect.poll(fill).toBe(ink);
+  const dir = await li.evaluate((e) => {
+    const probe = document.createElement("i");
+    probe.style.color = getComputedStyle(e).getPropertyValue("--dir");
+    document.body.append(probe);
+    const c = getComputedStyle(probe).color;
+    probe.remove();
+    return c;
+  });
+  await expect.poll(fill).toBe(dir);
+  // Leave: back to the sentence after ~300 ms.
+  await page.mouse.move(2, 2);
+  await expect.poll(() => shownCap(page)).toBe("legend");
+  await expect(page.locator("html")).not.toHaveAttribute("data-pearl-on", /.*/);
+  await expect.poll(fill).not.toBe(dir);
 });
 
-test("touch: a tap on a pearl opens it below the cup, the hint says Tap, a tap outside closes", async ({
-  browser,
-}) => {
-  const { ctx, page } = await ctxPage(browser, {
-    viewport: { width: 390, height: 844 },
-    hasTouch: true,
-    isMobile: true,
-  });
-  await home(page);
-  await expect(page.locator(".cup-pick-t")).toBeVisible();
-  await expect(page.locator(".cup-pick-m")).toBeHidden();
-  await page.locator(".cup-pearl").nth(2).tap();
-  const lab = page.locator(".cup-lab").nth(2);
-  await expect(lab).toHaveAttribute("aria-expanded", "true");
-  const panel = page.locator(`#${await lab.getAttribute("aria-controls")}`);
-  await expect(panel).toBeVisible();
-  const [cupBottom, panelTop] = await Promise.all([
-    page.locator(".cup-stage").evaluate((e) => e.getBoundingClientRect().bottom),
-    panel.evaluate((e) => e.getBoundingClientRect().top),
-  ]);
-  expect(panelTop).toBeGreaterThanOrEqual(cupBottom); // below the cup
-  // The hint flows below the panel (room is reserved, nothing overlaps).
-  const hintTop = await page.locator(".cup-hint").evaluate((e) => e.getBoundingClientRect().top);
-  const panelBottom = await panel.evaluate((e) => e.getBoundingClientRect().bottom);
-  expect(hintTop).toBeGreaterThanOrEqual(panelBottom - 1);
-  await page.locator(".hm-h1").tap();
-  await expect(lab).toHaveAttribute("aria-expanded", "false");
-  await ctx.close();
-});
-
-test.describe("phones: pressing around an open pearl", () => {
-  const phone = { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true };
-
-  // Closing gives back the room reserved for the panel. If that happened on the
-  // press (before the click landed), everything below the cup moved up under the
-  // finger: the timeline link opened the first paper, a paper link did nothing.
-  for (const [what, sel] of [
-    ["the timeline link", ".cup-map"],
-    ["a paper link", ".hm-papers a"],
-  ] as const) {
-    for (const how of ["tap", "click"] as const) {
-      test(`a ${how} on ${what} below the open panel follows that link`, async ({ browser }) => {
-        const { ctx, page } = await ctxPage(
-          browser,
-          how === "tap" ? phone : { viewport: phone.viewport },
-        );
-        await home(page);
-        await labels(page).first().click();
-        await expect(labels(page).first()).toHaveAttribute("aria-expanded", "true");
-        const link = page.locator(sel).first();
-        await link.scrollIntoViewIfNeeded();
-        const href = (await link.getAttribute("href"))!;
-        const b = (await link.boundingBox())!;
-        const [x, y] = [b.x + Math.min(20, b.width / 2), b.y + b.height / 2];
-        if (how === "tap") await page.touchscreen.tap(x, y);
-        else await page.mouse.click(x, y);
-        await page.waitForURL((u) => u.pathname + u.hash === href);
-        await ctx.close();
-      });
-    }
-  }
-
-  test("a tap on a pearl's edge opens that pearl, not its neighbour (hit areas under the discs)", async ({
-    browser,
-  }) => {
-    const { ctx, page } = await ctxPage(browser, phone);
-    await home(page);
-    const n = await page.locator(".cup-pearl").count();
-    test.skip(n < 2, "needs two pearls side by side");
-    // Every point of every visible disc belongs to its own pearl.
-    const owners = await page.evaluate(() => {
-      const items = [...document.querySelectorAll(".cup-item")];
-      return [...document.querySelectorAll(".cup-pearl")].map((p) => {
-        const b = p.getBoundingClientRect();
-        const cy = b.top + b.height / 2;
-        return [b.left + 2, b.left + 5, b.right - 5, b.right - 2].map((x) =>
-          items.indexOf(document.elementFromPoint(x, cy)?.closest(".cup-item") as Element),
-        );
-      });
-    });
-    owners.forEach((o, i) => expect(o, `pearl ${i}`).toEqual([i, i, i, i]));
-    // And the padded area still works where no disc is (≥ 48 px, D-14).
-    const b = (await page.locator(".cup-pearl").first().boundingBox())!;
-    await page.touchscreen.tap(b.x + b.width - 3, b.y + b.height / 2);
-    await expect(labels(page).first()).toHaveAttribute("aria-expanded", "true");
-    await ctx.close();
-  });
-
-  test("a touch drag that scrolls the page leaves the pearl up; a plain tap outside sinks it", async ({
-    browser,
-    browserName,
-  }) => {
-    test.skip(browserName !== "chromium", "raw touch input through CDP");
-    const { ctx, page } = await ctxPage(browser, phone);
-    await home(page);
-    await labels(page).first().tap();
-    await expect(labels(page).first()).toHaveAttribute("aria-expanded", "true");
-    const cdp = await ctx.newCDPSession(page);
-    const drag = async (x: number, y: number, dy: number) => {
-      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
-      for (let i = 1; i <= 12; i++) {
-        await cdp.send("Input.dispatchTouchEvent", {
-          type: "touchMove",
-          touchPoints: [{ x, y: y + (dy * i) / 12 }],
-        });
-        await page.waitForTimeout(16);
-      }
-      await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
-    };
-    const y0 = await page.evaluate(() => scrollY);
-    await drag(8, 600, -250); // from the side gutter, outside the cup
-    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(y0 + 100);
-    await page.waitForTimeout(600); // longer than the no-click fallback
-    await expect(labels(page).first()).toHaveAttribute("aria-expanded", "true");
-    await drag(6, 300, 0); // a tap in the side gutter, outside the cup
-    await expect(labels(page).first()).toHaveAttribute("aria-expanded", "false");
-    await ctx.close();
-  });
-
-  test("a pearl sunk by a second tap rests on the floor (no hover lift stuck after a tap)", async ({
-    browser,
-  }) => {
-    const { ctx, page } = await ctxPage(browser, phone);
-    await home(page);
-    // In page coordinates: opening may scroll the panel into view.
-    const top = async () => (await pearlTop(page, 1)) + (await page.evaluate(() => scrollY));
-    const rest = await top();
-    await labels(page).nth(1).tap();
-    await expect.poll(top).toBeLessThan(rest - 40);
-    await labels(page).nth(1).tap();
-    await expect(labels(page).nth(1)).toHaveAttribute("aria-expanded", "false");
-    await expect.poll(top).toBeCloseTo(rest, 0);
-    await ctx.close();
-  });
-
-  test("with a pearl up, the hint drops its promise and the timeline link starts the line", async ({
-    browser,
-  }) => {
-    for (const viewport of [phone.viewport, { width: 1024, height: 768 }]) {
-      const { ctx, page } = await ctxPage(browser, { viewport });
-      await home(page);
-      await labels(page).first().click();
-      await expect(page.locator(".cup-pick")).toBeHidden();
-      const [hint, link] = await Promise.all([
-        page.locator(".cup-hint").evaluate((e) => e.getBoundingClientRect().left),
-        page.locator(".cup-map").evaluate((e) => e.getBoundingClientRect().left),
-      ]);
-      expect(Math.abs(link - hint), `${viewport.width}`).toBeLessThanOrEqual(1);
-      await ctx.close();
-    }
-  });
-});
-
-test("Esc with focus outside the cup sinks the pearl but leaves focus (and the scroll) where it was", async ({
-  page,
-}) => {
-  await home(page);
-  await labels(page).nth(1).click();
-  await expect(labels(page).nth(1)).toHaveAttribute("aria-expanded", "true");
-  const far = page.locator("footer a").last();
-  await far.focus();
-  const y = await page.evaluate(() => scrollY);
-  await page.keyboard.press("Escape");
-  await expect(labels(page).nth(1)).toHaveAttribute("aria-expanded", "false");
-  await expect(far).toBeFocused();
-  expect(await page.evaluate(() => scrollY)).toBe(y);
-});
-
-test("Explore morphs the risen pearl into the direction page (pearl-{slug}, one name per slug)", async ({
+test("Enter opens the direction with the pearl morph (one pearl-{slug} per name); focus lands on its h1", async ({
   page,
   browserName,
 }) => {
-  test.skip(browserName !== "chromium", "view-transition pseudo-elements are read in Chromium");
   await page.context().addInitScript(() => {
     const w = window as unknown as { __vt: string[] | null };
     w.__vt = null;
@@ -554,23 +445,54 @@ test("Explore morphs the risen pearl into the direction page (pearl-{slug}, one 
       return t;
     }) as typeof document.startViewTransition;
   });
+  const errors: string[] = [];
+  page.on("console", (m) => {
+    if (m.type() === "error") errors.push(m.text());
+  });
   await home(page);
-  const li = page.locator(".cup-item").first();
-  const href = (await li.locator(".cup-panel a[href^='/research/']").getAttribute("href"))!;
+  const li = items(page).first();
+  const href = (await li.locator("a").getAttribute("href"))!;
   const slug = href.split("/")[2]!;
+  // One pearl per direction on the page (React names each pearl-{slug} only while
+  // a transition is captured, so a duplicate slug would be a duplicate name).
+  const slugs = await items(page).evaluateAll((els) =>
+    els.map((e) => (e as HTMLElement).dataset.slug),
+  );
+  expect(new Set(slugs).size).toBe(slugs.length);
+  await expect(page.locator(".pl-body")).toHaveCount(slugs.length);
   await page.evaluate(async (u) => void (await fetch(u)), href);
   await page.waitForTimeout(1200);
-  await li.locator(".cup-lab").click();
-  // Only the risen pearl is named; at rest no cup pearl carries a name.
-  await li.locator(".cup-panel a[href^='/research/']").click();
+  await li.locator("a").focus();
+  await page.keyboard.press("Enter");
   await page.waitForURL(`**${href}`);
-  await expect(page.locator("h1")).toBeVisible();
-  await expect
-    .poll(() => page.evaluate(() => (window as unknown as { __vt: string[] | null }).__vt))
-    .not.toBeNull();
-  const groups = (await page.evaluate(() => (window as unknown as { __vt: string[] }).__vt))!;
-  expect(groups).toContain(`pearl-${slug}`);
-  expect(groups.filter((g) => g.startsWith("pearl-"))).toEqual([`pearl-${slug}`]);
+  await expect(page.locator("main h1")).toBeFocused({ timeout: 5000 });
+  if (browserName === "chromium") {
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __vt: string[] | null }).__vt))
+      .not.toBeNull();
+    const groups = (await page.evaluate(() => (window as unknown as { __vt: string[] }).__vt))!;
+    expect(groups.filter((g) => g.startsWith("pearl-"))).toEqual([`pearl-${slug}`]);
+  }
+  // The direction header pearl carries the same halo, so the morph reads continuous.
+  const shadow = await page
+    .locator(".f1-dp--hero .f1-pearl")
+    .first()
+    .evaluate((e) => getComputedStyle(e).boxShadow);
+  expect(shadow).not.toBe("none");
+  expect(errors.filter((e) => /view-transition|duplicate|same name/i.test(e))).toEqual([]);
+});
+
+test("tap on a phone navigates to the direction", async ({ browser }) => {
+  const { ctx, page } = await ctxPage(browser, {
+    viewport: { width: 390, height: 844 },
+    hasTouch: true,
+    isMobile: true,
+  });
+  await home(page);
+  const href = (await links(page).nth(2).getAttribute("href"))!;
+  await links(page).nth(2).locator(".pl-label").tap();
+  await page.waitForURL(`**${href}`);
+  await ctx.close();
 });
 
 test.describe("motion", () => {
@@ -580,53 +502,67 @@ test.describe("motion", () => {
     const ctx = await browser.newContext({ reducedMotion: "no-preference" });
     const page = await ctx.newPage(); // no init script: a fresh session
     await page.goto("/research/");
-    await page.evaluate((k) => sessionStorage.removeItem(k), CUP_KEY);
+    await page.evaluate((k) => sessionStorage.removeItem(k), KEY);
     await page.locator(".bl-header__brand").click();
     await page.waitForURL((u) => u.pathname === "/");
-    await expect(page.locator("html")).toHaveAttribute("data-cup-intro", "");
+    await expect(page.locator(".pl")).toHaveAttribute("data-intro", "");
     const anim = await page
-      .locator(".cup-pearl")
+      .locator(".pl-g")
       .first()
       .evaluate((e) => e.getAnimations().map((a) => (a as CSSAnimation).animationName));
-    expect(anim).toContain("cup-settle");
-    const longest = await page.evaluate(() =>
-      Math.max(
-        ...document
-          .getAnimations()
-          .filter((a) => /^cup-/.test((a as CSSAnimation).animationName ?? ""))
-          .map((a) => {
-            const t = a.effect!.getComputedTiming();
-            return Number(t.delay ?? 0) + Number(t.duration ?? 0);
-          }),
-      ),
+    expect(anim).toContain("pl-settle");
+    // Transform and opacity only, finite, all done within ~1.2 s.
+    const props = await page.evaluate(() =>
+      document
+        .getAnimations()
+        .filter((a) => /^pl-/.test((a as CSSAnimation).animationName ?? ""))
+        .map((a) => {
+          const t = a.effect!.getComputedTiming();
+          const kf = (a.effect as KeyframeEffect).getKeyframes();
+          return {
+            end: Number(t.delay ?? 0) + Number(t.duration ?? 0),
+            iterations: t.iterations,
+            props: [...new Set(kf.flatMap((f) => Object.keys(f)))].filter(
+              (p) => !["offset", "easing", "composite", "computedOffset"].includes(p),
+            ),
+          };
+        }),
     );
-    expect(longest).toBeLessThanOrEqual(900); // R11: at most 0.9 s
-    await expect(page.locator("html")).not.toHaveAttribute("data-cup-intro", /.*/, {
-      timeout: 3000,
-    });
+    expect(props.length).toBeGreaterThan(0);
+    for (const p of props) {
+      expect(p.iterations).toBe(1);
+      expect(p.end).toBeLessThanOrEqual(1300);
+      for (const k of p.props) expect(["transform", "translate", "opacity"]).toContain(k);
+    }
+    expect(await page.evaluate((k) => sessionStorage.getItem(k), KEY)).toBe("1");
+    expect(await page.evaluate(() => sessionStorage.getItem("bobalab-intro"))).toBeNull();
+    await expect(page.locator(".pl")).not.toHaveAttribute("data-intro", /.*/, { timeout: 3000 });
     // Second home view in the same session: no intro.
     await page.goto("/research/");
     await page.locator(".bl-header__brand").click();
     await page.waitForURL((u) => u.pathname === "/");
-    await page.locator(".cup-stage[data-js]").waitFor();
-    expect(await page.evaluate(() => document.documentElement.hasAttribute("data-cup-intro"))).toBe(
-      false,
+    await page.locator(".pl-item").first().waitFor();
+    await page.waitForTimeout(200);
+    expect(await page.locator(".pl").getAttribute("data-intro")).toBeNull();
+    const again = await page.evaluate(
+      () =>
+        document.getAnimations().filter((a) => /^pl-/.test((a as CSSAnimation).animationName ?? ""))
+          .length,
     );
+    expect(again).toBe(0);
     await ctx.close();
   });
 
-  test("a full page load: the intro, if any, starts before the pearls are painted (no jump)", async ({
+  test("a full page load: the intro starts before the pearls are painted (no jump)", async ({
     browser,
   }) => {
-    // The pre-paint script may set data-cup-intro (change request home-1); the
-    // island must never set it after the pearls are on screen.
     const ctx = await browser.newContext({ reducedMotion: "no-preference" });
     await ctx.addInitScript(() => {
-      const w = window as unknown as { __cupIntro: string[] };
-      w.__cupIntro = [];
+      const w = window as unknown as { __intro: string[] };
+      w.__intro = [];
       new MutationObserver(() => {
         if (document.documentElement.hasAttribute("data-cup-intro"))
-          w.__cupIntro.push(document.querySelector(".cup-pearl") ? "after-paint" : "pre-paint");
+          w.__intro.push(document.querySelector(".pl-body") ? "after-paint" : "pre-paint");
       }).observe(document.documentElement, {
         attributes: true,
         attributeFilter: ["data-cup-intro"],
@@ -634,17 +570,15 @@ test.describe("motion", () => {
     });
     const page = await ctx.newPage();
     await page.goto("/");
-    await page.locator(".cup-stage[data-js]").waitFor();
-    await page.waitForTimeout(200);
-    const when = await page.evaluate(
-      () => (window as unknown as { __cupIntro: string[] }).__cupIntro,
-    );
+    await page.locator(".pl-item").first().waitFor();
+    await page.waitForTimeout(300);
+    const when = await page.evaluate(() => (window as unknown as { __intro: string[] }).__intro);
     expect(when.filter((w) => w === "after-paint")).toEqual([]);
-    expect(await page.evaluate((k) => sessionStorage.getItem(k), CUP_KEY)).toBe("1");
+    expect(await page.evaluate((k) => sessionStorage.getItem(k), KEY)).toBe("1");
     await ctx.close();
   });
 
-  test("reduced motion: no intro, no rise animation, no bubbles; 0 running animations", async ({
+  test("reduced motion: no intro, no lift or bloom transition; 0 running animations", async ({
     browser,
   }) => {
     const ctx = await browser.newContext({ reducedMotion: "reduce" });
@@ -652,8 +586,7 @@ test.describe("motion", () => {
     await page.goto("/research/");
     await page.locator(".bl-header__brand").click();
     await page.waitForURL((u) => u.pathname === "/");
-    await page.locator(".cup-stage[data-js]").waitFor();
-    // The page swap's ≤ 120 ms cross-fade (motion.css) is not the cup's; wait it out.
+    await page.locator(".pl-item").first().waitFor();
     const running = () =>
       page.evaluate(
         () =>
@@ -667,23 +600,30 @@ test.describe("motion", () => {
                 ),
             ).length,
       );
+    await page.waitForTimeout(200); // the page swap's ≤ 120 ms cross-fade is not the figure's
     expect(await running()).toBe(0);
-    await page.locator(".cup-lab").first().click();
+    await items(page).nth(1).locator(".pl-body").hover();
+    await expect(items(page).nth(1)).toHaveClass(/is-on/);
     expect(await running()).toBe(0);
+    const t = await items(page)
+      .nth(1)
+      .locator(".pl-g")
+      .evaluate((e) => getComputedStyle(e).transform);
+    expect(t).toBe("none"); // no lift
     const moving = await page.evaluate(() =>
-      [...document.querySelectorAll(".cup-pearl, .cup-ext, .cup-sfc")].map(
+      [...document.querySelectorAll(".pl-g, .pl-ring, .pl-seed, .pl-body, .pl-cap-l")].map(
         (e) => getComputedStyle(e).transitionDuration,
       ),
     );
     expect(moving.every((d) => d.split(",").every((x) => parseFloat(x) === 0))).toBe(true);
-    await expect(page.locator(".cup-bub").first()).toBeHidden();
     await ctx.close();
   });
 
-  test("the site's Reduce motion switch also stops the cup", async ({ page }) => {
+  test("the site's Reduce motion switch also stops the pearls", async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem("bobalab-motion", "reduce"));
     await home(page);
-    await page.locator(".cup-lab").first().click();
+    await items(page).first().locator(".pl-body").hover();
+    await expect(items(page).first()).toHaveClass(/is-on/);
     const running = await page.evaluate(
       () => document.getAnimations().filter((a) => a.playState === "running").length,
     );
@@ -691,19 +631,24 @@ test.describe("motion", () => {
   });
 });
 
-test("people: round consented photos with first names, the team in one sentence, no initials", async ({
+test("people: round consented photos with first names, the team in one sentence with no numbers", async ({
   page,
 }) => {
   await home(page);
   const sec = page.locator('section[aria-labelledby="h-people"]');
   if (!(await sec.count())) test.skip(true, "no people");
-  await expect(sec.locator(".hm-team")).toContainText(/leads the lab with .+\./);
+  const team = sec.locator(".hm-team");
+  await expect(team).toContainText(/leads the lab with .+\./);
+  // D-15: no count sentence ("one master's student and 23 undergraduate RAs").
+  expect(await team.innerText()).not.toMatch(/\d|\b(one|two|three|four|five|six|seven|eight)\b/i);
+  // D-15: no people count anywhere in the section, the foot link included.
+  expect(await sec.innerText()).not.toMatch(/\d+\s+(members?|alumni|former|students?|RAs?)\b/i);
   const faces = sec.locator(".hm-face");
   const n = await faces.count();
   expect(n).toBeGreaterThan(0);
   for (const f of (await faces.all()).slice(0, 6)) {
     const img = f.locator("img");
-    await expect(img).toHaveAttribute("alt", /\S+ \S+/); // the full name
+    await expect(img).toHaveAttribute("alt", /\S+ \S+/);
     const r = await img.evaluate((e) => {
       const b = e.getBoundingClientRect();
       return { w: b.width, h: b.height, rad: getComputedStyle(e).borderTopLeftRadius };
@@ -715,7 +660,7 @@ test("people: round consented photos with first names, the team in one sentence,
     expect(alt.replace(/["“”()]/g, " ")).toContain(first.replace(/ [A-Z]\.$/, ""));
   }
   await expect(sec.locator(".hm-ini")).toHaveCount(0);
-  await expect(sec.getByRole("link", { name: /^People: \d+ members?/ })).toHaveAttribute(
+  await expect(sec.getByRole("link", { name: /^People: current members/ })).toHaveAttribute(
     "href",
     "/people/",
   );
@@ -744,35 +689,39 @@ test("new papers beside news: 3 ruled rows and 4 dated one-liners, each with its
     await expect(r.locator(".hm-paper-meta")).toHaveCount(1);
   }
   const [a, b] = await Promise.all([papers.boundingBox(), news.boundingBox()]);
-  expect(Math.abs(a!.y - b!.y)).toBeLessThanOrEqual(2); // side by side
+  expect(Math.abs(a!.y - b!.y)).toBeLessThanOrEqual(2);
   await expect(papers.locator(".hm-more a")).toHaveText(
     /^Publications: \d+ papers?(, \d+ in progress)?$/,
   );
   await expect(news.locator(".hm-more a")).toHaveText(/^News: \d+ items?( since \d{4})?$/);
 });
 
-test("AI-tell probe (DIRECTION §5.0): no pills, boxes, tracked caps, gradients, shadows, arrows or loops", async ({
+test("AI-tell probe: no gloss, numerals, pills, boxes, tracked caps, arrows or loops", async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
-  for (const open of [false, true]) {
-    if (open) {
-      await page.locator(".cup-lab").first().click();
-      await page.waitForTimeout(400);
+  for (const active of [false, true]) {
+    if (active) {
+      await items(page).nth(2).locator(".pl-body").hover();
+      await page.waitForTimeout(500);
     }
     const r = await page.evaluate(() => {
-      const els = [...document.querySelectorAll<HTMLElement>("main *")];
       const out = {
         pills: 0,
         boxes: 0,
         caps: 0,
         gradients: 0,
         shadows: 0,
+        gloss: 0,
+        numerals: 0,
         arrows: 0,
         loops: 0,
         mono: 0,
       };
-      for (const el of els) {
+      // The pearl body (matte shading + its halo, D-15) is the one exempt graphic.
+      const pearl = (el: Element) => el.classList.contains("pl-body");
+      for (const el of document.querySelectorAll<HTMLElement>("main *")) {
         const cs = getComputedStyle(el);
         const b = el.getBoundingClientRect();
         const rad = parseFloat(cs.borderTopLeftRadius) || 0;
@@ -789,10 +738,18 @@ test("AI-tell probe (DIRECTION §5.0): no pills, boxes, tracked caps, gradients,
           (boxed || filled)
         )
           out.pills++;
-        if (rad > 2 && b.width > 60 && b.height > 60 && (boxed || filled)) out.boxes++;
+        // Discs (pearls, orbits) are exempt, as in the kit probe; boxes are not.
+        const r0 = cs.borderTopLeftRadius;
+        const px = r0.endsWith("%") ? (parseFloat(r0) / 100) * Math.min(b.width, b.height) : rad;
+        const disc = px >= Math.min(b.width, b.height) / 2 - 1;
+        if (rad > 2 && b.width > 60 && b.height > 60 && (boxed || filled) && !disc) out.boxes++;
         if (cs.textTransform === "uppercase" && parseFloat(cs.letterSpacing) > 0.5) out.caps++;
-        if (/gradient/.test(cs.backgroundImage)) out.gradients++;
-        if (cs.boxShadow !== "none") out.shadows++;
+        if (/gradient/.test(cs.backgroundImage) && !pearl(el)) out.gradients++;
+        if (cs.boxShadow !== "none" && !pearl(el)) out.shadows++;
+        for (const pe of ["::before", "::after"]) {
+          const p = getComputedStyle(el, pe);
+          if (el.closest(".pl-g") && p.content !== "none" && p.content !== "normal") out.gloss++;
+        }
         if (
           /monospace|Mono|Consolas/i.test(cs.fontFamily.split(",")[0]!) &&
           el.childElementCount === 0 &&
@@ -800,35 +757,43 @@ test("AI-tell probe (DIRECTION §5.0): no pills, boxes, tracked caps, gradients,
         )
           out.mono++;
       }
+      // The body shading has no light specular stop (a gloss would be near-white).
+      for (const b of document.querySelectorAll(".pl-body")) {
+        const img = getComputedStyle(b).backgroundImage;
+        const stops = [...img.matchAll(/rgb\((\d+), (\d+), (\d+)\)/g)].map(
+          (m) => (Number(m[1]) + Number(m[2]) + Number(m[3])) / 3,
+        );
+        if (stops.some((v) => v > 140)) out.gloss++;
+      }
+      out.numerals = [...document.querySelectorAll(".pl-g")].filter((g) =>
+        /\d/.test(g.textContent ?? ""),
+      ).length;
       const text = document.querySelector("main")!.textContent ?? "";
       out.arrows = (text.match(/[→←↗↘➔⟶]/g) ?? []).length;
       out.loops = document
         .getAnimations()
         .filter((a) => a.effect?.getComputedTiming().iterations === Infinity).length;
-      // The cup drawing: flat fills only (no gradient, pattern or filter).
-      if (
-        document.querySelector(
-          ".cup-draw linearGradient, .cup-draw radialGradient, .cup-draw filter, .cup-draw pattern",
-        )
-      )
-        out.gradients++;
       return out;
     });
-    expect(r, open ? "with a pearl open" : "at rest").toEqual({
+    expect(r, active ? "with a pearl active" : "at rest").toEqual({
       pills: 0,
       boxes: 0,
       caps: 0,
       gradients: 0,
       shadows: 0,
+      gloss: 0,
+      numerals: 0,
       arrows: 0,
       loops: 0,
       mono: 0,
     });
   }
+  // No Pause button, no buttons at all in the figure.
+  await expect(page.locator(".pl button")).toHaveCount(0);
 });
 
 for (const width of [390, 320]) {
-  test(`no horizontal scroll at ${width} px, at rest and with a pearl open`, async ({ page }) => {
+  test(`no horizontal scroll at ${width} px; every label inside the viewport`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
     await home(page);
     const overflow = () =>
@@ -836,20 +801,16 @@ for (const width of [390, 320]) {
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       );
     expect(await overflow()).toBeLessThanOrEqual(0);
-    const n = await labels(page).count();
-    for (let i = 0; i < n; i++) {
-      await labels(page).nth(i).click();
-      expect(await overflow(), `pearl ${i} open`).toBeLessThanOrEqual(0);
-    }
-    // Every label stays inside the viewport.
-    const right = await labels(page).evaluateAll((els) =>
-      Math.max(...els.map((e) => e.getBoundingClientRect().right)),
-    );
+    const right = await page
+      .locator(".pl-label")
+      .evaluateAll((els) => Math.max(...els.map((e) => e.getBoundingClientRect().right)));
     expect(right).toBeLessThanOrEqual(width);
+    await links(page).first().focus();
+    expect(await overflow()).toBeLessThanOrEqual(0);
   });
 }
 
-test("works without JavaScript: the cup draws and its <ol> is a list of direction links", async ({
+test("works without JavaScript: the pearls draw and their <ol> is a list of direction links", async ({
   browser,
 }) => {
   const ctx = await browser.newContext({
@@ -859,20 +820,16 @@ test("works without JavaScript: the cup draws and its <ol> is a list of directio
   const page = await ctx.newPage();
   await page.goto("/");
   const nav = page.getByRole("navigation", { name: "Research directions" });
-  const links = nav.locator("ol > li > a.cup-lab");
-  const n = await links.count();
+  const l = nav.locator("ol > li > a.pl-link");
+  const n = await l.count();
   expect(n).toBeGreaterThan(0);
-  for (const l of await links.all())
-    await expect(l).toHaveAttribute("href", /^\/research\/[a-z0-9-]+\/$/);
-  await expect(nav.locator("button")).toHaveCount(0);
-  await expect(page.locator(".cup-draw--wide")).toBeVisible();
-  await expect(page.locator(".cup-pearl")).toHaveCount(n);
-  await expect(page.locator(".cup-pearl").first()).toBeVisible();
-  await expect(page.locator(".cup-panel").first()).toBeHidden();
-  // No "pick a pearl" promise without the script; the timeline link stays.
-  await expect(page.locator(".cup-pick")).toBeHidden();
-  await expect(page.locator(".cup-map")).toBeVisible();
-  await links.first().click();
+  for (const a of await l.all())
+    await expect(a).toHaveAttribute("href", /^\/research\/[a-z0-9-]+\/$/);
+  await expect(page.locator(".pl-body")).toHaveCount(n);
+  await expect(page.locator(".pl-body").first()).toBeVisible();
+  await expect(page.locator(".pl-cap-l.is-on")).toHaveText(/^Each pearl is a research direction/);
+  await expect(page.locator(".pl-more a")).toBeVisible();
+  await l.first().click();
   await expect(page).toHaveURL(/\/research\/[a-z0-9-]+\/$/);
   await ctx.close();
 });
@@ -896,35 +853,36 @@ const AXE_CASES = [
   { name: "mobile dark", viewport: { width: 390, height: 844 }, colorScheme: "dark" as const },
 ];
 for (const c of AXE_CASES) {
-  test(`axe: ${c.name}, at rest and with a pearl open`, async ({ browser }) => {
+  test(`axe: ${c.name}, at rest and with a pearl active`, async ({ browser }) => {
     const { ctx, page } = await ctxPage(browser, {
       viewport: c.viewport,
       colorScheme: c.colorScheme,
     });
     await page.goto("/", { waitUntil: "networkidle" });
-    await page.locator(".cup-stage[data-js]").waitFor();
+    await page.locator(".pl-item").first().waitFor();
     const fmt = (r: Awaited<ReturnType<ReturnType<typeof axe>["analyze"]>>) =>
       r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(" | ")}`);
     expect(fmt(await axe(page).analyze())).toEqual([]);
-    await page.locator(".cup-lab").nth(2).click();
-    await page.waitForTimeout(500);
+    await links(page).nth(2).focus();
+    await page.waitForTimeout(400);
     expect(fmt(await axe(page).analyze())).toEqual([]);
     await ctx.close();
   });
 }
 
-test("axe: forced colours, with a pearl open", async ({ browser }) => {
+test("axe: forced colours, with a pearl focused; pearls stay visible in system colours", async ({
+  browser,
+}) => {
   const { ctx, page } = await ctxPage(browser, {
     viewport: { width: 1440, height: 900 },
     forcedColors: "active",
   });
   await home(page);
-  await page.locator(".cup-lab").nth(1).click();
+  await links(page).nth(1).focus();
   const results = await axe(page).analyze();
   expect(results.violations.map((v) => v.id)).toEqual([]);
-  // Pearls stay visible in system colours.
   const bg = await page
-    .locator(".cup-pearl")
+    .locator(".pl-body")
     .first()
     .evaluate((e) => getComputedStyle(e).backgroundColor);
   expect(bg).not.toBe("rgba(0, 0, 0, 0)");

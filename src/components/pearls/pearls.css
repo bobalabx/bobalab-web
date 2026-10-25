@@ -1,0 +1,428 @@
+/*
+ * The homepage pearl figure (DECISIONS D-15; the original Fig. 1 at 4740e10
+ * src/components/figure/figure.css and docs/design/JUDGE.md, polished to fit
+ * D-13/D-14).
+ *
+ * Kept from the original: the slot templates and nudge, the soft direction-
+ * colour halo (balanced per swatch), the hairline orbit with one dot per paper,
+ * the lift / halo / bloom on hover and focus, the dimming of the other pearls'
+ * graphics, the live caption, the settle-once arrival.
+ * Changed (D-15): a flat --tea panel with no border, radius or crop marks; matte
+ * bodies with no specular sheen and no numerals; Archivo link-style labels with a
+ * direction-colour underline; no overshoot, no idle float, stir or parallax, no
+ * Pause button. The seeds are drawn in the direction colour (--dir), like the
+ * paper dots of the timeline on /research/#map (≥ 4.37:1 on the tea).
+ *
+ * The halo is a box-shadow on the body (.pl-body), the element named
+ * pearl-{slug}: it travels inside the morph to the direction header, where
+ * DirectionPearl "hero" carries the same halo (halo.css).
+ * Motion: transform and opacity, plus two short colour fades (the halo's
+ * box-shadow on four small discs, the wordmark O's fill); all inside the motion gate
+ *   @media (prefers-reduced-motion: no-preference) { :root:not([data-motion="reduce"]) … }
+ */
+
+/* ---- tapioca body tones (the halo strength per swatch is in halo.css) ------- */
+.pl-item {
+  --pl-hi: #3d2b22;
+  --pl-lo: #1f140f;
+  --pl-rim: transparent;
+}
+@media (prefers-color-scheme: dark) {
+  .pl-item {
+    --pl-hi: #5b4738;
+    --pl-lo: #3a2b22;
+    --pl-rim: color-mix(in srgb, #a47e62 55%, transparent);
+  }
+}
+/* Active: the halo brightens; the others' halos step back. */
+.pl-item.is-on {
+  --pl-k: 1.45;
+}
+.pl[data-active] .pl-item:not(.is-on) {
+  --pl-k: 0.45;
+}
+
+/* ---- the box: the panel and the quiet link under it ------------------------ */
+.pl-box {
+  container: pl / inline-size;
+  min-width: 0;
+}
+.pl {
+  --D: 56px;
+  margin: 0;
+  padding: 14px 10px 14px;
+  background: var(--tea);
+}
+.pl-soon {
+  margin: 0;
+  color: var(--muted);
+}
+.pl-more {
+  margin: 10px 0 0;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+}
+.pl-more a {
+  display: inline-block;
+  padding-block: 4px;
+  color: var(--ink);
+}
+
+/* ---- the list: compact 2-column grid (phones, narrow columns, n = 1 or > 8) */
+.pl-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pl-item {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.pl-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+  padding: 0 4px 6px;
+  color: var(--ink);
+  text-align: center;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.pl-link:hover {
+  color: var(--ink);
+  text-decoration: none;
+}
+.pl-link:focus-visible {
+  outline: none;
+}
+.pl-item .bl-badge {
+  margin-bottom: 6px;
+}
+
+/* The pearl group: halo room, orbit, seeds and the body. */
+.pl-g {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: calc(var(--D) * 1.5);
+  height: calc(var(--D) * 1.44);
+}
+.pl-body {
+  position: relative;
+  display: block;
+  width: var(--D);
+  height: var(--D);
+  border-radius: 50%;
+  /* Matte tapioca: a soft body shade, no specular highlight. */
+  background: radial-gradient(circle at 50% 38%, var(--pl-hi) 0, var(--pl-lo) 74%);
+  /* The halo (two soft rings of the direction's light tone) and, in dark mode, a rim. */
+  box-shadow:
+    inset 0 0 0 1px var(--pl-rim),
+    0 0 calc(var(--D) * 0.12) calc(var(--D) * 0.06)
+      color-mix(in oklab, var(--dir-light) calc(var(--pl-ha) * var(--pl-k)), transparent),
+    0 0 calc(var(--D) * 0.5) calc(var(--D) * 0.16)
+      color-mix(in oklab, var(--dir-light) calc(var(--pl-ha) * var(--pl-k) * 0.55), transparent);
+}
+.pl-link:focus-visible .pl-body {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
+/* Hairline orbit and seeds: flat dots on the ring, capped at ±75°. */
+.pl-orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+}
+.pl-ring {
+  --rr: calc(var(--D) * 0.64);
+  position: absolute;
+  left: calc(var(--rr) * -1);
+  top: calc(var(--rr) * -1);
+  width: calc(var(--rr) * 2);
+  height: calc(var(--rr) * 2);
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, var(--rule) 55%, transparent);
+  border-radius: 50%;
+}
+.pl-seeds {
+  position: absolute;
+  inset: 0;
+}
+.pl-seed {
+  --ss: max(5px, calc(var(--D) * 0.1));
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--ss);
+  height: var(--ss);
+  margin: calc(var(--ss) / -2) 0 0 calc(var(--ss) / -2);
+  border-radius: 50%;
+  background: var(--dir);
+  transform: rotate(var(--a)) translateY(calc(var(--D) * -0.64));
+}
+
+/* Labels: link style (ink, direction-colour underline); the count is quiet. */
+.pl-label {
+  max-width: 100%;
+  margin-top: 2px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-decoration: underline 1px var(--dir);
+  text-underline-offset: 0.24em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.pl-count {
+  margin-top: 3px;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.pl-item.is-on .pl-label,
+.pl-link:focus-visible .pl-label {
+  text-decoration-thickness: 2px;
+}
+@media (hover: hover) {
+  .pl-link:hover .pl-label {
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* The others step back: graphics only (orbit and seeds; the halo via --pl-k). */
+.pl[data-active] .pl-item:not(.is-on) .pl-ring {
+  opacity: 0.4;
+}
+.pl[data-active] .pl-item:not(.is-on) .pl-seeds {
+  opacity: 0.45;
+}
+
+/* ---- the caption: every state stacked in one cell (the panel never jumps) */
+.pl-cap {
+  display: grid;
+  margin-top: 8px;
+  padding: 0 4px;
+}
+.pl-cap-l {
+  grid-area: 1 / 1;
+  display: block;
+  max-width: 46ch;
+  font-size: var(--t-meta);
+  line-height: var(--lh-meta);
+  color: var(--ink);
+  opacity: 0;
+  visibility: hidden;
+}
+.pl-cap-l.is-on {
+  opacity: 1;
+  visibility: visible;
+}
+.pl-cap-q {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-wrap: pretty;
+}
+.pl-cap-c {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+}
+
+/* ---- figure mode: the original slot templates (container ≥ 36em) ---------- */
+@container pl (width >= 36em) {
+  .pl[data-state="cluster"] {
+    --D: var(--pl-D, clamp(5rem, 14cqi, 6.5rem));
+    padding: 28px 24px 22px;
+  }
+  .pl[data-state="cluster"] .pl-list {
+    grid-template-columns: repeat(var(--pl-cols, 5), minmax(0, 1fr));
+    align-items: start;
+    gap: 0;
+  }
+  .pl[data-state="cluster"] .pl-item {
+    grid-row: var(--row, auto);
+    grid-column: var(--col, auto) / span 2;
+    translate: calc(var(--D) * var(--dx, 0)) calc(var(--D) * var(--dy, 0));
+    /* The cell is larger than its content: only pearl, label and count take the pointer. */
+    pointer-events: none;
+  }
+  .pl[data-state="cluster"] .pl-item :is(.pl-g, .pl-label, .pl-count, .bl-badge) {
+    pointer-events: auto;
+  }
+  .pl[data-state="cluster"] .pl-item:is([data-row="2"], [data-row="3"]) {
+    margin-top: calc(var(--D) * -0.25);
+  }
+  .pl[data-state="cluster"] .pl-g {
+    width: calc(var(--D) * 1.6);
+    height: calc(var(--D) * 1.5);
+  }
+  .pl[data-state="cluster"] .pl-seed {
+    --ss: max(6px, calc(var(--D) * 0.1));
+  }
+  .pl[data-state="cluster"] .pl-label {
+    font-size: 1.0625rem;
+  }
+  .pl[data-state="cluster"] .pl-cap {
+    margin-top: 18px;
+    padding: 0 8px;
+  }
+  .pl[data-state="cluster"] .pl-cap-q {
+    font-size: 1.125rem;
+  }
+}
+/* n > 8 on wide columns: the compact grid, more columns. n = 1: one centred pearl. */
+.pl[data-n="1"] .pl-list {
+  grid-template-columns: minmax(0, 1fr);
+}
+@container pl (width >= 36em) {
+  .pl[data-state="grid"]:not([data-n="1"]) .pl-list {
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  }
+  .pl[data-n="1"] {
+    --D: clamp(5rem, 14cqi, 6.5rem);
+    padding: 28px 24px 22px;
+  }
+  .pl[data-n="1"] .pl-label {
+    font-size: 1.0625rem;
+  }
+}
+
+/* ---- the header wordmark's O takes the active direction's colour (D-14 hook) */
+:root[data-pearl-on] .bl-header .bl-wordmark__pearl-o {
+  fill: var(--pearl-o, currentColor);
+}
+
+/* ---- motion (finite; off when motion is reduced) ---------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="reduce"]) .bl-header .bl-wordmark__pearl-o {
+    transition: fill var(--dur-base) ease-out;
+  }
+  :root:not([data-motion="reduce"]) .pl-g {
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  :root:not([data-motion="reduce"]) .pl-item.is-on .pl-g {
+    transform: translateY(-3px) scale(1.05);
+    transition-duration: var(--dur-base);
+  }
+  :root:not([data-motion="reduce"]) .pl-link:active .pl-g {
+    transform: scale(0.98);
+    transition-duration: var(--dur-press);
+  }
+  :root:not([data-motion="reduce"]) .pl-body {
+    transition: box-shadow 300ms var(--ease-out);
+  }
+  /* Seed bloom: ring and orbit ~10 % out, 20 ms per-seed stagger. */
+  :root:not([data-motion="reduce"]) .pl-ring {
+    transition:
+      transform 320ms ease-out,
+      opacity var(--dur-base) linear;
+  }
+  :root:not([data-motion="reduce"]) .pl-seeds {
+    transition: opacity var(--dur-base) linear;
+  }
+  :root:not([data-motion="reduce"]) .pl-seed {
+    transition: transform 320ms ease-out calc(var(--k) * 20ms);
+  }
+  :root:not([data-motion="reduce"]) .pl-cap-l {
+    transform: translateY(4px);
+    transition:
+      opacity 100ms linear,
+      transform 0s linear 100ms,
+      visibility 0s linear 100ms;
+  }
+  :root:not([data-motion="reduce"]) .pl-cap-l.is-on {
+    transform: none;
+    transition:
+      opacity var(--dur-caption) var(--ease-out) 60ms,
+      transform var(--dur-caption) var(--ease-out) 60ms,
+      visibility 0s;
+  }
+
+  /* Settle once per session (the first home view): each pearl drops a little and
+     comes to rest without overshoot, then its seeds spread from the body. Labels
+     and counts are on screen from the first paint. */
+  :root[data-cup-intro]:not([data-motion="reduce"]) .pl-g,
+  :root:not([data-motion="reduce"]) .pl[data-intro] .pl-g {
+    animation: pl-settle 560ms var(--ease-settle) calc(var(--i, 0) * 70ms) backwards;
+  }
+  :root[data-cup-intro]:not([data-motion="reduce"]) .pl-seed,
+  :root:not([data-motion="reduce"]) .pl[data-intro] .pl-seed {
+    animation: pl-seed-in 380ms var(--ease-out) calc(var(--i, 0) * 70ms + 320ms + var(--k) * 30ms)
+      backwards;
+  }
+}
+/* Bloom (active), with or without motion: positions only change, no movement under reduced motion. */
+.pl-item.is-on .pl-ring {
+  transform: scale(1.1);
+}
+.pl-item.is-on .pl-seed {
+  transform: rotate(var(--a)) translateY(calc(var(--D) * -0.64 * 1.1));
+}
+@keyframes pl-settle {
+  0% {
+    translate: 0 -18px;
+    opacity: 0;
+  }
+  /* Opaque within ~70 ms: a dark pearl never passes through grey on the tea. */
+  12% {
+    opacity: 1;
+  }
+  100% {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+@keyframes pl-seed-in {
+  from {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(calc(var(--D) * -0.3)) scale(0.3);
+  }
+}
+
+/* ---- forced colours: system ink discs, the labels carry everything --------- */
+@media (forced-colors: active) {
+  .pl {
+    border: 1px solid CanvasText;
+  }
+  .pl-body {
+    forced-color-adjust: none;
+    background: CanvasText;
+    box-shadow: none;
+  }
+  .pl-seed {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+  .pl-ring {
+    forced-color-adjust: none;
+    border-color: GrayText;
+    opacity: 1;
+  }
+  .pl[data-active] .pl-item:not(.is-on) :is(.pl-ring, .pl-seeds) {
+    opacity: 1;
+  }
+  .pl-label {
+    text-decoration-color: currentColor;
+  }
+  .pl-item.is-on .pl-body,
+  .pl-link:focus-visible .pl-body {
+    outline: 2px solid Highlight;
+    outline-offset: 3px;
+  }
+  :root[data-pearl-on] .bl-header .bl-wordmark__pearl-o {
+    fill: currentColor;
+  }
+}

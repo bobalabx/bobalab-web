@@ -19,12 +19,16 @@
  * - Kept for API stability, no longer drawn: `index` as a numeral, `swatch` (set as
  *   `data-swatch` for callers that colour around it), `seedCount`, `bloomOnMount`
  *   (the morph itself is the arrival; nothing else moves).
+ * - D-15: `size="hero"` carries the homepage pearls' soft direction-colour halo
+ *   (src/components/pearls/halo.css, a box-shadow on the named disc), so the
+ *   pearl-{slug} morph from the homepage reads as one continuous pearl.
  * - Decorative: the wrapper is aria-hidden; adjacent text carries the meaning.
  */
 import type { JSX } from "react";
 import type { SwatchId } from "@/lib/content/palette";
 import { PearlBody } from "./parts";
 import "./figure.css";
+import "@/components/pearls/halo.css";
 
 export interface DirectionPearlProps {
   slug: string;

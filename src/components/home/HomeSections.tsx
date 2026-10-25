@@ -1,7 +1,7 @@
 /**
- * Home sections below the cup (DECISIONS D-14; JUDGE.md §5 "Below the fold",
- * R18, R19): "New papers" (3 ruled rows: title, authors, one meta line) beside
- * "News" (4 dated one-liners), then "People" (one sentence that counts everyone,
+ * Home sections below the hero (DECISIONS D-14, D-15; JUDGE.md §5 "Below the
+ * fold", R18, R19): "New papers" (3 ruled rows: title, authors, one meta line) beside
+ * "News" (4 dated one-liners), then "People" (one sentence naming the team, no counts,
  * the routes to join, and the consented photos cropped round with first names).
  * Featured findings render only when content has them (R19). Each section
  * renders only what content provides (no placeholders); its way on is one
@@ -13,7 +13,6 @@ import type { AuthorView, NewsView, PublicationView } from "@/lib/content/load";
 import type { FindingView } from "@/lib/content/queries";
 import { ROLE_LABELS, ROLE_ORDER, type PublicPerson } from "@/lib/content/people";
 import { typeWord } from "@/lib/publications/csl";
-import { numberWord } from "@/lib/figure/buildFigure";
 import { PearlTag } from "@/components/ui/PearlTag";
 import { EvidenceLabel } from "@/components/ui/EvidenceLabel";
 import { Badge, DraftBadge } from "@/components/ui/Badge";
@@ -56,9 +55,9 @@ const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? o
 export function publicationsLine(papers: number, inProgress: number): string {
   return `Publications: ${plural(papers, "paper")}${inProgress ? `, ${inProgress} in progress` : ""}`;
 }
-/** "People: 25 members, 25 alumni". */
-export function peopleLine(members: number, alumni: number): string {
-  return `People: ${plural(members, "member")}${alumni ? `, ${alumni} alumni` : ""}`;
+/** "People: current members and alumni" (D-15: no people counts on the home page). */
+export function peopleLine(alumni: number): string {
+  return `People: current members${alumni ? " and alumni" : ""}`;
 }
 /** "News: 19 items since 2023". */
 export function newsLine(total: number, since?: string): string {
@@ -104,8 +103,8 @@ const lower = (label: string) =>
   /^[A-Z][a-z]*(?=[\s’'-]|$)/.test(label) ? label.charAt(0).toLowerCase() + label.slice(1) : label;
 
 /**
- * The team as words, by role in ROLE_ORDER, everyone counted (with or without a
- * photo): "one master’s student and 23 undergraduate RAs".
+ * The team as words, by role in ROLE_ORDER, without numbers (D-15: no people
+ * counts on the home page): "a master’s student and undergraduate RAs".
  */
 export function teamWords(people: Array<Pick<PublicPerson, "role">>): string {
   return and(
@@ -113,7 +112,9 @@ export function teamWords(people: Array<Pick<PublicPerson, "role">>): string {
       const n = people.filter((p) => p.role === role).length;
       if (!n) return [];
       const l = ROLE_LABELS[role];
-      return [`${n <= 8 ? numberWord(n) : n} ${lower(n === 1 ? l.one : l.group)}`];
+      if (n > 1) return [lower(l.group)];
+      const one = lower(l.one);
+      return [`${/^[aeiou]/i.test(one) ? "an" : "a"} ${one}`];
     }),
   );
 }
@@ -259,9 +260,9 @@ export function NewsSection({
 }
 
 /**
- * "People" (R18): a sentence that counts everyone, the routes to join, then the
- * people with a consented photo, cropped round, with their first names (alt = full
- * name). Nobody without a photo is drawn (no initials discs); they are counted.
+ * "People" (R18; D-15: no people counts): a sentence naming the team by role, the
+ * routes to join, then the people with a consented photo, cropped round, with their
+ * first names (alt = full name). Nobody without a photo is drawn (no initials discs).
  */
 export function PeopleSection({
   people,
@@ -284,26 +285,20 @@ export function PeopleSection({
       id="h-people"
       title="People"
       className="hm-people-sec"
-      more={{ href: "/people/", label: peopleLine(people.length, alumni) }}
+      more={{ href: "/people/", label: peopleLine(alumni) }}
     >
       <div className="hm-people-in">
         <div className="hm-people-txt">
-          <p className="hm-team">
-            {lead && team ? (
-              <>
-                {lead} leads the lab with {team}.
-              </>
-            ) : (
-              <>The lab has {team || plural(people.length, "member")}.</>
-            )}
-            {alumni > 0 && (
-              <>
-                {" "}
-                The people page also lists {alumni <= 8 ? numberWord(alumni) : alumni} former{" "}
-                {alumni === 1 ? "member" : "members"}.
-              </>
-            )}
-          </p>
+          {(lead || team) && (
+            <p className="hm-team">
+              {lead && team
+                ? `${lead} leads the lab with ${team}.`
+                : lead
+                  ? `${lead} leads the lab.`
+                  : `The lab has ${team}.`}
+              {alumni > 0 && " The people page also lists former members."}
+            </p>
+          )}
           <p className="hm-join">
             To work with the lab, see the notes for{" "}
             <Link href="/join/#students">Students & RAs</Link> and for{" "}

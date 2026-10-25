@@ -1,11 +1,11 @@
 /**
- * Home visual QA (D-14 "the boba cup"): the home at 1440×900 and 390×844, light
- * and dark (first screen and full page), 1366×768 / 1200×800 / 1024×768 /
- * 768×1024, and the cup's states: hover lift, keyboard focus, each pearl risen
- * (desktop and phone, light and dark), the rise mid-flight with bubbles, the
- * settle intro frames, reduced motion, forced colours and no JS. Writes PNGs to
- * test-results/simplify-home/ for review next to docs/simplify/sheets/c-*.jpg
- * (no pixel assertions).
+ * Home visual QA (D-15 "the pearl figure", on the D-14 hero): the home at
+ * 1440×900 and 390×844, light and dark (first screen and full page), 1366×768 /
+ * 1280×800 / 1024×768 / 768×1024, and the figure's states: each pearl hovered
+ * (desktop, light and dark), keyboard focus, the morph mid-flight and its
+ * destination, the settle intro frames, reduced motion, forced colours and no
+ * JS. Writes PNGs to test-results/simplify-home/ for review next to
+ * docs/design/shots/c-desktop-*.png (no pixel assertions).
  *   npx playwright test -c tests/visual/playwright.visual.config.ts home
  */
 import { test, type BrowserContextOptions, type Browser, type Page } from "@playwright/test";
@@ -29,7 +29,6 @@ async function open(browser: Browser, opts: BrowserContextOptions, intro = false
 }
 async function ready(page: Page) {
   await page.goto("/", { waitUntil: "networkidle" });
-  await page.locator(".cup-stage[data-js]").waitFor();
   await page.evaluate(() => document.fonts.ready);
   // Hide Next's dev indicator (not part of the site).
   await page.addStyleTag({ content: "nextjs-portal{display:none!important}" });
@@ -51,52 +50,42 @@ for (const vp of VIEWPORTS) {
       await ready(page);
       await shot(page, `home-${vp.width}-${scheme}`);
       await shot(page, `home-${vp.width}-${scheme}-full`, true);
-      const n = await page.locator(".cup-lab").count();
-      for (let i = 0; i < n; i++) {
-        await page.locator(".cup-lab").nth(i).click();
-        await page.waitForTimeout(700);
-        await shot(page, `home-${vp.width}-${scheme}-pearl-${i + 1}`);
+      if (vp.width > 500) {
+        const n = await page.locator(".pl-item").count();
+        for (let i = 0; i < n; i++) {
+          await page.locator(".pl-item").nth(i).locator(".pl-body").hover();
+          await page.waitForTimeout(600);
+          await shot(page, `home-${vp.width}-${scheme}-hover-${i + 1}`);
+        }
       }
       await ctx.close();
     });
   }
 }
 
-test("home at 1366×768, 1200×800 and the tablet widths", async ({ browser }) => {
+test("home at 1366×768, 1280×800 and the tablet widths", async ({ browser }) => {
   for (const [width, height] of [
     [1366, 768],
-    [1200, 800],
+    [1280, 800],
     [1024, 768],
     [768, 1024],
   ] as const) {
     const { ctx, page } = await open(browser, { viewport: { width, height } });
     await ready(page);
     await shot(page, `home-${width}x${height}`);
-    await page.locator(".cup-lab").nth(1).click();
-    await page.waitForTimeout(700);
-    await shot(page, `home-${width}x${height}-pearl-2`);
     await ctx.close();
   }
 });
 
-test("cup states: hover, keyboard focus, rise mid-flight, reduced motion", async ({ browser }) => {
+test("pearl states: keyboard focus, reduced motion, the morph mid-flight", async ({ browser }) => {
   const { ctx, page } = await open(browser, { viewport: { width: 1440, height: 900 } });
   await ready(page);
-  const cup = page.locator(".hm-cup");
-  await page.locator(".cup-lab").nth(2).hover();
-  await page.waitForTimeout(400);
-  await cup.screenshot({ path: path.join(OUT, "cup-hover.png") });
-  await page.mouse.move(2, 2);
+  const fig = page.locator(".hm-fig");
   await page.locator(".hm-links a").last().focus();
   await page.keyboard.press("Tab");
-  await page.waitForTimeout(400);
-  await cup.screenshot({ path: path.join(OUT, "cup-focus.png") });
-  await page.keyboard.press("Enter");
-  await page.waitForTimeout(150);
-  await cup.screenshot({ path: path.join(OUT, "cup-rise-150ms.png") });
-  await page.waitForTimeout(700);
   await page.keyboard.press("Tab");
-  await cup.screenshot({ path: path.join(OUT, "cup-open-tab-in-panel.png") });
+  await page.waitForTimeout(500);
+  await fig.screenshot({ path: path.join(OUT, "pearls-focus-2.png") });
   await ctx.close();
 
   const r = await open(browser, {
@@ -104,11 +93,42 @@ test("cup states: hover, keyboard focus, rise mid-flight, reduced motion", async
     reducedMotion: "reduce",
   });
   await ready(r.page);
-  await r.page.locator(".cup-lab").nth(1).click();
+  await r.page.locator(".pl-item").nth(1).locator(".pl-body").hover();
+  await r.page.waitForTimeout(300);
   await r.page
-    .locator(".hm-cup")
-    .screenshot({ path: path.join(OUT, "cup-reduced-motion-open.png") });
+    .locator(".hm-fig")
+    .screenshot({ path: path.join(OUT, "pearls-reduced-motion-hover.png") });
   await r.ctx.close();
+
+  const m = await open(browser, { viewport: { width: 1440, height: 900 } });
+  await m.ctx.addInitScript(() => {
+    const start = document.startViewTransition?.bind(document);
+    if (!start) return;
+    document.startViewTransition = ((arg: never) => {
+      const t = start(arg);
+      t.ready
+        .then(() => {
+          for (const a of document.getAnimations()) {
+            a.pause();
+            a.currentTime = 200;
+          }
+          (window as unknown as { __mid: boolean }).__mid = true;
+        })
+        .catch(() => {});
+      return t;
+    }) as typeof document.startViewTransition;
+  });
+  await ready(m.page);
+  const href = (await m.page.locator(".pl-link").first().getAttribute("href"))!;
+  await m.page.evaluate(async (u) => void (await fetch(u)), href);
+  await m.page.waitForTimeout(1200);
+  await m.page.locator(".pl-body").first().click();
+  await m.page.waitForFunction(() => (window as unknown as { __mid?: boolean }).__mid);
+  await shot(m.page, "morph-200ms");
+  await m.page.evaluate(() => document.getAnimations().forEach((a) => a.finish()));
+  await m.page.waitForTimeout(600);
+  await shot(m.page, "morph-destination");
+  await m.ctx.close();
 });
 
 test("settle intro frames (client navigation to home, fresh session)", async ({ browser }) => {
@@ -119,11 +139,11 @@ test("settle intro frames (client navigation to home, fresh session)", async ({ 
   await page.evaluate(() => {
     for (const a of document.getAnimations()) a.pause();
   });
-  for (const t of [0, 200, 400, 700, 950]) {
+  for (const t of [0, 120, 250, 450, 700, 1000]) {
     await page.evaluate((ms) => {
       for (const a of document.getAnimations()) a.currentTime = ms;
     }, t);
-    await page.locator(".hm-cup").screenshot({ path: path.join(OUT, `intro-${t}ms.png`) });
+    await page.locator(".hm-fig").screenshot({ path: path.join(OUT, `intro-${t}ms.png`) });
   }
   await ctx.close();
 });
@@ -131,9 +151,9 @@ test("settle intro frames (client navigation to home, fresh session)", async ({ 
 test("forced colours and no JS", async ({ browser }) => {
   const f = await open(browser, { viewport: { width: 1440, height: 900 }, forcedColors: "active" });
   await ready(f.page);
-  await f.page.locator(".cup-lab").first().click();
-  await f.page.waitForTimeout(400);
-  await shot(f.page, "home-forced-colors-open");
+  await f.page.locator(".pl-link").first().focus();
+  await f.page.waitForTimeout(300);
+  await shot(f.page, "home-forced-colors-focus");
   await f.ctx.close();
   for (const width of [1440, 390]) {
     const n = await open(browser, {

@@ -8,7 +8,8 @@
  *  - the hero: one h1, the who line from content (University of California kept
  *    together), the why line, exactly two links (one primary);
  *  - people (R18): only consented photos, round, alt = full name, first names
- *    (duplicates disambiguated), no initials discs, everyone counted in words.
+ *    (duplicates disambiguated), no initials discs, the team in words with no
+ *    numbers (D-15: the count sentence is gone).
  */
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -118,8 +119,9 @@ describe("section foot lines", () => {
   it("wording", () => {
     expect(publicationsLine(17, 8)).toBe("Publications: 17 papers, 8 in progress");
     expect(publicationsLine(1, 0)).toBe("Publications: 1 paper");
-    expect(peopleLine(25, 25)).toBe("People: 25 members, 25 alumni");
-    expect(peopleLine(1, 0)).toBe("People: 1 member");
+    // D-15: no people counts on the home page.
+    expect(peopleLine(25)).toBe("People: current members and alumni");
+    expect(peopleLine(0)).toBe("People: current members");
     expect(newsLine(19, "2023-07-20")).toBe("News: 19 items since 2023");
     expect(newsLine(1)).toBe("News: 1 item");
   });
@@ -167,7 +169,7 @@ describe("hero", () => {
   it("one h1, the who line from content, the why line, one primary and one secondary link", () => {
     const c = content();
     const copy = homeHeroCopy(c);
-    const html = renderToStaticMarkup(<HomeHero copy={copy} cup={<i className="cup-x" />} />);
+    const html = renderToStaticMarkup(<HomeHero copy={copy} figure={<i className="fig-x" />} />);
     expect(html.match(/<h1/g)).toHaveLength(1);
     expect(html).toContain(`>${copy.statement ?? HOME_STATEMENT}</h1>`);
     expect(html).toContain("University of California");
@@ -179,8 +181,8 @@ describe("hero", () => {
       ["/publications/", "Read the papers"],
     ]);
     expect(links.filter((m) => m[2])).toHaveLength(1);
-    // The cup comes after the copy.
-    expect(html.indexOf("cup-x")).toBeGreaterThan(html.indexOf("Read the papers"));
+    // The pearl figure comes after the copy.
+    expect(html.indexOf("fig-x")).toBeGreaterThan(html.indexOf("Read the papers"));
     expect(affiliationText("University of California, Berkeley")).toBe(
       "University of California, Berkeley",
     );
@@ -203,15 +205,26 @@ describe("people", () => {
     expect(html).not.toContain("hm-ini");
   });
 
-  it("everyone is counted in one sentence, by role", () => {
+  it("the team in one sentence, by role, with no numbers (D-15)", () => {
     const team = teamWords(people);
     expect(html).toContain(`Prof. Park Sinchaisri leads the lab with ${team}.`);
-    const ugrads = people.filter((p) => p.role === "undergrad").length;
-    if (ugrads > 8) expect(team).toContain(`${ugrads} undergraduate RAs`);
+    expect(team).not.toMatch(/\d|\b(one|two|three|four|five|six|seven|eight)\b/);
+    if (people.filter((p) => p.role === "undergrad").length > 1)
+      expect(team).toContain("undergraduate RAs");
     expect(teamWords([{ role: "masters" }, { role: "phd" }, { role: "phd" }])).toBe(
-      "two PhD students and one master’s student",
+      "PhD students and a master’s student",
     );
-    expect(html).toContain("also lists seven former members.");
+    expect(teamWords([{ role: "undergrad" }, { role: "affiliate" }])).toBe(
+      "an undergraduate RA and an affiliate",
+    );
+    expect(html).toContain("The people page also lists former members.");
+    const sentence = html.match(/<p class="hm-team">([^<]*)<\/p>/)?.[1] ?? "";
+    expect(sentence).not.toMatch(/\d/);
+    // Only the PI, or nobody but the team: no count either.
+    const solo = renderToStaticMarkup(
+      <PeopleSection people={people.filter((p) => p.role === "pi")} lead="Prof. X" />,
+    );
+    expect(solo).toContain(">Prof. X leads the lab.</p>");
   });
 
   it("first names: preferred name in quotes, duplicates get a last initial", () => {
