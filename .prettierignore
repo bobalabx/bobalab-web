@@ -11,6 +11,7 @@ tests/fixtures/content/**/*.md
 docs/research/
 docs/design/
 docs/redesign/
+docs/simplify/
 docs/DECISIONS.md
 AGENTS.md
 CLAUDE.md
