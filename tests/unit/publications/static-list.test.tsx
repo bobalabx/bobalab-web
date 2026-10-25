@@ -1,13 +1,21 @@
 /**
  * The no-JS list (WP3 acceptance #1): the <Suspense> fallback that the static
  * export writes into /publications/index.html renders every counted paper,
- * grouped by year (newest first) with "Jump to year" links.
+ * grouped by year (newest first) with "Jump to year" links, and the filter
+ * block as an inert stand-in of the island's (D-13 redesign: label-column grid,
+ * text toggles, year rail).
  */
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { PublicationsStatic } from "@/components/publications/PublicationsStatic";
 import { buildIndexData } from "@/lib/publications/index-data";
-import { groupDocsByYear } from "@/lib/publications/filters";
+import {
+  EMPTY_FILTERS,
+  facetCounts,
+  groupDocsByYear,
+  visibleFacetKeys,
+  type FacetKey,
+} from "@/lib/publications/filters";
 import { hasContent, loadContent } from "./helpers";
 
 describe.skipIf(!hasContent)("PublicationsStatic", () => {
@@ -19,7 +27,7 @@ describe.skipIf(!hasContent)("PublicationsStatic", () => {
         year: g.year,
         slugs: g.items.map((d) => d.slug),
       }));
-      // Stand-in entries (the real page passes server-rendered <PublicationEntry>s).
+      // Stand-in entries (the real page passes server-rendered rows).
       const entries = Object.fromEntries(
         docs.map((d) => [d.slug, <article key={d.slug} data-slug={d.slug} />]),
       );
@@ -38,31 +46,63 @@ describe.skipIf(!hasContent)("PublicationsStatic", () => {
       if (groups.length > 1) {
         const jumps = [...html.matchAll(/href="#(y[^"]+)"/g)].map((m) => m[1]);
         expect(jumps).toEqual(years);
+        expect(html).toContain('<nav class="pubs-jump" aria-label="Jump to year">');
       }
       expect(html).toContain(`${docs.length} publications`);
+      // The year rail sits inside its band; the ledger is one block.
+      expect(html).toMatch(/<div class="pubs-groups">\s*<section class="pubs-year"/);
     });
   }
 
-  it("reserves the island's search block (no layout shift) and hides it without JavaScript", () => {
+  it("draws the island's filter block as an inert stand-in, hidden without JavaScript", () => {
+    const c = loadContent(undefined, true);
+    const { docs, facets } = buildIndexData(c, c.countedPublications);
+    const visible = visibleFacetKeys(facets);
+    const counts: Partial<Record<FacetKey, Map<string, number>>> = {};
+    for (const k of visible) counts[k] = facetCounts(docs, EMPTY_FILTERS, null, k);
     const html = renderToStaticMarkup(
-      <PublicationsStatic groups={[]} entries={{}} total={0} hasPanel />,
+      <PublicationsStatic
+        groups={[]}
+        entries={{}}
+        total={0}
+        facets={facets}
+        visible={visible}
+        counts={counts}
+        hasPanel
+      />,
     );
-    const pending =
-      /<div class="pubs-filters pubs-filters--pending" aria-hidden="true" inert="">([\s\S]*?)<\/div><\/div>/.exec(
+    const block =
+      /<section class="pubs-filters pubs-filters--pending" aria-hidden="true" inert="">([\s\S]*?)<\/section>/.exec(
         html,
       );
-    expect(pending, html).not.toBeNull();
+    expect(block, html).not.toBeNull();
+    const inner = block![1]!;
     // No-JS visitors never see a dead control.
-    expect(html).toContain(
+    expect(inner).toContain(
       "<noscript><style>.pubs-filters--pending{display:none!important}</style></noscript>",
     );
-    // Nothing in the stand-in is reachable by keyboard or announced.
-    expect(html).toMatch(/<input[^>]*class="pubs-input"[^>]*tabindex="-1"[^>]*>/);
-    expect(html).toMatch(/<input[^>]*readonly=""/i);
-    expect(html).not.toMatch(/<button|<h2>Search/);
-    expect(html).toContain('class="pubs-toggle"');
-    expect(
-      renderToStaticMarkup(<PublicationsStatic groups={[]} entries={{}} total={0} />),
-    ).not.toContain('class="pubs-toggle"');
+    // Nothing in the stand-in is reachable by keyboard, announced, or id-bearing.
+    expect(inner).toMatch(/<input[^>]*class="pubs-input"[^>]*readonly=""[^>]*tabindex="-1"/i);
+    const buttons = [...inner.matchAll(/<button[^>]*>/g)].map((m) => m[0]);
+    expect(buttons.length).toBeGreaterThan(1);
+    for (const b of buttons) {
+      expect(b).toContain('disabled=""');
+      expect(b).toContain('tabindex="-1"');
+    }
+    expect(inner).not.toMatch(/\sid="/);
+    expect(inner).not.toMatch(/role="(search|group)"/);
+    // Same rows as the island: one per visible facet, labels in the label column.
+    for (const k of visible) {
+      const label = { type: "Type", direction: "Direction", member: "Lab member" }[k];
+      expect(inner).toContain(`<span class="pubs-fl">${label}</span>`);
+    }
+    expect(inner).toContain('class="pubs-toggle"');
+    // Direction toggles carry their line segment.
+    expect(inner).toMatch(/<span class="bl-seg" data-swatch="[a-z-]+" aria-hidden="true">/);
+
+    // Without facets (or a panel) there is no stand-in and no disclosure.
+    const bare = renderToStaticMarkup(<PublicationsStatic groups={[]} entries={{}} total={0} />);
+    expect(bare).not.toContain("pubs-filters");
+    expect(bare).not.toContain('class="pubs-toggle"');
   });
 });

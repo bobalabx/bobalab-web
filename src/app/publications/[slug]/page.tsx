@@ -1,11 +1,15 @@
 /**
- * /publications/{slug}/ (brief §D8).
+ * /publications/{slug}/ (brief §D8; redesign D-13, prototype
+ * docs/redesign/prototypes/p3/paper.html).
  *
- * Title, authors (lab members highlighted), venue line, the lab's own status
- * claim with "as of", tags, materials, "In brief" (only when content has it),
- * awards (with the title they were given under), presentations (both marked
- * "reported by the lab" when only the PI's CV or site says so; CON-03), citations
- * (APA + copyable BibTeX from citation-js), related projects / papers / news.
+ * Head: crumb, condensed title, authors (lab members linked to their pages,
+ * external coauthors to their web page), venue line, materials and the DOI;
+ * beside it a facts list (type, review status with "as of" and its source,
+ * directions with the paper's place on each line, awards). Then the lab's "In
+ * brief", the study-design plate (registry keyed by slug; only when
+ * `plate_verified` or in preview), awards, presentations and notes as ruled
+ * ledgers in the label-column grid, the citation (APA + copyable BibTeX from
+ * citation-js), and related projects / papers / news.
  * Google Scholar citation_* meta and ScholarlyArticle JSON-LD for papers that
  * count under D-05.
  */
@@ -15,9 +19,10 @@ import type { Metadata } from "next";
 import { getContent } from "@/lib/content/load";
 import { publicationDetail, staticParams, staticSlugs } from "@/lib/content/queries";
 import { clipDescription, pageMetadata } from "@/lib/seo/metadata";
+import { typeWord } from "@/lib/publications/csl";
+import { yearAnchor } from "@/lib/publications/filters";
 import { paperJsonLd } from "@/lib/publications/jsonld";
 import {
-  SELF_REPORTED_LABEL,
   SELF_REPORTED_WORDING,
   isSelfReportedAward,
   isSelfReportedTalk,
@@ -27,19 +32,23 @@ import {
   paperScholarMeta,
   wantsScholarMeta,
 } from "@/lib/publications/seo";
-import { Badge, DraftBadge } from "@/components/ui/Badge";
-import { Icon } from "@/components/ui/icons";
+import { DraftBadge } from "@/components/ui/Badge";
 import { Img } from "@/components/ui/Img";
 import { JsonLd } from "@/components/ui/JsonLd";
 import { MaterialsRow, materialsFromPublication } from "@/components/ui/MaterialsRow";
 import { NewsItem } from "@/components/ui/NewsItem";
-import { PearlTagList } from "@/components/ui/PearlTag";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { Prose } from "@/components/ui/Prose";
-import { PublicationEntry } from "@/components/ui/PublicationEntry";
-import { PUBLICATION_TYPE_LABELS } from "@/components/ui/labels";
-import { AuthorList, StatusNote, VenueLineText } from "@/components/publications/PaperParts";
+import {
+  AuthorList,
+  StatusDetail,
+  VenueLineText,
+  reviewStatus,
+} from "@/components/publications/PaperParts";
 import { CitationBlock } from "@/components/publications/CitationBlock";
+import { DirectionLine } from "@/components/publications/DirectionLine";
+import { PublicationRow } from "@/components/publications/PublicationRow";
+import { StudyPlate } from "@/components/plates";
 import "@/components/publications/publications.css";
 
 export const dynamicParams = false;
@@ -64,6 +73,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
+/** "7 awards, 2021 to 2023". */
+function awardSpan(years: number[]): string {
+  const lo = Math.min(...years);
+  const hi = Math.max(...years);
+  const n = years.length;
+  return `${n} ${n === 1 ? "award" : "awards"}, ${lo === hi ? lo : `${lo} to ${hi}`}`;
+}
+
 export default async function PublicationPage({ params }: Props) {
   const { slug } = await params;
   const c = getContent();
@@ -74,214 +91,258 @@ export default async function PublicationPage({ params }: Props) {
   const materials = materialsFromPublication(p);
   const hasVenue = Boolean(p.venue || p.year);
   const teaser = p.teaser?.image && p.teaser.alt ? p.teaser : undefined;
-  const hasMain = Boolean(
-    teaser || p.in_brief || p.awards.length || p.presentations.length || p.body.trim(),
-  );
-
-  const details = (
-    <>
-      {materials.length > 0 && (
-        <div className="pub-fact">
-          <h2 className="pub-fact__h">Materials</h2>
-          <MaterialsRow title={p.title} items={materials} />
-        </div>
-      )}
-      {p.doi && (
-        <div className="pub-fact">
-          <h2 className="pub-fact__h">DOI</h2>
-          <p className="pub-doi">
-            <a href={`https://doi.org/${p.doi}`} rel="noopener noreferrer">
-              {p.doi}
-            </a>
-          </p>
-        </div>
-      )}
-      {p.directionRefs.length > 0 && (
-        <div className="pub-fact">
-          <h2 className="pub-fact__h">Research directions</h2>
-          <PearlTagList items={p.directionRefs} />
-        </div>
-      )}
-    </>
-  );
-  const hasDetails = materials.length > 0 || Boolean(p.doi) || p.directionRefs.length > 0;
+  const live = new Set(c.directions.map((x) => x.slug));
+  // Each live direction's counted papers, oldest first (the paper's place on its line).
+  const lineOf = (dir: string) =>
+    c.countedPublications
+      .filter((x) => x.directions.includes(dir))
+      .map((x) => x.slug)
+      .reverse();
+  const awards = [...p.awards].sort((a, b) => b.year - a.year || a.name.localeCompare(b.name));
+  const selfAwards = awards.some(isSelfReportedAward);
+  const talksSelf = p.presentations.filter(isSelfReportedTalk).length;
+  const talksMixed = talksSelf > 0 && talksSelf < p.presentations.length;
+  const typeLabel = typeWord(p);
+  // D-05: not in the main list. The type already says so for work in progress.
+  const notCounted = !p.counted && p.type !== "work-in-progress";
 
   return (
     <article className="bl-container pub" aria-labelledby="pub-title">
       {p.counted && <JsonLd data={paperJsonLd(p, c.site)} />}
 
       <header className="pub-head">
-        <div className="pub-eyebrow">
-          <Link href="/publications/" className="pub-eyebrow__link">
-            Publications
-          </Link>
-          <span aria-hidden="true" className="pub-eyebrow__sep">
-            /
-          </span>
-          <span>{PUBLICATION_TYPE_LABELS[p.type]}</span>
-          {/* D-05: not in the main list. The type already says so for work in progress. */}
-          {!p.counted && p.type !== "work-in-progress" && <Badge tone="accent">In progress</Badge>}
-          <DraftBadge show={p.draft} />
-        </div>
-        <h1 id="pub-title" tabIndex={-1} className="pub-title">
-          {p.title}
-        </h1>
-        <p className="pub-authors">
-          <AuthorList authors={p.authorList} />
-        </p>
-        {hasVenue && (
-          <p className="pub-venue">
-            <VenueLineText pub={p} />
+        <div className="pub-head__main">
+          <p className="pub-crumb">
+            <Link href="/publications/">Publications</Link>
+            {p.counted && p.year ? (
+              <>
+                , <Link href={`/publications/#${yearAnchor(p.year)}`}>{p.year}</Link>
+              </>
+            ) : null}
+            <DraftBadge show={p.draft} />
           </p>
-        )}
-        <StatusNote pub={p} />
-      </header>
-
-      <div className={hasDetails ? "pub-layout pub-layout--split" : "pub-layout"}>
-        {hasDetails && (
-          <aside className="pub-facts" aria-label="Paper details">
-            {details}
-          </aside>
-        )}
-        <div className="pub-content">
-          {hasMain && (
-            <div className="pub-main">
-              {teaser && (
-                <figure className="pub-teaser">
-                  <Img src={teaser.image!} alt={teaser.alt!} className="pub-teaser__img" />
-                  {teaser.caption && (
-                    <figcaption className="t-sm t-muted">{teaser.caption}</figcaption>
-                  )}
-                </figure>
-              )}
-              {p.in_brief && (
-                <section className="pub-section" aria-labelledby="brief-h">
-                  <h2 id="brief-h" className="pub-section__h">
-                    In brief
-                  </h2>
-                  <p className="pub-brief">{p.in_brief}</p>
-                </section>
-              )}
-              {p.awards.length > 0 && (
-                <section className="pub-section" aria-labelledby="awards-h">
-                  <h2 id="awards-h" className="pub-section__h">
-                    Awards
-                  </h2>
-                  <ul className="pub-awards" role="list">
-                    {[...p.awards]
-                      .sort((a, b) => b.year - a.year)
-                      .map((a) => (
-                        <li key={`${a.name}-${a.year}`} className="pub-award">
-                          <span className="pub-award__year">{a.year}</span>
-                          <span className="pub-award__body">
-                            <span className="pub-award__name">{a.name}</span>
-                            {a.under_title && (
-                              <span className="pub-award__under">
-                                Awarded under the earlier title &ldquo;{a.under_title}&rdquo;
-                              </span>
-                            )}
-                            {isSelfReportedAward(a) && (
-                              <span className="pub-award__src">{SELF_REPORTED_LABEL}</span>
-                            )}
-                          </span>
-                        </li>
-                      ))}
-                  </ul>
-                </section>
-              )}
-              {p.presentations.length > 0 && (
-                <section className="pub-section" aria-labelledby="talks-h">
-                  <h2 id="talks-h" className="pub-section__h">
-                    Presentations
-                  </h2>
-                  <ul className="pub-talks" role="list">
-                    {p.presentations.map((t, i) => (
-                      <li key={`${t.event}-${i}`}>
-                        {t.url ? (
-                          <a href={t.url} rel="noopener noreferrer">
-                            {t.event}
-                          </a>
-                        ) : (
-                          t.event
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                  {p.presentations.some(isSelfReportedTalk) && (
-                    <p className="pub-talks__src">
-                      {p.presentations.every(isSelfReportedTalk)
-                        ? `${SELF_REPORTED_LABEL}.`
-                        : `Talks without a link are ${SELF_REPORTED_WORDING}.`}
-                    </p>
-                  )}
-                </section>
-              )}
-              {p.body.trim() && (
-                <section className="pub-section" aria-labelledby="notes-h">
-                  <h2 id="notes-h" className="pub-section__h">
-                    Notes
-                  </h2>
-                  <Prose source={p.body} />
-                </section>
+          <h1 id="pub-title" tabIndex={-1} className="pub-title">
+            {p.title}
+          </h1>
+          <p className="pub-authors">
+            <AuthorList authors={p.authorList} />
+          </p>
+          {hasVenue && (
+            <p className="pub-venue">
+              <VenueLineText pub={p} />
+            </p>
+          )}
+          {(materials.length > 0 || p.doi) && (
+            <div className="pub-links">
+              <MaterialsRow title={p.title} items={materials} />
+              {p.doi && (
+                <span className="pub-doi doi">
+                  <span className="vh">DOI </span>
+                  {p.doi}
+                </span>
               )}
             </div>
           )}
-
-          {p.publicVersion && <CitationBlock pub={p} />}
-
-          {d.projects.length > 0 && (
-            <section className="pub-section pub-related" aria-labelledby="projects-h">
-              <h2 id="projects-h" className="pub-section__h">
-                {d.projects.length === 1 ? "Project" : "Projects"}
-              </h2>
-              <ul className="pub-cards" role="list">
-                {d.projects.map((pr) => (
-                  <li key={pr.slug}>
-                    <ProjectCard project={pr} as="h3" />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {d.related.length > 0 && (
-            <section className="pub-section pub-related" aria-labelledby="related-h">
-              <h2 id="related-h" className="pub-section__h">
-                Related papers
-              </h2>
-              <ul className="pubs-list" role="list">
-                {d.related.map((r) => (
-                  <li key={r.slug}>
-                    <PublicationEntry pub={r} as="h3" />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {d.news.length > 0 && (
-            <section className="pub-section pub-related" aria-labelledby="news-h">
-              <h2 id="news-h" className="pub-section__h">
-                In the news
-              </h2>
-              <ul className="pubs-list" role="list">
-                {d.news.map((n) => (
-                  <li key={n.slug}>
-                    <NewsItem item={n} as="h3" />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
         </div>
-      </div>
 
-      <p className="pub-back">
-        <Link href="/publications/" className="bl-cta bl-cta--quiet">
-          All publications
-          <Icon name="arrow-right" />
-        </Link>
-      </p>
+        <dl className="pub-side" aria-label="Paper details">
+          <div className="pub-side__row">
+            <dt>Type</dt>
+            <dd className="pub-type">
+              {typeLabel}
+              {notCounted && (
+                <span className="pub-type__wip">In progress: no public version yet.</span>
+              )}
+            </dd>
+          </div>
+          {reviewStatus(p) && (
+            <div className="pub-side__row">
+              <dt>Status</dt>
+              <dd className="pub-status">
+                <StatusDetail pub={p} />
+              </dd>
+            </div>
+          )}
+          {p.directionRefs.length > 0 && (
+            <div className="pub-side__row">
+              <dt>{p.directionRefs.length === 1 ? "Direction" : "Directions"}</dt>
+              {p.directionRefs.map((dir) => (
+                <dd key={dir.slug} className="pub-dir" data-swatch={dir.color}>
+                  <Link href={`/research/${dir.slug}/`}>{dir.short_label}</Link>
+                  {p.counted && live.has(dir.slug) && (
+                    <DirectionLine
+                      label={dir.short_label}
+                      swatch={dir.color}
+                      slugs={lineOf(dir.slug)}
+                      current={p.slug}
+                    />
+                  )}
+                </dd>
+              ))}
+            </div>
+          )}
+          {awards.length > 0 && (
+            <div className="pub-side__row">
+              <dt>Awards</dt>
+              <dd>
+                <a href="#awards-h">{awardSpan(awards.map((a) => a.year))}</a>
+              </dd>
+            </div>
+          )}
+        </dl>
+      </header>
+
+      {p.in_brief && (
+        <section className="pub-brief-sec" aria-labelledby="brief-h">
+          <h2 id="brief-h" className="vh">
+            In brief
+          </h2>
+          <p className="pub-brief">{p.in_brief}</p>
+        </section>
+      )}
+
+      {teaser && (
+        <figure className="pub-teaser">
+          <Img src={teaser.image!} alt={teaser.alt!} className="pub-teaser__img" />
+          {teaser.caption && <figcaption className="pub-teaser__cap">{teaser.caption}</figcaption>}
+        </figure>
+      )}
+
+      <StudyPlate pub={p} preview={c.preview} />
+
+      {awards.length > 0 && (
+        <section className="pub-sec" aria-labelledby="awards-h">
+          <h2 id="awards-h" className="pub-sec__h">
+            Awards
+          </h2>
+          <div className="pub-sec__body">
+            <ul className="pub-awards" role="list">
+              {awards.map((a) => (
+                <li key={`${a.name}-${a.year}`} className="pub-award">
+                  <span className="pub-award__year">{a.year}</span>
+                  <span className="pub-award__body">
+                    <span className="pub-award__head">
+                      <span className="pub-award__name">{a.name}</span>
+                      {isSelfReportedAward(a) && (
+                        <span className="pub-award__src">
+                          <span aria-hidden="true">&dagger;</span>
+                          <span className="vh">, {SELF_REPORTED_WORDING}</span>
+                        </span>
+                      )}
+                    </span>
+                    {a.under_title && (
+                      <span className="pub-award__under">
+                        Under its earlier title &ldquo;{a.under_title}&rdquo;
+                      </span>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {selfAwards && (
+              <p className="pub-fn" aria-hidden="true">
+                &dagger; Reported by the lab.
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {p.presentations.length > 0 && (
+        <section className="pub-sec" aria-labelledby="talks-h">
+          <h2 id="talks-h" className="pub-sec__h">
+            Presentations
+          </h2>
+          <div className="pub-sec__body">
+            <ul className="pub-talks" role="list">
+              {p.presentations.map((t, i) => (
+                <li key={`${t.event}-${i}`}>
+                  {t.url ? (
+                    <a href={t.url} rel="noopener noreferrer">
+                      {t.event}
+                    </a>
+                  ) : (
+                    t.event
+                  )}
+                  {talksMixed && isSelfReportedTalk(t) && (
+                    <span className="pub-award__src">
+                      <span aria-hidden="true">&dagger;</span>
+                      <span className="vh">, {SELF_REPORTED_WORDING}</span>
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+            {/* All of them: one plain line. Some: the awards' dagger convention. */}
+            {talksSelf > 0 &&
+              (talksMixed ? (
+                <p className="pub-fn pub-talks__src" aria-hidden="true">
+                  &dagger; Reported by the lab.
+                </p>
+              ) : (
+                <p className="pub-fn pub-talks__src">Reported by the lab.</p>
+              ))}
+          </div>
+        </section>
+      )}
+
+      {p.body.trim() && (
+        <section className="pub-sec" aria-labelledby="notes-h">
+          <h2 id="notes-h" className="pub-sec__h">
+            Notes
+          </h2>
+          <div className="pub-sec__body pub-notes">
+            <Prose source={p.body} />
+          </div>
+        </section>
+      )}
+
+      {p.publicVersion && <CitationBlock pub={p} />}
+
+      {d.projects.length > 0 && (
+        <section className="pub-sec" aria-labelledby="projects-h">
+          <h2 id="projects-h" className="pub-sec__h">
+            {d.projects.length === 1 ? "Project" : "Projects"}
+          </h2>
+          <ul className="pub-sec__body pub-ledger" role="list">
+            {d.projects.map((pr) => (
+              <li key={pr.slug}>
+                <ProjectCard project={pr} as="h3" />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {d.related.length > 0 && (
+        <section className="pub-sec" aria-labelledby="related-h">
+          <h2 id="related-h" className="pub-sec__h">
+            Related papers
+          </h2>
+          <ul className="pub-sec__body pub-ledger pubs-list" role="list">
+            {d.related.map((r) => (
+              <li key={r.slug}>
+                <PublicationRow pub={r} as="h3" showYear showBrief={false} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {d.news.length > 0 && (
+        <section className="pub-sec" aria-labelledby="news-h">
+          <h2 id="news-h" className="pub-sec__h">
+            In the news
+          </h2>
+          <ul className="pub-sec__body pub-ledger" role="list">
+            {d.news.map((n) => (
+              <li key={n.slug}>
+                <NewsItem item={n} as="h3" />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </article>
   );
 }

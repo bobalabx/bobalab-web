@@ -30,6 +30,8 @@ export const EMPTY_FILTERS: FilterState = { q: "", direction: [], type: [], memb
 export interface FacetOption {
   value: string;
   label: string;
+  /** Direction options: the swatch whose 16 px line segment prefixes the toggle (D-13). */
+  swatch?: string;
 }
 
 /** The options each facet offers (built on the server from content). */

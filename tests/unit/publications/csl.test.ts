@@ -7,6 +7,7 @@ import {
   pageRange,
   referenceUrl,
   toCsl,
+  typeWord,
   venueLine,
   venueText,
 } from "@/lib/publications/csl";
@@ -152,6 +153,21 @@ describe("toCsl", () => {
       referenceUrl({ links: { pdf: "https://p.org/a.pdf", ssrn: "https://ssrn.com/x" } }),
     ).toBe("https://ssrn.com/x");
     expect(referenceUrl({ links: { pdf: "/uploads/a.pdf" } })).toBeUndefined();
+  });
+});
+
+describe("typeWord", () => {
+  it("names a thesis entered as `other` by its venue, like the citation does", () => {
+    const thesis = {
+      type: "other",
+      venue: "S.M. thesis, Massachusetts Institute of Technology",
+    } as const;
+    expect(typeWord(thesis)).toBe("Thesis");
+    expect(toCsl({ ...thesis, slug: "x", title: "T", authors: [] } as never).type).toBe("thesis");
+    expect(typeWord({ type: "other", venue: "Invited essay" })).toBe("Other");
+    expect(typeWord({ type: "other" })).toBe("Other");
+    expect(typeWord({ type: "dissertation", venue: "Ph.D. dissertation, X" })).toBe("Dissertation");
+    expect(typeWord({ type: "journal", venue: "Management Science" })).toBe("Journal article");
   });
 });
 

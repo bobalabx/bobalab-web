@@ -1,7 +1,9 @@
 /**
- * "Cite this paper" (brief §D8): an APA reference and a copyable BibTeX
- * entry, both generated at build time with citation-js from content.
- * Server component; only the Copy button is client code.
+ * "Cite" (brief §D8; P3 paper.html `.cite`): an APA reference and a BibTeX
+ * entry side by side, each under a hairline bar with its own Copy button, both
+ * generated at build time with citation-js from content. BibTeX is set in the
+ * system ui-monospace stack (no mono webfont, D-13 item 3).
+ * Server component; only the Copy buttons are client code.
  */
 import type { CSSProperties } from "react";
 import type { PublicationView } from "@/lib/content/load";
@@ -39,28 +41,33 @@ export function CitationBlock({ pub }: { pub: PublicationView }) {
   const bibtex = bibtexFor(pub);
   const reference = formatCitation(pub);
   return (
-    <section className="pub-section pub-cite" aria-labelledby="cite-h">
-      <h2 id="cite-h" className="pub-section__h">
-        Cite this paper
+    <section className="pub-sec pub-cite" aria-labelledby="cite-h">
+      <h2 id="cite-h" className="pub-sec__h">
+        Cite
       </h2>
-      {reference.length > 0 && (
-        <div className="pub-cite__ref">
-          <h3 className="pub-cite__label">APA</h3>
-          <p className="pub-cite__text">
-            {reference.map((s, i) => (s.italic ? <i key={i}>{s.text}</i> : s.text))}
-          </p>
+      <div className="pub-sec__body pub-cite__grid">
+        {reference.length > 0 && (
+          <div className="pub-cite__ref">
+            <div className="pub-cite__bar">
+              <h3 className="pub-cite__label">APA</h3>
+              <CopyButton targetId="pub-apa" what="APA reference" />
+            </div>
+            <p className="pub-cite__text" id="pub-apa">
+              {reference.map((s, i) => (s.italic ? <i key={i}>{s.text}</i> : s.text))}
+            </p>
+          </div>
+        )}
+        <div className="pub-bib">
+          <div className="pub-cite__bar">
+            <h3 className="pub-cite__label">BibTeX</h3>
+            <CopyButton targetId="pub-bibtex" what="BibTeX" />
+          </div>
+          <pre className="pub-bib__pre">
+            <code id="pub-bibtex">
+              <BibLines bibtex={bibtex} />
+            </code>
+          </pre>
         </div>
-      )}
-      <div className="pub-bib">
-        <div className="pub-bib__bar">
-          <h3 className="pub-cite__label">BibTeX</h3>
-          <CopyButton targetId="pub-bibtex" />
-        </div>
-        <pre className="pub-bib__pre">
-          <code id="pub-bibtex">
-            <BibLines bibtex={bibtex} />
-          </code>
-        </pre>
       </div>
     </section>
   );

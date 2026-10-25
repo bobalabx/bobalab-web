@@ -9,6 +9,7 @@
  */
 import type { PublicationEntry } from "@/lib/content/schema";
 import { formatDate } from "@/lib/content/dates";
+import { PUBLICATION_TYPE_LABELS } from "@/components/ui/labels";
 import { asciiKey, splitName, type CslName } from "./names";
 
 export type CitablePublication = Pick<
@@ -115,6 +116,17 @@ function workingPaperParts(venue: string | undefined): { publisher?: string; num
 
 const isMasters = (label: string | undefined) =>
   !!label && /\b(s\.?\s?m\.?|m\.?\s?s\.?c?\.?|m\.?\s?a\.?|master'?s?)\b/i.test(label);
+
+/**
+ * The type word shown for a publication. The schema has no "thesis" type, so a
+ * master's thesis is entered as `other` with a thesis venue ("S.M. thesis,
+ * Massachusetts Institute of Technology"); the citation already treats it as a
+ * thesis (toCsl below), and the page says "Thesis" rather than "Other".
+ */
+export function typeWord(p: Pick<PublicationEntry, "type" | "venue">): string {
+  if (p.type === "other" && thesisParts(p.venue).label) return "Thesis";
+  return PUBLICATION_TYPE_LABELS[p.type];
+}
 
 /** The best non-DOI link for a reference (publisher page → SSRN → arXiv → PDF). */
 export function referenceUrl(p: Pick<PublicationEntry, "doi" | "links">): string | undefined {

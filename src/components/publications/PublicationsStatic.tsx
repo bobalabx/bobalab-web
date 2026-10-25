@@ -1,81 +1,59 @@
 /**
  * The full publication list, grouped by year, with year jump links: what the
  * page shows without JavaScript and the <Suspense> fallback of the filter
- * island (brief §D7). Same layout as the island, so nothing jumps sideways
- * when the island takes over.
+ * island (brief §D7). Same layout as the island, so nothing moves when the
+ * island takes over.
  *
  * The static export ships this fallback in the HTML; with JavaScript the
- * island replaces it after hydration. Below 64rem the island's search box and
- * "Filters" button sit ABOVE the list, so swapping them in would push the
- * whole list down (~200 px: a layout shift over the §G2 CLS budget). The
- * fallback therefore draws an inert, aria-hidden stand-in of the same size.
- * Without JavaScript it would be a dead control, so a <noscript> style hides
- * it (the same pattern as the People filters).
+ * island replaces it after hydration. The search and filter block sits ABOVE
+ * the list at every width, so the fallback draws the island's block as an
+ * inert, aria-hidden stand-in of the same size (FilterBlock `pending`);
+ * without JavaScript a <noscript> style hides it (no dead controls).
  */
 import type { ReactNode } from "react";
-import { Icon } from "@/components/ui/icons";
+import { EMPTY_FILTERS, type FacetKey, type Facets } from "@/lib/publications/filters";
+import { FilterBlock } from "./FilterBlock";
 import { YearGroups, YearNav, pubCount, type YearGroup } from "./YearGroups";
-
-const NOSCRIPT_CSS = ".pubs-filters--pending{display:none!important}";
-
-/**
- * Visual stand-in for the island's "Search and filter" block (same classes and
- * box sizes as PublicationsExplorer; keep the two in step). Not interactive:
- * `inert`, `aria-hidden`, and the input is read-only and out of the tab order.
- */
-function FiltersPending({ hasPanel }: { hasPanel: boolean }) {
-  return (
-    <div className="pubs-filters pubs-filters--pending" aria-hidden="true" inert>
-      {/* Inside the stand-in, so it adds no grid row of its own when scripting is off. */}
-      <noscript>
-        <style>{NOSCRIPT_CSS}</style>
-      </noscript>
-      <p className="pubs-filters__h">Search and filter</p>
-      <div className="pubs-search">
-        <span className="pubs-label">Search publications</span>
-        <div className="pubs-search__field">
-          <Icon name="search" className="pubs-search__icon" />
-          <input
-            type="search"
-            className="pubs-input"
-            placeholder="Title, author or topic"
-            readOnly
-            tabIndex={-1}
-          />
-        </div>
-      </div>
-      {hasPanel && (
-        <span className="pubs-toggle">
-          <Icon name="filter" />
-          <span>Filters</span>
-          <Icon name="chevron" className="pubs-toggle__chev" />
-        </span>
-      )}
-    </div>
-  );
-}
 
 export function PublicationsStatic({
   groups,
   entries,
   total,
+  facets,
+  visible = [],
+  counts = {},
   hasPanel = false,
 }: {
   groups: YearGroup[];
   entries: Record<string, ReactNode>;
   total: number;
-  /** The island will show a "Filters" panel (see hasFilterPanel in lib/publications/filters). */
+  /** The island's facets: when given, the stand-in filter block is drawn. */
+  facets?: Facets;
+  visible?: FacetKey[];
+  counts?: Partial<Record<FacetKey, Map<string, number>>>;
+  /** The island will show a filter panel (see hasFilterPanel in lib/publications/filters). */
   hasPanel?: boolean;
 }) {
   return (
     <div className="pubs-layout">
-      <div className="pubs-aside">
-        <YearNav groups={groups} />
-        <FiltersPending hasPanel={hasPanel} />
-      </div>
+      {facets && (
+        <FilterBlock
+          facets={facets}
+          visible={visible}
+          counts={counts}
+          state={EMPTY_FILTERS}
+          query=""
+          panelOpen={false}
+          hasPanel={hasPanel}
+          pending
+        />
+      )}
       <div className="pubs-results">
         <div className="pubs-bar">
-          <p className="pubs-status">{pubCount(total)}</p>
+          <div className="pubs-bar__status">
+            <p className="pubs-status">{pubCount(total)}</p>
+          </div>
+          <YearNav groups={groups} />
         </div>
         <YearGroups groups={groups} entries={entries} />
       </div>

@@ -8,7 +8,8 @@
  *
  *   npx playwright test tests/e2e/publications.spec.ts
  *
- * Screenshots (1366×768 and 390×844, light and dark) land in test-results/WP3/.
+ * Screenshots (1440×900 and 390×844, light and dark) land in
+ * test-results/redesign-publications/ (D-13 redesign).
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -21,7 +22,7 @@ import { applyFilters, parseFilters } from "@/lib/publications/filters";
 
 test.describe.configure({ timeout: 90_000 });
 
-const SHOTS = "test-results/WP3";
+const SHOTS = "test-results/redesign-publications";
 const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 const GOLDEN = path.join(process.cwd(), "tests/unit/publications/golden");
 const MS_PAPER = "bastani-2026-rl-tips";
@@ -235,26 +236,59 @@ test("every materials link's accessible name includes the paper title", async ({
   }
 });
 
-test("statuses show the lab's claim with 'as of' and the self-reported wording", async ({
+test("statuses are dated on the row; one footnote says they are reported by the lab (D-13 item 7)", async ({
   page,
 }) => {
   await open(page, "/publications/");
   const c = await contentFor(page);
-  // A real review claim (a bare "Working paper" status repeats the type and gets no note).
+  // A real review claim (a bare "Working paper" status on a working paper, or
+  // "In progress" on work in progress, repeats the type word and is not shown).
   const p = c.countedPublications.find(
     (x) =>
       x.status !== "published" &&
       x.status !== "working-paper" &&
+      x.status !== "in-progress" &&
       x.status_source === "self-reported" &&
       x.as_of,
   );
   test.skip(!p, "no self-reported status in this build");
   const entry = page.locator(`.pubs-results article[aria-labelledby="pub-${p!.slug}"]`).first();
-  await expect(entry.locator(".bl-pub__status")).toContainText("as of ");
-  await expect(entry.locator(".bl-pub__status")).toContainText("reported by the lab");
+  await expect(entry.locator(".bl-pub__status")).toContainText(", as of ");
+  // No per-row hedge: the page carries one provenance footnote instead.
+  await expect(page.locator(".pubs-results")).not.toContainText("reported by the lab");
+  await expect(page.locator(".pubs-fn")).toHaveCount(1);
+  await expect(page.locator(".pubs-fn")).toContainText("as reported by the lab");
 
+  // Work in progress says so once (the type word), not again as "In progress, as of …".
+  const wipRow = c.countedPublications.find(
+    (x) => x.type === "work-in-progress" && x.status === "in-progress" && !x.status_note,
+  );
+  if (wipRow) {
+    await expect(
+      page.locator(`.pubs-results article[aria-labelledby="pub-${wipRow.slug}"] .bl-pub__status`),
+    ).toHaveCount(0);
+  }
+
+  // The paper page states its one status with the date and the source.
   await open(page, `/publications/${p!.slug}/`);
-  await expect(page.locator(".pub-status__meta")).toContainText(/^As of .+ · reported by the lab$/);
+  await expect(page.locator(".pub-status__meta")).toHaveText(
+    /^As of .+, as reported by the lab\.$/,
+  );
+});
+
+test("ledger rows have one link in the main column: the title (names are plain, P3)", async ({
+  page,
+}) => {
+  await open(page, "/publications/");
+  // Lab members are set in 600 without a link; the paper page links them.
+  await expect(page.locator(".pubs-results .bl-pub__authors a")).toHaveCount(0);
+  expect(await page.locator(".pubs-results strong.bl-pub__author--lab").count()).toBeGreaterThan(0);
+  const extra = await page.evaluate(() =>
+    Array.from(document.querySelectorAll(".pubs-results .bl-pub__main"))
+      .filter((m) => m.querySelectorAll("a").length !== 1)
+      .map((m) => m.closest("article")?.getAttribute("aria-labelledby")),
+  );
+  expect(extra).toEqual([]);
 });
 
 test("lab members are highlighted and linked only when listed; external authors link to their web page", async ({
@@ -294,14 +328,30 @@ test("talks known only from the PI's CV say 'reported by the lab' (CON-03)", asy
   await open(page, `/publications/${slug}/`);
   const talks = page.locator('section[aria-labelledby="talks-h"]');
   await expect(talks.locator(".pub-talks li")).toHaveCount(p!.presentations.length);
-  await expect(talks.locator(".pub-talks__src")).toHaveText(
-    p!.presentations.every((t) => !t.url)
-      ? "Reported by the lab."
-      : "Talks without a link are reported by the lab.",
+  // All of them from the CV: one plain line under the list, no daggers.
+  expect(p!.presentations.every((t) => !t.url)).toBe(true);
+  await expect(talks.locator(".pub-talks__src")).toHaveText("Reported by the lab.");
+  await expect(talks.locator(".pub-award__src")).toHaveCount(0);
+
+  // Some from the CV, some documented: a dagger on each CV-only talk (announced
+  // as "reported by the lab") and the awards' footnote, never "talks without a link".
+  const mixed = c.publications.find(
+    (x) => x.presentations.some((t) => t.url) && x.presentations.some((t) => !t.url),
   );
+  test.skip(!mixed, "no paper with both kinds of talk in this build");
+  await open(page, `/publications/${mixed!.slug}/`);
+  const rows = page.locator('section[aria-labelledby="talks-h"] .pub-talks li');
+  await expect(rows.locator(".pub-award__src")).toHaveCount(
+    mixed!.presentations.filter((t) => !t.url).length,
+  );
+  await expect(rows.locator(".pub-award__src").first()).toHaveText("†, reported by the lab");
+  await expect(page.locator(".pub-talks__src")).toHaveText("† Reported by the lab.");
+  await expect(page.locator("main")).not.toContainText("without a link");
 });
 
-test("awards known only from the PI's CV say 'Reported by the lab' (CON-03)", async ({ page }) => {
+test("awards known only from the PI's CV are marked as reported by the lab (CON-03)", async ({
+  page,
+}) => {
   await page.goto("/");
   const c = await contentFor(page);
   const p = c.getPublication(MS_PAPER);
@@ -316,7 +366,11 @@ test("awards known only from the PI's CV say 'Reported by the lab' (CON-03)", as
     await expect(row).toHaveCount(1);
     await expect(row.locator(".pub-award__src")).toHaveCount(a.source === "self-reported" ? 1 : 0);
   }
-  await expect(page.locator(".pub-award__src").first()).toHaveText("Reported by the lab");
+  // A dagger on the row (announced as "reported by the lab"), one footnote below the list.
+  await expect(page.locator(".pub-award__src").first()).toHaveText("†, reported by the lab");
+  await expect(page.locator('section[aria-labelledby="awards-h"] .pub-fn')).toHaveText(
+    "† Reported by the lab.",
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -369,7 +423,7 @@ test("Copy BibTeX copies the <pre> and announces 'Copied'", async ({ browser, br
   const button = page.getByRole("button", { name: "Copy BibTeX" });
   await expect(button).toBeVisible();
   await button.click();
-  await expect(page.locator(".pub-cite [role=status]")).toHaveText("Copied");
+  await expect(page.locator(".pub-bib [role=status]")).toHaveText("Copied");
   await expect(page.getByRole("button", { name: "Copied" })).toBeVisible();
   // The OS clipboard may hand back CRLF line ends (Windows).
   const raw = await page.evaluate(() => navigator.clipboard.readText());
@@ -386,7 +440,9 @@ test("without JavaScript the BibTeX <pre> is there and the Copy button is hidden
   const page = await ctx.newPage();
   await open(page, `/publications/${MS_PAPER}/`);
   await expect(page.locator("pre #pub-bibtex")).toContainText("@article{bastani2026improving,");
-  await expect(page.locator(".pub-copy")).toBeHidden();
+  // Both Copy buttons (APA and BibTeX) stay hidden without JavaScript.
+  await expect(page.locator(".pub-copy")).toHaveCount(2);
+  for (const b of await page.locator(".pub-copy").all()) await expect(b).toBeHidden();
   await ctx.close();
 });
 
@@ -396,8 +452,8 @@ test("work in progress pages say so and carry no Scholar meta", async ({ page })
   const wip = c.inProgress[0];
   test.skip(!wip, "no work in progress in this build");
   await open(page, `/publications/${wip!.slug}/`);
-  // "Work in progress" (the type) or the "In progress" badge (other types, D-05).
-  await expect(page.locator(".pub-eyebrow")).toContainText(/in progress/i);
+  // "Work in progress" (the type) or "In progress: no public version yet" (other types, D-05).
+  await expect(page.locator(".pub-side .pub-type")).toContainText(/in progress/i);
   await expect(page.locator('meta[name="citation_title"]')).toHaveCount(0);
   await expect(page.locator(".pub-cite")).toHaveCount(0);
 });
@@ -494,10 +550,170 @@ test("no horizontal scroll at 320 px (WCAG 1.4.10)", async ({ page }) => {
 });
 
 // ---------------------------------------------------------------------------
+// Study-design plate (D-13 item 8): preview or plate_verified only; a finite
+// 4-step step-through; the whole design under reduced motion and without JS.
+
+async function plateExpected(page: Page) {
+  const c = await contentFor(page);
+  const p = c.getPublication(MS_PAPER)!;
+  return p.plate_verified === true || c.preview;
+}
+
+test("the Bastani plate shows only when verified or in preview, with its source line", async ({
+  page,
+}) => {
+  await open(page, `/publications/${MS_PAPER}/`);
+  const want = await plateExpected(page);
+  const plate = page.locator("figure.plate");
+  await expect(plate).toHaveCount(want ? 1 : 0);
+  test.skip(!want, "plate not verified and not a preview build");
+  await expect(plate.locator("figcaption")).toContainText("not data");
+  await expect(plate.locator(".plate-src")).toContainText("arXiv:2108.08454");
+  // Labels are HTML, never SVG text.
+  expect(await plate.locator("svg text").count()).toBe(0);
+  // The Learning to Gig plate stays off.
+  await open(page, "/publications/deng-2025-learning-to-gig/");
+  await expect(page.locator("figure.plate")).toHaveCount(0);
+});
+
+test("plate step-through: 4 finite steps announced politely, then back to the whole design", async ({
+  page,
+}) => {
+  await open(page, `/publications/${MS_PAPER}/`);
+  test.skip(!(await plateExpected(page)), "no plate in this build");
+  const pl = page.locator(".pl");
+  const step = page.locator(".plate-btn--step");
+  const note = page.locator(".plate-note");
+  await expect(note).toHaveAttribute("aria-live", "polite");
+  await expect(pl).toHaveAttribute("data-at", "0");
+  await expect(step).toHaveText("Step through the design");
+  // Once stepping, the note's slot is as tall as the longest step: the plate
+  // never moves between steps (checked at desktop and phone width).
+  const plTop = () => pl.evaluate((el) => Math.round(el.getBoundingClientRect().top + scrollY));
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    const tops: number[] = [];
+    for (let k = 1; k <= 4; k++) {
+      await step.click();
+      await expect(pl).toHaveAttribute("data-at", String(k));
+      await expect(note).toContainText(`Step ${k} of 4.`);
+      tops.push(await plTop());
+    }
+    expect(new Set(tops).size, `${width}px: .pl top per step ${tops.join(",")}`).toBe(1);
+    await expect(step).toHaveText("Start again");
+    if (width !== 390) {
+      await page.getByRole("button", { name: "Show all steps" }).click();
+      await expect(pl).toHaveAttribute("data-at", "0");
+    }
+  }
+  await page.setViewportSize({ width: 1280, height: 720 });
+  // Step 1 dims the later steps (opacity only).
+  await step.click();
+  await expect(pl).toHaveAttribute("data-at", "1");
+  await page.waitForTimeout(600);
+  const dim = await page
+    .locator('.pl [data-k="4"]')
+    .first()
+    .evaluate((el) => Number(getComputedStyle(el).opacity));
+  expect(dim).toBeLessThan(0.5);
+  await page.getByRole("button", { name: "Show all steps" }).click();
+  await expect(pl).toHaveAttribute("data-at", "0");
+  await expect(step).toBeFocused();
+  // Nothing loops.
+  const infinite = await page.evaluate(
+    () =>
+      document.getAnimations().filter((a) => a.effect?.getComputedTiming().iterations === Infinity)
+        .length,
+  );
+  expect(infinite).toBe(0);
+});
+
+test("plate under reduced motion and without JS: every step shown, no step button", async ({
+  browser,
+}) => {
+  for (const mode of ["reduce", "nojs"] as const) {
+    const ctx = await browser.newContext({
+      reducedMotion: mode === "reduce" ? "reduce" : "no-preference",
+      javaScriptEnabled: mode !== "nojs",
+    });
+    const page = await ctx.newPage();
+    await open(page, `/publications/${MS_PAPER}/`);
+    const c = await contentFor(page);
+    const p = c.getPublication(MS_PAPER)!;
+    if (!(p.plate_verified || c.preview)) {
+      await ctx.close();
+      continue;
+    }
+    await expect(page.locator(".plate-btn--step"), mode).toBeHidden();
+    await expect(page.locator(".pl")).toHaveAttribute("data-at", "0");
+    const hidden = await page.evaluate(
+      () =>
+        Array.from(
+          document.querySelectorAll<HTMLElement>('.pl [data-k]:not([data-k="3o"])'),
+        ).filter((el) => Number(getComputedStyle(el).opacity) < 0.99).length,
+    );
+    expect(hidden, mode).toBe(0);
+    await page.locator("figure.plate").screenshot({ path: `${SHOTS}/plate-${mode}.png` });
+    await ctx.close();
+  }
+});
+
+// ---------------------------------------------------------------------------
+// D-13 AI-tell probe on both templates (DIRECTION §5.0): no pills or rounded
+// boxes, no arrows in text, no tracked caps, no mono outside DOI/BibTeX, at
+// most two heavy (2 px) rules per 900 px window.
+
+test("AI-tell probe: no pills, boxes, arrows, tracked caps or stray mono", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  for (const url of ["/publications/", `/publications/${MS_PAPER}/`]) {
+    await open(page, url);
+    const r = await page.evaluate(() => {
+      const main = document.querySelector("main")!;
+      const els = Array.from(main.querySelectorAll<HTMLElement>("*"));
+      const out = { pills: 0, boxes: 0, arrows: 0, caps: 0, mono: [] as string[], heavy: 0 };
+      for (const el of els) {
+        const cs = getComputedStyle(el);
+        const rad = parseFloat(cs.borderTopLeftRadius);
+        const box = el.getBoundingClientRect();
+        const painted = cs.borderTopWidth !== "0px" || cs.backgroundColor !== "rgba(0, 0, 0, 0)";
+        const disc = Math.abs(box.width - box.height) < 2;
+        if (painted && rad > 0 && rad >= box.height / 2 - 1 && box.height > 0 && !disc) out.pills++;
+        if (painted && rad > 2 && box.width > 60 && !disc) out.boxes++;
+        if (cs.textTransform === "uppercase" && parseFloat(cs.letterSpacing) > 0) out.caps++;
+        const own = Array.from(el.childNodes)
+          .filter((n) => n.nodeType === 3)
+          .map((n) => n.textContent ?? "")
+          .join("");
+        if (/[→←↗]/.test(own)) out.arrows++;
+        if (own.trim() && /mono|consol|menlo/i.test(cs.fontFamily) && !el.closest(".doi, pre"))
+          out.mono.push(el.className);
+        if (box.height > 0) {
+          for (const side of ["Top", "Bottom"] as const) {
+            if (
+              cs.getPropertyValue(`border-${side.toLowerCase()}-width`) === "2px" &&
+              cs.getPropertyValue(`border-${side.toLowerCase()}-style`) === "solid"
+            )
+              out.heavy++;
+          }
+        }
+      }
+      return out;
+    });
+    expect(r.pills, url).toBe(0);
+    expect(r.boxes, url).toBe(0);
+    expect(r.arrows, url).toBe(0);
+    expect(r.caps, url).toBe(0);
+    expect(r.mono, url).toEqual([]);
+    // The full ledger (index) or the plate (paper): one 2 px pair per page.
+    expect(r.heavy, url).toBeLessThanOrEqual(2);
+  }
+});
+
+// ---------------------------------------------------------------------------
 // Visual QA + axe on every WP3 template, both schemes, desktop and phone
 
 const VIEWPORTS = [
-  { name: "1366", width: 1366, height: 768 },
+  { name: "1440", width: 1440, height: 900 },
   { name: "390", width: 390, height: 844 },
 ] as const;
 

@@ -12,8 +12,7 @@
  */
 import type { PublicationView } from "@/lib/content/load";
 import { scholarMeta } from "@/lib/seo/scholar";
-import { PUBLICATION_TYPE_LABELS } from "@/components/ui/labels";
-import { toCsl, venueText } from "./csl";
+import { toCsl, typeWord, venueText } from "./csl";
 
 type ScholarInput = Parameters<typeof scholarMeta>[0] &
   Pick<PublicationView, "slug" | "links" | "status">;
@@ -57,7 +56,7 @@ export function paperFallbackDescription(
   >,
 ): string {
   const who = joinNames(p.authors.map((a) => a.name));
-  const head = `${PUBLICATION_TYPE_LABELS[p.type]}${who ? ` by ${who}` : ""}.`;
+  const head = `${typeWord(p)}${who ? ` by ${who}` : ""}.`;
   const venue = venueText(p);
   return venue ? `${head} ${venue}.` : head;
 }

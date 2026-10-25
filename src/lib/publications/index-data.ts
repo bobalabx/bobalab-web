@@ -9,12 +9,22 @@
 import type { Content, PublicationView } from "@/lib/content/load";
 import { PUBLICATION_TYPES } from "@/lib/content/schema";
 import { PUBLICATION_TYPE_LABELS } from "@/components/ui/labels";
+import { typeWord } from "./csl";
 import { toPubDoc, type PubDoc } from "./search";
 import type { Facets } from "./filters";
 
 export interface IndexData {
   docs: PubDoc[];
   facets: Facets;
+}
+
+/**
+ * A type toggle's label: the type word its items share ("Thesis" when every
+ * `other` entry is a thesis, see typeWord), otherwise the schema label.
+ */
+function typeLabel(pubs: readonly PublicationView[], t: PublicationView["type"]): string {
+  const words = new Set(pubs.filter((p) => p.type === t).map(typeWord));
+  return words.size === 1 ? [...words][0]! : PUBLICATION_TYPE_LABELS[t];
 }
 
 export function buildIndexData(
@@ -31,10 +41,10 @@ export function buildIndexData(
   const facets: Facets = {
     direction: [...c.directions, ...c.archivedDirections]
       .filter((d) => dirs.has(d.slug))
-      .map((d) => ({ value: d.slug, label: d.short_label })),
+      .map((d) => ({ value: d.slug, label: d.short_label, swatch: d.color })),
     type: PUBLICATION_TYPES.filter((t) => types.has(t)).map((t) => ({
       value: t,
-      label: PUBLICATION_TYPE_LABELS[t],
+      label: typeLabel(pubs, t),
     })),
     member: c.people
       .filter((p) => members.has(p.slug))

@@ -1,25 +1,21 @@
 "use client";
 /**
- * "Copy BibTeX" (brief §D8, §G1 4.1.3): copies the text of the <pre> with
- * `targetId` and announces "Copied" through a polite live region. If the
+ * "Copy" for a citation (brief §D8, §G1 4.1.3): copies the text of the element
+ * with `targetId` and announces "Copied" through a polite live region. If the
  * Clipboard API is unavailable or refused, it selects the text instead and
- * says how to copy it. Without JavaScript the button stays hidden and the
- * <pre> remains selectable (the fallback).
+ * says how to copy it. Without JavaScript the button stays hidden and the text
+ * remains selectable (the fallback).
+ *
+ * D-13: a plain underlined text button ("Copy"), no icon. Its accessible name
+ * says what it copies ("Copy BibTeX").
  */
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Icon } from "@/components/ui/icons";
 
 const noopSubscribe = () => () => {};
 
 type Status = "idle" | "copied" | "selected";
 
-export function CopyButton({
-  targetId,
-  label = "Copy BibTeX",
-}: {
-  targetId: string;
-  label?: string;
-}) {
+export function CopyButton({ targetId, what = "BibTeX" }: { targetId: string; what?: string }) {
   const isClient = useSyncExternalStore(
     noopSubscribe,
     () => true,
@@ -64,8 +60,8 @@ export function CopyButton({
         onClick={onClick}
         data-status={status}
       >
-        <Icon name={status === "copied" ? "check" : "copy"} />
-        <span>{status === "copied" ? "Copied" : label}</span>
+        {status === "copied" ? "Copied" : "Copy"}
+        <span className="vh"> {what}</span>
       </button>
       <span className="vh" role="status" aria-live="polite" aria-atomic="true">
         {status === "copied"
