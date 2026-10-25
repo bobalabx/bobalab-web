@@ -747,6 +747,14 @@
           ),
         ),
         has(d.question) ? h("p", { className: "t-lead" }, d.question) : null,
+        has(d.home_question)
+          ? h(
+              "p",
+              { className: "cms-preview__meta" },
+              "On the home page: ",
+              h("strong", null, d.home_question),
+            )
+          : null,
         has(d.summary) ? h("p", null, d.summary) : null,
         d.draft ? h("p", null, DraftBadge(true)) : null,
       ),
@@ -1097,11 +1105,19 @@
       Note(
         [
           h("strong", { key: "a" }, "Preview. "),
-          "The mission under the lab name, and the home page’s featured findings.",
+          "The line under the home page heading (the mission when it is empty), and the featured findings. The mission is also the About page’s “Mission” and the search-result description.",
         ],
         false,
       ),
-      has(d.mission) ? h("p", { className: "t-lead", key: "mission" }, d.mission) : null,
+      has(d.statement) ? h("h1", { key: "statement" }, d.statement) : null,
+      has(d.why) ? h("p", { className: "t-lead", key: "why" }, d.why) : null,
+      has(d.mission)
+        ? h(
+            "p",
+            { className: has(d.why) ? "cms-preview__meta" : "t-lead", key: "mission" },
+            d.mission,
+          )
+        : null,
       d.draft ? h("p", { className: "cms-preview__meta", key: "draft" }, DraftBadge(true)) : null,
       findings.length
         ? Section("pv-featured", "What we’ve learned", [

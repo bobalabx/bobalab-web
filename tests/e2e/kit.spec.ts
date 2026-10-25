@@ -122,15 +122,27 @@ test("RouteFocus focuses the h1 after a client-side navigation", async ({ page }
   await expect(page.locator("main h1")).toBeFocused();
 });
 
-test("data-intro is set on the first home view only", async ({ page }) => {
+test("the pre-paint script no longer sets data-intro (D-14: Fig. 1 arrives on /research/#map)", async ({
+  page,
+}) => {
   await page.goto("/");
-  expect(await page.evaluate(() => document.documentElement.hasAttribute("data-intro"))).toBe(true);
-  await page.waitForTimeout(2100); // the pre-paint script clears it after 2 s (WP1 request 3)
   expect(await page.evaluate(() => document.documentElement.hasAttribute("data-intro"))).toBe(
     false,
   );
+  expect(await page.evaluate(() => sessionStorage.getItem("bobalab-intro"))).toBeNull();
+});
+
+test("data-cup-intro is set pre-paint on the first home view only", async ({ page }) => {
   await page.goto("/");
-  expect(await page.evaluate(() => document.documentElement.hasAttribute("data-intro"))).toBe(
+  expect(await page.evaluate(() => document.documentElement.hasAttribute("data-cup-intro"))).toBe(
+    true,
+  );
+  await page.waitForTimeout(1300); // removed 1.2 s after `load` (home-6)
+  expect(await page.evaluate(() => document.documentElement.hasAttribute("data-cup-intro"))).toBe(
+    false,
+  );
+  await page.goto("/");
+  expect(await page.evaluate(() => document.documentElement.hasAttribute("data-cup-intro"))).toBe(
     false,
   );
 });

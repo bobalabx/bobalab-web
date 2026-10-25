@@ -132,10 +132,15 @@ describe("paths", () => {
 });
 
 describe("pre-paint script", () => {
-  it("applies the stored motion choice and sets data-intro once per session on home", () => {
+  it("applies the stored motion choice; only the cup's intro is gated pre-paint (D-14)", () => {
     const src = prePaintSource("/site");
     expect(src).toContain('localStorage.getItem("bobalab-motion")');
-    expect(src).toContain('sessionStorage.getItem("bobalab-intro")');
+    // Fig. 1's arrival moved to /research/#map (research-1): FigureIsland owns its key.
+    expect(src).not.toContain('"bobalab-intro"');
+    // The homepage cup's settle-once intro (home-1), timed from `load` (home-6).
+    expect(src).toContain('s.getItem("bobalab-cup-intro")');
+    expect(src).toContain('"data-cup-intro"');
+    expect(src).toContain('addEventListener("load"');
     expect(src).toContain('"/site"');
     expect(() => new Function(src)).not.toThrow();
   });

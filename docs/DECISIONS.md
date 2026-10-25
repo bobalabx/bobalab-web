@@ -153,6 +153,7 @@ Labels: DOCUMENTED (primary source), MEASURED (we ran it), HYPOTHESIS, UNKNOWN.
   - **Geometry** is defined for 3, 4 and 5 live directions, plus an empty state.
   - **Below the fold:** new papers (3 ruled rows) beside news (4 dated lines); then people (round consented photos with first names, counts as a sentence, no initials discs); then the footer.
 - **The timeline is not deleted.** It moves to `/research/` as `<section id="map">`, "Explore: how the four directions connect", in a tinted band with a one-sentence key, using the existing `PearlFigure`. The homepage links to it once: "See how the four directions connect".
+  - Built (RESEARCH package): open by default, no disclosure; the key is one sentence above the plate; the arrival plays once per session when the map scrolls into view. The live ledger dropped its per-row strips because they duplicated the map (JUDGE.md recommendation; **owner to confirm**, and restore them by passing `strip` to the live `DirectionRow`s in `src/app/research/page.tsx`). The map's lane pearls are the page's only `pearl-{slug}` elements.
 - **Tokens:**
   - a scoped `--t-display` for the home h1, about 5–5.5rem desktop and 2.5–2.75rem mobile. This is the only exception to the 2.25rem cap.
   - `--tea` #F4ECE2 and `--tea-dark` #211C17, used for the cup fill only.

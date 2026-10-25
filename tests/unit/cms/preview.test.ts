@@ -325,5 +325,16 @@ describe("preview templates", () => {
     expect(home).toContain("What we’ve learned");
     expect(home).toContain(EVIDENCE_LABELS.published);
     expect(home).toContain("Paper One");
+
+    // D-14 (change request foundation-lite-1): the statement, the why line and the
+    // direction's short homepage question show in the editor preview.
+    const home2 = textOf(
+      render("home", { statement: "S.", why: "Why line.", mission: "We study work." }),
+    );
+    expect(home2).toContain("S.");
+    expect(home2).toContain("Why line.");
+    expect(home2).toContain("We study work.");
+    const dir = textOf(render("directions", { title: "T", home_question: "Short?" }));
+    expect(dir).toContain("On the home page: Short?");
   });
 });

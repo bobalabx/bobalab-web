@@ -17,7 +17,7 @@ content/  ──read.ts──► RawContent ──validate.ts──► issues (n
 
 ## 2. Layout contract (`src/app/layout.tsx`, WP0)
 
-- `<html lang="en" suppressHydrationWarning>` carries the font variables. `data-motion="reduce"` and `data-intro` are set pre-paint by `PrePaintScript` (inline `<head>` script).
+- `<html lang="en" suppressHydrationWarning>` carries the font variables. `data-motion="reduce"` and (first home view of the session) `data-cup-intro` are set pre-paint by `PrePaintScript` (inline `<head>` script).
 - `<body>`: `SkipLink` → `PreviewRibbon` (preview builds only) → `SiteHeader` → **`<main id="main" tabIndex={-1}>{children}</main>`** → `SiteFooter` → `RouteFocus`.
 - **Pages must not render their own `<main>`.** Each page renders exactly one `<h1 tabIndex={-1}>`; `RouteFocus` focuses it after client-side navigation (not on first load).
 - Metadata: root `title.template` is `"%s · BOBALAB"`; pages call `pageMetadata({ title, description, path })` from `src/lib/seo/metadata.ts`. `metadataBase` = `NEXT_PUBLIC_SITE_URL` → `site.site_url` → `https://bobalab-berkeley.github.io`, plus the base path.
@@ -125,9 +125,9 @@ Errors fail CI (`validate-content`); warnings print. Each code has a fixture tes
 - **Layers**: tokens/base → `@layer base`; prose + primitives → `@layer components` (Tailwind utilities can override); `motion.css` and `forced-colors.css` unlayered (always win).
 - **Fonts** `src/fonts/index.ts` (next/font/local): **one file**, `archivo-latin-wdth-normal.woff2` (wdth 62–125 × wght 100–900, latin; 88.0 KiB preloaded), variable `--font-archivo`, declared with `font-stretch: 62% 125%`. Body wdth 100 / 400; h2–h4 600; condensed 68 / 700 for the h1, lane labels and year headings (`.t-display`, `.t-cond`, `.t-year`). DOI and BibTeX use the system `--font-mono` stack (`code`, `pre`, `.doi`, `.bibtex`); nothing else is monospace (`--font-data` resolves to Archivo with tabular figures). The latin subset has no `→`; links carry no arrows anyway.
 - **Layout primitives** (`base.css`): `.bl-container`; `.bl-grid` with `__label`, `__track`, `__full` (the label-column grid every page uses); `.bl-ledger` (+ `--major` 2 px, `--closed`); `.bl-sec` (section rhythm); `.bl-sec-h`; `.bl-seg` (16 × 2 px direction segment); `.t-lead`, `.t-sm`/`.t-meta`, `.t-muted`, `.t-num`. `.t-mono` and `.t-eyebrow` keep their names but render plain Archivo meta (no mono, no caps, no tracking).
-- **Motion** `src/styles/motion.css`: tokens `--ease-settle` (the critically damped `linear(…)` of IDENTITY-RESEARCH §5), `--ease-steep`, `--ease-diffuse` and durations; every view-transition rule: `.pearl-morph` (420 ms on the settle curve, no blur, z-index 10), root page swap (opacity only: 150 ms out, 210 ms in after 150 ms), `.page-swap`, `.band-fade`, `.nav-forward` / `.nav-back` (60 px slide landing on the settle curve), anchored `site-header`, `::view-transition { pointer-events: none }`, morph companions (WP1 request 6); opt-in `.bl-steep` (filter results) and `.bl-settle` (6 px arrival). `<html data-intro>` stays for 2 s on the first home view. Reduced motion (OS **or** `data-motion="reduce"`) → VT 0 s, root ≤ 120 ms opacity crossfade, every transition 0 ms. Transform animations must sit in `@media (prefers-reduced-motion: no-preference) { :root:not([data-motion="reduce"]) … }`. Nothing loops, so no Pause control is needed.
+- **Motion** `src/styles/motion.css`: tokens `--ease-settle` (the critically damped `linear(…)` of IDENTITY-RESEARCH §5), `--ease-steep`, `--ease-diffuse` and durations; every view-transition rule: `.pearl-morph` (420 ms on the settle curve, no blur, z-index 10), root page swap (opacity only: 150 ms out, 210 ms in after 150 ms), `.page-swap`, `.band-fade`, `.nav-forward` / `.nav-back` (60 px slide landing on the settle curve), anchored `site-header`, `::view-transition { pointer-events: none }`, morph companions (WP1 request 6); opt-in `.bl-steep` (filter results) and `.bl-settle` (6 px arrival). Fig. 1's arrival (D-14) is plate-scoped: `FigureIsland` sets `.f1-plate[data-intro="wait"]` while the map is below the fold and `"play"` when its top clears the bottom 30 % of the viewport, once per session (`sessionStorage["bobalab-intro"]`), never on a figure already painted; a figure already on screen at mount is counted as seen. The homepage cup's settle-once intro is `<html data-cup-intro>`, set pre-paint on the first home view of the session and removed 1.2 s after `load` (change requests home-1, home-6). Reduced motion (OS **or** `data-motion="reduce"`) → VT 0 s, root ≤ 120 ms opacity crossfade, every transition 0 ms. Transform animations must sit in `@media (prefers-reduced-motion: no-preference) { :root:not([data-motion="reduce"]) … }`. Nothing loops, so no Pause control is needed.
 - **VT names** `src/lib/vt.ts`: `pearlVtName(slug)`, `VT.morph` etc., `TRANSITION.pearlOpen/…` for `<Link transitionTypes>`, `PAGE_ENTER_EXIT` for page-level `<ViewTransition enter exit>`. One mounted element per `pearl-{slug}` name; decorative pearls carry none.
-- **Motion preference** `src/lib/site/motion.ts`: `setMotionPreference()`, `motionReduced()`, `subscribeMotion()` (storage key `bobalab-motion`, event `bobalab-motion-change`); the footer switch uses them. Intro flag: `sessionStorage["bobalab-intro"]`.
+- **Motion preference** `src/lib/site/motion.ts`: `setMotionPreference()`, `motionReduced()`, `subscribeMotion()` (storage key `bobalab-motion`, event `bobalab-motion-change`); the footer switch uses them. Intro flags: `sessionStorage["bobalab-intro"]` (Fig. 1 on /research/#map, set by FigureIsland) and `"bobalab-cup-intro"` (the homepage cup, D-14; set by the pre-paint script or CupIsland).
 
 ## 5. Components (WP0-owned; import, do not edit — file a change request)
 
@@ -224,6 +224,26 @@ What the FOUNDATION package changed, and where it deviates from D-13 or from the
     from `direction.css` (change request research-1). `site.figure_mode` no longer does anything
     (hidden in the CMS). The h1 statement is `content/pages/home.yml` `statement` (≤ 80
     characters), falling back to `HOME_STATEMENT`; wording pending PI sign-off.
+    D-14 (simplify): Fig. 1 left the homepage. `/research/` renders it in
+    `<section id="map" aria-labelledby="map-h">` ("Explore: how the N directions connect") in a
+    full-bleed `--band` band after the directions ledger, via `<PearlFigure model={buildFigure(c)} heading={…} />`.
+    - Layout: the heading sits in the label column with a one-sentence key beside it (from 64rem;
+      stacked above the key below that). The key's clauses follow the data and the same container
+      queries as the marks. The caption is short, and its "Point at…" hint is hidden on
+      `(hover: none)` screens.
+    - Size: the map is a section, not the hero, so `.f1--map` steps the lane names down to
+      `--t-lane: 1.375rem` (still condensed) and the lanes to `--f1-lane-h: 4.5rem`. The band's h2
+      stays its largest text.
+    - Colour: inside the band the figure's ground is `--band` and the zone after "now" is
+      `--paper` (`--f1-ground`, `--f1-zone`).
+    - Arrival: it plays once per session, when the plate's top clears the bottom 30 % of the
+      viewport. A plate that is on screen when the island mounts is drawn at rest and counts as
+      seen, so a later Back to the page never blanks it to replay it.
+    - View-transition names on /research: only the map's lane pearls carry `pearl-{slug}`.
+    - Ledger: it has no pearls. The live rows no longer draw a `DirectionStrip`, because the map
+      draws the same papers; their counts column is 16rem from 80rem, so the counts sit on one
+      line. "Earlier and related research" keeps its strips, because archived directions are not
+      on the map.
 12. **Study-design plates (PUBLICATIONS).** `src/components/plates/`: `registry.tsx` maps a
     publication slug to `{ steps, caption, source, Body }`; pages render
     `<StudyPlate pub={p} preview={c.preview} figure={n} />` from `@/components/plates`, which
@@ -242,5 +262,18 @@ What the FOUNDATION package changed, and where it deviates from D-13 or from the
     spans are separate nodes and stay as typed) and the plain display fields the loader exposes
     (including news and project titles). Stored content, publication titles (they feed APA and
     BibTeX), URLs, DOIs and slugs are never converted.
+15. **Homepage cup (HOME, D-14).** `src/app/page.tsx` renders `HomeHero` (statement h1 at
+    `--t-display`, the who line from `homeWho(c)`, the why line from `pages/home.why` falling
+    back to `mission`, two links) and `HomeSections` (new papers beside news, then people).
+    `src/components/cup/`: `geometry.ts` lays out 3, 4 or 5 live directions plus an empty state;
+    `BobaCup.tsx` (server) draws the line cup on `--tea` with the pearls, leader lines and
+    underlined labels, and renders an `<ol>` of links to `/research/<slug>/` without JS;
+    `CupIsland.tsx` (client, ≈1.5 KB gz) turns the labels into buttons, raises one pearl at a time
+    (`homeQuestion`, one finding or "A first read", "Explore …"), names the risen pearl
+    `pearl-{slug}` only while it is up, tints the wordmark O via `<html data-cup-open>`, and
+    closes on Esc, a second pick or a click outside (never a scroll). `homePearls(c)` in
+    `queries.ts` picks each first read (newest published paper whose main direction it is, never
+    the same paper twice). Matcha text never sits on `--tea` (4.37:1); direction-coloured text
+    sits on white.
 
 Known gaps: Archivo has no italic file, so `<cite>` and `<em>` render a synthesised oblique (P3 sets venues upright).

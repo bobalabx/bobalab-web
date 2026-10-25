@@ -6,8 +6,9 @@
  *   - zero off-origin requests on every section page and on the first two
  *     detail pages of each template, including lazy images (scrolled into
  *     view) and link prefetches (hover);
- *   - no cookies; browser storage holds only the two documented keys
- *     (localStorage "bobalab-motion", sessionStorage "bobalab-intro");
+ *   - no cookies; browser storage holds only the documented keys
+ *     (localStorage "bobalab-motion"; sessionStorage "bobalab-intro" and the
+ *     homepage cup's "bobalab-cup-intro", privacy page);
  *   - against a static export (E2E_STATIC=1): no same-origin 4xx while
  *     navigating client-side through the header (this is how Next #85374's
  *     misnamed prefetch files show up), and the CSP <meta> is present.
@@ -36,7 +37,7 @@ const DETAIL: Array<{ index: string; re: RegExp }> = [
   { index: "/news/", re: /^\/news\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/ },
 ];
 const ALLOWED_LOCAL = new Set(["bobalab-motion"]);
-const ALLOWED_SESSION = new Set(["bobalab-intro"]);
+const ALLOWED_SESSION = new Set(["bobalab-intro", "bobalab-cup-intro"]);
 // Keys Next's dev overlay may write when BASE_URL is `next dev` (never in an export).
 const DEV_KEY = /^(__next|next|nextjs|__nextjs)/i;
 

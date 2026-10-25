@@ -8,6 +8,7 @@ const skipIntro = (page: Page) =>
   page.context().addInitScript(() => {
     try {
       sessionStorage.setItem("bobalab-intro", "1");
+      sessionStorage.setItem("bobalab-cup-intro", "1");
     } catch {}
   });
 
@@ -50,12 +51,16 @@ test("pearl morph: the travelling pearl paints above the page-swap groups, below
   await skipIntro(page);
   await page.context().addInitScript(recordGroupZ);
   await page.goto("/");
-  await page.waitForSelector(".f1-plate[data-live]");
-  const li = page.locator(".f1-item").first();
-  const slug = (await li.getAttribute("data-slug"))!;
+  // D-14 (change request home-4): the homepage morph source is the risen cup pearl,
+  // whose wrapper carries pearl-{slug} only while it is up.
+  await page.waitForSelector(".cup-stage[data-js]");
+  const li = page.locator(".cup-item").first();
+  const explore = li.locator(".cup-panel a[href^='/research/']");
+  const slug = (await explore.getAttribute("href"))!.split("/")[2]!;
   await page.evaluate(async (s) => void (await fetch(`/research/${s}/`)), slug);
   await page.waitForTimeout(1500);
-  await li.locator("a").focus();
+  await li.locator(".cup-lab").click(); // the pearl rises and takes the name pearl-{slug}
+  await explore.focus();
   await page.keyboard.press("Enter");
   await page.waitForURL(`**/research/${slug}/`);
   await expect

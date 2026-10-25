@@ -5,7 +5,10 @@
  * these helpers so they stay in sync. Client-only; every access is guarded.
  */
 export const MOTION_STORAGE_KEY = "bobalab-motion";
+/** Fig. 1's arrival on /research/#map has played this session (set by FigureIsland). */
 export const INTRO_STORAGE_KEY = "bobalab-intro";
+/** D-14: the homepage cup's settle-once intro (CupIsland CUP_INTRO_KEY). */
+export const CUP_INTRO_STORAGE_KEY = "bobalab-cup-intro";
 export const MOTION_EVENT = "bobalab-motion-change";
 
 export function readStoredMotion(): "reduce" | "auto" {
@@ -57,17 +60,24 @@ export function subscribeMotion(cb: () => void): () => void {
 /**
  * Pre-paint script body (runs synchronously in <head> before first paint):
  * 1. apply the stored motion preference;
- * 2. on the first home view of the browser session, set <html data-intro>
- *    (removed after 2 s) so the Fig. 1 intro plays once (D-02a, WP1 request 3).
+ * 2. on the first home view of the browser session, set <html data-cup-intro>
+ *    so the homepage cup's pearls settle once from the first frame (D-14, R11;
+ *    change requests home-1 and home-6). The attribute is removed 1.2 s after
+ *    `load`, which waits for the stylesheets, so a slow first load never cuts
+ *    the settle short.
+ * Fig. 1's once-per-session arrival is no longer gated here (D-14, research-1):
+ * it moved to /research/#map, and FigureIsland starts it when the map scrolls
+ * into view, under INTRO_STORAGE_KEY.
  */
 export function prePaintSource(basePath: string): string {
   const b = JSON.stringify(basePath.replace(/\/+$/, ""));
+  const k = JSON.stringify(CUP_INTRO_STORAGE_KEY);
   return (
     `(function(){var d=document.documentElement;` +
     `try{if(localStorage.getItem(${JSON.stringify(MOTION_STORAGE_KEY)})==="reduce")d.setAttribute("data-motion","reduce")}catch(e){}` +
-    `try{var b=${b},p=location.pathname;` +
-    `if((p===b+"/"||p===b+"/index.html"||p===b)&&!sessionStorage.getItem(${JSON.stringify(INTRO_STORAGE_KEY)})){` +
-    `sessionStorage.setItem(${JSON.stringify(INTRO_STORAGE_KEY)},"1");d.setAttribute("data-intro","");` +
-    `setTimeout(function(){d.removeAttribute("data-intro")},2000)}}catch(e){}})();`
+    `try{var b=${b},p=location.pathname,s=sessionStorage;` +
+    `if((p===b+"/"||p===b+"/index.html"||p===b)&&!s.getItem(${k})){` +
+    `s.setItem(${k},"1");d.setAttribute("data-cup-intro","");` +
+    `addEventListener("load",function(){setTimeout(function(){d.removeAttribute("data-cup-intro")},1200)})}}catch(e){}})();`
   );
 }

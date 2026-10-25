@@ -165,12 +165,13 @@ Nothing. The site sets no cookies, runs no analytics and loads no third-party sc
 
 ## What your browser keeps
 
-Two small settings stay in your own browser and are never sent anywhere:
+Three small settings stay in your own browser and are never sent anywhere:
 
 - your "Reduce motion" choice, kept in \`localStorage\` under the key \`bobalab-motion\`;
-- a note that the opening animation has already played in this session, kept in \`sessionStorage\` under the key \`bobalab-intro\` and cleared when you close the tab.
+- a note that the research map's opening animation has already played in this session, kept in \`sessionStorage\` under the key \`bobalab-intro\` and cleared when you close the tab;
+- a note that the pearls on the home page have already settled once in this session, kept in \`sessionStorage\` under the key \`bobalab-cup-intro\` and cleared when you close the tab.
 
-You can remove both by clearing this site's data in your browser settings.
+You can remove all three by clearing this site's data in your browser settings.
 
 ## Hosting
 
