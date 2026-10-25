@@ -682,8 +682,9 @@ const OPP = [
     slug: "urap",
     audience: "students",
     status: "closed",
-    // WP5 request 8 item 3: the ASCII " - " separator wrapped to a line starting "- apply".
-    route: (r) => r.replace(/ Program - apply to\b/, " Program. Apply to"),
+    // Redesign CONTENT request 1: the same facts as the dataset route, in plain sentences.
+    route: () =>
+      "Apply through URAP to one of four tracks: mathematical modeling and theory; experimental systems and game building; research generalist and research operations; or data science, econometrics and algorithms. About 9–11 hours a week; remote work is possible.",
   },
   {
     match: /^Research assistants/,

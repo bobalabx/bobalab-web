@@ -7,6 +7,7 @@
  */
 import Markdoc, { Tag, type Config, type Node, type RenderableTreeNode } from "@markdoc/markdoc";
 import { withBasePath } from "@/lib/site/paths";
+import { typeset } from "./typeset";
 
 const isExternal = (href: string) => /^https?:\/\//i.test(href);
 /** Site-relative ("/x/") links and images get the base path (WP5 request 9); "#…", "mailto:" and URLs do not. */
@@ -15,6 +16,14 @@ const siteRelative = (href: string) =>
 
 export const markdocConfig: Config = {
   nodes: {
+    // Typographic quotes in display text (content-4a). Inline `code` and fences are
+    // separate nodes, so they keep what the editor typed.
+    text: {
+      attributes: { content: { type: String, required: true } },
+      transform(node: Node) {
+        return typeset(String(node.attributes.content ?? ""));
+      },
+    },
     heading: {
       children: ["inline"],
       attributes: { level: { type: Number, required: true } },

@@ -305,7 +305,7 @@ const CASES: Case[] = [
   {
     code: "W_DIR_COUNT_HIGH",
     severity: "warning",
-    name: "7 live directions suggests the dot-plot fallback",
+    name: "7 live directions warns that Fig. 1 gets tall",
     make: (f) => {
       const colors = ["jasmine", "black-sesame", "taro"];
       for (let i = 0; i < 3; i++)

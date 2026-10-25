@@ -26,6 +26,7 @@ import { countsAsPublication, hasPublicVersion, isLabWork } from "./relations";
 import { swatchOf, type Swatch } from "./palette";
 import { dateSortKey, isOnOrAfter, todayInLab } from "./dates";
 import { toPublicPerson, comparePeople, type PublicPerson } from "./people";
+import { typesetOpt as ts } from "./typeset";
 import type {
   DirectionEntry,
   NewsEntry,
@@ -189,9 +190,11 @@ export function buildContent(raw: RawContent, opts: BuildOptions): Content {
     preview ? xs : xs.filter((x) => !x.draft);
 
   const site = raw.site ?? DEFAULT_SITE;
-  const pages: PagesData = Object.fromEntries(
-    Object.entries(raw.pages).filter(
-      ([, v]) => v && (preview || !(v as { draft?: boolean }).draft),
+  const pages: PagesData = typesetPages(
+    Object.fromEntries(
+      Object.entries(raw.pages).filter(
+        ([, v]) => v && (preview || !(v as { draft?: boolean }).draft),
+      ),
     ),
   );
 
@@ -212,6 +215,9 @@ export function buildContent(raw: RawContent, opts: BuildOptions): Content {
   const dirView = new Map<string, DirectionView>();
   const mkDir = (d: DirectionEntry, index: number | null): DirectionView => ({
     ...d,
+    question: ts(d.question),
+    summary: ts(d.summary),
+    findings: d.findings.map((f) => ({ ...f, text: ts(f.text) })),
     index,
     swatch: swatchOf(d.color),
     counts: { papers: 0, projects: 0, inProgress: 0 },
@@ -227,6 +233,7 @@ export function buildContent(raw: RawContent, opts: BuildOptions): Content {
     const counted = countsAsPublication(p);
     return {
       ...p,
+      in_brief: ts(p.in_brief),
       authorList: p.authors.map((a) => {
         const person = a.person ? listedBySlug.get(a.person) : undefined;
         return { name: a.name, url: a.url, person, isLab: Boolean(person) };
@@ -250,6 +257,7 @@ export function buildContent(raw: RawContent, opts: BuildOptions): Content {
     const directionRefs = refDirs(p.directions);
     return {
       ...p,
+      summary: ts(p.summary),
       directionRefs,
       primaryDirection: directionRefs[0],
       teamRefs: p.team.map((s) => listedBySlug.get(s)).filter((x): x is PublicPerson => !!x),
@@ -267,6 +275,7 @@ export function buildContent(raw: RawContent, opts: BuildOptions): Content {
   // Opportunities
   const opportunities: OpportunityView[] = keep(raw.entries.opportunities).map((o) => ({
     ...o,
+    route: ts(o.route),
     isOpen:
       (o.status === "open" || o.status === "rolling") &&
       (!o.closes_on || isOnOrAfter(o.closes_on, today)),
@@ -289,6 +298,7 @@ export function buildContent(raw: RawContent, opts: BuildOptions): Content {
   const news: NewsView[] = keep(raw.entries.news)
     .map((n) => ({
       ...n,
+      summary: ts(n.summary),
       directionRefs: refDirs(n.directions),
       peopleRefs: n.people.map((s) => listedBySlug.get(s)).filter((x): x is PublicPerson => !!x),
       publicationRefs: n.publications
@@ -325,6 +335,23 @@ export function buildContent(raw: RawContent, opts: BuildOptions): Content {
     getPerson: (s) => listedBySlug.get(s),
     getNews: (s) => newsBySlug.get(s),
   };
+}
+
+/** Typographic quotes in the pages' plain display fields (content-4a; join.intro is Markdown). */
+function typesetPages(pages: PagesData): PagesData {
+  const out: PagesData = { ...pages };
+  if (out.home)
+    out.home = {
+      ...out.home,
+      statement: ts(out.home.statement),
+      mission: ts(out.home.mission),
+      featured_findings: out.home.featured_findings.map((f) => ({ ...f, text: ts(f.text) })),
+    };
+  for (const k of ["about", "accessibility", "privacy"] as const) {
+    const p = out[k];
+    if (p) out[k] = { ...p, intro: ts(p.intro) };
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------------------

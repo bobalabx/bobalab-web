@@ -335,7 +335,7 @@ export function validateContent(raw: RawContent, opts: ValidateOptions = {}): Is
   } else if (n >= 7) {
     warn(
       "W_DIR_COUNT_HIGH",
-      `${n} directions: consider the dot-plot fallback (figure_mode: dotplot) and rerun the five-second test`,
+      `${n} directions: Fig. 1 gets tall (one lane per direction); consider grouping directions and rerun the five-second test`,
       "site.yml",
       "direction_order",
     );
