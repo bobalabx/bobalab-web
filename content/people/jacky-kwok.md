@@ -1,6 +1,7 @@
 ---
 name: Jacky Kwok
 role: undergrad
+program: Computer Science
 end: "2023"
 now_at: Computer Science PhD, Stanford
 directions: []

@@ -1,6 +1,7 @@
 ---
 name: Jerry Zhu
 role: undergrad
+program: Computer Science/Data Science
 end: "2024"
 now_at: Machine Learning & Data Science MS, Northwestern
 directions: []

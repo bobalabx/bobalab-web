@@ -1,6 +1,7 @@
 ---
 name: Stephen Yang
 role: undergrad
+program: Computer Science/Cognitive Science
 end: "2023"
 now_at: Computational Science & Engineering MS, Harvard
 links:

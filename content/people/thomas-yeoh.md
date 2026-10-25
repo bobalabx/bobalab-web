@@ -1,6 +1,7 @@
 ---
 name: Thomas Yeoh
 role: undergrad
+program: EECS
 end: "2025"
 now_at: Computer Science MS, UC Irvine
 links:
