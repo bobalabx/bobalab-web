@@ -49,9 +49,12 @@
 }
 .pl {
   --D: 56px;
+  --pl-gw: 1.5;
   margin: 0;
   padding: 14px 10px 14px;
   background: var(--tea);
+  /* The edge pearls' halos reach the panel's edge: keep that edge crisp. */
+  overflow: clip;
 }
 .pl-soon {
   margin: 0;
@@ -71,10 +74,7 @@
 /* ---- the list: compact 2-column grid (phones, narrow columns, n = 1 or > 8) */
 .pl-list {
   display: grid;
-  /* Columns as wide as their widest label, pushed to the panel's edges: the left
-     column lines up with the caption (owner, 2026-10-26). */
-  grid-template-columns: repeat(2, minmax(0, max-content));
-  justify-content: space-between;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 4px 8px;
   margin: 0;
   padding: 0;
@@ -114,7 +114,7 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: calc(var(--D) * 1.5);
+  width: calc(var(--D) * var(--pl-gw));
   height: calc(var(--D) * 1.44);
 }
 .pl-body {
@@ -248,6 +248,10 @@
 @container pl (width >= 36em) {
   .pl[data-state="cluster"] {
     --D: var(--pl-D, clamp(5rem, 14cqi, 6.5rem));
+    --pl-gw: 1.6;
+    /* The shared line: the caption text and the edge pearls start this far in from
+       the panel's content edge. */
+    --pl-edge: 12px;
     padding: 28px 24px 22px;
   }
   .pl[data-state="cluster"] .pl-list {
@@ -265,18 +269,47 @@
   .pl[data-state="cluster"] .pl-item :is(.pl-g, .pl-label, .pl-count, .bl-badge) {
     pointer-events: auto;
   }
-  /* Outer slots hug the panel's content edges (left with the caption, right with the panel). */
+  /* Edge slots (owner, 2026-10-26): the left pearl's disc, label and count start
+     on the caption's x; the right pearl mirrors it on the right. They keep the
+     vertical nudge, not the sideways one. The faint ring and seeds overshoot the
+     line, as round shapes do. */
   .pl[data-state="cluster"] .pl-item[data-edge="start"] {
     justify-self: start;
+    align-items: flex-start;
+    translate: 0 calc(var(--D) * var(--dy, 0));
   }
   .pl[data-state="cluster"] .pl-item[data-edge="end"] {
     justify-self: end;
+    align-items: flex-end;
+    translate: 0 calc(var(--D) * var(--dy, 0));
+  }
+  .pl[data-state="cluster"] .pl-item[data-edge="start"] .pl-link {
+    align-items: flex-start;
+    padding-inline: var(--pl-edge) 0;
+    text-align: left;
+  }
+  .pl[data-state="cluster"] .pl-item[data-edge="end"] .pl-link {
+    align-items: flex-end;
+    padding-inline: 0 var(--pl-edge);
+    text-align: right;
+  }
+  /* The disc is centred in .pl-g: pull the group out so the disc sits on the line. */
+  .pl[data-state="cluster"] .pl-item[data-edge="start"] .pl-g {
+    margin-inline-start: calc(var(--D) * (1 - var(--pl-gw)) / 2);
+  }
+  .pl[data-state="cluster"] .pl-item[data-edge="end"] .pl-g {
+    margin-inline-end: calc(var(--D) * (1 - var(--pl-gw)) / 2);
+  }
+  .pl[data-state="cluster"] .pl-item[data-edge="start"] > .bl-badge {
+    margin-inline-start: var(--pl-edge);
+  }
+  .pl[data-state="cluster"] .pl-item[data-edge="end"] > .bl-badge {
+    margin-inline-end: var(--pl-edge);
   }
   .pl[data-state="cluster"] .pl-item:is([data-row="2"], [data-row="3"]) {
     margin-top: calc(var(--D) * -0.25);
   }
   .pl[data-state="cluster"] .pl-g {
-    width: calc(var(--D) * 1.6);
     height: calc(var(--D) * 1.5);
   }
   .pl[data-state="cluster"] .pl-seed {
@@ -287,10 +320,40 @@
   }
   .pl[data-state="cluster"] .pl-cap {
     margin-top: 18px;
-    padding: 0 8px;
+    padding: 0 var(--pl-edge);
   }
   .pl[data-state="cluster"] .pl-cap-q {
     font-size: 1.125rem;
+  }
+}
+/* Compact grid (phones, narrow columns): the left column's discs, labels and counts
+   start on the caption's x, the right column mirrors it (owner, 2026-10-26). The
+   wider side padding keeps the bloomed seeds inside the panel. */
+@container pl (width < 36em) {
+  .pl:not([data-n="1"]) {
+    padding-inline: 18px;
+  }
+  .pl:not([data-n="1"]) .pl-item:nth-child(odd),
+  .pl:not([data-n="1"]) .pl-item:nth-child(odd) .pl-link {
+    align-items: flex-start;
+    text-align: left;
+  }
+  .pl:not([data-n="1"]) .pl-item:nth-child(even),
+  .pl:not([data-n="1"]) .pl-item:nth-child(even) .pl-link {
+    align-items: flex-end;
+    text-align: right;
+  }
+  .pl:not([data-n="1"]) .pl-item:nth-child(odd) .pl-g {
+    margin-inline-start: calc(var(--D) * (1 - var(--pl-gw)) / 2);
+  }
+  .pl:not([data-n="1"]) .pl-item:nth-child(even) .pl-g {
+    margin-inline-end: calc(var(--D) * (1 - var(--pl-gw)) / 2);
+  }
+  .pl:not([data-n="1"]) .pl-item:nth-child(odd) > .bl-badge {
+    margin-inline-start: 4px;
+  }
+  .pl:not([data-n="1"]) .pl-item:nth-child(even) > .bl-badge {
+    margin-inline-end: 4px;
   }
 }
 /* n > 8 on wide columns: the compact grid, more columns. n = 1: one centred pearl. */

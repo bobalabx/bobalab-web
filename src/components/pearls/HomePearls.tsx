@@ -41,9 +41,9 @@ export function mapLinkText(n: number): string {
 }
 
 /**
- * Slots that touch the first or last grid column hug that edge (cluster mode), so
- * the figure lines up with the caption on the left and the panel on the right
- * instead of floating in the middle of its outer cells (owner, 2026-10-26).
+ * Slots that touch the first or last grid column hug that edge (cluster mode):
+ * the left pearl's disc, label and count start on the caption's x (the panel's
+ * content edge + --pl-edge), and the right pearl mirrors it (owner, 2026-10-26).
  */
 export function edgeOf(col: number | undefined, columns: number | undefined) {
   if (!col || !columns) return undefined;

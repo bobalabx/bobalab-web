@@ -99,7 +99,7 @@
   /* D-14: the homepage h1 ONLY (the one exception to the 2.25rem cap; REFS-SIMPLE C5:
    * at least 2x the next level). 2.5rem at 320 px, 2.625rem at 390 px, 4.2rem at
    * 1024 px, 5.25rem from 1440 px. Condensed, like every line ≥ 2rem. */
-  --t-display: clamp(2.5rem, 1.65rem + 4vw, 5.25rem);
+  --t-display: clamp(2.5rem, 1.75rem + 3vw, 4.25rem);
   --lh-display-home: 0.96;
 
   /* Legacy size names mapped onto the new scale (nothing else above 2.25rem). */
