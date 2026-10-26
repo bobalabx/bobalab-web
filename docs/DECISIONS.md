@@ -186,3 +186,4 @@ Labels: DOCUMENTED (primary source), MEASURED (we ran it), HYPOTHESIS, UNKNOWN.
 - **The cup:** removed from `src/`. It survives in git history and in `docs/simplify/prototypes/c/`.
 - **Branch:** `simplify`, not deployed.
 - **2026-10-26 (owner):** the home headline is a bit smaller. `--t-display` is now `clamp(2.5rem, 1.75rem + 3vw, 4.25rem)` (68 px at 1440, 40 px on phones), which still passes the 2× hierarchy test.
+- **2026-10-26 (owner):** the pearls line up with the panel's left edge. In the figure, slots in the first column hug the left (`data-edge="start"`) and slots ending in the last column hug the right, so the leftmost pearl sits over the caption. In the compact 2-column grid (tablets, phones), each column is only as wide as its widest label and the two columns are pushed to the panel's edges.

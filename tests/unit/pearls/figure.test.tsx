@@ -23,6 +23,7 @@ import {
   type PearlsModel,
 } from "@/lib/pearls/model";
 import { seedCount } from "@/lib/pearls/seeds";
+import { MAX_FIGURE_N, MIN_FIGURE_N, TEMPLATES } from "@/lib/pearls/templates";
 
 vi.mock("next/link", () => ({
   default: ({
@@ -42,7 +43,7 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-const { HomePearls, mapLinkText } = await import("@/components/pearls/HomePearls");
+const { HomePearls, edgeOf, mapLinkText } = await import("@/components/pearls/HomePearls");
 const { PEARLS_INTRO_KEY } = await import("@/components/pearls/PearlsIsland");
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
@@ -144,6 +145,17 @@ describe("markup", () => {
       expect(layer, it.slug).not.toBeNull();
       expect(layer![1]).toContain(countsLine(it));
     }
+  });
+
+  it("every template has a slot hugging each side, so the figure lines up with the caption", () => {
+    for (let n = MIN_FIGURE_N; n <= MAX_FIGURE_N; n++) {
+      const t = TEMPLATES[n]!;
+      const edges = t.slots.map((s) => edgeOf(s.col, t.columns));
+      expect(edges, `n=${n}`).toContain("start");
+      expect(edges, `n=${n}`).toContain("end");
+    }
+    expect(html).toContain('data-edge="start"');
+    expect(html).toContain('data-edge="end"');
   });
 
   it("the quiet link to the timeline under the panel", () => {

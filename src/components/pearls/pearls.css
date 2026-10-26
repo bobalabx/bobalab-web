@@ -71,7 +71,10 @@
 /* ---- the list: compact 2-column grid (phones, narrow columns, n = 1 or > 8) */
 .pl-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* Columns as wide as their widest label, pushed to the panel's edges: the left
+     column lines up with the caption (owner, 2026-10-26). */
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  justify-content: space-between;
   gap: 4px 8px;
   margin: 0;
   padding: 0;
@@ -261,6 +264,13 @@
   }
   .pl[data-state="cluster"] .pl-item :is(.pl-g, .pl-label, .pl-count, .bl-badge) {
     pointer-events: auto;
+  }
+  /* Outer slots hug the panel's content edges (left with the caption, right with the panel). */
+  .pl[data-state="cluster"] .pl-item[data-edge="start"] {
+    justify-self: start;
+  }
+  .pl[data-state="cluster"] .pl-item[data-edge="end"] {
+    justify-self: end;
   }
   .pl[data-state="cluster"] .pl-item:is([data-row="2"], [data-row="3"]) {
     margin-top: calc(var(--D) * -0.25);

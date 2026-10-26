@@ -40,6 +40,18 @@ export function mapLinkText(n: number): string {
     : `See how the ${WORDS[n] ?? n} directions connect`;
 }
 
+/**
+ * Slots that touch the first or last grid column hug that edge (cluster mode), so
+ * the figure lines up with the caption on the left and the panel on the right
+ * instead of floating in the middle of its outer cells (owner, 2026-10-26).
+ */
+export function edgeOf(col: number | undefined, columns: number | undefined) {
+  if (!col || !columns) return undefined;
+  if (col === 1) return "start";
+  if (col + 1 === columns) return "end";
+  return undefined;
+}
+
 export function HomePearls({ model }: { model: PearlsModel }) {
   const { items, template, n, state } = model;
   if (state === "empty") {
@@ -74,6 +86,7 @@ export function HomePearls({ model }: { model: PearlsModel }) {
                   data-slug={it.slug}
                   data-swatch={it.swatch}
                   data-row={it.slot?.row}
+                  data-edge={edgeOf(it.slot?.col, template?.columns)}
                   style={v}
                 >
                   <Link
