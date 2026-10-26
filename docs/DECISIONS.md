@@ -185,3 +185,4 @@ Labels: DOCUMENTED (primary source), MEASURED (we ran it), HYPOTHESIS, UNKNOWN.
 - **People (owner, same day):** remove the count sentence ("1 principal investigator, 1 master's student, 23 undergraduate RAs and 25 alumni.") from `/people/`, and the equivalent count sentence in the homepage people section.
 - **The cup:** removed from `src/`. It survives in git history and in `docs/simplify/prototypes/c/`.
 - **Branch:** `simplify`, not deployed.
+- **2026-10-26 (owner):** the home headline is a bit smaller. `--t-display` is now `clamp(2.5rem, 1.75rem + 3vw, 4.25rem)` (68 px at 1440, 40 px on phones), which still passes the 2× hierarchy test.

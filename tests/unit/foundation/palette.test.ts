@@ -288,10 +288,10 @@ describe("D-14: the cup's tea and the home display size", () => {
     const [min, a, b, max] = m!.slice(1).map(Number) as [number, number, number, number];
     return Math.min(max, Math.max(min, a + (b * vw) / 100 / 16));
   };
-  it("--t-display: about 5–5.5rem on desktop and 2.5–2.75rem on phones", () => {
+  it("--t-display: about 4–4.5rem on desktop (owner: a bit smaller) and 2.5–2.75rem on phones", () => {
     for (const w of [1440, 1920]) {
-      expect(display(w)).toBeGreaterThanOrEqual(5);
-      expect(display(w)).toBeLessThanOrEqual(5.5);
+      expect(display(w)).toBeGreaterThanOrEqual(4);
+      expect(display(w)).toBeLessThanOrEqual(4.5);
     }
     for (const w of [320, 375, 390, 414]) {
       expect(display(w)).toBeGreaterThanOrEqual(2.5);
