@@ -80,32 +80,33 @@
     font-size: 1.1875rem;
   }
 }
-/* Tablets: text left, the pearls right. */
+/* Tablets: text left, the pearls right. The statement heads the text column and
+   the panel starts level with it (owner, 2026-10-26): the panel spans both rows,
+   and the 1fr row takes any height the panel adds, so the text stays under the h1. */
 @media (min-width: 48rem) {
   .hm-hero {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    grid-template-rows: auto 1fr;
     column-gap: 40px;
-    /* h1 to text and panel: scales with the h1 (34 px at 800, 44 px from 1333). */
-    row-gap: calc(var(--t-display) * 0.65);
-    align-items: center;
+    row-gap: 0;
+    align-items: start;
     padding-top: 32px;
   }
-  /* The statement runs across the whole hero; text and pearls sit under it. */
+  /* The h1's first line is trimmed to its cap height, so its letters and the
+     panel's top edge start on one line. */
   .hm-h1 {
-    grid-column: 1 / -1;
+    grid-column: 1;
+    grid-row: 1;
+    text-box: trim-start cap alphabetic;
   }
   .hm-copy {
+    grid-column: 1;
+    grid-row: 2;
     margin-top: 0;
-    align-self: start;
   }
-  /* The panel's top edge meets the cap height of the first text line (owner,
-     2026-10-26): both start at the top of the row, the first line trimmed. */
   .hm-fig {
-    align-self: start;
-  }
-  .hm-who {
-    margin-top: 0;
-    text-box: trim-start cap alphabetic;
+    grid-column: 2;
+    grid-row: 1 / span 2;
   }
   .hm-why {
     font-size: var(--t-body);
@@ -115,22 +116,21 @@
    height). Archivo: ascent 0.878, descent 0.21, cap 0.6875, so 0.354em − 0.5lh. */
 @supports not (text-box: trim-start cap alphabetic) {
   @media (min-width: 48rem) {
-    .hm-who {
+    .hm-h1 {
       margin-top: calc(0.354em - 0.5lh);
     }
   }
 }
-/* Desktop: the pearl figure beside the text, the hero filling the first screen. */
+/* Desktop: the text column is wide enough for the statement in two lines. */
 @media (min-width: 80rem) {
   .hm-hero {
-    grid-template-columns: minmax(0, 29rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 32rem) minmax(0, 1fr);
     column-gap: 48px;
-    min-height: min(calc(100svh - 80px), 860px);
-    align-content: center;
-    padding-top: 8px;
+    padding-top: 56px;
   }
   .hm-who {
     max-width: none;
+    margin-top: 24px;
     font-size: 1.3125rem;
     line-height: 1.4;
   }
