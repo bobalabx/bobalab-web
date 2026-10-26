@@ -29,10 +29,11 @@ export function affiliationText(text: string): string {
 export function HomeHero({ copy, figure }: { copy: HomeHeroCopy; figure: ReactNode }) {
   return (
     <section className="hm-hero" aria-labelledby="hm-h1">
+      {/* The h1 spans the whole hero from 48rem, so it sets in two lines (owner, 2026-10-26). */}
+      <h1 id="hm-h1" className="hm-h1" tabIndex={-1}>
+        {copy.statement ?? HOME_STATEMENT}
+      </h1>
       <div className="hm-copy">
-        <h1 id="hm-h1" className="hm-h1" tabIndex={-1}>
-          {copy.statement ?? HOME_STATEMENT}
-        </h1>
         <p className="hm-who">{affiliationText(copy.who.text)}</p>
         {copy.why && (
           <p className="hm-why">
