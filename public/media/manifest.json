@@ -71,6 +71,36 @@
         }
       ]
     },
+    "/uploads/people/haonan-william-deng.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/haonan-william-deng-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/isabelle-cho.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/isabelle-cho-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/jazz-beecham.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/jazz-beecham-480.webp"
+        }
+      ]
+    },
     "/uploads/people/jiaming-guan.jpg": {
       "width": 400,
       "height": 400,
@@ -88,6 +118,16 @@
         {
           "width": 480,
           "src": "/media/people/jian-kweon-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/jj-srimakut.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/jj-srimakut-480.webp"
         }
       ]
     },
@@ -128,6 +168,26 @@
         {
           "width": 480,
           "src": "/media/people/nicholas-chen-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/nike-naiyarat.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/nike-naiyarat-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/park-sinchaisri.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/park-sinchaisri-480.webp"
         }
       ]
     },
@@ -198,6 +258,26 @@
         {
           "width": 480,
           "src": "/media/people/thomas-morelli-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/tom-jiramate.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/tom-jiramate-480.webp"
+        }
+      ]
+    },
+    "/uploads/people/zhiwei-wang.jpg": {
+      "width": 480,
+      "height": 480,
+      "variants": [
+        {
+          "width": 480,
+          "src": "/media/people/zhiwei-wang-480.webp"
         }
       ]
     },

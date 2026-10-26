@@ -51,6 +51,33 @@ export const ROLE_LABELS: Record<PersonRole, { one: string; group: string }> = {
   affiliate: { one: "Affiliate", group: "Affiliates & collaborators" },
 };
 
+/**
+ * The People page's groups: PhD and master's students share "Graduate students"
+ * (PI, 2026-10-26); each card still names the exact role ("PhD student").
+ */
+export type PeopleGroup = Exclude<PersonRole, "phd" | "masters"> | "graduate";
+
+export const GROUP_ORDER: PeopleGroup[] = [
+  "pi",
+  "postdoc",
+  "graduate",
+  "predoc-staff",
+  "undergrad",
+  "affiliate",
+];
+
+export const groupOf = (role: PersonRole): PeopleGroup =>
+  role === "phd" || role === "masters" ? "graduate" : role;
+
+export const GROUP_LABELS: Record<PeopleGroup, { one: string; group: string }> = {
+  pi: ROLE_LABELS.pi,
+  postdoc: ROLE_LABELS.postdoc,
+  graduate: { one: "Graduate student", group: "Graduate students" },
+  "predoc-staff": ROLE_LABELS["predoc-staff"],
+  undergrad: ROLE_LABELS.undergrad,
+  affiliate: ROLE_LABELS.affiliate,
+};
+
 /** "Undergraduate RA" → "undergraduate RA"; a first word with more capitals ("PhD") stays. */
 export const lowerRole = (label: string) =>
   /^[A-Z][a-z]*(?=[\s’'-]|$)/.test(label) ? label.charAt(0).toLowerCase() + label.slice(1) : label;
@@ -118,16 +145,16 @@ export function toPublicPerson(p: PersonEntry, today: string = todayInLab()): Pu
   };
 }
 
-/** Group current people by role in §D9 order; alumni grouped by end year (desc). */
+/** Group current people by group in §D9 order; alumni grouped by end year (desc). */
 export function groupPeople(people: PublicPerson[]): {
-  current: Array<{ role: PersonRole; label: string; people: PublicPerson[] }>;
+  current: Array<{ role: PeopleGroup; label: string; people: PublicPerson[] }>;
   alumni: Array<{ year: number | null; people: PublicPerson[] }>;
 } {
   const listed = people.filter((p) => p.listed);
-  const current = ROLE_ORDER.map((role) => ({
+  const current = GROUP_ORDER.map((role) => ({
     role,
-    label: ROLE_LABELS[role].group,
-    people: listed.filter((p) => !p.isAlumni && p.role === role).sort(comparePeople),
+    label: GROUP_LABELS[role].group,
+    people: listed.filter((p) => !p.isAlumni && groupOf(p.role) === role).sort(comparePeople),
   })).filter((g) => g.people.length);
   const byYear = new Map<number | null, PublicPerson[]>();
   for (const p of listed.filter((x) => x.isAlumni)) {

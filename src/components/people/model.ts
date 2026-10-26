@@ -11,18 +11,20 @@ import type {
   PublicationView,
 } from "@/lib/content/load";
 import {
+  GROUP_LABELS,
+  GROUP_ORDER,
   ROLE_LABELS,
-  ROLE_ORDER,
   avatarSwatch,
   formerRole,
+  groupOf,
   groupPeople,
   initials,
+  type PeopleGroup,
   type PublicPerson,
 } from "@/lib/content/people";
 import { directionsOf, personDetail } from "@/lib/content/queries";
 import { formatDate } from "@/lib/content/dates";
 import type { SwatchId } from "@/lib/content/palette";
-import type { PersonRole } from "@/lib/content/schema";
 import type { FilterMeta } from "./filter";
 
 // ---------------------------------------------------------------------------
@@ -89,9 +91,9 @@ export function personLinks(p: Pick<PublicPerson, "links" | "email">): PersonLin
   return out;
 }
 
-/** Singular / plural group label: "1 Master's student", "8 Undergraduate RAs". */
-export function countLabel(role: PersonRole, n: number): string {
-  return n === 1 ? ROLE_LABELS[role].one : ROLE_LABELS[role].group;
+/** Singular / plural group label: "1 Graduate student", "8 Undergraduate RAs". */
+export function countLabel(group: PeopleGroup, n: number): string {
+  return n === 1 ? GROUP_LABELS[group].one : GROUP_LABELS[group].group;
 }
 
 // ---------------------------------------------------------------------------
@@ -107,7 +109,7 @@ export interface PersonItem {
 }
 
 export interface RoleGroup {
-  role: PersonRole;
+  role: PeopleGroup;
   label: string;
   id: string;
   items: PersonItem[];
@@ -151,7 +153,11 @@ export function toItem(c: Content, person: PublicPerson): PersonItem {
     swatch: avatarSwatch(person.slug, directions),
     initials: initials(person.name),
     roleLine: roleLine(person),
-    meta: { role: person.role, directions: directions.map((d) => d.slug), alumni: person.isAlumni },
+    meta: {
+      role: groupOf(person.role),
+      directions: directions.map((d) => d.slug),
+      alumni: person.isAlumni,
+    },
   };
 }
 
@@ -175,10 +181,10 @@ export function buildPeopleIndex(c: Content): PeopleIndexModel {
   const alumniItems = alumni.flatMap((g) => g.items);
   const all = [...current, ...alumniItems];
 
-  const roleOptions: ChipOptionModel[] = ROLE_ORDER.map((role) => ({
-    value: role,
-    label: ROLE_LABELS[role].group,
-    count: all.filter((i) => i.person.role === role).length,
+  const roleOptions: ChipOptionModel[] = GROUP_ORDER.map((group) => ({
+    value: group,
+    label: GROUP_LABELS[group].group,
+    count: all.filter((i) => groupOf(i.person.role) === group).length,
   })).filter((o) => o.count > 0);
 
   const dirOrder = [...c.directions, ...c.archivedDirections];

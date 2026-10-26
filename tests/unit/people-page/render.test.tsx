@@ -49,7 +49,7 @@ describe("People index (consent-edge-cases, production)", () => {
     expect(h2).toEqual([
       "people-pi",
       "people-postdoc",
-      "people-phd",
+      "people-graduate",
       "people-undergrad",
       "people-affiliate",
       "people-alumni",
@@ -146,8 +146,8 @@ describe("People index (consent-edge-cases, production)", () => {
     const buttons = [
       ...html.matchAll(/<button type="button" class="bl-chip press" aria-pressed="false">/g),
     ];
-    // 6 role options + 2 direction options.
-    expect(buttons.length).toBe(8);
+    // 5 group options (PhD and master's share "Graduate students") + 2 direction options.
+    expect(buttons.length).toBe(7);
     expect(html).toContain("<legend");
     expect(html).toContain(
       "<noscript><style>.pp-filters{display:none!important}</style></noscript>",

@@ -10,7 +10,9 @@ links:
   orcid: https://orcid.org/0000-0001-9351-0541
   cv: https://parksinchaisri.github.io/files/cv.pdf
 directions: []
-photo_consent: false
+photo: /uploads/people/park-sinchaisri.jpg
+photo_alt: Headshot of Park Sinchaisri
+photo_consent: true
 email_public: false
 now_at_public: false
 listed: true

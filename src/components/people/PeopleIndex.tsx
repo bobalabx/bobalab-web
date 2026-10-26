@@ -6,8 +6,9 @@
  * its people in the track: the PI first (160 px square), then ruled rows with
  * 64 px square photos, then alumni as a compact ruled list by year.
  *
- * Order: Principal investigator → Postdocs → PhD students → Pre-docs & research
- * staff → Master's students → Undergraduate RAs → Affiliates & collaborators,
+ * Order: Principal investigator → Postdocs → Graduate students (PhD, then
+ * master's) → Pre-docs & research staff → Undergraduate RAs → Affiliates &
+ * collaborators,
  * then Alumni in a collapsed <details>, grouped by end year (newest first).
  * Sorting inside a group: role → rank → last name (lib/content/people).
  * Groups without people are not rendered.

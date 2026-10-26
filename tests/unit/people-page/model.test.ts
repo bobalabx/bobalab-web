@@ -29,11 +29,18 @@ describe("buildPeopleIndex — order and grouping (§D9)", () => {
   const m = buildPeopleIndex(load("consent-edge-cases"));
 
   it("groups current people in the §D9 role order, skipping empty groups", () => {
-    expect(m.groups.map((g) => g.role)).toEqual(["pi", "postdoc", "phd", "undergrad", "affiliate"]);
+    expect(m.groups.map((g) => g.role)).toEqual([
+      "pi",
+      "postdoc",
+      "graduate",
+      "undergrad",
+      "affiliate",
+    ]);
+    // PhD and master's students share one group (PI, 2026-10-26).
     expect(m.groups.map((g) => g.label)).toEqual([
       "Principal investigator",
       "Postdocs",
-      "PhD students",
+      "Graduate students",
       "Undergraduate RAs",
       "Affiliates & collaborators",
     ]);
@@ -61,7 +68,7 @@ describe("buildPeopleIndex — order and grouping (§D9)", () => {
     expect(pv.groups.map((g) => g.role)).toEqual([
       "pi",
       "postdoc",
-      "phd",
+      "graduate",
       "predoc-staff",
       "undergrad",
       "affiliate",
@@ -80,8 +87,7 @@ describe("buildPeopleIndex — order and grouping (§D9)", () => {
     expect(m.roleOptions.map((o) => [o.value, o.count])).toEqual([
       ["pi", 1],
       ["postdoc", 1],
-      ["phd", 1],
-      ["masters", 1], // gray-alum (alumni) — emery-hidden is unlisted
+      ["graduate", 2], // a PhD student + gray-alum (master's, alumni); emery-hidden is unlisted
       ["undergrad", 2],
       ["affiliate", 1],
     ]);
@@ -96,7 +102,7 @@ describe("buildPeopleIndex — order and grouping (§D9)", () => {
     expect(m.summary).toEqual([
       { count: 1, label: "Principal investigator" },
       { count: 1, label: "Postdoctoral scholar" },
-      { count: 1, label: "PhD student" },
+      { count: 1, label: "Graduate student" },
       { count: 1, label: "Undergraduate RA" },
       { count: 1, label: "Affiliate" },
       { count: 2, label: "Alumni" },
