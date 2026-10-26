@@ -144,9 +144,12 @@ describe("person helpers", () => {
     expect(roleLine({ role: "pi", title: "Professor of X", program: undefined })).toBe(
       "Professor of X",
     );
-    expect(roleLine({ role: "undergrad", title: undefined, program: "econ" })).toBe(
-      "Undergraduate RA, econ",
+    // Undergraduates: title and major only, or nothing (PI, 2026-10-26).
+    expect(roleLine({ role: "undergrad", title: undefined, program: "econ" })).toBe("econ");
+    expect(roleLine({ role: "undergrad", title: "Lab manager", program: undefined })).toBe(
+      "Lab manager",
     );
+    expect(roleLine({ role: "undergrad", title: undefined, program: undefined })).toBe("");
     expect(roleLine({ role: "phd", title: undefined, program: undefined })).toBe("PhD student");
   });
 

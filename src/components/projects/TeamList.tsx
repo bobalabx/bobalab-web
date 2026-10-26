@@ -23,8 +23,13 @@ export function hasTeam(p: ProjectView): boolean {
   return projectTeamRows(p).length + p.visibleCollaborators.length + p.visiblePartners.length > 0;
 }
 
-/** "PhD student, IEOR" · "Former PhD student, IEOR" · the PI's title. */
+/**
+ * "PhD student, IEOR" · "Former PhD student, IEOR" · the PI's title.
+ * Undergraduates: only their title and major, or nothing (PI, 2026-10-26).
+ */
 export function roleLine(m: PublicPerson): string {
+  if (m.role === "undergrad")
+    return [m.title?.trim(), m.program?.trim()].filter(Boolean).join(", ");
   const role =
     m.role === "pi" && m.title
       ? m.title
@@ -54,7 +59,7 @@ export function PersonRow({ person: m }: { person: PublicPerson }) {
         <span className="pj-member__name">
           {m.hasProfile ? <Link href={`/people/${m.slug}/`}>{m.name}</Link> : m.name}
         </span>
-        <span className="pj-member__role">{roleLine(m)}</span>
+        {roleLine(m) && <span className="pj-member__role">{roleLine(m)}</span>}
         <DraftBadge show={m.draft} />
       </span>
     </li>

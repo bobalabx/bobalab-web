@@ -47,7 +47,7 @@ export function PeopleCard({
         <h3 className="pp-card__name" id={id}>
           <Name item={item} />
         </h3>
-        <p className="pp-card__role">{item.roleLine}</p>
+        {item.roleLine && <p className="pp-card__role">{item.roleLine}</p>}
         {lead && affiliation ? <p className="pp-card__affil">{affiliation}</p> : null}
         {p.draft && (
           <p className="pp-card__badges">
@@ -75,7 +75,7 @@ export function AlumniEntry({ item }: { item: PersonItem }) {
       <h4 className="pp-alum__name" id={id}>
         <Name item={item} />
       </h4>
-      <p className="pp-alum__role">{item.roleLine}</p>
+      {item.roleLine && <p className="pp-alum__role">{item.roleLine}</p>}
       {p.now_at && <p className="pp-alum__now">Now at {p.now_at}</p>}
       {p.draft && (
         <p className="pp-card__badges">

@@ -64,18 +64,22 @@ export function NewsRelated({ item }: { item: NewsView }) {
         <div className="nw-related__group">
           <h3>People</h3>
           <ul className="nw-related__list">
-            {item.peopleRefs.map((p) => (
-              <li key={p.slug}>
-                {p.hasProfile ? (
-                  <Link href={`/people/${p.slug}/`}>{p.name}</Link>
-                ) : (
-                  <span className="nw-related__name">{p.name}</span>
-                )}
-                <span className="nw-related__sub">
-                  {p.isAlumni ? "Former lab member" : p.title || ROLE_LABELS[p.role].one}
-                </span>
-              </li>
-            ))}
+            {item.peopleRefs.map((p) => {
+              // Undergraduates: title or major only, or nothing (PI, 2026-10-26).
+              const sub = p.isAlumni
+                ? "Former lab member"
+                : p.title || (p.role === "undergrad" ? p.program : ROLE_LABELS[p.role].one);
+              return (
+                <li key={p.slug}>
+                  {p.hasProfile ? (
+                    <Link href={`/people/${p.slug}/`}>{p.name}</Link>
+                  ) : (
+                    <span className="nw-related__name">{p.name}</span>
+                  )}
+                  {sub && <span className="nw-related__sub">{sub}</span>}
+                </li>
+              );
+            })}
           </ul>
         </div>
       ) : null}

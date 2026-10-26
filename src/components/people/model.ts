@@ -33,9 +33,13 @@ import type { FilterMeta } from "./filter";
 /** Shared with PersonCard and the home People strip (WP4 request 1). */
 export { avatarSwatch };
 
-/** "Undergraduate RA, applied math", or the position title (the PI's faculty title). */
+/**
+ * "PhD student, Economics", or the position title (the PI's faculty title).
+ * Undergraduates show only their title and major ("Lab manager", "EECS"), or
+ * nothing until the major is known (PI, 2026-10-26).
+ */
 export function roleLine(p: Pick<PublicPerson, "role" | "title" | "program">): string {
-  const role = p.title?.trim() || ROLE_LABELS[p.role].one;
+  const role = p.title?.trim() || (p.role === "undergrad" ? "" : ROLE_LABELS[p.role].one);
   return [role, p.program?.trim()].filter(Boolean).join(", ");
 }
 
