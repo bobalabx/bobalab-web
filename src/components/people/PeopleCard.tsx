@@ -17,6 +17,7 @@ import { PearlTagList } from "@/components/ui/PearlTag";
 import { PersonAvatar } from "./PersonAvatar";
 import { PersonLinks } from "./PersonLinks";
 import { personLinks, type PersonItem } from "./model";
+import { entryMark } from "@/lib/preview/mark";
 
 function Name({ item }: { item: PersonItem }) {
   const p = item.person;
@@ -36,7 +37,11 @@ export function PeopleCard({
   const p = item.person;
   const id = `person-${p.slug}`;
   return (
-    <article className={lead ? "pp-card pp-card--lead" : "pp-card"} aria-labelledby={id}>
+    <article
+      className={lead ? "pp-card pp-card--lead" : "pp-card"}
+      aria-labelledby={id}
+      {...entryMark("people", p.slug)}
+    >
       <PersonAvatar
         person={p}
         swatch={item.swatch}
@@ -71,7 +76,7 @@ export function AlumniEntry({ item }: { item: PersonItem }) {
   const p = item.person;
   const id = `person-${p.slug}`;
   return (
-    <article className="pp-alum" aria-labelledby={id}>
+    <article className="pp-alum" aria-labelledby={id} {...entryMark("people", p.slug)}>
       <h4 className="pp-alum__name" id={id}>
         <Name item={item} />
       </h4>

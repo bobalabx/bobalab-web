@@ -14,6 +14,7 @@ import { Fragment } from "react";
 import type { PublicationView } from "@/lib/content/load";
 import { statusLine } from "@/components/ui/PublicationEntry";
 import { DraftBadge } from "@/components/ui/Badge";
+import { entryMark } from "@/lib/preview/mark";
 
 /**
  * The status printed under an in-progress title, or null. Under an "In
@@ -49,7 +50,7 @@ export function InProgressList({
         {items.map((p) => {
           const status = wipStatus(p);
           return (
-            <li key={p.slug}>
+            <li key={p.slug} {...entryMark("publications", p.slug)}>
               <Link href={`/publications/${p.slug}/`} className="dr-wip__link">
                 {p.title}
               </Link>

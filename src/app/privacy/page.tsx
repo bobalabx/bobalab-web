@@ -1,31 +1,24 @@
-/** /privacy/: privacy statement (brief §D12; required for a berkeley.edu hostname) from content/pages/privacy.yml. */
+/**
+ * /privacy/: privacy statement (brief §D12; required for a berkeley.edu
+ * hostname) from content/pages/privacy.yml.
+ * The body is the shared view (src/components/views/TextPageView.tsx), which
+ * the editor live preview renders too.
+ */
 import type { Metadata } from "next";
 import { getContent } from "@/lib/content/load";
 import { clipDescription, pageMetadata } from "@/lib/seo/metadata";
-import { TextPage } from "@/components/pages/TextPage";
-
-const FALLBACK_TITLE = "Privacy";
+import { TEXT_PAGES, TextPageView } from "@/components/views/TextPageView";
 
 export function generateMetadata(): Metadata {
   const { pages, site } = getContent();
   const page = pages.privacy;
   return pageMetadata({
-    title: page?.title || FALLBACK_TITLE,
+    title: page?.title || TEXT_PAGES.privacy.fallbackTitle,
     description: clipDescription(page?.intro) ?? `Privacy and the ${site.name} website.`,
     path: "/privacy/",
   });
 }
 
 export default function PrivacyPage() {
-  const { pages, site } = getContent();
-  return (
-    <TextPage
-      page={pages.privacy}
-      fallbackTitle={FALLBACK_TITLE}
-      site={site}
-      contactTitle="Questions"
-      contactText="For questions about privacy on this site, email the lab."
-      contactSubject={`${site.name} website: privacy question`}
-    />
-  );
+  return <TextPageView c={getContent()} name="privacy" />;
 }

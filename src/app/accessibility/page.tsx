@@ -1,31 +1,24 @@
-/** /accessibility/: accessibility statement (brief §D12, §G1) from content/pages/accessibility.yml. */
+/**
+ * /accessibility/: accessibility statement (brief §D12, §G1) from
+ * content/pages/accessibility.yml.
+ * The body is the shared view (src/components/views/TextPageView.tsx), which
+ * the editor live preview renders too.
+ */
 import type { Metadata } from "next";
 import { getContent } from "@/lib/content/load";
 import { clipDescription, pageMetadata } from "@/lib/seo/metadata";
-import { TextPage } from "@/components/pages/TextPage";
-
-const FALLBACK_TITLE = "Accessibility";
+import { TEXT_PAGES, TextPageView } from "@/components/views/TextPageView";
 
 export function generateMetadata(): Metadata {
   const { pages, site } = getContent();
   const page = pages.accessibility;
   return pageMetadata({
-    title: page?.title || FALLBACK_TITLE,
+    title: page?.title || TEXT_PAGES.accessibility.fallbackTitle,
     description: clipDescription(page?.intro) ?? `Accessibility of the ${site.name} website.`,
     path: "/accessibility/",
   });
 }
 
 export default function AccessibilityPage() {
-  const { pages, site } = getContent();
-  return (
-    <TextPage
-      page={pages.accessibility}
-      fallbackTitle={FALLBACK_TITLE}
-      site={site}
-      contactTitle="Report a barrier"
-      contactText="If something on this site does not work for you, email the lab with the page address and a short description."
-      contactSubject={`${site.name} website: accessibility barrier`}
-    />
-  );
+  return <TextPageView c={getContent()} name="accessibility" />;
 }

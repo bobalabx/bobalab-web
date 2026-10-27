@@ -95,6 +95,12 @@ describe("js-budget helpers", () => {
     expect(budgetFor("/", B)).toEqual({ kind: "home", limit: B + 8 * KB });
     expect(budgetFor("/publications/", B)).toEqual({ kind: "publications", limit: B + 30 * KB });
     expect(budgetFor("/publications/x-2020-y/", B)).toEqual({ kind: "other", limit: B + 10 * KB });
+    // WP2: the editor's live preview page has a named budget of its own.
+    expect(budgetFor("/editor-preview/", B)).toEqual({
+      kind: "editor-preview",
+      limit: B + 180 * KB,
+    });
+    expect(budgetFor("/editor-preview/x/", B).kind).toBe("other");
   });
 
   it("counts <script src> and preloads once, skips nomodule, inline and JSON-LD", () => {
@@ -127,6 +133,39 @@ describe("js-budget fails when it should", () => {
     expect(failures.map((f) => f.route)).toEqual(["/publications/"]);
     // The 40 KB noModule chunk is never counted.
     expect(by["/people/"]!.skipped).toBe(1);
+  });
+
+  it("/editor-preview/ has its own B + 180 KB budget, reported on its own line", () => {
+    const out = siteFixture({
+      "/people/": EXTRA.other,
+      "/editor-preview/": EXTRA["editor-preview"],
+    });
+    const { rows, failures } = checkBudgets(out, { baseline: B });
+    const by = Object.fromEntries(rows.map((r) => [r.route, r]));
+    expect(by["/editor-preview/"]).toMatchObject({
+      kind: "editor-preview",
+      gz: B + 180 * KB,
+      limit: B + 180 * KB,
+      ok: true,
+    });
+    expect(failures).toEqual([]);
+    const ok = spawnSync(process.execPath, [JS_BUDGET, out, "--baseline", String(B)], {
+      encoding: "utf8",
+    });
+    expect(ok.status).toBe(0);
+    expect(ok.stdout).toMatch(
+      /\[js-budget\] editor-preview \(not a public page, budget B \+ 180 KB\):\r?\n {2}ok {2}\/editor-preview\/ /,
+    );
+    // The public pages' table does not list it.
+    const table = ok.stdout.split("[js-budget] editor-preview")[0]!;
+    expect(table).not.toContain("/editor-preview/");
+
+    const over = siteFixture({ "/editor-preview/": EXTRA["editor-preview"] + 1 });
+    const r = spawnSync(process.execPath, [JS_BUDGET, over, "--baseline", String(B)], {
+      encoding: "utf8",
+    });
+    expect(r.status).toBe(1);
+    expect(r.stdout).toMatch(/FAIL \/editor-preview\//);
   });
 
   it("home over B + 8 KB fails; the CLI exits 1 and names the page", () => {

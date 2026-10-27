@@ -18,6 +18,7 @@ import { Pearl } from "@/components/ui/Pearl";
 import { Img } from "@/components/ui/Img";
 import { DraftBadge } from "@/components/ui/Badge";
 import { projectTeamRows } from "./model";
+import { entryMark } from "@/lib/preview/mark";
 
 export function hasTeam(p: ProjectView): boolean {
   return projectTeamRows(p).length + p.visibleCollaborators.length + p.visiblePartners.length > 0;
@@ -42,7 +43,7 @@ export function roleLine(m: PublicPerson): string {
 /** One person row: square photo or initials tile, name (linked to a profile), role. */
 export function PersonRow({ person: m }: { person: PublicPerson }) {
   return (
-    <li className="pj-member">
+    <li className="pj-member" {...entryMark("people", m.slug)}>
       {m.photo ? (
         <Img
           src={m.photo}

@@ -1,5 +1,6 @@
 /**
- * Responsive image for the static export (server component: reads the media manifest).
+ * Responsive image for the static export (reads the media manifest; renders on
+ * the server and, in the editor live preview, in the browser).
  *
  * Manifest: public/media/manifest.json, written by `npm run media` (WP7). Generated
  * files live in public/media/, outside the CMS media folder (WP6 request 6):
@@ -8,31 +9,24 @@
  *                     { "width": 960, "src": "/media/x-960.webp" } ] } } }
  * With a manifest entry we emit srcset plus intrinsic width/height (no CLS).
  * Without one, pass width/height explicitly.
+ *
+ * Editor live preview: an unsaved upload at `src` (lib/preview/assets) is drawn
+ * as a plain <img> with its data URL, keeping alt, width and height.
  */
-import fs from "node:fs";
-import path from "node:path";
 import { withBasePath } from "@/lib/site/paths";
+import { assetOverride } from "@/lib/preview/assets";
+// Imported (not read with fs) so this component also renders in the browser. The
+// manifest is committed; `npm run media` rewrites it before `next build` in CI,
+// and `next dev` picks up a rewrite through HMR.
+import manifestJson from "../../../public/media/manifest.json";
 
 interface ManifestEntry {
   width: number;
   height: number;
   variants: Array<{ width: number; src: string }>;
 }
-let manifest: Record<string, ManifestEntry> | null = null;
-
-function readManifest(): Record<string, ManifestEntry> {
-  if (manifest && process.env.NODE_ENV !== "development") return manifest;
-  try {
-    const file = path.join(process.cwd(), "public", "media", "manifest.json");
-    const json = JSON.parse(fs.readFileSync(file, "utf8")) as {
-      images?: Record<string, ManifestEntry>;
-    };
-    manifest = json.images ?? {};
-  } catch {
-    manifest = {};
-  }
-  return manifest;
-}
+const manifest: Record<string, ManifestEntry> =
+  (manifestJson as { images?: Record<string, ManifestEntry> }).images ?? {};
 
 export interface ImgProps {
   src: string;
@@ -54,7 +48,21 @@ export function Img({
   className,
   loading = "lazy",
 }: ImgProps) {
-  const entry = readManifest()[src];
+  const entry = manifest[src];
+  const draft = assetOverride(src);
+  if (draft) {
+    return (
+      <img
+        src={draft}
+        width={entry?.width ?? width}
+        height={entry?.height ?? height}
+        alt={alt}
+        loading={loading}
+        decoding="async"
+        className={className}
+      />
+    );
+  }
   if (entry && entry.variants.length) {
     const variants = [...entry.variants].sort((a, b) => a.width - b.width);
     const largest = variants[variants.length - 1]!;

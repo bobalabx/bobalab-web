@@ -7,7 +7,9 @@
  *   npm run slugs:record          (run on main after a deploy; commit the file)
  *
  * Plain .mjs (no TypeScript) so it can run anywhere; it mirrors
- * hasLivePage() in src/lib/content/validate.ts.
+ * hasLivePage() in src/lib/content/links.ts (validate.ts re-exports it).
+ * tests/unit/content-rules/published-slugs-parity.test.ts checks that both
+ * give the same slugs. W_PUBLISHED_HIDDEN and E_REDIRECT_MISSING read this file.
  */
 import fs from "node:fs";
 import path from "node:path";

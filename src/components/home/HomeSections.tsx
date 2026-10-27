@@ -18,6 +18,7 @@ import { EvidenceLabel } from "@/components/ui/EvidenceLabel";
 import { Badge, DraftBadge } from "@/components/ui/Badge";
 import { DateText } from "@/components/ui/DateText";
 import { Img } from "@/components/ui/Img";
+import { entryMark } from "@/lib/preview/mark";
 import "./home.css";
 
 function Section({
@@ -151,7 +152,7 @@ export function PapersSection({ items }: { items: PublicationView[] }) {
     >
       <ol role="list" className="hm-papers">
         {items.map((p) => (
-          <li key={p.slug}>
+          <li key={p.slug} {...entryMark("publications", p.slug)}>
             <h3 className="hm-paper-t">
               <Link href={`/publications/${p.slug}/`}>{p.title}</Link>
             </h3>
@@ -186,7 +187,7 @@ export function NewsSection({ items }: { items: NewsView[] }) {
     >
       <ol role="list" className="hm-log">
         {items.map((n) => (
-          <li key={n.slug}>
+          <li key={n.slug} {...entryMark("news", n.slug)}>
             <DateText value={n.date} className="hm-log-date" />
             <p className="hm-log-title">
               <Link href={`/news/${n.slug}/`}>{n.title}</Link>
@@ -243,7 +244,7 @@ export function PeopleSection({ people, email }: { people: PublicPerson[]; email
         {faces.length > 0 && (
           <ul role="list" className="hm-faces">
             {faces.map((p) => (
-              <li key={p.slug} className="hm-face">
+              <li key={p.slug} className="hm-face" {...entryMark("people", p.slug)}>
                 {/* Consent-gated by the loader (D-06): photo is present only with photo_consent. */}
                 <Img
                   src={p.photo!}

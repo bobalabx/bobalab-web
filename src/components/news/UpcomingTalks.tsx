@@ -11,6 +11,7 @@ import type { NewsView } from "@/lib/content/load";
 import { DateText } from "@/components/ui/DateText";
 import { Badge, DraftBadge } from "@/components/ui/Badge";
 import { NEWS_TYPE_LABELS } from "@/components/ui/labels";
+import { entryMark } from "@/lib/preview/mark";
 import "./news.css";
 
 export function UpcomingTalks({ items }: { items: NewsView[] }) {
@@ -22,7 +23,7 @@ export function UpcomingTalks({ items }: { items: NewsView[] }) {
       </div>
       <ol className="nw-upcoming__list">
         {items.map((n) => (
-          <li key={n.slug} className="nw-upcoming__item">
+          <li key={n.slug} className="nw-upcoming__item" {...entryMark("news", n.slug)}>
             <p className="nw-upcoming__when">
               <DateText value={n.event_date} />
             </p>

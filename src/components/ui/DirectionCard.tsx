@@ -8,6 +8,7 @@ import Link from "next/link";
 import type { DirectionView } from "@/lib/content/load";
 import { DraftBadge, OpenToRAsBadge, Badge } from "./Badge";
 import { DateText } from "./DateText";
+import { entryMark } from "@/lib/preview/mark";
 
 export function countsLine(d: Pick<DirectionView, "counts">): string {
   const { projects, papers } = d.counts;
@@ -47,6 +48,7 @@ export function DirectionCard({
       className="bl-card bl-card--link bl-direction-card"
       data-swatch={d.color}
       aria-labelledby={`dir-${d.slug}`}
+      {...entryMark("directions", d.slug)}
     >
       <H className="bl-card__title" id={`dir-${d.slug}`}>
         <span className="bl-seg" aria-hidden="true" />

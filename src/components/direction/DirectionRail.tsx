@@ -8,6 +8,7 @@
 import Link from "next/link";
 import type { DirectionView } from "@/lib/content/load";
 import { countsSentence, railTransition } from "./model";
+import { entryMark } from "@/lib/preview/mark";
 
 export function DirectionRail({
   current,
@@ -28,7 +29,7 @@ export function DirectionRail({
       <div className="dr-section__body">
         <ol className="dr-rail__list" role="list">
           {items.map((s) => (
-            <li key={s.slug} data-swatch={s.color}>
+            <li key={s.slug} data-swatch={s.color} {...entryMark("directions", s.slug)}>
               <span className="bl-seg" aria-hidden="true" />
               <Link
                 href={`/research/${s.slug}/`}

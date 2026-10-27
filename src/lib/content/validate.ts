@@ -3,12 +3,16 @@
  * Runs over ALL content (drafts included) and returns issues. `npm run validate`
  * fails on any error; warnings are printed. Every rule code below has a fixture
  * test in tests/content/rules.test.ts. Codes are listed in docs/ARCHITECTURE.md.
+ * Pure (no file system): the editor's site check runs it in the browser too.
+ * Links to hidden pages (E_LINK_HIDDEN) are found by ./links.ts.
  */
 import { CONFUSABLE_PAIRS } from "./palette";
 import { orderDirections } from "./directions";
 import { countsAsPublication, relationsOf } from "./relations";
-import type { Issue, RawContent } from "./read";
+import type { Issue, RawContent } from "./parse";
 import { isOnOrAfter, todayInLab } from "./dates";
+import { hasLivePage, hiddenLinkIssues } from "./links";
+import { siteOrigin } from "@/lib/seo/metadata";
 import {
   COLLECTIONS,
   COLLECTION_ROUTES,
@@ -17,9 +21,22 @@ import {
   type EntryMap,
 } from "./schema";
 
+export { hasLivePage };
+
 export interface ValidateOptions {
   /** 'YYYY-MM-DD' in the lab time zone; defaults to today. */
   today?: string;
+  /**
+   * The site's own origins, for E_LINK_HIDDEN: an absolute link on one of them is
+   * a link into the site. Defaults to ownOrigins(site.site_url).
+   */
+  origins?: string[];
+}
+
+/** The site's own origins: the candidates siteOrigin() picks from (env, site_url, the production origin). */
+export function ownOrigins(siteUrl?: string): string[] {
+  const all = [siteOrigin(siteUrl), siteOrigin(), siteUrl];
+  return [...new Set(all.filter((o): o is string => Boolean(o)))];
 }
 
 export const MAX_DIRECTIONS = 8;
@@ -83,16 +100,6 @@ function* strings(obj: unknown, prefix = ""): Generator<[string, string]> {
 }
 
 type AnyEntry = EntryMap[CollectionName];
-
-/** Does this entry produce a public page in a production build? */
-export function hasLivePage(c: CollectionName, e: AnyEntry): boolean {
-  if (e.draft || !COLLECTION_ROUTES[c]) return false;
-  if (c === "people") {
-    const p = e as EntryMap["people"];
-    return p.listed && (p.role === "pi" || p.profile_page);
-  }
-  return true;
-}
 
 export function validateContent(raw: RawContent, opts: ValidateOptions = {}): Issue[] {
   const today = opts.today ?? todayInLab();
@@ -482,6 +489,10 @@ export function validateContent(raw: RawContent, opts: ValidateOptions = {}): Is
         "redirects",
       );
   }
+  // A published page whose entry is GONE needs a redirect (E_REDIRECT_MISSING).
+  // One whose entry still exists but is hidden (Draft on, Listed off, no profile
+  // page) needs none: the entry can come back, and hiding is the lab's privacy
+  // action, so it is a warning on the entry itself (D-05 amendment).
   if (raw.publishedSlugs) {
     for (const c of COLLECTIONS) {
       const route = COLLECTION_ROUTES[c];
@@ -490,16 +501,29 @@ export function validateContent(raw: RawContent, opts: ValidateOptions = {}): Is
         const e = index[c].get(slug);
         if (e && hasLivePage(c, e)) continue;
         const from = route(slug);
-        if (!froms.has(from))
-          err(
-            "E_REDIRECT_MISSING",
-            `${from} was published but no longer exists; add site.redirects {from: "${from}", to: …} (or restore it)`,
-            "site.yml",
-            "redirects",
+        if (froms.has(from)) continue;
+        if (e) {
+          const p = c === "people" ? (e as EntryMap["people"]) : null;
+          warn(
+            "W_PUBLISHED_HIDDEN",
+            `${from} was on the live site and is now hidden; visitors get “Page not found” there.`,
+            e.file,
+            e.draft ? "draft" : p && !p.listed ? "listed" : p ? "profile_page" : undefined,
           );
+          continue;
+        }
+        err(
+          "E_REDIRECT_MISSING",
+          `${from} was published but no longer exists; add site.redirects {from: "${from}", to: …} (or restore it)`,
+          "site.yml",
+          "redirects",
+        );
       }
     }
   }
+
+  // --- links to pages that are not on the live site (export-check's rule) -----------
+  issues.push(...hiddenLinkIssues(raw, { origins: opts.origins ?? ownOrigins(site?.site_url) }));
 
   return issues;
 }

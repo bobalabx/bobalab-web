@@ -7,6 +7,7 @@
 import Link from "next/link";
 import type { NewsView } from "@/lib/content/load";
 import { DateText } from "@/components/ui/DateText";
+import { entryMark } from "@/lib/preview/mark";
 import "./news.css";
 
 function PagerLink({ item, dir }: { item: NewsView; dir: "Older" | "Newer" }) {
@@ -33,12 +34,12 @@ export function NewsPager({
     <nav className="nw-pager" aria-label="More news">
       <ul>
         {previous ? (
-          <li className="nw-pager__prev">
+          <li className="nw-pager__prev" {...entryMark("news", previous.slug)}>
             <PagerLink item={previous} dir="Older" />
           </li>
         ) : null}
         {next ? (
-          <li className="nw-pager__next">
+          <li className="nw-pager__next" {...entryMark("news", next.slug)}>
             <PagerLink item={next} dir="Newer" />
           </li>
         ) : null}

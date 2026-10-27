@@ -17,6 +17,7 @@ import { Badge, DraftBadge } from "./Badge";
 import { PearlTagList } from "./PearlTag";
 import { MaterialsRow, materialsFromPublication } from "./MaterialsRow";
 import { PUBLICATION_STATUS_LABELS } from "./labels";
+import { entryMark } from "@/lib/preview/mark";
 
 type Heading = "h2" | "h3" | "h4";
 
@@ -106,7 +107,11 @@ export function PublicationEntry({
     .join(", ");
   const materials = materialsFromPublication(pub);
   return (
-    <article className="bl-pub" aria-labelledby={`pub-${pub.slug}`}>
+    <article
+      className="bl-pub"
+      aria-labelledby={`pub-${pub.slug}`}
+      {...entryMark("publications", pub.slug)}
+    >
       <div className="bl-pub__main">
         <H className="bl-pub__title" id={`pub-${pub.slug}`}>
           <Link href={`/publications/${pub.slug}/`}>{pub.title}</Link>

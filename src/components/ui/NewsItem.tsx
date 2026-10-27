@@ -9,6 +9,7 @@ import { DateText } from "./DateText";
 import { Badge, DraftBadge } from "./Badge";
 import { PearlTagList } from "./PearlTag";
 import { NEWS_TYPE_LABELS } from "./labels";
+import { entryMark } from "@/lib/preview/mark";
 
 export function NewsItem({
   item,
@@ -20,7 +21,11 @@ export function NewsItem({
   showTags?: boolean;
 }) {
   return (
-    <article className="bl-news" aria-labelledby={`news-${item.slug}`}>
+    <article
+      className="bl-news"
+      aria-labelledby={`news-${item.slug}`}
+      {...entryMark("news", item.slug)}
+    >
       <div className="bl-news__head">
         <DateText value={item.date} className="bl-news__date" />
         <Badge>{NEWS_TYPE_LABELS[item.type]}</Badge>

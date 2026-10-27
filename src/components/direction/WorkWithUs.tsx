@@ -8,6 +8,7 @@ import Link from "next/link";
 import type { OpportunityView } from "@/lib/content/load";
 import { DateText } from "@/components/ui/DateText";
 import { Badge, DraftBadge } from "@/components/ui/Badge";
+import { entryMark } from "@/lib/preview/mark";
 
 const STATUS: Record<OpportunityView["status"], string> = {
   open: "Open",
@@ -33,7 +34,7 @@ export function WorkWithUs({
       {opportunities.length > 0 && (
         <ul className="dr-work__list" role="list">
           {opportunities.map((o) => (
-            <li key={o.slug} className="dr-work__item">
+            <li key={o.slug} className="dr-work__item" {...entryMark("opportunities", o.slug)}>
               <p className="dr-work__item-title">
                 {o.apply_url || o.url ? (
                   <a href={o.apply_url ?? o.url} rel="noopener noreferrer">

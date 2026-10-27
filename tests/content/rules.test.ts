@@ -436,6 +436,27 @@ const CASES: Case[] = [
     name: "file outside any collection",
     make: (f) => f.set("misc/notes.md", "---\na: 1\n---\n"),
   },
+  {
+    code: "W_PUBLISHED_HIDDEN",
+    severity: "warning",
+    name: "a published entry is hidden now (Draft on): no redirect needed (D-05 amendment)",
+    make: (f) => {
+      f.set(".published-slugs.json", JSON.stringify({ directions: ["advice"] }));
+      f.edit(DIR, (d) => void (d.draft = true));
+    },
+  },
+  {
+    code: "E_LINK_HIDDEN",
+    severity: "error",
+    name: "a published entry links to a draft's page (export-check's rule, in the validator)",
+    make: (f) => {
+      f.edit(DIR, (d) => void (d.draft = true));
+      f.edit(
+        "news/2026-05-11-fixture-paper-accepted.md",
+        (d) => void (d.link = { label: "The direction", url: "/research/advice/" }),
+      );
+    },
+  },
 ];
 
 describe("baseline fixture n4", () => {
@@ -478,7 +499,11 @@ describe("validator rules (one fixture per error/warning)", () => {
 
   it("every rule code in the validator has a fixture test here", () => {
     const root = fileURLToPath(new URL("../..", import.meta.url));
-    const src = ["src/lib/content/validate.ts", "src/lib/content/read.ts"]
+    const src = [
+      "src/lib/content/validate.ts",
+      "src/lib/content/parse.ts",
+      "src/lib/content/links.ts",
+    ]
       .map((p) => fs.readFileSync(path.join(root, p), "utf8"))
       .join("\n");
     const used = new Set([...src.matchAll(/"([EW]_[A-Z0-9_]+)"/g)].map((m) => m[1]!));

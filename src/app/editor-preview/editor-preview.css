@@ -1,0 +1,148 @@
+/*
+ * The editor live preview (/editor-preview/, EditorPreview.tsx). Everything here
+ * is scoped to the preview page: .ep-* classes and the data-ep-* attributes the
+ * preview sets on the site's own elements.
+ * Only the site's own tokens (src/styles/tokens.css) are used, never Tailwind's
+ * theme variables: Tailwind scans every source file, and a theme variable named
+ * here would be added to the public pages' stylesheet.
+ */
+
+/* The layout's footer is built once, at build time; the preview draws its own
+   from the Settings the editor is changing. */
+body:has(.ep-root) > .bl-footer {
+  display: none;
+}
+
+/* --- Shell: before the content manager has sent the site ----------------- */
+.ep-shell {
+  padding-block: 3rem 6rem;
+}
+.ep-loading {
+  margin: 0 0 1.5rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.ep-skeleton {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 40rem;
+}
+.ep-skeleton span {
+  display: block;
+  height: 1rem;
+  background: var(--hairline, #d9dcd6);
+  animation: ep-pulse 1.4s ease-in-out infinite alternate;
+}
+.ep-skeleton span:first-child {
+  width: 60%;
+  height: 2.25rem;
+}
+.ep-skeleton span:last-child {
+  width: 80%;
+}
+@keyframes ep-pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.45;
+  }
+}
+.ep-standalone {
+  margin: 0;
+  max-width: 40rem;
+}
+.ep-standalone h1 {
+  margin: 0 0 0.75rem;
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+.ep-standalone p {
+  margin: 0;
+}
+.ep-standalone[hidden] {
+  display: none;
+}
+
+/* --- A page that is not on the live site ---------------------------------- */
+.ep-notonsite {
+  padding-block: 3rem 6rem;
+}
+.ep-notonsite h1 {
+  margin: 0 0 1rem;
+  font-size: 2.25rem;
+  line-height: 1.1;
+}
+.ep-notonsite p {
+  margin: 0;
+  max-width: 40rem;
+  color: var(--muted);
+}
+
+/* The citation box stays on the published page (citation-js is not loaded here). */
+.ep-citation {
+  margin: 2rem 0;
+  padding: 0.75rem 1rem;
+  border: 1px dashed var(--rule, #8a8f86);
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* --- The entry being edited, on list pages -------------------------------- */
+[data-ep-editing] {
+  outline: 2px dashed #3a69c7;
+  outline-offset: 4px;
+}
+[data-ep-pos] {
+  position: relative;
+}
+[data-ep-editing]::after {
+  content: attr(data-ep-editing);
+  position: absolute;
+  z-index: 5;
+  top: -4px;
+  right: -4px;
+  transform: translateY(-100%);
+  padding: 0.125rem 0.375rem;
+  background: #3a69c7;
+  color: #fff;
+  font: 600 12px/1.4 var(--font-sans);
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  pointer-events: none;
+}
+@media (prefers-color-scheme: dark) {
+  [data-ep-editing] {
+    outline-color: #8fb0ff;
+  }
+}
+
+/* "Find my entry": a short tint that fades. */
+.ep-flash {
+  animation: ep-flash 1.2s ease-out;
+}
+@keyframes ep-flash {
+  from {
+    background-color: rgb(58 105 199 / 0.24);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ep-flash {
+    animation: none;
+    background-color: rgb(58 105 199 / 0.16);
+  }
+  .ep-skeleton span {
+    animation: none;
+  }
+}
+:root[data-motion="reduce"] .ep-flash {
+  animation: none;
+  background-color: rgb(58 105 199 / 0.16);
+}
+:root[data-motion="reduce"] .ep-skeleton span {
+  animation: none;
+}

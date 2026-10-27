@@ -11,6 +11,7 @@ import { PearlTagList } from "@/components/ui/PearlTag";
 import { statusLine } from "@/components/ui/PublicationEntry";
 import { typeWord } from "@/lib/publications/csl";
 import { ROLE_LABELS } from "@/lib/content/people";
+import { entryMark } from "@/lib/preview/mark";
 import "./news.css";
 
 export function hasRelated(n: NewsView): boolean {
@@ -46,7 +47,7 @@ export function NewsRelated({ item }: { item: NewsView }) {
               const venue = venueLine(p);
               const status = statusLine(p, p.type);
               return (
-                <li key={p.slug}>
+                <li key={p.slug} {...entryMark("publications", p.slug)}>
                   <Link href={`/publications/${p.slug}/`}>{p.title}</Link>
                   {venue ? (
                     <span className="nw-related__sub">
@@ -70,7 +71,7 @@ export function NewsRelated({ item }: { item: NewsView }) {
                 ? "Former lab member"
                 : p.title || (p.role === "undergrad" ? p.program : ROLE_LABELS[p.role].one);
               return (
-                <li key={p.slug}>
+                <li key={p.slug} {...entryMark("people", p.slug)}>
                   {p.hasProfile ? (
                     <Link href={`/people/${p.slug}/`}>{p.name}</Link>
                   ) : (

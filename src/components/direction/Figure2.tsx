@@ -18,6 +18,7 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import type { DirectionView } from "@/lib/content/load";
+import { entryMark } from "@/lib/preview/mark";
 import { pearlVtName } from "@/lib/vt";
 import { DirectionPearl } from "./DirPearl";
 import type { F2Item, F2Model } from "./f2model";
@@ -47,6 +48,7 @@ function Column({ item, k, wip = false }: { item: F2Item; k: number; wip?: boole
       className={wip ? "dr-f2__p dr-f2__p--wip" : "dr-f2__p"}
       data-slug={item.slug}
       style={{ "--t": `${k * STAGGER}ms` } as Vars}
+      {...entryMark("publications", item.slug)}
     >
       <span className={wip ? "dr-f2__ring" : "dr-f2__dot"} aria-hidden="true" />
       <span className="dr-f2__lead" aria-hidden="true" />

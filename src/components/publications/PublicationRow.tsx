@@ -18,6 +18,7 @@ import { pageRange, typeWord } from "@/lib/publications/csl";
 import { Badge, DraftBadge } from "@/components/ui/Badge";
 import { MaterialsRow, materialsFromPublication } from "@/components/ui/MaterialsRow";
 import { AuthorList, statusText } from "./PaperParts";
+import { entryMark } from "@/lib/preview/mark";
 
 type Heading = "h2" | "h3" | "h4";
 
@@ -44,7 +45,11 @@ export function PublicationRow({
   const materials = materialsFromPublication(pub);
   const nAwards = pub.awards.length;
   return (
-    <article className="bl-pub pubs-row" aria-labelledby={`pub-${pub.slug}`}>
+    <article
+      className="bl-pub pubs-row"
+      aria-labelledby={`pub-${pub.slug}`}
+      {...entryMark("publications", pub.slug)}
+    >
       <div className="bl-pub__main">
         <H className="bl-pub__title" id={`pub-${pub.slug}`}>
           <Link href={`/publications/${pub.slug}/`}>{pub.title}</Link>

@@ -19,6 +19,11 @@
  *   /               ≤ B + 8 KB
  *   /publications/  ≤ B + 30 KB
  *   any other page  ≤ B + 10 KB
+ * and one named budget for a page that is not part of the public site, reported
+ * on its own line:
+ *   /editor-preview/  ≤ B + 180 KB  (the content manager's live preview: every
+ *                     page view, the content pipeline and the validator run in
+ *                     the browser; noindex, never linked, not in the sitemap)
  * B can be overridden with --baseline or PERF_BASELINE_B (bytes).
  *
  * Exit: 0 all within budget · 1 a page is over budget or references a missing /
@@ -33,7 +38,14 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const KB = 1024;
-export const EXTRA = { home: 8 * KB, publications: 30 * KB, other: 10 * KB };
+export const EXTRA = {
+  home: 8 * KB,
+  publications: 30 * KB,
+  other: 10 * KB,
+  "editor-preview": 180 * KB,
+};
+/** Routes with a named budget of their own (not public pages). */
+export const NAMED = { "/editor-preview/": "editor-preview" };
 
 /** Parse baseline B (bytes) from docs/PERF-BASELINE.md. */
 export function parseBaseline(markdown) {
@@ -51,7 +63,9 @@ export function routeOf(rel) {
 
 /** Budget class and limit (bytes) for a route. */
 export function budgetFor(route, baseline) {
-  const kind = route === "/" ? "home" : route === "/publications/" ? "publications" : "other";
+  const kind =
+    NAMED[route] ??
+    (route === "/" ? "home" : route === "/publications/" ? "publications" : "other");
   return { kind, limit: baseline + EXTRA[kind] };
 }
 
@@ -247,13 +261,22 @@ export function main(
       `[js-budget] baseline B = ${fmt(baseline)} B gz; ${rows.length} page(s) in ${path.relative(process.cwd(), outDir) || outDir}`,
     );
     const w = Math.min(60, Math.max(...rows.map((r) => r.route.length)));
-    const sorted = [...rows].sort((a, b) => Number(a.ok) - Number(b.ok) || b.gz - a.gz);
-    for (const r of sorted) {
+    const line = (r) => {
       const head = r.limit - r.gz;
-      log(
+      return (
         `${r.ok ? "  ok " : "  FAIL"} ${r.route.padEnd(w)} ${fmt(r.gz).padStart(9)} / ${fmt(r.limit).padStart(9)} (${head >= 0 ? "+" : ""}${fmt(head)}) ${r.kind}` +
-          (r.errors.length ? `  ${r.errors.join("; ")}` : ""),
+        (r.errors.length ? `  ${r.errors.join("; ")}` : "")
       );
+    };
+    const named = new Set(Object.values(NAMED));
+    const sorted = [...rows]
+      .filter((r) => !named.has(r.kind))
+      .sort((a, b) => Number(a.ok) - Number(b.ok) || b.gz - a.gz);
+    for (const r of sorted) log(line(r));
+    // Named budgets (pages outside the public site) get a line of their own.
+    for (const r of rows.filter((x) => named.has(x.kind))) {
+      log(`[js-budget] ${r.kind} (not a public page, budget B + ${EXTRA[r.kind] / KB} KB):`);
+      log(line(r));
     }
     if (measured !== null) {
       const diff = measured - baseline;

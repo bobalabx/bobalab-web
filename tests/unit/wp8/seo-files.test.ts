@@ -117,7 +117,7 @@ describe.each(SETS)("sitemap for %s", (dir) => {
     for (const u of urls) {
       expect(u.startsWith(`${origin}/`), u).toBe(true);
       expect(u.endsWith("/"), `${u} needs a trailing slash`).toBe(true);
-      expect(u).not.toMatch(/\/(admin|kit)\//);
+      expect(u).not.toMatch(/\/(admin|kit|editor-preview)\//);
       expect(u).not.toContain("_none");
     }
     const paths = new Set(urls.map((u) => u.slice(origin.length)));
@@ -165,18 +165,21 @@ describe("sitemap details", () => {
     );
     const txt = resolveRouteData(robots(), "robots");
     expect(txt).toContain("Disallow: /website/admin/");
+    expect(txt).toContain("Disallow: /website/editor-preview/");
     expect(txt).toContain("Sitemap: https://bobalab.haas.berkeley.edu/website/sitemap.xml");
   });
 });
 
 describe("robots.txt", () => {
-  it("production: allows the site, disallows /admin/, points to the sitemap", async () => {
+  it("production: allows the site, disallows /admin/ and /editor-preview/, points to the sitemap", async () => {
     setEnv({ CONTENT_DIR: path.join(FIX, "n4"), INCLUDE_DRAFTS: "0" });
     const { robots } = await loadRoutes();
     const txt = resolveRouteData(robots(), "robots");
     expect(txt).toContain("User-Agent: *");
     expect(txt).toContain("Allow: /\n");
     expect(txt).toContain("Disallow: /admin/");
+    // The editor's live preview page (WP2): noindex itself, never in the sitemap.
+    expect(txt).toMatch(/^Disallow: \/editor-preview\/$/m);
     expect(txt).not.toMatch(/^Disallow: \/$/m);
     expect(txt).toContain("Sitemap: https://example.invalid/sitemap.xml");
   });
@@ -187,5 +190,6 @@ describe("robots.txt", () => {
     const txt = resolveRouteData(robots(), "robots");
     expect(txt).toMatch(/^Disallow: \/$/m);
     expect(txt).toContain("Disallow: /admin/");
+    expect(txt).toContain("Disallow: /editor-preview/");
   });
 });

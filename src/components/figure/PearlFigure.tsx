@@ -37,6 +37,7 @@ import {
   type FigureModel,
 } from "@/lib/figure/buildFigure";
 import { figureCss, plateVars } from "@/lib/figure/geometry";
+import { entryMark } from "@/lib/preview/mark";
 import { pearlVtName, TRANSITION } from "@/lib/vt";
 import { PearlBody } from "./parts";
 import { FigureIsland } from "./FigureIsland";
@@ -301,7 +302,13 @@ export function PearlFigure({ model, heading }: PearlFigureProps) {
                 const [count, rest] = laneCounts(l);
                 const shares = sharesSentence(l.shares);
                 return (
-                  <li key={l.slug} className="f1-item" data-slug={l.slug} data-swatch={l.swatch}>
+                  <li
+                    key={l.slug}
+                    className="f1-item"
+                    data-slug={l.slug}
+                    data-swatch={l.swatch}
+                    {...entryMark("directions", l.slug)}
+                  >
                     <div className="f1-lab">
                       <p className="f1-name">
                         <Link

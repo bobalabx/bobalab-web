@@ -7,6 +7,7 @@ import Link from "next/link";
 import type { ProjectView } from "@/lib/content/load";
 import { Badge, DraftBadge } from "./Badge";
 import { PearlTagList } from "./PearlTag";
+import { entryMark } from "@/lib/preview/mark";
 
 const STATUS_LABELS: Record<ProjectView["status"], string> = {
   active: "Active",
@@ -35,6 +36,7 @@ export function ProjectCard({
       className="bl-card bl-card--link"
       aria-labelledby={`project-${project.slug}`}
       data-swatch={project.primaryDirection?.color}
+      {...entryMark("projects", project.slug)}
     >
       <div className="bl-card__meta">
         <Badge tone={project.status === "active" ? "strong" : "neutral"}>

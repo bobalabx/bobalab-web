@@ -20,6 +20,7 @@ import type { ProjectView } from "@/lib/content/load";
 import { Badge, DraftBadge } from "@/components/ui/Badge";
 import { PROJECT_STATUS_LABELS, projectYears, projectTeamRows } from "./model";
 import { plural } from "@/components/direction/model";
+import { entryMark } from "@/lib/preview/mark";
 
 export function projectPapersCell(p: Pick<ProjectView, "publicationRefs">): string | null {
   const counted = p.publicationRefs.filter((x) => x.counted).length;
@@ -58,7 +59,12 @@ export function ProjectLedger({
           const people = projectTeamRows(p).length + p.visibleCollaborators.length;
           const years = projectYears(p);
           return (
-            <li key={p.slug} className="pj-table__row dr-project" data-status={p.status}>
+            <li
+              key={p.slug}
+              className="pj-table__row dr-project"
+              data-status={p.status}
+              {...entryMark("projects", p.slug)}
+            >
               <div className="pj-table__main">
                 <H className="dr-project__title" id={`pr-${p.slug}`}>
                   <Link href={`/projects/${p.slug}/`}>{p.title}</Link>

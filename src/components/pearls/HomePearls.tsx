@@ -25,6 +25,7 @@ import { ViewTransition, type CSSProperties } from "react";
 import { DraftBadge } from "@/components/ui/Badge";
 import { countsLine, papersLine, PEARLS_LEGEND, type PearlsModel } from "@/lib/pearls/model";
 import { pearlVtName, TRANSITION, VT } from "@/lib/vt";
+import { entryMark } from "@/lib/preview/mark";
 import { PearlsIsland } from "./PearlsIsland";
 import "./halo.css";
 import "./pearls.css";
@@ -88,6 +89,7 @@ export function HomePearls({ model }: { model: PearlsModel }) {
                   data-row={it.slot?.row}
                   data-edge={edgeOf(it.slot?.col, template?.columns)}
                   style={v}
+                  {...entryMark("directions", it.slug)}
                 >
                   <Link
                     href={it.href}

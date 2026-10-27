@@ -7,6 +7,7 @@ import Link from "next/link";
 import type { ProjectView } from "@/lib/content/load";
 import { DraftBadge } from "@/components/ui/Badge";
 import { projectYears } from "./model";
+import { entryMark } from "@/lib/preview/mark";
 
 export function CompactProjectList({
   projects,
@@ -21,7 +22,7 @@ export function CompactProjectList({
       {projects.map((p) => {
         const years = projectYears(p);
         return (
-          <li key={p.slug} className="pj-row">
+          <li key={p.slug} className="pj-row" {...entryMark("projects", p.slug)}>
             <p className="pj-row__title">
               <Link href={`/projects/${p.slug}/`}>{p.title}</Link>
               <DraftBadge show={p.draft} line />

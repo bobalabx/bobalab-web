@@ -14,6 +14,7 @@ import { Img } from "./Img";
 import { DraftBadge } from "./Badge";
 import { PearlTagList } from "./PearlTag";
 import { isExternalUrl, withBasePath } from "@/lib/site/paths";
+import { entryMark } from "@/lib/preview/mark";
 
 const LINK_LABELS: Record<string, string> = {
   haas: "Haas profile",
@@ -41,7 +42,11 @@ export function PersonCard({
     ? formerRole(person.role)
     : person.title || ROLE_LABELS[person.role].one;
   return (
-    <article className="bl-person" aria-labelledby={`person-${person.slug}`}>
+    <article
+      className="bl-person"
+      aria-labelledby={`person-${person.slug}`}
+      {...entryMark("people", person.slug)}
+    >
       {person.photo ? (
         <Img
           src={person.photo}

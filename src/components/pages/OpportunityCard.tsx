@@ -11,6 +11,7 @@ import { Badge, DraftBadge } from "@/components/ui/Badge";
 import { DateText } from "@/components/ui/DateText";
 import { Prose } from "@/components/ui/Prose";
 import { mailtoHref } from "./MailLink";
+import { entryMark } from "@/lib/preview/mark";
 import "./pages.css";
 
 /** The status in words, or null when the lab has not set one ("unknown" shows nothing). */
@@ -90,7 +91,7 @@ export function OpportunityCard({
   const id = `opp-${o.slug}`;
   const email = o.email && o.email.toLowerCase() !== labEmail?.toLowerCase() ? o.email : undefined;
   return (
-    <article className="pg-opp" aria-labelledby={id}>
+    <article className="pg-opp" aria-labelledby={id} {...entryMark("opportunities", o.slug)}>
       <H className="pg-opp__title" id={id}>
         {o.title}
       </H>
