@@ -1,4 +1,74 @@
-# Testing report (verification phase)
+# Testing report
+
+Section 0 is the verification of editor v2 (2026-10-26). Sections 1–12 are the original verification of the site (2026-10-20); where editor v2 changed what they describe, they say so.
+
+## 0. Editor v2 verification (2026-10-26, WP6 integration)
+
+Editor v2 ("Save goes live", the live column, History and Restore; DECISIONS D-17 to D-19) on the branch `editor-v2` (from `main` 14c739c), after WP1–WP5 and the integration fixes below. Windows 11, Node 24.19.0, Playwright 1.64.1, Decap 3.17.1. Labels as in §1–12. Nothing was committed, pushed or deployed.
+
+### 0.1 Gates (MEASURED)
+
+| Gate                                                          | Result                                                                                                                                                                  |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run typecheck` / `lint`                                  | 0 errors / 0 problems                                                                                                                                                   |
+| `npm run format:check`                                        | all files formatted                                                                                                                                                     |
+| `npm run test`                                                | 79 files, **1,420 passed, 4 skipped** (the same environment-gated skips as before: network vendoring check, Linux-only, dataset)                                        |
+| `npm run validate`                                            | 5 files, **75 passed** (two new rule fixtures: W_PUBLISHED_HIDDEN, E_LINK_HIDDEN); real content: 0 errors, warnings W_CONSENT_NOW_AT and W_DIRECTIONS_EMPTY (unchanged) |
+| `npm run cms:check`, `cms:vendor:check`                       | admin files up to date; vendored bundle equals the decap-cms 3.17.1 tarball                                                                                             |
+| Production build (copy of the tree, base path `/bobalab-web`) | validate, uploads, media, build, export-check (82 pages, 78 sitemap URLs), CMS backend check, asset budgets, JS budget (82 pages within budget): **all pass**           |
+| `npm run build:preview` (copy, root)                          | 83 pages, CSP hoisted                                                                                                                                                   |
+
+### 0.2 Public pages against `main` 14c739c (MEASURED)
+
+480 exported public text files (HTML, RSC payloads, XML, JSON) compared with the export of `main`, build ids blanked:
+
+- **Identical** except `robots.txt` (the new `Disallow: /bobalab-web/editor-preview/` line) and the 5 files of `/publications/`, which name a renamed island chunk. `/publications/` JavaScript is **148,259 → 148,560 B gz (+301 B)**; the other 80 routes are byte-identical. The cause and the owner decision are in DECISIONS D-17 and `docs/PERF-BASELINE.md`.
+- The global CSS is identical (it was not during integration: a Markdown sentence in these docs spelled out a Tailwind important-modifier class and added one rule to every page; reworded, D-17).
+- `sitemap.xml` identical; `news/feed.xml` differs only in `lastBuildDate`; **0** exported files contain `data-entry`.
+- `/editor-preview/`: 286,780 B gz (budget B + 180 KiB = 323,464), noindex, not in the sitemap.
+
+### 0.3 End-to-end (MEASURED)
+
+| Run                                                                                  | Chromium                                         | WebKit                                                                     |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------ | -------------------------------------------------------------------------- |
+| Shared dev server, **every spec**                                                    | **286 passed, 16 skipped, 1 failed** (see below) | home, people, cms-live, cms-save, editor-preview: **96 passed, 1 skipped** |
+| `cms-local.spec.ts` alone (dev)                                                      | **15 passed** (alone, and in the full run)       | not run (not in the WebKit list)                                           |
+| Preview export (CI configuration: `E2E_STATIC=1`, every spec but cms-local and a11y) | **253 passed, 14 skipped**                       | **249 passed, 17 skipped, 1 failed** (see below)                           |
+| `a11y-sitewide.spec.ts` on the preview export                                        | **21 passed**                                    | n/a (Chromium job)                                                         |
+| `editor-preview.spec.ts` on the production export (base path `/bobalab-web`)         | **11 passed**                                    | **11 passed**                                                              |
+
+- **Dev, Chromium, the 1 failure:** `research.spec.ts` "Figure 2 geometry" exceeds its 30 s test timeout while 8 workers load the dev server (8 page loads of direction pages). It passes alone on the dev server (9.8 s) and on the export. Not caused by the editor (it opens only public pages); treat as a load-sensitive test.
+- **Export, WebKit, the 1 failure:** `editor-preview.spec.ts` is flaky in WebKit on the root preview export: in 3 runs it passed once fully and failed once each on two different checks (a refused router prefetch logged as "… due to access control checks"; once `found: "absent"` instead of `"marker"` on the first render of a new news item). It passes in WebKit on the dev server and on the production export. Logged for WP2 (known issues). **Resolved after verification:** both causes were in the test, not in the preview. The prefetch errors came from the test's own visit to the home page just before it opened the preview (the visit now runs in a page of its own), and `found: "absent"` was the preview's second `rendered` message, posted 400 ms after the previous render, taken for the answer (the test now waits for the render of its own overlay `rev`). The preview needs no change. MEASURED after the fix: 33 of 33 in WebKit on the production export (`--repeat-each=3`).
+- **Integration fixes found by these runs** (all now passing): a ResizeObserver loop error in WebKit after a save (`cms-live.js` now measures on the next frame); a race in the cms-live and cms-local specs when a direct address change reloads the page (they now wait for the scripts); the cms-local axe pass now waits for the live column to finish before scanning.
+- **Content safety:** every spec that saves uses a scratch copy of `content/` with its own decap-server; `cms-local.spec.ts` also byte-checks every file in `content/` at the end. After all runs, `git status` shows no change under `content/` or `public/uploads/`.
+
+### 0.4 Measurements (MEASURED; local demo, dev server, Chromium, Windows)
+
+| What                                                                           | Result                                                                                      |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| Live column, first load in a new tab (editor open → site loaded)               | 1,311 ms, 14 requests to the local proxy                                                    |
+| Another entry in the same tab (cached site)                                    | 480 ms, 1 request                                                                           |
+| After a page reload                                                            | 774 ms, 12 requests                                                                         |
+| Edit → real page in the nested frame                                           | 13–57 ms (5 keystrokes); WP4: 35–59 ms Chromium, 71–150 ms WebKit, all 8 entry types        |
+| Unsaved image upload → nested frame                                            | 117–133 ms Chromium, 314–335 ms WebKit (WP4)                                                |
+| Site check (`checkSave`)                                                       | 1–7 ms (5 runs; errors of the saved site are cached), 0 blocking problems on real content   |
+| New entry's first save                                                         | file written 141 ms after the click; **no page reload**; the address moves to the new entry |
+| One-click fallback (Decap's "Save now" renamed)                                | Decap's menu shows: two clicks, never a dead button (`cms-save.spec`, Chromium + WebKit)    |
+| Latch                                                                          | double click, Enter twice and Ctrl+S twice each give exactly one save (`cms-save.spec`)     |
+| **The live site** (first base load through GitHub, ~280 requests; Save → live) | **not measured yet**: SETUP-PRODUCTION §C6 step 1–2 (owner)                                 |
+
+### 0.5 Walkthrough screenshots
+
+`test-results/WP6/walkthrough/` (git-ignored), from the local demo with a fictional GitHub history: 01 the live column while typing; 02 News list with Find my entry; 03 a new entry with stand-ins and its future address; 04 History; 05 an older version (amber band, consent kept off); 06 the Restore dialog; 07 the "Not saved" band from the site check (duplicate title, with [Open …]); 08 the band from a "required when" rule; 09 someone else saved; 10 "Bring in their changes" with the conflict and [Copy my …]; 11 "Saved" with Undo; 12 the failed-deploy banner; 13 Recent changes; 14–15 phone Edit and Preview & history. The editor screens at 1366 and 390 px, light and dark, with axe results, are in `test-results/WP6/` (cms-local.spec).
+
+### 0.6 Not tested (UNKNOWN)
+
+- The real GitHub backend: saves by a signed-in editor, `author.login` on the commits, the token scope, History and the deploy tracking against the live API, the two-editor conflict. All were tested with recorded or synthetic GitHub answers only. SETUP-PRODUCTION §C6 is the live smoke test.
+- Linux and GitHub Actions for the new specs; real phones; screen readers with the new editor (QA-CHECKLIST §3a).
+
+---
+
+## Site verification (2026-10-20): sections 1–12
 
 Final verification of the BOBALAB website after the lens review (64 findings) and the area fixers, run on 2026-10-20 by the final verifier. Labels: **MEASURED** (run and observed here), **DOCUMENTED** (reported by an area fixer or a source, not re-run here), **UNKNOWN** (not tested).
 
@@ -92,17 +162,17 @@ Other budgets: JS (`npm run perf`) all 33 production and 82 preview pages within
 
 Links: linkinator, local URLs with fragments: production 118 checked, preview 228 checked, **0 broken** (external links are the weekly job).
 
-## 7. CMS end-to-end flows (MEASURED, `cms-local.spec.ts` against the dev server + decap-server)
+## 7. CMS end-to-end flows (MEASURED, `cms-local.spec.ts` against the dev server + decap-server; updated for editor v2 in §0)
 
 1. Admin CSP: Decap 3.17.1 needs `'unsafe-eval'`; the generated policy lets it start.
 2. Create a news item in the CMS → file in `content/news/` → valid against the schema → in the production build's route list → deleted. (On `next dev`, a news file added after the route compiled returns 404 until restart: a dev-server limitation the cms fixer recorded as an annotation; production static params are checked.)
 3. Rich-text body: opening an entry changes nothing; an edit does; undo does not.
 4. New publication address checked before the first save (D-05); the long-first-author advice (CMS-11).
 5. Phone widths: no sideways scrolling, account menu reachable.
-6. On a scratch copy of `content/` (second decap-server): Direction order items show their address, reorder with the keyboard and can be removed (CMS-01, CMS-03, CMS-12); after a save, an address change opens the named entry and Publish writes that file (CMS-02); saves the validator would reject are refused (as_of, status_source, directions, year, duplicate colour; CMS-04, CMS-07); focus ring and conditional "(required …)" labels (A11Y-02, CMS-09); the CMS refuses to start inside a frame (CMS-13).
+6. On a scratch copy of `content/` (second decap-server): Direction order items show their address, reorder with the keyboard and can be removed (CMS-01, CMS-03, CMS-12); after a save, an address change opens the named entry and the next save writes that file (CMS-02); saves the validator would reject are refused (as_of, status_source, directions, year, duplicate colour; CMS-04, CMS-07); focus ring and conditional "(required …)" labels (A11Y-02, CMS-09); the CMS refuses to start inside a frame (CMS-13).
 7. axe on the editor (§5).
 
-Not tested: the GitHub backend (OAuth bridge, editorial-workflow PRs, Publish → deploy), see §10.
+Not tested: the GitHub backend (OAuth bridge, saves through GitHub, deploy), see §10 and §0.
 
 ## 8. Content verification (MEASURED)
 
@@ -131,7 +201,7 @@ Minors were spot-checked on the exports (VIS-07/08 PI page 3,569 px with Haas li
 ## 10. Not tested (UNKNOWN)
 
 - Linux and GitHub Actions: no workflow has run; the Linux JS baseline, Linux WebKit Tab behaviour and the `record-slugs` push/PR step are unverified.
-- The GitHub OAuth bridge, Decap's editorial workflow (branch, PR, `validate-content`, Publish, deploy, revert).
+- The GitHub OAuth bridge and saving through GitHub (editor v2: the live smoke test of SETUP-PRODUCTION §C6).
 - Real devices (iOS Safari, Android Chrome) and real browser zoom; only emulated viewports.
 - Screen readers (VoiceOver, NVDA, JAWS), including the timing of the CMS drag announcements.
 - Field performance (CrUX); Lighthouse is a lab simulation.

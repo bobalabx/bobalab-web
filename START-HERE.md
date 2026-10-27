@@ -2,10 +2,10 @@
 
 This repo holds **both** "websites" the lab needs. They share one set of content files, so there is a single source of truth.
 
-|             | What                                                                                                                                                                              | Where     |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| Public site | Home with the interactive pearl figure (Fig. 1), Research directions, Projects, Publications (search, filters, BibTeX), People, News (+ RSS), Join, About, Accessibility, Privacy | `/`       |
-| Editor      | Decap CMS: forms for every content type, drafts → review → publish, image and PDF uploads, reordering pearls, a colour per direction                                              | `/admin/` |
+|             | What                                                                                                                                                                                                                          | Where     |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Public site | Home with the interactive pearl figure (Fig. 1), Research directions, Projects, Publications (search, filters, BibTeX), People, News (+ RSS), Join, About, Accessibility, Privacy                                             | `/`       |
+| Editor      | Decap CMS: forms for every content type with the real site beside the form, one-click Save that goes live in about 2 minutes, History with Undo and Restore, image and PDF uploads, reordering pearls, a colour per direction | `/admin/` |
 
 Nothing has been deployed, pushed or registered. Everything below runs on this computer.
 
@@ -35,7 +35,7 @@ Almost all content is still a draft until the lab approves it, so the production
 npm run cms:local
 ```
 
-Open http://localhost:3100/admin/local.html and click **Login**. Saving writes straight into `content/`, and the site updates when you reload. Use `git diff` to see what changed and `git checkout -- content` to undo practice edits. The real editor (GitHub sign-in, drafts board, review before publish) is described in `docs/EDITING.md`.
+Open http://localhost:3100/admin/local.html and click **Login**. The right-hand column shows the real site with your changes as you type. Saving writes straight into `content/`, and the site updates when you reload. Use `git diff` to see what changed and `git restore content/` to undo practice edits. The real editor (GitHub sign-in; Save puts a change on the live site in about 2 minutes; History, Undo and Restore) is described in `docs/EDITING.md`.
 
 ## 3. Before launch: what the lab must decide
 

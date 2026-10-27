@@ -2,100 +2,193 @@
 
 This guide is for lab members who edit the website through the content manager (Decap CMS) at **`/admin/`** on the live site, today `https://bobalabx.github.io/bobalab-web/admin/`. You do not need to know Git or code. Maintainers set up the system once (`docs/SETUP-PRODUCTION.md`) and look after it (`docs/HANDOVER.md`).
 
-Contents: [1. Sign in](#1-sign-in) · [2. Drafts and review](#2-drafts-and-review) · [3. Publish: wait for the green check](#3-publish-wait-for-the-green-check) · [4. Consent rules](#4-consent-rules-people-photos-emails) · [5. Images and alt text](#5-images-and-alt-text) · [6. Research directions: order, colours, archiving](#6-research-directions-order-colours-archiving) · [7. Archive instead of deleting](#7-archive-instead-of-deleting) · [8. Undo a publish (Revert)](#8-undo-a-publish-revert) · [9. Per-term checklist](#9-per-term-checklist) · [10. PDF accessibility checklist](#10-pdf-accessibility-checklist) · [11. Practice on your own computer](#11-practice-on-your-own-computer-no-account) · [12. Tips and known quirks](#12-tips-and-known-quirks) · [13. How Fig. 1 is made from your entries](#13-how-fig-1-is-made-from-your-entries) · [14. Study-design figures](#14-study-design-figures-plate_verified) · [15. Links for lab members](#15-links-for-lab-members) · [16. Writing for the site](#16-writing-for-the-site)
+Contents: [1. Sign in](#1-sign-in) · [2. Save and the Draft switch](#2-save-and-the-draft-switch) · [3. Save goes live](#3-save-goes-live-what-not-live-yet-and-hidden-mean) (the status box, [the live preview column](#32-the-live-preview-column), [what Save refuses](#33-what-save-refuses-and-what-the-site-check-is), [someone else saved this entry](#34-someone-else-saved-this-entry)) · [4. Consent rules](#4-consent-rules-people-photos-emails) · [5. Images and alt text](#5-images-and-alt-text) · [6. Research directions: order, colours, archiving](#6-research-directions-order-colours-archiving) · [7. Archive instead of deleting](#7-archive-instead-of-deleting) · [8. History: who changed what; restore a version](#8-history-who-changed-what-restore-a-version) · [9. Per-term checklist](#9-per-term-checklist) · [10. PDF accessibility checklist](#10-pdf-accessibility-checklist) · [11. Practice on your own computer](#11-practice-on-your-own-computer-no-account) · [12. Tips, phones and known quirks](#12-tips-phones-and-known-quirks) · [13. How Fig. 1 is made from your entries](#13-how-fig-1-is-made-from-your-entries) · [14. Study-design figures](#14-study-design-figures-plate_verified) · [15. Links for lab members](#15-links-for-lab-members) · [16. Writing for the site](#16-writing-for-the-site)
 
-> **Redesign, October 2026 (DECISIONS D-13).** The site now looks different, but what you edit is almost the same. Here is what changed for editors:
+> **New editor, October 2026 (DECISIONS D-17 to D-19).** What changed for editors:
 >
-> - Type and status show as plain words, not as boxed badges or pills. You fill in the same fields.
-> - Lists are ruled rows, not cards.
-> - A person without a consented photo gets a square with their initials.
-> - Fig. 1 on the home page draws one line per research direction (section 13).
-> - Publications have one new checkbox, **Study-design figure checked by the authors** (section 14).
-> - Status provenance ("reported by the lab") is printed once per page as a footnote, so never type it into a field or a body (section 16).
+> - **Save puts your change on the live site** in about 2 minutes. There is no separate publishing step and no waiting for a check on github.com any more.
+> - The right-hand column shows **the real website** with your unsaved changes, not an approximation (section 3.2).
+> - Before it saves, the content manager runs **the site's own check**. If your change would break the site, Save says so and nothing is written (section 3.3).
+> - **History** lists every save of an entry with who made it. One click brings back an older version; **Undo** in the "Saved" message takes back your last save (section 8).
+> - A status box at the bottom right says when your change is live, and **Recent changes** lists every save to the website (section 3.1).
+> - The header **Media** page and the **Delete** button in the image library are gone (section 5).
+> - You can edit and save from a phone (section 12).
+
+> **Redesign, October 2026 (DECISIONS D-13).** The site looks different from before, but what you edit is almost the same. Type and status show as plain words, lists are ruled rows, a person without a consented photo gets a square with their initials, Fig. 1 draws one line per research direction (section 13), publications have the checkbox **Study-design figure checked by the authors** (section 14), and status provenance is printed once per page as a footnote, so never type it into a field (section 16).
 
 ---
 
 ## 1. Sign in
 
-1. You need a free GitHub account with **two-factor authentication** turned on, and a maintainer must add you to the lab's `web-editors` team. Ask the PI or a maintainer.
+1. You need a free GitHub account with **two-factor authentication** turned on, and a maintainer must give your account edit access to the lab's website repository. Ask the PI or a maintainer.
 2. Open `/admin/` on the site and click **Login with GitHub**. A GitHub window asks you to authorise "BOBALAB website CMS" the first time. Approve it.
 3. The CMS keeps your sign-in in this browser. On a shared or public computer, use the account menu (top right) → **Log out** when you finish.
-4. If sign-in fails ("Not found" or a blank pop-up), you are probably not in the team yet, or the pop-up was blocked. Allow pop-ups for the site and try again.
+4. If sign-in fails ("Not found" or a blank pop-up), you probably have no access yet, or the pop-up was blocked. Allow pop-ups for the site and try again.
 
 What you can change: News, Publications, People, Research directions, Projects, Opportunities, the fixed Pages (Home texts, Join, About, Accessibility, Privacy) and site Settings (including the links for lab members, section 15).
 
-## 2. Drafts and review
+## 2. Save and the Draft switch
 
-There are **two different things called "draft"**. Keep them apart:
+**Save means "put this on the website".** Each Save is recorded on GitHub under your name and the live site updates about 2 minutes later. There is one button, **Save**, at the top of the form. While it works it reads "Saving…"; a second click does nothing, so you cannot save twice by accident. **Ctrl+S** (Cmd+S on a Mac) saves too.
 
-|                                         | Where                                            | What it means                                                                                                                                                                                                            |
-| --------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Workflow draft**                      | The **Workflow** tab: Drafts → In review → Ready | Your change is saved but **not published**. It lives on its own branch with a pull request on GitHub. Nothing on the site changes.                                                                                       |
-| **"Draft · pending lab review" switch** | A field in every entry                           | The entry **is** published to the repository, but the live site leaves it out. Preview builds show it with the words "Draft · pending lab review". Imported content that the lab has not checked yet has this switch on. |
+**The "Draft · pending lab review" switch** is a field in every entry. When it is on, Save keeps the entry **off the website**: visitors who open its address get "Page not found", and lists leave it out. Use it for anything the lab has not approved yet.
+
+> **Draft hides an entry from the website only.** The website's repository is public: anyone can read every save, drafts included, on github.com, now and later. Never put embargoed results, unpublished personal data, home addresses, phone numbers or anything a person has not agreed to share into any field, draft or not.
+
+**The note next to Save** always says what Save will do with the entry as it is in the form now:
+
+| The entry                                | The note says                           |
+| ---------------------------------------- | --------------------------------------- |
+| Draft off                                | Save puts this on the live site         |
+| Draft on                                 | Save keeps it hidden: Draft is on       |
+| A person with **Listed** off             | Not listed: Save won't show this person |
+| A listed person without a profile page   | Save updates the People page            |
+| An opportunity                           | Save updates the Join page              |
+| A page (Home texts, Join, …) or Settings | Save updates the live site              |
+
+New entries start with Draft **off** (DECISIONS D-17, default). If the text is not ready for visitors, turn Draft on **before** the first Save.
 
 The normal path:
 
-1. Open a collection, click its **＋** button (for example **＋ Publication**, **＋ News item**, **＋ Person**) or an existing entry, and edit. The right-hand pane is a **preview** styled like the site (news, people, publications and research directions show the site's own list row; it is an approximation of the live page).
-2. Click **Save**. This creates a workflow draft. You can come back and keep editing.
-3. When the text is ready, set the status to **In review** (top bar, or drag the card on the Workflow board). A maintainer or the PI reviews it. If the lab requires an approval, they approve the pull request on github.com.
-4. Move it to **Ready**, then **Publish** (section 3).
-5. To show an entry on the live site, its "Draft · pending lab review" switch must also be **off**.
+1. Open a collection, click its **＋** button (for example **＋ Publication**, **＋ News item**, **＋ Person**) or an existing entry, and edit. The right-hand column shows the real page with your changes as you type (section 3.2).
+2. Check the column: the page, the lists it appears in, and any band that says something is still needed or would be refused.
+3. Click **Save**. The status box at the bottom right follows the update until it is live (section 3.1).
+4. Made a mistake? Click **Undo** in the "Saved" message, or use the entry's **History** (section 8).
 
-> **The repository is public.** Workflow drafts and the content files can be read on github.com even before they are published. Never put embargoed results, unpublished personal data, home addresses, phone numbers or anything a person has not agreed to share into any field, draft or not.
-
-The **file name** (the page address) is made when you first save: news use the date plus the title, people their name, directions the short label, and publications the first author's name, the year you create the entry and the start of the title. Fill those fields in **before the first save**. The CMS cannot rename a file afterwards; ask a maintainer, who will also add a redirect. If an address would break the site's rules, the CMS does not save and says what to change. For example, a publication address may have at most 60 characters: when the first author has a long name, type only their last name for the first save, then complete the name and save again.
+The **file name** (the page address) is made when you first save: news use the date plus the title, people their name, directions the short label, and publications the first author's name, the year you create the entry and the start of the title. The live column shows the address a new entry will get ("New page · address after the first save: … · it can't be changed later"). Fill those fields in **before the first save**. The CMS cannot rename a file afterwards; ask a maintainer, who will also add a redirect. If an address would break the site's rules, the CMS does not save and says what to change. For example, a publication address may have at most 60 characters: when the first author has a long name, type only their last name for the first save, then complete the name and save again.
 
 **Publications: last name first.** The lab's paper addresses start with the first author's **last name** and the year (`sinchaisri-2026-compliance-aware-rl`), but the CMS builds the address from the whole name in the first author field and from the year you **create** the entry. So for every new publication: type only the first author's last name, save once, then complete the name and save again. If you forget, the first Save stops once with "Not saved yet: check the address first …" and shows the address it would use; Save again keeps it as shown. For an older paper (say 2023), the address still carries this year; if it must match, ask a maintainer to add the file.
 
-## 3. Publish: wait for the green check
+**Unsaved changes from your last visit.** If you leave an entry without saving, this browser keeps your changes (only here, never on GitHub). Next time the CMS asks: **OK** brings them back (they are still not saved until you press Save), **Cancel** throws them away. If someone else saved the entry in the meantime, Save tells you (section 3.4).
 
-Every change runs an automatic check called **validate-content** (spelling of dates, required fields, links, consent rules, relations between entries).
+## 3. Save goes live: what "Not live yet" and "hidden" mean
 
-- **Publish fails while the check is still running, or if it failed.** Wait until the pull request shows a **green check**. The check usually takes a minute or two. You can see it on the pull request on github.com (repository → **Pull requests** → the one named after your entry).
-- If the lab requires an approval, Publish also fails until someone with permission has approved the pull request on github.com. (GitHub does not let you approve your own pull request.)
-- If the check is red, open its details on github.com: each message names the file and field (for example `E_ALT_MISSING … image.alt`). Fix the field in the CMS and save again; the check reruns.
-- After **Publish**, the site rebuilds automatically. Wait a few minutes, then reload the live page. If nothing changes after about 15 minutes, tell a maintainer.
+### 3.1 The status box and the "Saved" message
 
-The CMS itself already blocks many mistakes when you save, so they never reach the check:
+After each Save, a message at the bottom right says **"Saved. The live site updates in about 2 minutes. [Undo]"** (section 8.3), and the **status box** below it follows the update:
+
+| The status box says                                                           | What it means                                                                                                                                  |
+| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Saved. The live site updates in about 2 minutes.                              | GitHub has your change; the site is being rebuilt.                                                                                             |
+| Live on the site ✓ · View page                                                | Your change is live. **View page** opens it. If you still see the old page, reload it: browsers keep pages for up to 10 minutes.               |
+| Live on the site ✓ · View the People page (or the Join page, the Home page)   | The entry has no page of its own; it shows on that page.                                                                                       |
+| Saved · not shown on the live site because "Draft · pending lab review" is on | Saved and hidden on purpose (people: "because Listed is off"). There is no View link.                                                          |
+| Saved · the live site is taking longer than usual                             | More than 6 minutes. Wait a little; tell a maintainer if it stays.                                                                             |
+| Saved. The live site is stuck on an earlier problem (… saved by @…) …         | An earlier save broke the site update. Your change goes live once that is fixed. **No need to undo yours.**                                    |
+| Saved, but the live site did not update · What happened?                      | Your save is recorded, but the site could not be rebuilt. **What happened?** explains it in plain words. Undo your save, or tell a maintainer. |
+| Saved without the site check (the preview wasn't ready)                       | Added when the check could not run in time (section 3.3). The save went through.                                                               |
+| Saved without the conflict check (GitHub didn't answer)                       | Added when GitHub did not say in time whether someone else saved the entry (section 3.4). The save went through.                               |
+
+When nothing is happening the box says **"Live site up to date"**. If the live site stopped updating, a band at the top of every screen names the save that caused it, with **[Open it]** and **[What happened?]**. If the daily rebuild failed, the band says it was not caused by a save. Saves are still recorded and go live once it is fixed.
+
+**Recent changes** (the button in the status box) lists every save to the website, newest first and grouped by day: who, what ("News item › 2026-10-07-informs-talk"), when, and "Not live yet" until the site has it. **Open** takes you to the entry. Changes a maintainer made directly on GitHub read "changed outside the content manager".
+
+Times are shown in your own time zone.
+
+### 3.2 The live preview column
+
+The right-hand column is the real website, drawn from the saved site plus your unsaved changes. Nothing in it is saved until you press Save.
+
+- **Live preview | History** (top left) switch between the page and the entry's history (section 8).
+- **Page tabs** show where the entry appears. For a news item: **Article**, **News list**, **Home page**; for a publication: **Paper page**, **Publications list**, **Home page**, **Research page**; and so on. A person gets a **Profile page** tab only when they have a profile page (the PI, or "Profile page" on). Clicking a link inside the page opens that page in the column ("Other page: …", with a button back).
+- **Desktop | Phone** show the page at desktop or phone width.
+- **Find my entry** scrolls to the entry on a list page and outlines it. On list pages the entry you edit is outlined with a dashed blue line and an "Editing" tag ("New · not saved yet" for a new entry).
+- **Open the published page ↗** opens the live page in a new tab ("Not on the live site yet" for a new or hidden entry).
+- **Show as visitors see it** shows the page exactly as visitors will see it after you save. Without it, an entry with Draft on is still drawn, so you can check it; the column then says "Hidden from the live site: “Draft · pending lab review” is on. Shown here so you can check it."
+- The **address line** shows the page's address and whether you see "your unsaved changes", the "saved version" or an older version.
+
+**Why other drafts are missing.** The column follows the live site's rules: other entries with Draft on, people with Listed off and profile pages that are switched off never show, exactly as on the live site.
+
+**Unfinished new entries.** A new entry shows at once, with stand-ins such as "(Title not filled in yet)" for the fields you have not filled in. Images you just uploaded show before you save.
+
+**Bands above the page:**
+
+- **Still needed before Save** (grey): required fields that are still empty, for example "Title, Year". They are not an error while you are still typing.
+- **Fix before Save** (grey): a value in the wrong form, named down to the field, for example "Link › Address: use a full https:// address or a site path starting with /".
+- **Problem** (red): "The site check would stop this save: …" (section 3.3). Fix it before you press Save.
+- **Information**: for example "Not listed: the site never shows this person", what a person's consent switches show and hide, "This entry isn't on this page", "This page was on the live site. After this save, people who open its address get “Page not found”.", or "@… saved this entry 3 min ago, after you opened it. [Bring in their changes]" (section 3.4).
+- If the column could not load part of the site, it says "Some entries couldn't be loaded, so the preview may be missing them and the site check is off. [Try again]".
+
+**Hiding the column.** The eye button at the right edge hides and shows the column. While it is hidden, the History tab and the site check are off, and the note next to Save says so with a **[Show it]** button. The column always comes back when you reload.
+
+**Keyboard.** "Skip to the live preview" is the first thing Tab reaches on an editor page, and "Back to the form" in the column takes you back.
+
+The first time you open an entry in a new browser tab, the column needs a few seconds ("Loading the site… (3 of 8)") while it reads the whole site.
+
+### 3.3 What Save refuses, and what the site check is
+
+Save runs a few checks first. If one fails, **nothing is written** and a red **"Not saved: …"** band appears at the top of the form. It stays until you fix the problem, edit the named field or click **Dismiss**, and **[Go to …]** jumps to the field. Your form keeps everything you typed. A value in the wrong form is named with its place in the form, for example "Not saved: Link › Address: Use a full https:// address or a site path starting with /." (the field itself is marked in red, maybe further down the form).
+
+The content manager refuses:
 
 - an image without alt text, a link with an address but no link text, web addresses that do not start with `https://`, dates in the wrong format, texts longer than the site can show;
-- a new entry whose address would not fit the site's rules;
+- a new entry whose address would not fit the site's rules (section 2);
 - fields that are required only in some cases. Their labels say when, for example **Alt text (required with an image)**, **As of (required unless Published)**, **Status source (required unless Published)**, **Year (required with a public version)** and **Research directions (required except for work in progress)**; a paper or project needs at least one research direction unless "Draft · pending lab review" is on;
-- the same direction twice in **Direction order**, a colour that another direction already uses (section 6), and a person's photo without photo consent (section 4).
+- the same direction twice in **Direction order**, a colour that another direction already uses (section 6), and a person's photo without photo consent (section 4);
+- **a file the website cannot take:** only JPG, PNG, WebP or GIF images up to 2 MB and PDFs up to 10 MB (for example "Not saved: “cv.docx” can't go on the website. Upload a PDF (at most 10 MB) or a JPG, PNG, WebP or GIF image (at most 2 MB)."). A phone photo in HEIC format, a Word file or a 3 MB PNG are refused;
+- **a link to a page that is hidden on the live site,** for example a news item that links to `/people/isabelle-cho/` when Isabelle has no profile page: "This links to /people/isabelle-cho/, which is not a page on the live site. Link to /people/ instead, or remove the link.";
+- **hiding a page that other entries link to,** for example turning on Draft for a project that a news item links to. The band offers **[Open News item “…”]** so you can remove the link there first, then come back;
+- **a name the lab has asked never to publish:** "Not saved: this entry contains a name the lab has asked never to publish. Ask the PI before adding it." The message never shows the name;
+- **a save over someone else's newer save** (section 3.4).
 
-The message appears at the top right and reads like **"Failed to persist entry: Error: Not saved: …"**. Everything after "Not saved:" tells you what to fix; nothing was written. Fix it and save again.
+**The site check.** Before every Save, the column runs the website's own check (the same one the site update runs) twice: on the saved site, and on the saved site with your change. It refuses only **problems your change adds**, in any entry. Problems that were already there never stop your save. For example, two publications with the same title, a colour that clashes once Settings "launched" is on, or a link that breaks because you hid the page it points to. The band names the entry and the field: "Not saved: the site check would reject this: News item “…” › Title: …". If the check is not ready (for example in the first seconds after opening an entry), Save goes through and the status box adds "Saved without the site check (the preview wasn't ready)".
+
+Hiding a page that was already public (turning Draft on, or Listed or Profile page off) is **allowed**: the column only warns that visitors who open its old address get "Page not found" (DECISIONS D-05 amendment, owner to confirm). This matters most when someone withdraws consent: hide first, ask questions later.
+
+**Other "Not saved" messages:**
+
+| The band says                                                                          | What to do                                                                  |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Not saved: someone else saved at the same moment. Nothing was lost — press Save again. | Press Save again; every check runs again.                                   |
+| Not saved: your sign-in expired. Sign in again; your changes are kept in this browser. | Log out and in again; your changes come back from this browser (section 2). |
+| Not saved: couldn't reach GitHub. Check the connection and press Save again.           | Check the internet connection and press Save again.                         |
+
+### 3.4 Someone else saved this entry
+
+If a colleague saves the entry after you opened it, your Save stops instead of silently replacing their work: "Not saved: Isabelle Cho (@icho) saved this entry at 2:03 pm, after you opened it. Saving now would replace their change. Press “Bring in their changes” above the form; your changes stay, theirs are added, then Save again." The column may also warn you earlier: "@icho saved this entry 3 min ago, after you opened it. [Bring in their changes]".
+
+**Bring in their changes** puts their save into your form and keeps your own changes:
+
+- fields only they changed take their value; fields only you changed keep yours;
+- where you **both** changed the same field, the form gets **their** text and shows yours below it with **[Copy my …]**, for example "You both changed Bio: the form now has their text; yours is below. [Copy my Bio]";
+- if they switched a consent field off (for example **Photo consent**), it stays off.
+
+Check the column, fix anything you want, and press **Save**. If the message says "you saved this entry in another tab or window", the button is called **Bring in that version** and works the same way.
 
 ## 4. Consent rules (people, photos, emails)
 
-The site shows people only with their consent (lab decision D-06). The switches in each person entry control this, and the preview shows "What the site will show".
+The site shows people only with their consent (lab decision D-06). The switches in each person entry control this, and the live column shows what each switch hides ("Shown: photo, program. Hidden: email (Email public is off)").
 
 | Switch                           | Off (the default)                                                             | On                                                                     |
 | -------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| **Listed (consented to appear)** | The person is **never shown or linked anywhere**, not even in preview builds. | The person may appear on People, as a linked author, in project teams. |
+| **Listed (consented to appear)** | The person is **never shown or linked anywhere**.                             | The person may appear on People, as a linked author, in project teams. |
 | **Photo consent**                | The photo is not shown; a square with the person's initials is shown instead. | The uploaded photo is shown, cropped to a square.                      |
 | **Email public**                 | The email is not shown.                                                       | The email is shown as a link.                                          |
 | **Now at public**                | "Now at …" (alumni) is not shown.                                             | It is shown.                                                           |
 
 Rules:
 
-- Turn a switch on **only after the person agreed in writing** (an email is enough). Keep that email; do not paste it into the site. If someone withdraws consent, turn the switch off and publish at once.
-- **Upload a photo only after photo consent.** An uploaded file is public at `/uploads/…` as soon as it is published, even while "Photo consent" is off and no page shows it. The CMS therefore does not save a person with a photo while "Photo consent" is off. If someone withdraws photo consent, remove the photo from the entry as well and ask a maintainer to delete the file from `public/uploads/`.
+- Turn a switch on **only after the person agreed in writing** (an email is enough). Keep that email; do not paste it into the site. If someone withdraws consent, turn the switch off and **Save at once**; the live site follows in about 2 minutes.
+- **Upload a photo only after photo consent.** An uploaded file is public at `/uploads/…` as soon as it is saved, even while "Photo consent" is off and no page shows it. The CMS therefore does not save a person with a photo while "Photo consent" is off. If someone withdraws photo consent, remove the photo from the entry as well and ask a maintainer to delete the file from `public/uploads/`. Older versions of the entry and the file stay readable in the repository's history on github.com (section 8.4).
 - **External coauthors are not people.** In a publication, type their name in the author list and optionally their web page. Only the PI, lab members and alumni have person entries.
 - Nobody becomes an "Affiliate" without their written consent.
 - Project **collaborators** are shown only when their "Consent to be shown" switch is on; **partners** only when "Public" is on.
 - Students who leave: set the **End** date (they move to Alumni automatically; the CMS will not save an End before the Start) and ask whether they want "Now at" shown.
 - **Program:** when a member consents to appear, ask how they want their program written, with their capitalisation (for example "EECS", "Applied Math & Data Science"). Do not repeat the degree the role already shows ("Master's student · IEOR", not "· IEOR MS"). Never leave it in lower case.
-- Never add anyone from old, hidden rosters on other sites. When in doubt, leave the person out and ask the PI.
+- Never add anyone from old, hidden rosters on other sites. When in doubt, leave the person out and ask the PI. The CMS refuses names the lab has asked never to publish (section 3.3).
 
 ## 5. Images and alt text
 
-- Upload **JPG, PNG, WebP or GIF** images up to **2 MB** (PDFs up to 10 MB). A larger file is refused with a browser message "File too large. Configured to not allow files greater than 2097 kB." (2 MB is 2097 kB in that message; for PDFs it says 10485 kB). Do not upload SVG, HTML or other files: the automatic check rejects them because they could run code next to the content manager. The site does not show images from other websites, so always upload.
+- Upload **JPG, PNG, WebP or GIF** images up to **2 MB** (PDFs up to 10 MB). A larger file is refused at once by the browser ("File too large. Configured to not allow files greater than 2097 kB."; 2 MB is 2097 kB in that message, and for PDFs it says 10485 kB), and Save refuses any other type (section 3.3). Do not upload SVG, HTML or other files. The site does not show images from other websites, so always upload.
+- Upload images from the image field of the entry (**Choose an image**). The header **Media** page and the **Delete** button in the image library are gone, because both changed the live site at once, without Save. To delete a file, ask a maintainer.
+- **Give every new file its own name.** If a file with the same name is already on the site, the upload is refused: "A file with this name is already on the site. Rename your file (for example isabelle-cho-2026.jpg) and upload it again." (Replacing it would delete the old file from the site at once.)
+- An uploaded image shows in the live column straight away, but goes onto the website only when you press Save.
 - Only upload images the lab may use (your own figures, photos with the person's permission, figures from your paper when the publisher allows it).
 - **Alt text is required whenever an image is set** (the CMS will not save without it). Write one sentence that says what the image shows and why it matters, as you would describe it on the phone:
   - Good: "Line chart: couriers' delivery times fall over their first 200 orders, faster for those who follow recommendations."
   - Good (headshot): "Portrait of Jane Doe."
-- **Headshots** are shown as squares, so the edges of a wide or tall photo are cut off. Upload a head-and-shoulders photo with the face near the middle.
   - Avoid: "image", "figure 1", "photo.jpg", or repeating the caption word for word. Do not start with "Image of".
+- **Headshots** are shown as squares, so the edges of a wide or tall photo are cut off. Upload a head-and-shoulders photo with the face near the middle.
 - For charts, put the key takeaway in the alt text and the details in the caption or "What this shows".
 - Rich-text bodies cannot hold images; use the image fields (Figure, Hero image, Teaser image, Image), which enforce alt text.
 
@@ -103,24 +196,24 @@ Rules:
 
 The research directions are the lines of Fig. 1 on the home page. Each line ends in a black pearl at the "now" rule (section 13). The CMS hints still say "pearls"; they mean the same thing.
 
-**Reorder the lines (pearls).** Go to **Settings → Site → Direction order**. Each item shows the direction's address (for example `ai-at-work`, the file name of the direction). Drag an item by its handle (the two lines at the top of the item), or use the keyboard: press Tab until the handle is focused (a screen reader announces "Reorder “ai-at-work”, item 2 of 4"), then press the **Up** or **Down arrow** key once per step; the focus stays on the item and its new position is announced. Then save and publish. The order lives in this one list on purpose: changing it never needs edits to several direction entries at once. Each live direction must appear exactly once (the CMS will not save a direction listed twice); archived directions are left out.
+**Reorder the lines (pearls).** Go to **Settings → Site → Direction order**. Each item shows the direction's address (for example `ai-at-work`, the file name of the direction). Drag an item by its handle (the two lines at the top of the item), or use the keyboard: press Tab until the handle is focused (a screen reader announces "Reorder “ai-at-work”, item 2 of 4"), then press the **Up** or **Down arrow** key once per step; the focus stays on the item and its new position is announced. Then Save. The order lives in this one list on purpose: changing it never needs edits to several direction entries at once. Each live direction must appear exactly once (the CMS will not save a direction listed twice); archived directions are left out.
 
 **Remove an item** with the **×** at its top right. An item that opens as an empty choice is a direction that has been archived: remove it.
 
 **Add a direction.** Create it under Research directions (fill in the **short label** first: it becomes the address), then add it to **Direction order**. Up to 8 directions fit; with 7–8, consider **Settings → Site → Fig. 1 layout: Dot plot**.
 
-**Choose a colour.** Each direction needs its **own** colour: the CMS will not save a colour that another live (not archived) direction already uses. The colour is a data colour: it draws the direction's line in Fig. 1 and the short line segment next to the direction's name on papers, projects and news. Links and headings stay black. The preview shows the colour, the colours the other live directions use, and a warning when a colour is easy to confuse for colour-blind readers, with the direction that uses the other colour of the pair (if any):
+**Choose a colour.** Each direction needs its **own** colour: the CMS will not save a colour that another live (not archived) direction already uses. The colour is a data colour: it draws the direction's line in Fig. 1 and the short line segment next to the direction's name on papers, projects and news. Links and headings stay black. The live column shows the colour on the real pages, and its information band lists the colours the other live directions use. While you choose a colour (a new direction, or a changed colour), it also warns when the colour is hard to tell apart from one that another direction uses now, for example "Hard to tell apart from Jasmine (the colour of “…”) for some colour-blind readers.":
 
 - The four live directions use Butterfly pea (blue), Lychee (rose), Matcha (green) and Oolong (brown). These four were retuned for the redesign and checked against each other for colour-blind readers.
 - Jasmine (teal) and Black sesame (charcoal) are used by the two archived directions. Taro (violet) and Thai tea (orange) are **reserve** colours.
 - Easy-to-confuse pairs (recomputed 2026-10-24): **Jasmine** with Black sesame, Butterfly pea, Lychee or Matcha; **Thai tea** with Matcha, Lychee or Oolong; **Taro** with Butterfly pea or Black sesame. In short: a fifth live direction should not use Jasmine or Thai tea, and Taro conflicts with Butterfly pea.
 - The automatic check warns about shared or confusable colours; fix it before launch.
 
-**Archive a direction** instead of deleting it (section 7): set **Status: Archived**, set **Archived on** (e.g. `2026-10`), save and publish; then open **Settings → Site**, remove it from **Direction order** (×), save and publish. It leaves Fig. 1, but its page stays with a dated "Archived" note and it is listed under "Earlier and related research".
+**Archive a direction** instead of deleting it (section 7): set **Status: Archived**, set **Archived on** (e.g. `2026-10`) and Save; then open **Settings → Site**, remove it from **Direction order** (×) and Save. It leaves Fig. 1, but its page stays with a dated "Archived" note and it is listed under "Earlier and related research".
 
 ## 7. Archive instead of deleting
 
-The CMS has no Delete button for published entries, on purpose: links to old pages would break, and the protected main branch does not accept direct deletions. Instead:
+The CMS has no Delete button for entries, on purpose: every page has a permanent address, and links to it from other sites, papers and search engines would break. Instead:
 
 | Entry                          | How to retire it                                                                                                         |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
@@ -129,30 +222,66 @@ The CMS has no Delete button for published entries, on purpose: links to old pag
 | Person                         | Set the **End** date (alumni), or switch **Listed** off if they no longer want to appear.                                |
 | News, publication, opportunity | Switch **Draft · pending lab review** on to hide it; for opportunities, set Status **Closed** with a new **As of** date. |
 
-If a page really must go, or its address must change, ask a maintainer: they remove or rename it in a pull request and add an entry under **Settings → Site → Redirects** (old address → new address), so old links still work. Unpublished work is different: a workflow draft can be discarded with **Delete unpublished entry / changes** in the editor, or **Delete new entry** on its Workflow card.
+A hidden entry can come back at any time: switch it on again and Save. If other entries link to the page you hide, Save asks you to remove those links first (section 3.3).
 
-## 8. Undo a publish (Revert)
+If a page really must go, or its address must change, ask a maintainer: they remove or rename it and add an entry under **Settings → Site → Redirects** (old address → new address), so old links still work.
 
-Every Publish is a merged pull request on GitHub, so every change can be undone:
+## 8. History: who changed what; restore a version
 
-1. On github.com, open the repository → **Pull requests** → **Closed**, and find the pull request named after the entry (for example "Update News “…”").
-2. Click **Revert**. GitHub opens a new pull request that undoes the change.
-3. Wait for the **green check**, then merge it (**Squash and merge**). The site rebuilds and the old version is back.
+### 8.1 The History tab
 
-For a small mistake it is often quicker to edit the entry again and publish the fix. Reverting needs write access on github.com; if you do not see the button, ask a maintainer.
+Click **History** at the top of the live column (or the "Last saved by … · 2 days ago" line under it). It lists every save of this entry, newest first, 30 at a time (**Show older saves** for more):
+
+- each row shows the person's picture and name and what they did: "changed Title, Photo", "created this entry", "restored the version from Oct 24", "saved without changing the content (formatting only)", or "changed this entry (outside the content manager)" for a maintainer's change on GitHub;
+- the second line says how long ago, in your own time zone; hover it for the exact time;
+- the newest row carries **Current version**; rows the live site does not have yet carry **Not live yet**;
+- while the form has unsaved changes, "Your unsaved changes (not saved yet)" sits on top;
+- a new entry that was never saved shows "No history yet. The first row appears when you save."
+
+**Personal details stay private in History.** For people, the values of Email, Now at, Photo, Photo alt text and CV are never shown when the matching switch is off now, or when the person is not listed: the row reads, for example, "Email: changed (hidden: Email public is off)".
+
+### 8.2 Look at an older version and restore it
+
+Click a row. It opens to list its changes, and the column shows the page **as Restore would save it**, with an amber band: "Older version · saved by Jazz Beecham on Oct 24, 2026, 10:02 am. The form still has the current text; Save saves the form, not this version." Nothing changes until you choose:
+
+- **Restore this version** opens a short dialog: what comes back, which later saves it replaces, and what the content manager keeps as it is now (below). Press **Restore this version** again and it is saved like any other Save, with every check; the live site updates in about 2 minutes. Tick **Let me check it in the form first (don't save yet)** to put the old values into the form and save them yourself.
+- **Back to the current version** or **Back to History** leave everything as it was.
+
+**What Restore never brings back by itself** (so that a withdrawn consent stays withdrawn, DECISIONS D-19):
+
+- **Consent and visibility switches** (Listed, Profile page, Photo consent, Email public, Now at public; a project collaborator's "Consent to be shown" and a partner's "Public") can go from on to off, **never from off to on**. Switch them on yourself, after checking the person still agrees.
+- **Removed personal details** (email, now at, photo, CV) stay removed unless you tick **Also bring back removed personal details (email, now at, photo, CV)** in History's dialog. Undo never brings them back.
+- If Photo consent stays off, the photo and its alt text are cleared.
+- **Draft:** an entry that is a draft now stays a draft unless you tick **Also make it visible on the live site**.
+- **Images:** Restore brings back the file name, not the picture. If the file has been deleted or replaced since, the field is cleared and the dialog says so; the column shows the file that is at that address **today**. Bringing back an old picture is a maintainer task.
+
+If a check refuses the restored version (for example because it links to a page that is now hidden), the old values stay in the form with the band "These are the values from Oct 24. Fix the marked problem, then press Save. [Cancel restore]".
+
+### 8.3 Undo
+
+- **Right after a save:** the "Saved" message offers **Undo** for 30 seconds (it waits while the mouse or keyboard is on it). Undo acts at once, without asking, and only on the entry you just saved: it saves the version from before your save, with every check and the same consent rules as Restore. The entry may close and reopen once (under a second) while Undo works; that is expected. If you have already moved on, typed something new or opened another entry, the message closes ("Undo is in this entry's History") and Undo is the **Undo this change** button on the top row of the entry's History instead.
+- **Later:** open the entry's History and click **Undo this change** on the top row, or pick an older row and **Restore this version**.
+- **A new entry** cannot be undone (there is no older version): to take it off the site, turn on "Draft · pending lab review" (people: turn off "Listed") and Save.
+
+Undo and Restore never delete anything: the version you replaced stays in History.
+
+### 8.4 Revert is not erasure
+
+The repository is public, so **every saved version stays readable on github.com**, photos and emails included, even after you restore an older version or hide the entry. Restore only changes what the website shows. If something personal was saved by mistake, hide it at once (section 4) and tell a maintainer: removing it from the history needs a maintainer and possibly GitHub Support.
 
 ## 9. Per-term checklist
 
 At the **start of each term** (PI or a maintainer):
 
-- [ ] **Onboard new editors:** each has a GitHub account with 2FA; add them to the `web-editors` team; they sign in once, read this guide and try the local practice mode (section 11).
-- [ ] **Offboard leavers:** remove departed members from the GitHub organisation and teams; check the Workflow board for their unfinished drafts (finish, hand over or discard them).
+- [ ] **Onboard new editors:** each has a GitHub account with 2FA and edit access to the repository; they sign in once, read this guide and try the local practice mode (section 11).
+- [ ] **Offboard leavers:** remove departed members' access on GitHub.
 - [ ] **People:** add new members only with consent (section 4); set **End** dates for people who left; ask leavers about "Now at" and email consent; check photos still have consent.
 - [ ] **Opportunities and Join page:** update each opportunity's **Status** and **As of** date (URAP rounds open and close every term); make sure nothing says "open" without a dated source.
 - [ ] **Publications:** refresh statuses (revisions, acceptances) and their **As of** dates; add new papers and preprints; check that working papers have **Status source**; turn on **Study-design figure checked by the authors** only for figures an author has approved (section 14).
 - [ ] **News:** add the term's talks and awards; past events stop showing "Upcoming" automatically after the next rebuild.
 - [ ] **Directions:** confirm the order and colours; archive directions the lab no longer pursues.
 - [ ] **Accessibility and Privacy pages:** review the text and update **Last reviewed**.
+- [ ] **Recent changes:** skim the term's saves (status box → Recent changes) for anything unexpected.
 - [ ] **Maintainers once a year:** rotate the sign-in secret and review who has access (`docs/HANDOVER.md`).
 
 ## 10. PDF accessibility checklist
@@ -173,29 +302,33 @@ UC Berkeley requires documents on its sites, PDFs included, to meet **WCAG 2.1 A
 
 ## 11. Practice on your own computer (no account)
 
-Maintainers and curious editors can try the content manager without a GitHub account:
+Maintainers and curious editors can try the content manager without a GitHub account. It behaves like the live one: one-click Save, the live column, the checks and the "Not saved" band.
 
 1. In a copy of the repository, run `npm ci` once, then **`npm run cms:local`**.
 2. Open **`http://localhost:3100/admin/local.html`** and click **Login**.
-3. Changes are written straight into the files on your computer (no drafts board, every Publish writes the file), and the local site at `http://localhost:3100` shows them after a reload. One exception: the own page of an entry you **created** (for example `/news/<new-address>/`) may say "not found" until you stop and restart `npm run cms:local`, because the local site works out the list of pages once; lists such as `/news/` show the new entry at once, and the published site is built afresh every time.
-4. Press **Ctrl+C** to stop. Use Git to review or throw away what you changed (`git status`, `git restore content/`).
+3. **Save writes straight into the files on your computer.** The status box says "Local demo: Save writes to this computer" and, after a save, "Saved to this computer (local demo: there is no live site)". There is no deploy to follow, no Undo message and no conflict check. The History tab and Recent changes read the real history on GitHub (bobalabx/bobalab-web), not your computer's.
+4. An image you upload into an entry shows in the live column at once, but the form's own small thumbnail may show as a broken image until you press Save (the local demo serves new files only once they are saved); the upload itself is fine.
+5. The local site at `http://localhost:3100` shows saved changes after a reload. One exception: the own page of an entry you **created** (for example `/news/<new-address>/`) may say "not found" until you stop and restart `npm run cms:local`, because the local site works out the list of pages once; the live column and lists such as `/news/` show the new entry at once.
+6. Press **Ctrl+C** to stop. Use Git to review or throw away what you changed (`git status`, `git restore content/`). To run the demo's proxy on another port, start it with `CMS_PROXY_PORT=8097 npm run cms:local`; the page follows that port.
 
-## 12. Tips and known quirks
+## 12. Tips, phones and known quirks
 
+- **Phones and small windows.** You can edit and save from a phone. Below 800 pixels a switch at the bottom of the screen toggles between **Edit** (the form) and **Preview & history** (the live column at phone width, with a "Page" menu instead of the tabs). Save stays at the top. The status box sits just above the switch.
 - **Saving after editing a body re-formats its Markdown.** When you change a rich-text body (Body, Bio, the Join texts), the editor saves the whole text in its own style: `-` list markers become `*`, and list items may get blank lines between them. The page looks the same apart from slightly more space between those list items. Opening an entry and saving other fields leaves the body as it was.
 - **Bodies** support bold, italic, links, headings (level 2 and 3), quotes and lists. Switch the editor to **Markdown** mode (toggle above the text) for anything else. Code blocks and images inside bodies are turned off.
 - **Long texts:** the CMS stops you at the site's limits (for example a pearl's short label at 28 characters, a news summary at 280).
 - **Dates** in "As of", "Archived on" and similar fields accept `2026`, `2026-10` or `2026-10-20`.
 - **Relations to people** (an author's lab person, a project team, the people in a news item) only offer people who agreed to be listed.
-- **The first save of a file may change lines you did not touch.** The CMS writes the whole file in its own style: long texts are wrapped at 80 characters, quotes around dates are dropped, fields follow the editor's order and empty settings such as `social: {}` disappear. The site reads both forms the same way. Reviewers: expect these formatting-only lines in the first CMS change of each file; later changes show only what was edited.
+- **The first save of a file may change lines you did not touch.** The CMS writes the whole file in its own style: long texts are wrapped at 80 characters, quotes around dates are dropped, fields follow the editor's order and empty settings such as `social: {}` disappear. The site reads both forms the same way, and History calls such a save "saved without changing the content (formatting only)".
 - **Opening an entry by its address.** If you paste or type another entry's address into the address bar while the editor is open, the page reloads to show that entry (the editor would otherwise keep showing the previous one). If you see "Not saved: the editor still shows …", reload the page (F5) and make the change again.
 - **Drag announcements for screen readers.** When you drag an item with the mouse, the spoken messages name the item and its position. Lists cannot be reordered with Space and the arrow keys as the built-in instructions of the drag library suggest; use the Up and Down arrow keys on the focused handle (section 6). The tags of multi-select fields (for example a project's Research directions, where the first is the project's home direction) can be dragged with the mouse; without a mouse, remove the tags with their × and add them again in the order you want.
-- The content manager works best on a laptop or desktop. In windows narrower than 800 pixels (phones), the editor shows the form only, without the preview pane and the "Check for Preview" button. Use a laptop to review and publish.
+- **"Save and add another" and "Save and duplicate"** are gone from the Save button. Duplicate is still in the **Saved** menu of an unchanged entry.
+- **The first-use tip.** The first time you open the editor, a tip explains Save; **Got it** closes it for good in this browser.
 - Something broken or unclear? Tell a maintainer, or open an issue on the repository.
 
 ## 13. How Fig. 1 is made from your entries
 
-Nobody draws Fig. 1 by hand. Every build draws it again from the content, so it updates a few minutes after you publish. What it shows comes from these fields:
+Nobody draws Fig. 1 by hand. Every build draws it again from the content, so it updates about 2 minutes after you save. What it shows comes from these fields:
 
 | What you see in Fig. 1                                                                | Where it comes from                                                                                                                                                                                                                                              |
 | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -208,7 +341,7 @@ Nobody draws Fig. 1 by hand. Every build draws it again from the content, so it 
 | Open rings after the "now" rule                                                       | Work in progress: entries tagged with the direction that do not count as a paper yet (no public version and no documented talk). They are not placed by date.                                                                                                    |
 | The counts beside each label ("4 papers, 2 in progress") and "As of …" in the caption | Counted from the same entries on the day of the build.                                                                                                                                                                                                           |
 
-To get a paper onto the figure, add its public link or DOI (or a presentation with its source link), its **Year** and at least one **Research direction**, then publish. To move a direction's line, change **Direction order**. Without JavaScript, and for screen readers, the same counts and the publications list carry the same information.
+To get a paper onto the figure, add its public link or DOI (or a presentation with its source link), its **Year** and at least one **Research direction**, then Save. The live column's **Home page** tab shows the result before you save. To move a direction's line, change **Direction order**. Without JavaScript, and for screen readers, the same counts and the publications list carry the same information.
 
 ## 14. Study-design figures (`plate_verified`)
 
@@ -218,7 +351,7 @@ Each publication has a checkbox, **Study-design figure checked by the authors** 
 
 - **Off** (the default): the figure appears only in **preview builds**, so the authors can check it. The live site does not show it.
 - **On**: the live site shows the figure on the paper's page (today the only page that shows study-design figures).
-- Turn it on **only after an author of the paper has checked the drawing** against the paper and said it is right. Keep that email; do not paste it into the site. If an author later finds a mistake, turn the box off and publish at once, then ask a maintainer to fix the drawing.
+- Turn it on **only after an author of the paper has checked the drawing** against the paper and said it is right. Keep that email; do not paste it into the site. If an author later finds a mistake, turn the box off and Save at once, then ask a maintainer to fix the drawing.
 - The checkbox does nothing for a paper without a figure.
 
 ## 15. Links for lab members

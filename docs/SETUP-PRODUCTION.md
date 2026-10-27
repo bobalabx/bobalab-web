@@ -1,6 +1,6 @@
 # Production setup (done once by the lab)
 
-This is the hookup checklist for the live site: GitHub organization and repository, Actions and Pages, the `protect-main` ruleset, the CMS sign-in bridge, the domain and the campus approvals. It reproduces R4 §8 (`docs/research/R4-cms-hosting.md`) **with the R4 Verification fixes applied**: the ruleset bypass is "for pull requests only", the merge method matches Decap's `squash_merges`, and editors wait for the green check before Publish.
+This is the hookup checklist for the live site: GitHub organization and repository, Actions and Pages, the `protect-main` ruleset, the CMS sign-in bridge, the domain and the campus approvals. It reproduces R4 §8 (`docs/research/R4-cms-hosting.md`), **updated for editor v2** ("Save goes live", DECISIONS D-17): every Save in the content manager is a commit straight to `main`, so the `protect-main` ruleset only blocks force pushes and deletions, and must never require a pull request. Section H is the owner's release checklist for editor v2.
 
 The builder cannot do these steps: they need the lab's accounts. Budget about half a day plus the campus waiting time.
 
@@ -47,39 +47,35 @@ Do the sections in order. Section G is the launch gate.
    - `web-maintainers`: **Maintain** on `<REPO>`. The PI and whoever reviews and fixes the build.
    - `.github/CODEOWNERS` requests reviews from `@<ORG>/web-maintainers`. Rename it there if the org or team name differs.
 
-3. **Settings → General → Pull Requests** (merge method aligned with Decap):
-   - Allow **squash merging** only. Untick "Allow merge commits" and "Allow rebase merging".
-   - Reason: Decap merges with the `merge` method unless `backend.squash_merges: true` is set; the CMS config sets it (`cms/source.mjs`). If the repo method and Decap's method disagree, every Publish gets HTTP 405 and fails (DOCUMENTED, R4 V33 and Verification required change 2).
+3. **Settings → General → Pull Requests** (maintainers' pull requests only; the content manager no longer opens or merges pull requests, D-17):
+   - Allow **squash merging** (recommended for a tidy history); the other methods are up to the maintainers.
    - Tick "Automatically delete head branches".
-   - Leave auto-merge off. Turn it on only if the lab later switches the UI to Sveltia CMS (DOCUMENTED requirement, R4 V10).
+   - Leave auto-merge off.
 
 4. **Settings → Actions → General:**
    - Actions permissions: allow actions by GitHub (`actions/*`) and the one third-party action `lycheeverse/lychee-action`. If the page offers "Require actions to be pinned to a full-length commit SHA", turn it on; the workflows already pin every action by SHA (brief §G4).
    - Workflow permissions: **Read repository contents and packages permissions** (the workflows ask for more per job where they need it).
    - "Allow GitHub Actions to create and approve pull requests": see the trade-off below, then decide.
 
-   > **Trade-off (HYPOTHESIS, our analysis).** After each deploy, `deploy.yml` records the published slugs (DECISIONS D-05) and opens a PR from `automation/published-slugs`. That needs this box ticked. The same box also lets a workflow _approve_ PRs, so if the review gate (H-6) is on, also turn on "Require review from Code Owners" in the ruleset: an approval by `github-actions[bot]` is not a code-owner review. If you leave the box unticked, the deploy still succeeds; the job warns and attaches `.published-slugs.json` to the run, and a maintainer commits it by PR now and then (`npm run slugs:record`).
+   > **Trade-off (HYPOTHESIS, our analysis).** After each deploy, `deploy.yml` records the published slugs (DECISIONS D-05) and opens a PR from `automation/published-slugs`. That needs this box ticked. The same box also lets a workflow _approve_ PRs; no rule on `main` relies on approvals any more (step 6), so the risk is small. If you leave the box unticked, the deploy still succeeds; the job warns and attaches `.published-slugs.json` to the run, and a maintainer commits it by PR now and then (`npm run slugs:record`). **Merge the first such PR only after editor v2 is live** (section H).
 
 5. **Settings → Pages → Build and deployment → Source: GitHub Actions** (R4 §8 B3). This creates the `github-pages` environment. Open Settings → Environments → `github-pages` and check that deployment branches are limited to `main`.
 
-6. **Settings → Rules → Rulesets → New branch ruleset `protect-main`** (brief §F5; R4 §8 B4 with the Verification fixes):
+6. **Settings → Rules → Rulesets → New branch ruleset `protect-main`** (editor v2, DECISIONS D-17; owner action after launch). Every Save in the content manager is a commit straight to `main`, so the ruleset protects only against losing history:
 
-   | Setting                                          | Value                                                                                                                    | Why                                                                                                                                                                                                                                                                                                                |
-   | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-   | Enforcement                                      | Active                                                                                                                   |                                                                                                                                                                                                                                                                                                                    |
-   | Target branches                                  | Default branch (`main`)                                                                                                  |                                                                                                                                                                                                                                                                                                                    |
-   | **Bypass list**                                  | Organization admin (and Repository admin, if listed) with mode **"For pull requests only"**. Never "Always allow"        | Decap's fallback `forceMergePR` writes the commit straight to `main` when the merge API returns 405 (for example while checks are pending). The ruleset blocks that for editors, but **not** for an actor with "Always allow", whose Publish would skip `validate-content` (DOCUMENTED, R4 V33, required change 1) |
-   | Restrict deletions                               | On                                                                                                                       |                                                                                                                                                                                                                                                                                                                    |
-   | Block force pushes                               | On                                                                                                                       |                                                                                                                                                                                                                                                                                                                    |
-   | Require a pull request before merging            | On. Required approvals: **0**, or **1** if the PI chooses the review gate (H-6 option A, recommended for the first term) | With 1 approval, Publish fails until a maintainer approves on github.com (DOCUMENTED, R4 V10). Pull request authors cannot approve their own PRs (DOCUMENTED, GH-SELF)                                                                                                                                             |
-   | Require review from Code Owners                  | On together with 1 approval (H-6 option A)                                                                               | Makes the approval come from `web-maintainers` (`.github/CODEOWNERS`)                                                                                                                                                                                                                                              |
-   | Allowed merge methods                            | **Squash** only                                                                                                          | Matches `squash_merges: true`                                                                                                                                                                                                                                                                                      |
-   | **Require status checks to pass**                | Add **`validate-content`** (source: GitHub Actions)                                                                      | The CI job name is stable; it runs on every PR with no path filter, so it always reports                                                                                                                                                                                                                           |
-   | Require branches to be up to date before merging | **Off**                                                                                                                  | Decap cannot update an editor's branch; with this on, Publish fails whenever `main` has moved (HYPOTHESIS)                                                                                                                                                                                                         |
-   | Require linear history                           | Optional (squash-only merges are linear). Never turn it on without `squash_merges`                                       | R4 Verification required change 2                                                                                                                                                                                                                                                                                  |
-   | Require signed commits                           | Off                                                                                                                      | Whether Decap's API commits are signed: UNKNOWN                                                                                                                                                                                                                                                                    |
+   | Setting                               | Value                      | Why                                                                                                                                                                                                |
+   | ------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | Enforcement                           | Active                     |                                                                                                                                                                                                    |
+   | Target branches                       | Default branch (`main`)    |                                                                                                                                                                                                    |
+   | Bypass list                           | Empty                      | Lift the ruleset only for a planned history rewrite (HANDOVER §6, "revert is not erasure")                                                                                                         |
+   | **Block force pushes**                | **On**                     | Keeps every saved version, so History and Restore always work                                                                                                                                      |
+   | **Restrict deletions**                | **On**                     | `main` cannot be deleted                                                                                                                                                                           |
+   | Require a pull request before merging | **Off. Never turn it on.** | Editors' saves are direct commits: this rule would stop every Save. (The old setup with pull requests and a review gate is gone, D-17.) Maintainers still use pull requests for code by convention |
+   | Require status checks to pass         | **Off. Never turn it on.** | A direct commit has no checks yet, so this would also stop every Save. The content manager runs the same validator before each Save, and `deploy.yml` runs it again before building                |
+   | Require linear history                | Off (not needed)           | Decap's commits are fast-forwards anyway                                                                                                                                                           |
+   | Require signed commits                | Off                        | Decap's API commits are not signed by the editor                                                                                                                                                   |
 
-   Rulesets are free on public repositories (DOCUMENTED, R4 V21). The other CI jobs (`lint-typecheck`, `unit`, `build`, `e2e`, `a11y`, `links`, `budgets`) report on every PR; make `build` required too once editors are comfortable.
+   Rulesets are free on public repositories (DOCUMENTED, R4 V21). The CI jobs (`validate-content`, `lint-typecheck`, `unit`, `build`, `e2e`, `a11y`, `links`, `budgets`) report on maintainers' pull requests.
 
 7. **Settings → Code security:** turn on Dependabot alerts, Dependabot security updates, and secret scanning with push protection. `.github/dependabot.yml` already schedules weekly version updates for npm and for the pinned actions.
 
@@ -110,13 +106,15 @@ Decap's GitHub backend needs a small OAuth server; GitHub Pages cannot run one (
 
    GitHub Pages cannot send `X-Frame-Options` or a `frame-ancestors` header, and browsers ignore `frame-ancestors` in the `<meta>` CSP of `/admin/`. Instead, `public/admin/cms-start.js` does not start the content manager inside a frame (it shows a link to open it on its own), which covers clickjacking of the editor.
 
-6. **Smoke test the editorial workflow** with a throwaway news item (R4 §8 C6, plus Verification required change 3):
-   1. Open `https://<HOST>/admin/`, choose **Login with GitHub**, approve "BOBALAB website CMS".
-   2. Create a news item and **Save**. Decap creates a `cms/news/...` branch and a PR; the `validate-content` check starts on github.com.
-   3. Set the status to **Ready**.
-   4. **Wait for the green check.** Decap's Publish fails while `validate-content` is still running. With the review gate on, a maintainer must approve the PR on github.com first, and the author cannot approve their own PR.
-   5. **Publish.** Decap squash-merges the PR; Actions → Deploy runs; the item appears on the site. Note the minutes from Publish to live (UNKNOWN until measured) in `docs/HANDOVER.md` §5.
-   6. **Roll back:** on github.com open the merged PR → **Revert** → merge the revert PR when green → the item disappears after the next deploy.
+6. **Live smoke test of the editor** (editor v2, spec §9; the owner or the PI, right after the release, on a **draft test entry** such as a news item "Editor smoke test (delete me)" with "Draft · pending lab review" on):
+   1. Sign in at `https://<HOST>/admin/`, open the draft test entry, type, and see the change in the live column within a second. Note how long the first "Loading the site… (n of 8)" took, and the first and later loads, in `docs/TESTING-REPORT.md`.
+   2. **Save.** The status box goes to "Saved · not shown on the live site because “Draft · pending lab review” is on", and the deploy completes (Actions → Deploy is green). Note the minutes from Save to the end of the deploy in `docs/HANDOVER.md` §5.
+   3. The entry's **History** shows the new row with your name and avatar; **Recent changes** shows it too.
+   4. Click **Undo** in the "Saved" message (or **Undo this change** in History). The status box tracks the second deploy.
+   5. On github.com (repository → Commits), both commits show **your account** as the author, with "(by @your-login)" in the message.
+   6. In the browser's DevTools (Network), a request to `api.github.com` answers with the header `X-OAuth-Scopes: public_repo`.
+   7. **Two editors:** in two browsers (or with a colleague), open the same entry, save in one, then save in the other. The second Save is refused and names the first editor; **Bring in their changes** puts their change into the form, and Save then works.
+   8. Turn the test entry's content back (or leave it as a draft) and tell a maintainer the results. Steps 5 and 6 confirm that History can name each editor (DECISIONS D-19); until they pass, treat the names in History as unconfirmed.
 
 ## D. Domain
 
@@ -163,9 +161,21 @@ Do not announce the site until all of these hold:
 - [ ] Lab decisions recorded in `docs/DECISIONS.md`: H-1 directions and labels, H-3 which papers count, H-5 repo visibility, H-6 review gate, H-11 roster and photo consent, H-12 name, H-18 contact.
 - [ ] Approved items have `draft: false`; the rest stay drafts. `content/site.yml → launched: true` (from then on, zero live directions is a validator **error**, DECISIONS D-03).
 - [ ] A, B, C and E done; D at least on the interim github.io URL.
-- [ ] CI green on `main`; a production Deploy run green; the C6 smoke test passed, including the Revert.
+- [ ] CI green on `main`; a production Deploy run green; the C6 smoke test passed, including Undo and the two-editor test.
 - [ ] `docs/QA-CHECKLIST.md` signed off: the manual matrix, Lighthouse on the four key pages, and the five-second test.
 - [ ] `docs/HANDOVER.md` §2 has real names in every owner row.
+
+## H. Editor v2 release checklist (owner)
+
+Editor v2 ("Save goes live", the live column, History and Restore; DECISIONS D-17 to D-19) is built and tested on the branch `editor-v2`, but not merged or deployed. In this order:
+
+1. [ ] **Answer the open questions** in DECISIONS D-17 (the table of 15 defaults now in the code), especially **#1 hiding a published page** (the D-05 amendment: a warning, not a deploy error) and **#2 links to hidden pages** (E_LINK_HIDDEN: Save refuses them). Change any default you disagree with before the release.
+2. [ ] **Decide the measured side effect:** `/publications/` ships 301 more bytes of JavaScript (D-17, default accept).
+3. [ ] **Merge and deploy** `editor-v2`: run the full checks of `docs/TESTING-REPORT.md` §0 on the branch after a clean `npm ci`, fast-forward `main` to it and push. Check that Actions → Deploy is green and that `/admin/` loads, with the live column on an entry.
+4. [ ] **Only now merge the `automation/published-slugs` pull request** (if one is open). Merged before the release, turning on Draft or turning off Listed for a published entry would have failed the deploy.
+5. [ ] **Add the `protect-main` ruleset** of section B6: block force pushes and restrict deletions **only**. Never "Require a pull request" or required status checks: either would stop every Save.
+6. [ ] **One editor runs the live smoke test** of section C6, including the two-editor test, and checks that GitHub shows their own account on both commits (`author.login`) and that the token's scope is `public_repo` (`X-OAuth-Scopes`).
+7. [ ] **Only then tell the lab managers.** Point them to `docs/EDITING.md`: sections 2, 3 and 8 cover what changed.
 
 ## Appendix: what the workflows need
 

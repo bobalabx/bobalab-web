@@ -48,3 +48,17 @@ Preloaded: Fraunces wght 36,620 B + Inter wght 48,256 B + Plex Mono 500 14,888 B
 - B was measured on a **Windows** build. CI builds on Linux (D-07); WP8 should re-measure B there and update this file if it differs by more than ~1 KB.
 - B includes the root-layout client islands, because every route ships them.
 - Hashes change on every build; the numbers are what matters.
+
+## Editor v2 (2026-10-26, DECISIONS D-17/D-18)
+
+Measured with `scripts/perf/js-budget.mjs` on a production export (base path `/bobalab-web`, Windows) of the editor-v2 working tree, compared with the export of `main` 14c739c. MEASURED.
+
+| Route                                  | `main` 14c739c |    editor v2 | Budget                                                  |
+| -------------------------------------- | -------------: | -----------: | ------------------------------------------------------- |
+| `/editor-preview/` (not a public page) |            n/a | 286,780 B gz | B + 180 KiB = 323,464 B gz (own line in `npm run perf`) |
+| `/publications/`                       |   148,259 B gz | 148,560 B gz | B + 30 KB = 169,864 B gz                                |
+| every other route (80)                 |      identical |    identical | unchanged                                               |
+
+- **`/publications/` +301 B gz.** The editor's live column runs `PublicationsView` and `PublicationDetailView` in the browser, so Turbopack exports the publications island's helper modules by id instead of inlining them (the island chunk grows from 27,302 to 28,074 bytes raw). The design spike's own budget files show the same 148,259 → 148,560; the spec's "0 bytes changed on every public page" misread them. Default: accept (D-17, owner to confirm).
+- `/editor-preview/` loads the site's views, zod (in jitless mode, so the site CSP needs no `eval`) and the validator. It is noindex, out of the sitemap and disallowed in `robots.txt`.
+- Global CSS and every other HTML, RSC payload, sitemap and feed are identical to `main` once build ids are blanked (`robots.txt` gains the Disallow line).

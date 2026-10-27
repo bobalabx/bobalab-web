@@ -2,7 +2,9 @@
 # (brief §F4 step 6, §F5; DECISIONS D-03, D-07; WP8).
 #
 # Triggers:
-#   - push to main (an editor's Publish in Decap merges a PR into main);
+#   - push to main: every Save in the content manager is a commit to main
+#     ("Save goes live", DECISIONS D-17; the editor runs the validator below
+#     before each Save, and its status box follows this workflow's deploy job);
 #   - a DAILY rebuild at an off-peak minute, so date-derived states
 #     (upcoming talks, alumni) stay current. Static export has no ISR:
 #     "revalidation" is always a full rebuild. GitHub disables schedules in a
@@ -114,13 +116,15 @@ jobs:
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
 
   # D-05: content/.published-slugs.json lists every slug with a public page, so
-  # the validator can demand a redirect when one disappears. The build never
+  # the validator can demand a redirect when one disappears (and only warn,
+  # W_PUBLISHED_HIDDEN, when it is hidden but still there). The build never
   # modifies tracked content (docs/ARCHITECTURE.md §3), so after a successful
   # deploy this job records the list and, when it changed, opens (or updates) a
-  # PR from the branch automation/published-slugs. main is protected, so it
-  # never pushes to main. A PR opened with GITHUB_TOKEN does not trigger
-  # workflows, so the job starts ci.yml on the branch itself (workflow_dispatch
-  # is allowed); the required check then reports on the PR's head commit.
+  # PR from the branch automation/published-slugs; it never pushes to main.
+  # Merge that PR only after editor v2 ships (D-17). A PR opened with
+  # GITHUB_TOKEN does not trigger workflows, so the job starts ci.yml on the
+  # branch itself (workflow_dispatch is allowed); the check then reports on
+  # the PR's head commit.
   record-slugs:
     needs: deploy
     if: github.ref == 'refs/heads/main'

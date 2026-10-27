@@ -4,6 +4,7 @@ Website of BOBALAB, the Berkeley Operations and Behavioral Analytics Lab (Haas S
 
 - Spec: `docs/research/research-brief.md` · Decisions (binding): `docs/DECISIONS.md`
 - How it fits together: `docs/ARCHITECTURE.md` · Dataset → schema: `docs/CONTENT-MAPPING.md` · JS baseline: `docs/PERF-BASELINE.md` · Verification results: `docs/TESTING-REPORT.md`
+- Editing content (the content manager at `/admin/`, "Save goes live"): `docs/EDITING.md` · running and maintaining it: `docs/HANDOVER.md`, `cms/README.md`
 - Changing a file another package owns: `docs/change-requests/README.md`
 
 ## Requirements
