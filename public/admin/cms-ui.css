@@ -1,0 +1,500 @@
+/*
+ * BOBALAB CMS: the status dock, banner, toasts, dialogs and the Recent changes
+ * sheet (editor v2, WP3; cms-ui.js, cms-dock.js). Loaded after admin.css.
+ *
+ * Contrast (WCAG 1.4.3 / 1.4.11, MEASURED with the WCAG formula):
+ *   text #1f2329 on white 15.8:1, secondary #4f5765 7.3:1;
+ *   white on the teal #0f6e7d 5.9:1 (Save's colour), white on #b80029 6.8:1;
+ *   banner #7a2a00 on #fdece4 8.5:1; "Not live yet" #5c4300 on #fff4d6 8.5:1;
+ *   button borders #767b85 4.3:1; focus ring #3a69c7 5.2:1 (4.6:1 on the banner).
+ * State is never shown by colour alone: the dot only repeats what the words say.
+ * Targets are at least 32 px, and 44 px below 800 px (phones).
+ */
+
+.bl-corner {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9000; /* above Decap's editor, below its own modal dialogs */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: min(560px, calc(100vw - 32px));
+  pointer-events: none; /* the gaps let clicks through to the page */
+  font:
+    14px/1.4 system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  color: #1f2329;
+}
+.bl-corner > * {
+  pointer-events: auto;
+}
+
+/* ---- Buttons --------------------------------------------------------------- */
+
+.bl-btn {
+  box-sizing: border-box;
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 1px solid #767b85;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1f2329;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-decoration: none;
+}
+.bl-btn:hover {
+  background: #f4f5f7;
+}
+.bl-btn--primary {
+  background: #0f6e7d;
+  border-color: #0f6e7d;
+  color: #ffffff;
+}
+.bl-btn--primary:hover {
+  background: #0b5966;
+}
+.bl-btn--danger {
+  background: #b80029;
+  border-color: #b80029;
+  color: #ffffff;
+}
+.bl-btn--danger:hover {
+  background: #970022;
+}
+.bl-btn--quiet {
+  border-color: transparent;
+  background: transparent;
+  color: #4f5765;
+}
+.bl-btn--link {
+  border-color: transparent;
+  background: transparent;
+  color: #0f6e7d;
+  text-decoration: underline;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.bl-btn--small {
+  min-height: 32px;
+  padding: 2px 10px;
+  font-size: 13px;
+}
+.bl-btn[disabled] {
+  opacity: 0.6;
+  cursor: default;
+}
+.bl-btn[hidden] {
+  display: none;
+}
+
+.bl-corner :focus-visible,
+dialog.bl-dialog :focus-visible {
+  outline: 2px solid #3a69c7;
+  outline-offset: 2px;
+}
+
+/* ---- The dock --------------------------------------------------------------- */
+
+.bl-dock {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  max-width: 100%;
+  padding: 4px 4px 4px 12px;
+  border: 1px solid #8b9099;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(31, 35, 41, 0.18);
+}
+.bl-dock__dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #8b9099;
+}
+.bl-dock[data-tone="ok"] .bl-dock__dot {
+  background: #1d6b3a;
+}
+.bl-dock[data-tone="busy"] .bl-dock__dot {
+  background: #3a69c7;
+}
+.bl-dock[data-tone="warn"] .bl-dock__dot {
+  background: #8a5a00;
+}
+.bl-dock[data-tone="fail"] .bl-dock__dot {
+  background: #b80029;
+}
+.bl-dock__body {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 4px;
+}
+.bl-dock__text {
+  font-weight: 600;
+}
+.bl-dock[data-tone="fail"] .bl-dock__text {
+  color: #b80029;
+}
+.bl-dock__notes {
+  flex-basis: 100%;
+  color: #4f5765;
+  font-size: 13px;
+}
+.bl-dock__notes[hidden] {
+  display: none;
+}
+.bl-dock__recent {
+  flex: none;
+  border-radius: 16px;
+}
+
+/* ---- The banner: the live site is not updating ------------------------------ */
+
+.bl-banner {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e3b29a;
+  border-radius: 8px;
+  background: #fdece4;
+  color: #7a2a00;
+  box-shadow: 0 2px 8px rgba(31, 35, 41, 0.18);
+}
+.bl-banner__text {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+.bl-banner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+/* Off: kept in the page (empty) so screen readers hear it when a problem appears. */
+.bl-banner[data-state="off"],
+.bl-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ---- Toasts --------------------------------------------------------------- */
+
+.bl-toasts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+.bl-toasts:empty {
+  display: none;
+}
+.bl-toast {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  width: min(420px, 100%);
+  padding: 10px 10px 10px 14px;
+  border: 1px solid #8b9099;
+  border-left: 4px solid #0f6e7d;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(31, 35, 41, 0.22);
+}
+.bl-toast__text {
+  margin: 0;
+  flex: 1 1 200px;
+}
+.bl-toast__actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+/* ---- Dialogs (native <dialog>, buttons only) -------------------------------- */
+
+dialog.bl-dialog {
+  box-sizing: border-box;
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 20px;
+  border: 1px solid #8b9099;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1f2329;
+  font:
+    15px/1.5 system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  box-shadow: 0 10px 40px rgba(31, 35, 41, 0.3);
+}
+dialog.bl-dialog::backdrop {
+  background: rgba(31, 35, 41, 0.45);
+}
+.bl-dialog__title {
+  margin: 0 0 12px;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+.bl-dialog__body p {
+  margin: 0 0 10px;
+}
+.bl-dialog__list {
+  margin: 0 0 10px;
+  padding-left: 20px;
+}
+.bl-dialog__checks {
+  margin: 12px 0 4px;
+}
+.bl-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 32px;
+  padding: 4px 0;
+}
+.bl-check input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  flex: none;
+}
+.bl-dialog__link a {
+  color: #0f6e7d;
+}
+.bl-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* ---- Recent changes ---------------------------------------------------------- */
+
+dialog.bl-dialog.bl-sheet {
+  width: min(560px, 100vw);
+  max-height: min(85vh, 100vh);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+dialog.bl-dialog.bl-sheet:not([open]) {
+  display: none;
+}
+.bl-sheet .bl-dialog__title {
+  margin: 0;
+  padding: 18px 20px 4px;
+}
+.bl-sheet .bl-dialog__body {
+  padding: 0 20px;
+  color: #4f5765;
+}
+.bl-sheet__content {
+  padding: 0 20px 8px;
+  overflow: auto;
+  flex: 1 1 auto;
+}
+.bl-sheet .bl-dialog__actions {
+  margin: 0;
+  padding: 12px 20px;
+  border-top: 1px solid #d9dcd6;
+  background: #ffffff;
+}
+.bl-sheet__status {
+  margin: 4px 0 12px;
+  padding: 10px 12px;
+  border: 1px solid #d9dcd6;
+  border-radius: 8px;
+  background: #f4f5f7;
+}
+.bl-sheet__status p {
+  margin: 0;
+}
+.bl-sheet__status p + p {
+  margin-top: 4px;
+}
+.bl-sheet__status-text {
+  font-weight: 600;
+}
+.bl-sheet__status[data-tone="fail"] {
+  background: #fdece4;
+  border-color: #e3b29a;
+  color: #7a2a00;
+}
+.bl-sheet__problem p {
+  margin: 0 0 8px;
+  color: #b80029;
+  font-weight: 600;
+}
+.bl-sheet__day {
+  margin: 16px 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #4f5765;
+  text-transform: none;
+}
+.bl-sheet__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.bl-change {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid #eceeea;
+}
+.bl-avatar {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.bl-avatar--none {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #d9dcd6;
+  color: #1f2329;
+  font-weight: 700;
+}
+.bl-change__main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.bl-change__line,
+.bl-change__meta {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.bl-change__entry {
+  font-weight: 600;
+}
+.bl-change__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  color: #4f5765;
+  font-size: 13px;
+}
+.bl-change__side {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.bl-chip {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: #fff4d6;
+  color: #5c4300;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ---- Phones and narrow windows (spec §8) -------------------------------------- */
+
+@media (max-width: 799px) {
+  /* Above WP5's [Edit] [Preview & history] switch (44 px) and the phone's home bar. */
+  .bl-corner {
+    left: 8px;
+    right: 8px;
+    bottom: calc(44px + 8px + env(safe-area-inset-bottom));
+    max-width: none;
+    align-items: stretch;
+  }
+  .bl-dock {
+    min-height: 44px;
+    border-radius: 22px;
+    flex-wrap: nowrap;
+  }
+  .bl-dock__body {
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+  .bl-dock__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .bl-dock__notes {
+    display: none;
+  }
+  .bl-btn,
+  .bl-btn--small {
+    min-height: 44px;
+  }
+  .bl-check {
+    min-height: 44px;
+  }
+  .bl-toast {
+    width: 100%;
+  }
+  dialog.bl-dialog.bl-sheet {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100%;
+    max-height: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bl-toast {
+    animation: bl-toast-in 160ms ease-out;
+  }
+  /* Movement only: a fading toast would be low-contrast for its first frames. */
+  @keyframes bl-toast-in {
+    from {
+      transform: translateY(6px);
+    }
+    to {
+      transform: none;
+    }
+  }
+}

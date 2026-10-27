@@ -1,0 +1,423 @@
+{
+  "request": "GET /repos/bobalabx/bobalab-web/commits?sha=main&per_page=12",
+  "recorded": "2026-10-26T07:40:38Z",
+  "status": 200,
+  "headers": {
+    "etag": "W/\"178674ec35d4f2795e844cd501a5611b6de7367fef6aeb771f9c0d4e2c7371f4\"",
+    "last-modified": "Mon, 26 Oct 2026 06:50:40 GMT",
+    "link": "<https://api.github.com/repositories/1427902156/commits?sha=main&per_page=12&page=2>; rel=\"next\", <https://api.github.com/repositories/1427902156/commits?sha=main&per_page=12&page=6>; rel=\"last\"",
+    "x-ratelimit-limit": "60",
+    "x-ratelimit-remaining": "44",
+    "x-ratelimit-reset": "1793001569"
+  },
+  "body": [
+    {
+      "sha": "14c739cd9f216df68f5e5071acc1fe15e0484d27",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/14c739cd9f216df68f5e5071acc1fe15e0484d27",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T06:50:40Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T06:50:40Z"
+        },
+        "message": "People: undergraduates show only their major under their name\n\nUnder an undergraduate's name the site now shows only their title and\nmajor (\"Lab manager\", \"EECS\"), or nothing until the major is known; never\n\"Undergraduate RA\". Graduate students keep \"PhD student, Economics\".\nApplies on People, project team lists and news.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "715bd47b7c54d015af9a906ef41fddd45b10cff6"
+        }
+      ]
+    },
+    {
+      "sha": "715bd47b7c54d015af9a906ef41fddd45b10cff6",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/715bd47b7c54d015af9a906ef41fddd45b10cff6",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T06:43:11Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T06:43:11Z"
+        },
+        "message": "People: new members and photos; \"Graduate students\" group\n\n- Photos for Park Sinchaisri and William Deng; new members Zhiwei Wang\n  (PhD, Economics), Isabelle Cho and Jazz Beecham (lab managers), and\n  Nike Naiyarat, JJ Srimakut and Tom Jiramate (Chulalongkorn, '28).\n- PhD and master's students share one People group, \"Graduate students\";\n  cards keep the exact role.\n\nDECISIONS D-16.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "587ed7eb08c08dd4cbc93e9a68e5937e5c2fd4ae"
+        }
+      ]
+    },
+    {
+      "sha": "587ed7eb08c08dd4cbc93e9a68e5937e5c2fd4ae",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/587ed7eb08c08dd4cbc93e9a68e5937e5c2fd4ae",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T06:03:00Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T06:03:00Z"
+        },
+        "message": "Home: the title and the pearl panel start on one line\n\nFrom 48rem the h1 heads the text column again and the pearl panel spans\nboth rows beside it; the h1's first line is trimmed to its cap height, so\nits capitals and the panel's top edge start on one line. From 80rem the\ntext column is 32rem wide, so the statement still sets in two lines.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "6dba23ef416d480dcc0532c2eaaa15b5d0cc67c9"
+        }
+      ]
+    },
+    {
+      "sha": "6dba23ef416d480dcc0532c2eaaa15b5d0cc67c9",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/6dba23ef416d480dcc0532c2eaaa15b5d0cc67c9",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T04:14:23Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T04:14:23Z"
+        },
+        "message": "Home: the first pearl, its label and the caption start on one line\n\nThe left pearl's dark disc, label and count now start exactly at the\ncaption's x (panel content edge + --pl-edge), and the right pearl mirrors\nit; the compact 2-column grid does the same. From 48rem the panel's top\nedge meets the cap height of the first line of text beside it. The panel\nclips its overflow so edge halos stay inside it.\n\nChosen by a workflow (3 readings of the owner's screenshots, 3 prototypes,\n3 judges; edge hug won 2-1) and verified to +-1px from 320 to 1920px,\nin WebKit, and on the n=2-8 fixture galleries.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "7bd2e8d69f31e596df66b4a1e6c626bc348127ae"
+        }
+      ]
+    },
+    {
+      "sha": "7bd2e8d69f31e596df66b4a1e6c626bc348127ae",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/7bd2e8d69f31e596df66b4a1e6c626bc348127ae",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T03:25:32Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T03:25:32Z"
+        },
+        "message": "Home: line the pearls up with the panel's left edge\n\nOuter slots in the pearl figure now hug the panel's content edges, so the\nleftmost pearl sits over the caption and the rightmost meets the right edge.\nThe compact 2-column grid (tablets, phones) sizes each column to its widest\nlabel and pushes the columns to the edges, for the same alignment.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "d2352d5dbd38bd0175a0c857bb79804eb525c4bb"
+        }
+      ]
+    },
+    {
+      "sha": "d2352d5dbd38bd0175a0c857bb79804eb525c4bb",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/d2352d5dbd38bd0175a0c857bb79804eb525c4bb",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T03:17:58Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T03:17:58Z"
+        },
+        "message": "home: headline spans the hero and sets in two lines (three at 320 px)\n\nThe h1 moves out of the text column and spans the hero from 48rem, with the\nwho/why text and the pearl figure side by side below it.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "667be93ed8d7ed10c7449426140d5cf52566cd23"
+        }
+      ]
+    },
+    {
+      "sha": "667be93ed8d7ed10c7449426140d5cf52566cd23",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/667be93ed8d7ed10c7449426140d5cf52566cd23",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T03:04:01Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T03:04:01Z"
+        },
+        "message": "home: smaller headline (--t-display 84px -> 68px on desktop)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "9d3874bd11f5a0bc1eec4e37708f4f77ea3975e7"
+        }
+      ]
+    },
+    {
+      "sha": "9d3874bd11f5a0bc1eec4e37708f4f77ea3975e7",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/9d3874bd11f5a0bc1eec4e37708f4f77ea3975e7",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-25T23:38:39Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-25T23:38:39Z"
+        },
+        "message": "docs(simplify): report update for D-15, copy sweep and majors\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "b6b380f6657cb39d476ec2a52639b26a016aa3ff"
+        }
+      ]
+    },
+    {
+      "sha": "b6b380f6657cb39d476ec2a52639b26a016aa3ff",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/b6b380f6657cb39d476ec2a52639b26a016aa3ff",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-25T23:37:24Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-25T23:37:24Z"
+        },
+        "message": "copy: remove generated-sounding text site-wide\n\nOwner rulings: delete the home people sentence, all \"reported by the\nlab\" provenance, \"as of\" dates in statuses, \"This direction was last\nupdated\", and stats written as sentences; rewrite meta descriptions so\nthey keep whole sentences. Content edits are logged for PI approval in\ndocs/CONTENT-QUESTIONS.md (C-1 to C-64).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "9c1ceb4fce38d123e60dee3f4a695f984d217010"
+        }
+      ]
+    },
+    {
+      "sha": "9c1ceb4fce38d123e60dee3f4a695f984d217010",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/9c1ceb4fce38d123e60dee3f4a695f984d217010",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-25T21:58:36Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-25T21:58:36Z"
+        },
+        "message": "simplify(integration): pearls change requests, D-15 gates and before/after sheets\n\nChange requests pearls-1..3 applied (Status marked in each):\n- pearls-1: the foundation morph test starts from a homepage pearl (.pl-link,\n  .pl-body named pearl-{slug}) instead of the removed cup.\n- pearls-2: the reduced-motion sampler hovers a homepage pearl and follows its\n  link again (the cup branch had been skipped silently); the people-page unit\n  test checks every fixture for no count line.\n- pearls-3: comments and ARCHITECTURE.md say \"homepage pearls\" / \"--tea panel\"\n  instead of \"cup\"; the session key bobalab-cup-intro is kept on purpose, so\n  the privacy page stays accurate.\n\nBefore/after sheets (live site vs the served simplify production export):\ndocs/simplify/after/d15-home-desktop.jpg, d15-home-mobile.jpg, d15-hover.jpg,\nd15-dark-desktop.jpg.\n\nGates (isolated-copy builds): typecheck, lint, format:check, unit 831 (+4\nskipped), validate 74, cms:check, media:check, check:export (production),\nperf, perf:assets, linkinator 0 broken; Playwright on the preview export\nChromium 226 / WebKit 223 passed, 0 failed.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "96fc5604df113bc4b6e1e79c69c91563a28ed930"
+        }
+      ]
+    },
+    {
+      "sha": "96fc5604df113bc4b6e1e79c69c91563a28ed930",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/96fc5604df113bc4b6e1e79c69c91563a28ed930",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-25T11:31:47Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-25T11:31:47Z"
+        },
+        "message": "simplify(people): drop the count sentences\n\nD-15: the /people/ summary sentence with member and alumni counts is\nremoved; only the empty state \"No one is listed yet.\" keeps .pp-summary.\nThe unit test now checks every fixture for no count line.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "61c7ed30cb002c22f8edcac4601228e3f8966c53"
+        }
+      ]
+    },
+    {
+      "sha": "61c7ed30cb002c22f8edcac4601228e3f8966c53",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/61c7ed30cb002c22f8edcac4601228e3f8966c53",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-25T11:31:47Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-25T11:31:47Z"
+        },
+        "message": "simplify(home): restore the original pearl figure as the hero (D-15)\n\nThe boba cup is replaced by the original Fig. 1 pearl cluster (4740e10),\npolished per D-15: a flat --tea panel with an <ol> of real links, matte\nbodies with a direction-colour halo (shared with the direction header via\nhalo.css), hairline orbit and seeds, underlined labels and muted counts.\nPearlsIsland swaps the caption on hover/focus, dims only the other\npearls' graphics, tints the wordmark O and plays the settle-once intro.\nNo gloss, numerals, loops, parallax or Pause button. The homepage People\nsection drops its counts. src/components/cup is removed.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "efe49758f126c92edfdff467666e7714fff3abc6"
+        }
+      ]
+    }
+  ]
+}

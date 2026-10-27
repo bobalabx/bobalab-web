@@ -2,12 +2,16 @@
  * Colour-contrast fixes for Decap CMS 3.17.1's own editor UI (WCAG 1.4.3; WP6).
  * MEASURED 2026-10-20 with axe: Decap's grey text (#798291 / #7b8290) is 3.4–3.9:1
  * on its white and #eff0f4 backgrounds, the "Unsaved changes" red 3.95:1, and
- * white on the teal Publish button 3.04:1.
+ * white on the teal Publish (now Save) button 3.04:1.
  *
  * Selectors match the labels in Decap's generated class names (stable for the
  * pinned 3.17.1 bundle). "html body" lifts them above Decap's single-class rules
  * but keeps them below its two-class active/hover states (e.g. the selected
  * sidebar item stays blue).
+ *
+ * Editor v2 (WP5): Decap's "Publish" button is worded "Save" (cms-locale.js); its
+ * teal stays. The rules for one-click Save, the "Not saved" band, the note next
+ * to Save and the phone layout are at the end of this file.
  */
 html body [class*="AppHeaderButton"],
 html body [class*="AppHeaderLink"],
@@ -67,8 +71,12 @@ html body [class*="ControlContainer"] [class*="-control"] input:focus-visible {
  * Narrow screens (WCAG 1.4.10 Reflow; WP6 review). Decap 3.17.1 gives the editor
  * and its top bar a fixed min-width of 800px, so on a phone the page scrolled
  * sideways and the account menu sat off-screen. Below 800px the editor shows the
- * form at full width and no preview pane (a phone has no room for both; the
- * preview toggle and scroll-sync buttons are hidden with it).
+ * form at full width; the eye and scroll-sync buttons are hidden.
+ *
+ * Editor v2 (spec §8): phones can edit and save, with an [Edit] [Preview & history]
+ * switch at the bottom (cms-layout.js). In Edit the live column is NOT display:none:
+ * it stays rendered off-screen at phone width, so the site check and History keep
+ * working. Preview (html.bl-phone-preview) shows it at full width instead of the form.
  */
 @media (max-width: 799px) {
   html body [class*="EditorContainer"],
@@ -79,9 +87,27 @@ html body [class*="ControlContainer"] [class*="-control"] input:focus-visible {
     width: 100% !important;
   }
   html body [class*="StyledSplitPane"] > .Resizer,
-  html body [class*="StyledSplitPane"] > .Pane2,
   html body [class*="ViewControls"] {
     display: none;
+  }
+  html body [class*="StyledSplitPane"] > .Pane2 {
+    position: absolute !important;
+    top: 0;
+    left: -10000px;
+    width: 390px !important;
+    height: 100%;
+    visibility: hidden;
+  }
+  html.bl-phone-preview body [class*="StyledSplitPane"] > .Pane1 {
+    display: none;
+  }
+  html.bl-phone-preview body [class*="StyledSplitPane"] > .Pane2 {
+    left: 0;
+    right: 0;
+    bottom: calc(44px + env(safe-area-inset-bottom));
+    width: 100% !important;
+    height: auto;
+    visibility: visible;
   }
   html body [class*="ToolbarSectionMeta"] [class*="AppHeaderSiteLink"] {
     display: none;
@@ -100,6 +126,21 @@ html body [class*="ControlContainer"] [class*="-control"] input:focus-visible {
     padding-left: 12px;
     padding-right: 12px;
   }
+  /* Save stays in the toolbar, at least 44 px tall (spec §7 targets). */
+  html body [class*="ToolbarDropdown"] [class*="PublishButton"],
+  html body [class*="PublishedToolbarButton"],
+  html body [class*="PublishedButton"] {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  /*
+   * The last field must not hide under the switch (44 px), the status dock above
+   * it (cms-ui.css: 8 px gap, a 44 px pill) and a 16 px margin.
+   */
+  html.bl-editor body [class*="ControlPaneContainer"] {
+    padding-bottom: calc(44px + 8px + 44px + 16px + env(safe-area-inset-bottom));
+  }
 }
 @media (max-width: 479px) {
   /* "Writing in News collection": kept for screen readers, hidden so the status fits. */
@@ -111,5 +152,220 @@ html body [class*="ControlContainer"] [class*="-control"] input:focus-visible {
     clip: rect(0 0 0 0);
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+}
+
+/* ===========================================================================
+ * Editor v2 (WP5): "Save goes live" (spec §3.2–§3.10). Colours as in cms-ui.css:
+ * text #1f2329 15.8:1, secondary #4f5765 7.3:1, red #b80029 on #fdecef 6.0:1,
+ * focus ring #3a69c7 5.2:1 on white.
+ * ======================================================================== */
+
+/*
+ * One-click Save (cms-save.js): Decap's Save menu opens for at most 600 ms while
+ * the script picks "Save now"; it is never seen. Without :has() support it
+ * flashes for a moment, which is harmless.
+ */
+html.bl-one-click [class*="ToolbarDropdown"]:has([class*="PublishButton"]) [role="menu"] {
+  display: none !important;
+}
+
+/* Decap toasts that cms-save.js replaced: by the "Not saved" band, or by the dock's own "Saved" toast. */
+.Toastify__toast[data-bl-hide] {
+  display: none !important;
+}
+
+/*
+ * Nothing reaches GitHub without Save (spec §3.10). The header Media button opens a
+ * library whose Delete commits at once; it is hidden. Contents (a link) stays.
+ * The library's "Delete selected" inside an entry is hidden by cms-layout.js.
+ */
+nav [class*="AppHeaderNavList"] li > button[class*="AppHeaderButton"] {
+  display: none !important;
+}
+/* MEASURED (editor v2): Decap's buttons set display:flex, which beats the hidden attribute. */
+button[data-bl-hidden="media-delete"] {
+  display: none !important;
+}
+/*
+ * Decap's "Check for Preview ↻" next to Save asks GitHub for a deploy preview,
+ * which this site never has (MEASURED: in the local demo it does nothing). The
+ * live column and "Open the published page" do that job.
+ */
+[class*="PreviewButtonContainer"],
+[class*="RefreshPreviewButton"] {
+  display: none !important;
+}
+/*
+ * A same-name upload is refused while Decap's media library is open (its overlay
+ * is z-index 99999, MEASURED); the "rename your file" toast must show above it.
+ * The status box (cms-ui.css) otherwise stays below Decap's dialogs.
+ */
+body.ReactModal__Body--open #bl-corner:has([data-bl-rename]) {
+  z-index: 100000;
+}
+
+/* The note next to Save: what Save will do with this entry (spec §3.5). */
+#bl-save-note {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+  min-width: 0;
+  max-width: 22em;
+  margin: 0 auto 0 4px; /* right next to Save; the free space goes after it */
+  font-size: 13px;
+  line-height: 1.3;
+  color: #4f5765;
+}
+#bl-save-note .bl-btn--link {
+  min-height: 32px;
+  padding: 0 4px;
+}
+@media (max-width: 799px) {
+  #bl-save-note {
+    max-width: 10em;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+}
+@media (max-width: 479px) {
+  /* No room next to Save: the note stays readable to screen readers. */
+  #bl-save-note .bl-save-note__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+#bl-save-desc {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The "Not saved" band (role=alert) at the top of the form; it stays until fixed. */
+.bl-refusal {
+  position: sticky;
+  top: 0;
+  z-index: 250; /* above the form's own sticky bits, below Decap's menus (299) */
+  box-sizing: border-box;
+  margin: 0 -16px 12px;
+  padding: 10px 16px;
+  border-bottom: 2px solid #b80029;
+  background: #fdecef;
+  color: #1f2329;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.bl-refusal[hidden] {
+  display: none;
+}
+.bl-refusal__text {
+  margin: 0 0 8px;
+  color: #b80029;
+  font-weight: 600;
+}
+.bl-refusal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.bl-refusal--fixed {
+  position: fixed;
+  top: 66px; /* under Decap's toolbar */
+  left: 0;
+  right: 0;
+  margin: 0;
+  z-index: 300;
+}
+.bl-refusal :focus-visible,
+#bl-save-note :focus-visible,
+.bl-skip:focus-visible,
+.bl-phonebar :focus-visible {
+  outline: 2px solid #3a69c7;
+  outline-offset: 2px;
+}
+
+/* "Skip to the live preview": the first stop for the keyboard on editor routes. */
+.bl-skip {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10000;
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 2px solid #3a69c7;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1f2329;
+  font:
+    600 14px/1.2 system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+  cursor: pointer;
+  transform: translateY(-200%);
+}
+.bl-skip:focus {
+  transform: none;
+}
+.bl-skip[hidden] {
+  display: none;
+}
+
+/* Phones: [Edit] [Preview & history] at the bottom of editor routes (spec §8). */
+.bl-phonebar {
+  display: none;
+}
+@media (max-width: 799px) {
+  .bl-phonebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9001; /* with the status dock (cms-ui.css), above the editor */
+    box-sizing: border-box;
+    display: flex;
+    height: calc(44px + env(safe-area-inset-bottom));
+    padding: 0 0 env(safe-area-inset-bottom);
+    border-top: 1px solid #8b9099;
+    background: #ffffff;
+  }
+  .bl-phonebar[hidden] {
+    display: none;
+  }
+  .bl-phonebar__btn {
+    flex: 1 1 50%;
+    min-height: 44px;
+    margin: 0;
+    border: 0;
+    background: #ffffff;
+    color: #1f2329;
+    font:
+      600 15px/1.2 system-ui,
+      -apple-system,
+      "Segoe UI",
+      Roboto,
+      Arial,
+      sans-serif;
+    cursor: pointer;
+  }
+  .bl-phonebar__btn + .bl-phonebar__btn {
+    border-left: 1px solid #8b9099;
+  }
+  .bl-phonebar__btn[aria-pressed="true"] {
+    background: #0f6e7d;
+    color: #ffffff;
   }
 }

@@ -1,0 +1,155 @@
+{
+  "description": "GitHub never starts a run for this save: waiting, then unknown after 90 s, then slow after 6 minutes.",
+  "sha": "c100000000000000000000000000000000000000",
+  "startedAt": "2026-10-26T20:00:00Z",
+  "polls": [
+    {
+      "at": 10,
+      "runs": [
+        {
+          "id": 50001,
+          "name": "Deploy",
+          "head_branch": "main",
+          "head_sha": "b000000000000000000000000000000000000000",
+          "display_title": "Edit News item “2026-10-01-older” (by @ben-editor)",
+          "run_number": 1,
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/50001",
+          "created_at": "2026-10-26T19:00:00Z",
+          "updated_at": "2026-10-26T19:00:00Z",
+          "run_started_at": "2026-10-26T19:00:00Z",
+          "run_attempt": 1,
+          "actor": {
+            "login": "ben-editor"
+          },
+          "triggering_actor": {
+            "login": "ben-editor"
+          },
+          "head_commit": {
+            "id": "b000000000000000000000000000000000000000",
+            "message": "Edit News item “2026-10-01-older” (by @ben-editor)",
+            "timestamp": "2026-10-26T19:00:00Z",
+            "author": {
+              "name": "Ada Editor"
+            }
+          }
+        }
+      ],
+      "jobs": {},
+      "expect": "waiting"
+    },
+    {
+      "at": 89,
+      "runs": [
+        {
+          "id": 50001,
+          "name": "Deploy",
+          "head_branch": "main",
+          "head_sha": "b000000000000000000000000000000000000000",
+          "display_title": "Edit News item “2026-10-01-older” (by @ben-editor)",
+          "run_number": 1,
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/50001",
+          "created_at": "2026-10-26T19:00:00Z",
+          "updated_at": "2026-10-26T19:00:00Z",
+          "run_started_at": "2026-10-26T19:00:00Z",
+          "run_attempt": 1,
+          "actor": {
+            "login": "ben-editor"
+          },
+          "triggering_actor": {
+            "login": "ben-editor"
+          },
+          "head_commit": {
+            "id": "b000000000000000000000000000000000000000",
+            "message": "Edit News item “2026-10-01-older” (by @ben-editor)",
+            "timestamp": "2026-10-26T19:00:00Z",
+            "author": {
+              "name": "Ada Editor"
+            }
+          }
+        }
+      ],
+      "jobs": {},
+      "expect": "waiting"
+    },
+    {
+      "at": 91,
+      "runs": [
+        {
+          "id": 50001,
+          "name": "Deploy",
+          "head_branch": "main",
+          "head_sha": "b000000000000000000000000000000000000000",
+          "display_title": "Edit News item “2026-10-01-older” (by @ben-editor)",
+          "run_number": 1,
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/50001",
+          "created_at": "2026-10-26T19:00:00Z",
+          "updated_at": "2026-10-26T19:00:00Z",
+          "run_started_at": "2026-10-26T19:00:00Z",
+          "run_attempt": 1,
+          "actor": {
+            "login": "ben-editor"
+          },
+          "triggering_actor": {
+            "login": "ben-editor"
+          },
+          "head_commit": {
+            "id": "b000000000000000000000000000000000000000",
+            "message": "Edit News item “2026-10-01-older” (by @ben-editor)",
+            "timestamp": "2026-10-26T19:00:00Z",
+            "author": {
+              "name": "Ada Editor"
+            }
+          }
+        }
+      ],
+      "jobs": {},
+      "expect": "unknown"
+    },
+    {
+      "at": 361,
+      "runs": [
+        {
+          "id": 50001,
+          "name": "Deploy",
+          "head_branch": "main",
+          "head_sha": "b000000000000000000000000000000000000000",
+          "display_title": "Edit News item “2026-10-01-older” (by @ben-editor)",
+          "run_number": 1,
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/50001",
+          "created_at": "2026-10-26T19:00:00Z",
+          "updated_at": "2026-10-26T19:00:00Z",
+          "run_started_at": "2026-10-26T19:00:00Z",
+          "run_attempt": 1,
+          "actor": {
+            "login": "ben-editor"
+          },
+          "triggering_actor": {
+            "login": "ben-editor"
+          },
+          "head_commit": {
+            "id": "b000000000000000000000000000000000000000",
+            "message": "Edit News item “2026-10-01-older” (by @ben-editor)",
+            "timestamp": "2026-10-26T19:00:00Z",
+            "author": {
+              "name": "Ada Editor"
+            }
+          }
+        }
+      ],
+      "jobs": {},
+      "expect": "slow"
+    }
+  ]
+}

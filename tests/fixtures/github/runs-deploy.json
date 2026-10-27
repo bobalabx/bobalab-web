@@ -1,0 +1,436 @@
+{
+  "request": "GET /repos/bobalabx/bobalab-web/actions/workflows/deploy.yml/runs?branch=main",
+  "recorded": "2026-10-26T07:41:00Z",
+  "status": 200,
+  "headers": {
+    "etag": "W/\"2f5efcc1b8baebdd73365b7a27c0d3ff315a14694f09f45f26f751667d5c78cf\"",
+    "x-ratelimit-limit": "60",
+    "x-ratelimit-remaining": "41",
+    "x-ratelimit-reset": "1793001569"
+  },
+  "body": {
+    "total_count": 14,
+    "workflow_runs": [
+      {
+        "id": 40283049218,
+        "name": "Deploy",
+        "head_branch": "main",
+        "head_sha": "14c739cd9f216df68f5e5071acc1fe15e0484d27",
+        "display_title": "People: undergraduates show only their major under their name",
+        "run_number": 14,
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/40283049218",
+        "created_at": "2026-10-26T06:59:25Z",
+        "updated_at": "2026-10-26T07:00:57Z",
+        "run_started_at": "2026-10-26T06:59:25Z",
+        "run_attempt": 1,
+        "actor": {
+          "login": "J12aGuan"
+        },
+        "triggering_actor": {
+          "login": "J12aGuan"
+        },
+        "head_commit": {
+          "id": "14c739cd9f216df68f5e5071acc1fe15e0484d27",
+          "message": "People: undergraduates show only their major under their name\n\nUnder an undergraduate's name the site now shows only their title and\nmajor (\"Lab manager\", \"EECS\"), or nothing until the major is known; never\n\"Undergraduate RA\". Graduate students keep \"PhD student, Economics\".\nApplies on People, project team lists and news.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+          "timestamp": "2026-10-26T06:50:40Z",
+          "author": {
+            "name": "Jiaming Guan"
+          }
+        }
+      },
+      {
+        "id": 40281536985,
+        "name": "Deploy",
+        "head_branch": "main",
+        "head_sha": "715bd47b7c54d015af9a906ef41fddd45b10cff6",
+        "display_title": "People: new members and photos; \"Graduate students\" group",
+        "run_number": 13,
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/40281536985",
+        "created_at": "2026-10-26T06:43:54Z",
+        "updated_at": "2026-10-26T06:45:38Z",
+        "run_started_at": "2026-10-26T06:43:54Z",
+        "run_attempt": 1,
+        "actor": {
+          "login": "J12aGuan"
+        },
+        "triggering_actor": {
+          "login": "J12aGuan"
+        },
+        "head_commit": {
+          "id": "715bd47b7c54d015af9a906ef41fddd45b10cff6",
+          "message": "People: new members and photos; \"Graduate students\" group\n\n- Photos for Park Sinchaisri and William Deng; new members Zhiwei Wang\n  (PhD, Economics), Isabelle Cho and Jazz Beecham (lab managers), and\n  Nike Naiyarat, JJ Srimakut and Tom Jiramate (Chulalongkorn, '28).\n- PhD and master's students share one People group, \"Graduate students\";\n  cards keep the exact role.\n\nDECISIONS D-16.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+          "timestamp": "2026-10-26T06:43:11Z",
+          "author": {
+            "name": "Jiaming Guan"
+          }
+        }
+      },
+      {
+        "id": 40278325198,
+        "name": "Deploy",
+        "head_branch": "main",
+        "head_sha": "587ed7eb08c08dd4cbc93e9a68e5937e5c2fd4ae",
+        "display_title": "Home: the title and the pearl panel start on one line",
+        "run_number": 12,
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/40278325198",
+        "created_at": "2026-10-26T06:11:01Z",
+        "updated_at": "2026-10-26T06:12:49Z",
+        "run_started_at": "2026-10-26T06:11:01Z",
+        "run_attempt": 1,
+        "actor": {
+          "login": "J12aGuan"
+        },
+        "triggering_actor": {
+          "login": "J12aGuan"
+        },
+        "head_commit": {
+          "id": "587ed7eb08c08dd4cbc93e9a68e5937e5c2fd4ae",
+          "message": "Home: the title and the pearl panel start on one line\n\nFrom 48rem the h1 heads the text column again and the pearl panel spans\nboth rows beside it; the h1's first line is trimmed to its cap height, so\nits capitals and the panel's top edge start on one line. From 80rem the\ntext column is 32rem wide, so the statement still sets in two lines.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+          "timestamp": "2026-10-26T06:03:00Z",
+          "author": {
+            "name": "Jiaming Guan"
+          }
+        }
+      },
+      {
+        "id": 40204594511,
+        "name": "Deploy",
+        "head_branch": "main",
+        "head_sha": "ba50ae5476fe67f9cf929262d867c7a4814a1919",
+        "display_title": "Deploy",
+        "run_number": 11,
+        "event": "schedule",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/40204594511",
+        "created_at": "2026-10-25T14:56:42Z",
+        "updated_at": "2026-10-25T14:58:17Z",
+        "run_started_at": "2026-10-25T14:56:42Z",
+        "run_attempt": 1,
+        "actor": {
+          "login": "J12aGuan"
+        },
+        "triggering_actor": {
+          "login": "J12aGuan"
+        },
+        "head_commit": {
+          "id": "ba50ae5476fe67f9cf929262d867c7a4814a1919",
+          "message": "redesign: before/after report and comparisons; headshot within the 40 KB budget\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+          "timestamp": "2026-10-25T06:03:13Z",
+          "author": {
+            "name": "Jiaming Guan"
+          }
+        }
+      },
+      {
+        "id": 40168634627,
+        "name": "Deploy",
+        "head_branch": "main",
+        "head_sha": "ba50ae5476fe67f9cf929262d867c7a4814a1919",
+        "display_title": "redesign: before/after report and comparisons; headshot within the 40…",
+        "run_number": 10,
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/40168634627",
+        "created_at": "2026-10-25T06:18:36Z",
+        "updated_at": "2026-10-25T06:20:20Z",
+        "run_started_at": "2026-10-25T06:18:36Z",
+        "run_attempt": 1,
+        "actor": {
+          "login": "J12aGuan"
+        },
+        "triggering_actor": {
+          "login": "J12aGuan"
+        },
+        "head_commit": {
+          "id": "ba50ae5476fe67f9cf929262d867c7a4814a1919",
+          "message": "redesign: before/after report and comparisons; headshot within the 40 KB budget\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+          "timestamp": "2026-10-25T06:03:13Z",
+          "author": {
+            "name": "Jiaming Guan"
+          }
+        }
+      },
+      {
+        "id": 40146277201,
+        "name": "Deploy",
+        "head_branch": "main",
+        "head_sha": "4740e107935fa45d397d9ecbe2e9f6d1e23ef61d",
+        "display_title": "people: October 2026 roster with member headshots; link the lab sched…",
+        "run_number": 9,
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/40146277201",
+        "created_at": "2026-10-25T00:20:02Z",
+        "updated_at": "2026-10-25T00:21:43Z",
+        "run_started_at": "2026-10-25T00:20:02Z",
+        "run_attempt": 1,
+        "actor": {
+          "login": "J12aGuan"
+        },
+        "triggering_actor": {
+          "login": "J12aGuan"
+        },
+        "head_commit": {
+          "id": "4740e107935fa45d397d9ecbe2e9f6d1e23ef61d",
+          "message": "people: October 2026 roster with member headshots; link the lab scheduler\n\n- 19 new member records from the owner's roster list (D-12); 21 consented\n  headshots from the 'Submit a headshot' form, cropped to 480x480 with all\n  metadata stripped; placeholders for Aaron Tu (submitted an ID card),\n  Vinayak Sarkar (silhouette) and William Deng (none).\n- Eddie Zhang, Hannah Yu, Marcus Koh, Ryan Xu -> alumni 2026 (not on the\n  October roster; to confirm). Display name William Deng per the roster.\n- New site.yml member_links (schema + CMS 'Links for lab members'): Lab\n  scheduler -> https://scheduler.bobalab.org/, shown in the footer and on\n  /people/. Link only; the scheduler forbids framing.\n- D-11: content/ is now the source of truth; the dataset importer is retired.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+          "timestamp": "2026-10-25T00:19:57Z",
+          "author": {
+            "name": "Jiaming Guan"
+          }
+        }
+      },
+      {
+        "id": 40102786704,
+        "name": "Deploy",
+        "head_branch": "main",
+        "head_sha": "7a6545d4b693f939cbb0aecd11279854f63c111f",
+        "display_title": "Deploy",
+        "run_number": 8,
+        "event": "schedule",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/40102786704",
+        "created_at": "2026-10-24T14:30:19Z",
+        "updated_at": "2026-10-24T14:31:43Z",
+        "run_started_at": "2026-10-24T14:30:19Z",
+        "run_attempt": 1,
+        "actor": {
+          "login": "J12aGuan"
+        },
+        "triggering_actor": {
+          "login": "J12aGuan"
+        },
+        "head_commit": {
+          "id": "7a6545d4b693f939cbb0aecd11279854f63c111f",
+          "message": "cms: connect GitHub sign-in through the lab's OAuth bridge worker\n\nbase_url -> https://bobalab-cms-auth.bobalabx-034.workers.dev (forked\nsveltia-cms-auth on Cloudflare, GitHub OAuth App 'BOBALAB website CMS'\non bobalabx). Regenerated admin config and /admin/ CSP connect-src.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+          "timestamp": "2026-10-22T22:03:45Z",
+          "author": {
+            "name": "Jiaming Guan"
+          }
+        }
+      },
+      {
+        "id": 39980777995,
+        "name": "Deploy",
+        "head_branch": "main",
+        "head_sha": "7a6545d4b693f939cbb0aecd11279854f63c111f",
+        "display_title": "Deploy",
+        "run_number": 7,
+        "event": "schedule",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/39980777995",
+        "created_at": "2026-10-23T15:43:53Z",
+        "updated_at": "2026-10-23T15:45:28Z",
+        "run_started_at": "2026-10-23T15:43:53Z",
+        "run_attempt": 1,
+        "actor": {
+          "login": "J12aGuan"
+        },
+        "triggering_actor": {
+          "login": "J12aGuan"
+        },
+        "head_commit": {
+          "id": "7a6545d4b693f939cbb0aecd11279854f63c111f",
+          "message": "cms: connect GitHub sign-in through the lab's OAuth bridge worker\n\nbase_url -> https://bobalab-cms-auth.bobalabx-034.workers.dev (forked\nsveltia-cms-auth on Cloudflare, GitHub OAuth App 'BOBALAB website CMS'\non bobalabx). Regenerated admin config and /admin/ CSP connect-src.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+          "timestamp": "2026-10-22T22:03:45Z",
+          "author": {
+            "name": "Jiaming Guan"
+          }
+        }
+      },
+      {
+        "id": 39862120442,
+        "name": "Deploy",
+        "head_branch": "main",
+        "head_sha": "7a6545d4b693f939cbb0aecd11279854f63c111f",
+        "display_title": "cms: connect GitHub sign-in through the lab's OAuth bridge worker",
+        "run_number": 6,
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/39862120442",
+        "created_at": "2026-10-22T22:03:48Z",
+        "updated_at": "2026-10-22T22:05:33Z",
+        "run_started_at": "2026-10-22T22:03:48Z",
+        "run_attempt": 1,
+        "actor": {
+          "login": "J12aGuan"
+        },
+        "triggering_actor": {
+          "login": "J12aGuan"
+        },
+        "head_commit": {
+          "id": "7a6545d4b693f939cbb0aecd11279854f63c111f",
+          "message": "cms: connect GitHub sign-in through the lab's OAuth bridge worker\n\nbase_url -> https://bobalab-cms-auth.bobalabx-034.workers.dev (forked\nsveltia-cms-auth on Cloudflare, GitHub OAuth App 'BOBALAB website CMS'\non bobalabx). Regenerated admin config and /admin/ CSP connect-src.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+          "timestamp": "2026-10-22T22:03:45Z",
+          "author": {
+            "name": "Jiaming Guan"
+          }
+        }
+      },
+      {
+        "id": 39808909729,
+        "name": "Deploy",
+        "head_branch": "main",
+        "head_sha": "4efbb0e59b45bde6b5e9eb81ac7efc7c1bb1ec14",
+        "display_title": "Deploy",
+        "run_number": 5,
+        "event": "schedule",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/39808909729",
+        "created_at": "2026-10-22T15:52:34Z",
+        "updated_at": "2026-10-22T15:54:10Z",
+        "run_started_at": "2026-10-22T15:52:34Z",
+        "run_attempt": 1,
+        "actor": {
+          "login": "J12aGuan"
+        },
+        "triggering_actor": {
+          "login": "J12aGuan"
+        },
+        "head_commit": {
+          "id": "4efbb0e59b45bde6b5e9eb81ac7efc7c1bb1ec14",
+          "message": "content: publish all imported entries (owner decision D-10)\n\nOwner chose 'Publish everything' for the live site. The importer now\nwrites draft: false for every entry (PUBLISH_ALL), except the one project\nwith no research direction (cancer-recognition), which stays a draft so no\ndirection is invented. Consent gates are unchanged: listed:false people,\nphotos, emails and 'now at' remain hidden. site.yml launched stays false\nuntil CMS sign-in is configured.\n\nTests: CON-02 hold skipped while PUBLISH_ALL is on; hidden-names scan gets\na 60 s timeout (OneDrive I/O). validate 72/72, unit 670 pass, export check ok.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+          "timestamp": "2026-10-21T06:24:57Z",
+          "author": {
+            "name": "Jiaming Guan"
+          }
+        }
+      },
+      {
+        "id": 39630248527,
+        "name": "Deploy",
+        "head_branch": "main",
+        "head_sha": "4efbb0e59b45bde6b5e9eb81ac7efc7c1bb1ec14",
+        "display_title": "Deploy",
+        "run_number": 4,
+        "event": "schedule",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/39630248527",
+        "created_at": "2026-10-21T15:56:35Z",
+        "updated_at": "2026-10-21T15:58:22Z",
+        "run_started_at": "2026-10-21T15:56:35Z",
+        "run_attempt": 1,
+        "actor": {
+          "login": "J12aGuan"
+        },
+        "triggering_actor": {
+          "login": "J12aGuan"
+        },
+        "head_commit": {
+          "id": "4efbb0e59b45bde6b5e9eb81ac7efc7c1bb1ec14",
+          "message": "content: publish all imported entries (owner decision D-10)\n\nOwner chose 'Publish everything' for the live site. The importer now\nwrites draft: false for every entry (PUBLISH_ALL), except the one project\nwith no research direction (cancer-recognition), which stays a draft so no\ndirection is invented. Consent gates are unchanged: listed:false people,\nphotos, emails and 'now at' remain hidden. site.yml launched stays false\nuntil CMS sign-in is configured.\n\nTests: CON-02 hold skipped while PUBLISH_ALL is on; hidden-names scan gets\na 60 s timeout (OneDrive I/O). validate 72/72, unit 670 pass, export check ok.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+          "timestamp": "2026-10-21T06:24:57Z",
+          "author": {
+            "name": "Jiaming Guan"
+          }
+        }
+      },
+      {
+        "id": 39555261656,
+        "name": "Deploy",
+        "head_branch": "main",
+        "head_sha": "4efbb0e59b45bde6b5e9eb81ac7efc7c1bb1ec14",
+        "display_title": "content: publish all imported entries (owner decision D-10)",
+        "run_number": 3,
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/39555261656",
+        "created_at": "2026-10-21T06:25:02Z",
+        "updated_at": "2026-10-21T06:26:50Z",
+        "run_started_at": "2026-10-21T06:25:02Z",
+        "run_attempt": 1,
+        "actor": {
+          "login": "J12aGuan"
+        },
+        "triggering_actor": {
+          "login": "J12aGuan"
+        },
+        "head_commit": {
+          "id": "4efbb0e59b45bde6b5e9eb81ac7efc7c1bb1ec14",
+          "message": "content: publish all imported entries (owner decision D-10)\n\nOwner chose 'Publish everything' for the live site. The importer now\nwrites draft: false for every entry (PUBLISH_ALL), except the one project\nwith no research direction (cancer-recognition), which stays a draft so no\ndirection is invented. Consent gates are unchanged: listed:false people,\nphotos, emails and 'now at' remain hidden. site.yml launched stays false\nuntil CMS sign-in is configured.\n\nTests: CON-02 hold skipped while PUBLISH_ALL is on; hidden-names scan gets\na 60 s timeout (OneDrive I/O). validate 72/72, unit 670 pass, export check ok.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+          "timestamp": "2026-10-21T06:24:57Z",
+          "author": {
+            "name": "Jiaming Guan"
+          }
+        }
+      },
+      {
+        "id": 39551915535,
+        "name": "Deploy",
+        "head_branch": "main",
+        "head_sha": "cc9afcddf0cbbbd048d7ad4470b8535eab699e04",
+        "display_title": "fix(deps): restore missing @tailwindcss/oxide platform entries in pac…",
+        "run_number": 2,
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/39551915535",
+        "created_at": "2026-10-21T05:51:15Z",
+        "updated_at": "2026-10-21T05:52:45Z",
+        "run_started_at": "2026-10-21T05:51:15Z",
+        "run_attempt": 1,
+        "actor": {
+          "login": "J12aGuan"
+        },
+        "triggering_actor": {
+          "login": "J12aGuan"
+        },
+        "head_commit": {
+          "id": "cc9afcddf0cbbbd048d7ad4470b8535eab699e04",
+          "message": "fix(deps): restore missing @tailwindcss/oxide platform entries in package-lock\n\nnpm ci failed on the Linux deploy runner (and on any clean install):\nthe lockfile created on Windows lacked the optional per-platform\n@tailwindcss/oxide packages, so package.json and the lock were out of sync.\nRegenerated with npm install --package-lock-only: 17 entries added, no\nversion changes. Verified with a clean npm ci.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+          "timestamp": "2026-10-21T05:51:10Z",
+          "author": {
+            "name": "Jiaming Guan"
+          }
+        }
+      },
+      {
+        "id": 39550790859,
+        "name": "Deploy",
+        "head_branch": "main",
+        "head_sha": "3bd6ab71be8cf04978babf23ab707d94850ff3f3",
+        "display_title": "chore: point CMS, site URL fallback, link check and CODEOWNERS at bob…",
+        "run_number": 1,
+        "event": "push",
+        "status": "completed",
+        "conclusion": "failure",
+        "html_url": "https://github.com/bobalabx/bobalab-web/actions/runs/39550790859",
+        "created_at": "2026-10-21T05:39:31Z",
+        "updated_at": "2026-10-21T05:46:18Z",
+        "run_started_at": "2026-10-21T05:45:57Z",
+        "run_attempt": 2,
+        "actor": {
+          "login": "J12aGuan"
+        },
+        "triggering_actor": {
+          "login": "bobalabx"
+        },
+        "head_commit": {
+          "id": "3bd6ab71be8cf04978babf23ab707d94850ff3f3",
+          "message": "chore: point CMS, site URL fallback, link check and CODEOWNERS at bobalabx/bobalab-web\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+          "timestamp": "2026-10-21T05:34:29Z",
+          "author": {
+            "name": "Jiaming Guan"
+          }
+        }
+      }
+    ]
+  }
+}

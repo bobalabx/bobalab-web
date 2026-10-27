@@ -1,7 +1,7 @@
 /**
  * Decap CMS configuration SOURCE (WP6). Edit this file, never public/admin/config.yml.
  *
- *   node scripts/cms/build-config.mjs           regenerate public/admin/{config.yml,index.html,preview.css,fonts/}
+ *   node scripts/cms/build-config.mjs           regenerate public/admin/{config.yml,index.html,cms-data.js,logo.svg}
  *   node scripts/cms/build-config.mjs --check   fail if a generated file is out of date (CI-friendly)
  *   node scripts/cms/build-config.mjs --local   also write the git-ignored local demo files
  *
@@ -39,10 +39,31 @@ export const backend = {
   auth_endpoint: "auth",
   // Public repo: the token may only touch public repositories. Use "repo" if the repo goes private.
   auth_scope: "public_repo",
-  // The repo allows squash merges only (R4 Verification, required change 2).
-  squash_merges: true,
-  cms_label_prefix: "decap/",
+  // "Save goes live" (editor v2, D-17): every Save is one commit on main, and its
+  // message names the entry and the editor's GitHub account. History, Recent
+  // changes and the deploy status read these messages back (public/admin/
+  // cms-history.js parses them in this order; Interfaces §3). Change them together.
+  commit_messages: {
+    create: "Add {{collection}} “{{slug}}” (by @{{author-login}})",
+    update: "Edit {{collection}} “{{slug}}” (by @{{author-login}})",
+    delete: "Delete {{collection}} “{{slug}}” (by @{{author-login}})",
+    uploadMedia: "Upload “{{path}}” (by @{{author-login}})",
+    deleteMedia: "Delete file “{{path}}” (by @{{author-login}})",
+  },
 };
+
+/** The GitHub Actions workflow that builds and deploys the site after every Save (.github/workflows/). */
+export const DEPLOY_WORKFLOW = "deploy.yml";
+
+/**
+ * Switches for the editor's checks before a Save (public/admin/cms-save.js).
+ * previewCheckBlocksSave: the site check (the deploy's own validator, run in the
+ * live preview on the saved site with and without the change) refuses a Save
+ * that would make the deploy fail. A maintainer can turn it off here (then the
+ * problems still show in the live column, but Save goes ahead), regenerate and
+ * commit, if the check ever refuses a valid save.
+ */
+export const features = { previewCheckBlocksSave: true };
 
 /** Origins the admin page may contact in production (CSP connect-src / img-src). */
 export const csp = {
@@ -64,7 +85,11 @@ export const csp = {
 export const media = {
   media_folder: "public/uploads",
   public_folder: "/uploads",
-  /** Upload limits (CI also rejects files over 10 MB and raster images over 2 MB). */
+  /**
+   * Upload limits. They must equal scripts/perf/asset-budget.mjs LIMITS, which the
+   * deploy enforces (tests/unit/cms/config.test.ts checks it); cms-save.js also
+   * refuses a Save with a bigger upload, using the same numbers from cms-data.js.
+   */
   imageMaxBytes: 2 * 1024 * 1024,
   fileMaxBytes: 10 * 1024 * 1024,
 };
@@ -86,8 +111,8 @@ export const orderRules = [
 
 /**
  * "Required when …" rules that the content validator (src/lib/content/validate.ts)
- * reports as ERRORS, so the required validate-content check would reject the
- * pull request, but that Decap cannot express (verification finding CMS-04).
+ * reports as ERRORS, so the deploy's validate step would fail after the Save,
+ * but that Decap cannot express (verification finding CMS-04).
  * cms-hooks.js blocks a save that breaks one, with the message below;
  * tests/unit/cms/hooks.test.ts runs the validator on the same cases, so the two
  * cannot drift apart silently. The generator checks every field path.
@@ -192,9 +217,13 @@ const RICHTEXT = {
   ],
 };
 
+// Draft, Listed and Photo say it: the switches hide things from the website only.
+// The repository is public, so every saved version can be read on github.com.
+const ON_GITHUB = "anyone can read every save on github.com.";
+
 const DRAFT = {
   label: "Draft · pending lab review",
-  hint: "On: shown only in preview builds, with a “Draft · pending lab review” badge; the live site leaves it out. Turn it off once the lab has approved the text. This is separate from the CMS’s own Draft → In review → Ready board.",
+  hint: `Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: ${ON_GITHUB}`,
 };
 
 const body = (hint, label = "Body") => ({ label, hint, ...RICHTEXT });
@@ -536,7 +565,8 @@ export const collections = [
         hint: "The lab’s own plain-language summary, at most 3 sentences (≤ 400 characters). Never paste the abstract.",
       },
       teaser: imageObject("Teaser image", "Optional figure from the paper (with permission)."),
-      featured: { label: "Featured", hint: "Show on the home page." },
+      // Owner default (open question 13): nothing on the site reads it yet.
+      featured: { label: "Featured", hint: "Not used on the site yet." },
       plate_verified: {
         label: "Study-design figure checked by the authors",
         hint: "Turn on only after the authors have checked the paper's study-design figure. Until then the figure shows only in preview builds.",
@@ -601,7 +631,7 @@ export const collections = [
       },
       directions: directionsRel(),
       photo: imageField(
-        "Upload only after the person has agreed in writing: uploaded files are public as soon as they are published, even while “Photo consent” is off, so the CMS does not save a photo without that consent. Square headshot, JPG or WebP, at most 2 MB.",
+        `Upload only after the person has agreed in writing: uploaded files are public as soon as they are saved, even while “Photo consent” is off, so the CMS does not save a photo without that consent. Square headshot, JPG or WebP, at most 2 MB. Removing a photo later hides it from the website only: ${ON_GITHUB}`,
       ),
       photo_alt: {
         label: "Photo alt text (required with a photo)",
@@ -640,7 +670,7 @@ export const collections = [
       now_at_public: { label: "Now at public", hint: "On only with the person’s consent." },
       listed: {
         label: "Listed (consented to appear)",
-        hint: "Off: the person is never shown or linked anywhere on the site, even in preview.",
+        hint: `Off: the person is never shown or linked anywhere on the site, even in preview. Listed hides the person from the website only: ${ON_GITHUB}`,
       },
       profile_page: {
         label: "Profile page",
@@ -972,7 +1002,6 @@ export const fileCollections = [
     name: "settings",
     label: "Settings",
     description: "Site-wide settings. Changes affect every page.",
-    preview: false,
     files: [
       {
         name: "site",
@@ -1021,7 +1050,7 @@ export const fileCollections = [
           direction_order: {
             label: "Direction order",
             label_singular: "direction",
-            hint: "The order of the pearls in Fig. 1. Each item shows the direction’s address (e.g. ai-at-work). Drag an item by its handle, or focus the handle and use Space, the arrow keys and Space again. Each live direction once; remove archived directions (×). An item that opens as an empty choice is an archived direction: remove it.",
+            hint: "The order of the pearls in Fig. 1. Each item shows the direction’s address (e.g. ai-at-work). Drag an item by its handle, or focus the handle and press the Up/Down arrows. Each live direction once; remove archived directions (×). An item that opens as an empty choice is an archived direction: remove it.",
             // The collapsed items show the stored address (Decap: summary of a single-field list).
             summary: "{{fields.direction}}",
             field: {

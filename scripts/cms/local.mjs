@@ -5,6 +5,7 @@
  *   npm run cms:local               generate the local config, start decap-server (port 8081)
  *                                   and `next dev` (port 3100), print the editor URL
  *   npm run cms:local -- --no-next  only decap-server; use a dev server that is already running
+ *   CMS_PROXY_PORT=8097 npm run cms:local   decap-server on another port (the page follows it)
  *
  * Then open http://localhost:3100/admin/local.html and click "Login": no GitHub
  * account is needed. The CMS writes straight into content/ and public/uploads/
@@ -22,7 +23,7 @@ import fs from "node:fs";
 import net from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { generate, LOCAL_FILES, ROOT } from "./build-config.mjs";
+import { generate, LOCAL_FILES, localDemoOptions, ROOT } from "./build-config.mjs";
 
 const args = process.argv.slice(2);
 const noNext = args.includes("--no-next");
@@ -75,7 +76,8 @@ async function main() {
     console.error(`[cms:local] port ${PROXY_PORT} is in use; is decap-server already running?`);
     process.exit(1);
   }
-  const files = await generate({ local: true, localSiteUrl: `http://localhost:${SITE_PORT}` });
+  // The page must name the proxy's port (CMS_PROXY_PORT), or it cannot sign in.
+  const files = await generate(localDemoOptions({ proxyPort: PROXY_PORT, sitePort: SITE_PORT }));
   for (const rel of LOCAL_FILES) {
     const abs = path.join(ROOT, rel);
     fs.mkdirSync(path.dirname(abs), { recursive: true });
@@ -103,7 +105,7 @@ async function main() {
     ]);
   }
   console.log(
-    `\n[cms:local] Editor: http://localhost:${SITE_PORT}/admin/local.html  (Ctrl+C to stop)\n`,
+    `\n[cms:local] Editor: http://localhost:${SITE_PORT}/admin/local.html  (proxy on port ${PROXY_PORT}; Ctrl+C to stop)\n`,
   );
 }
 

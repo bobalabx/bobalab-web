@@ -1,0 +1,303 @@
+{
+  "request": "synthetic: commits as the content manager writes them (cms-data.js commit_messages)",
+  "status": 200,
+  "headers": {
+    "etag": "W/\"synthetic-cms-commits\""
+  },
+  "body": [
+    {
+      "sha": "a900000000000000000000000000000000000000",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/a900000000000000000000000000000000000000",
+      "commit": {
+        "author": {
+          "name": "Ada Editor",
+          "date": "2026-10-26T20:15:00.000Z"
+        },
+        "committer": {
+          "name": "GitHub",
+          "date": "2026-10-26T20:15:00.000Z"
+        },
+        "message": "Edit News item “2026-10-07-informs-talk” (by @ada-editor)"
+      },
+      "author": {
+        "login": "ada-editor",
+        "id": 1000001,
+        "avatar_url": "https://avatars.githubusercontent.com/u/1000001?v=4",
+        "html_url": "https://github.com/ada-editor",
+        "type": "User"
+      },
+      "committer": {
+        "login": "web-flow",
+        "id": 19864447,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+        "html_url": "https://github.com/web-flow",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "a800000000000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "sha": "a800000000000000000000000000000000000000",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/a800000000000000000000000000000000000000",
+      "commit": {
+        "author": {
+          "name": "Ben Editor",
+          "date": "2026-10-26T20:13:20.000Z"
+        },
+        "committer": {
+          "name": "GitHub",
+          "date": "2026-10-26T20:13:20.000Z"
+        },
+        "message": "Delete file “public/uploads/people/old-photo.jpg” (by @ben-editor)"
+      },
+      "author": {
+        "login": "ben-editor",
+        "id": 1000002,
+        "avatar_url": "https://avatars.githubusercontent.com/u/1000002?v=4",
+        "html_url": "https://github.com/ben-editor",
+        "type": "User"
+      },
+      "committer": {
+        "login": "web-flow",
+        "id": 19864447,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+        "html_url": "https://github.com/web-flow",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "a700000000000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "sha": "a700000000000000000000000000000000000000",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/a700000000000000000000000000000000000000",
+      "commit": {
+        "author": {
+          "name": "Ben Editor",
+          "date": "2026-10-26T20:11:40.000Z"
+        },
+        "committer": {
+          "name": "GitHub",
+          "date": "2026-10-26T20:11:40.000Z"
+        },
+        "message": "Upload “public/uploads/people/isabelle-cho.jpg” (by @ben-editor)"
+      },
+      "author": {
+        "login": "ben-editor",
+        "id": 1000003,
+        "avatar_url": "https://avatars.githubusercontent.com/u/1000002?v=4",
+        "html_url": "https://github.com/ben-editor",
+        "type": "User"
+      },
+      "committer": {
+        "login": "web-flow",
+        "id": 19864447,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+        "html_url": "https://github.com/web-flow",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "a600000000000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "sha": "a600000000000000000000000000000000000000",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/a600000000000000000000000000000000000000",
+      "commit": {
+        "author": {
+          "name": "Ada Editor",
+          "date": "2026-10-26T20:10:00.000Z"
+        },
+        "committer": {
+          "name": "GitHub",
+          "date": "2026-10-26T20:10:00.000Z"
+        },
+        "message": "Add Person “jane-doe” (by @ada-editor)"
+      },
+      "author": {
+        "login": "ada-editor",
+        "id": 1000004,
+        "avatar_url": "https://avatars.githubusercontent.com/u/1000001?v=4",
+        "html_url": "https://github.com/ada-editor",
+        "type": "User"
+      },
+      "committer": {
+        "login": "web-flow",
+        "id": 19864447,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+        "html_url": "https://github.com/web-flow",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "a500000000000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "sha": "a500000000000000000000000000000000000000",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/a500000000000000000000000000000000000000",
+      "commit": {
+        "author": {
+          "name": "Ada Editor",
+          "date": "2026-10-26T20:08:20.000Z"
+        },
+        "committer": {
+          "name": "GitHub",
+          "date": "2026-10-26T20:08:20.000Z"
+        },
+        "message": "Edit Pages “home” (by @ada-editor)"
+      },
+      "author": {
+        "login": "ada-editor",
+        "id": 1000005,
+        "avatar_url": "https://avatars.githubusercontent.com/u/1000001?v=4",
+        "html_url": "https://github.com/ada-editor",
+        "type": "User"
+      },
+      "committer": {
+        "login": "web-flow",
+        "id": 19864447,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+        "html_url": "https://github.com/web-flow",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "a400000000000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "sha": "a400000000000000000000000000000000000000",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/a400000000000000000000000000000000000000",
+      "commit": {
+        "author": {
+          "name": "Ben Editor",
+          "date": "2026-10-26T20:06:40.000Z"
+        },
+        "committer": {
+          "name": "GitHub",
+          "date": "2026-10-26T20:06:40.000Z"
+        },
+        "message": "Update Publication “doe-2026-trust”"
+      },
+      "author": {
+        "login": "ben-editor",
+        "id": 1000006,
+        "avatar_url": "https://avatars.githubusercontent.com/u/1000002?v=4",
+        "html_url": "https://github.com/ben-editor",
+        "type": "User"
+      },
+      "committer": {
+        "login": "web-flow",
+        "id": 19864447,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+        "html_url": "https://github.com/web-flow",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "a300000000000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "sha": "a300000000000000000000000000000000000000",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/a300000000000000000000000000000000000000",
+      "commit": {
+        "author": {
+          "name": "github-actions[bot]",
+          "date": "2026-10-26T20:05:00.000Z"
+        },
+        "committer": {
+          "name": "GitHub",
+          "date": "2026-10-26T20:05:00.000Z"
+        },
+        "message": "chore(content): record published slugs after deploy 14c739c"
+      },
+      "author": {
+        "login": "github-actions[bot]",
+        "id": 1000007,
+        "avatar_url": null,
+        "html_url": "https://github.com/github-actions[bot]",
+        "type": "User"
+      },
+      "committer": {
+        "login": "web-flow",
+        "id": 19864447,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+        "html_url": "https://github.com/web-flow",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "a200000000000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "sha": "a200000000000000000000000000000000000000",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/a200000000000000000000000000000000000000",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T20:03:20.000Z"
+        },
+        "committer": {
+          "name": "GitHub",
+          "date": "2026-10-26T20:03:20.000Z"
+        },
+        "message": "People: new members and photos; \"Graduate students\" group\n\nlonger body"
+      },
+      "author": null,
+      "committer": {
+        "login": "web-flow",
+        "id": 19864447,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+        "html_url": "https://github.com/web-flow",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "a100000000000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "sha": "a100000000000000000000000000000000000000",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/a100000000000000000000000000000000000000",
+      "commit": {
+        "author": {
+          "name": "Ada Editor",
+          "date": "2026-10-26T20:01:40.000Z"
+        },
+        "committer": {
+          "name": "GitHub",
+          "date": "2026-10-26T20:01:40.000Z"
+        },
+        "message": "Edit Research direction “trust-in-ai” (by @ada-editor)"
+      },
+      "author": null,
+      "committer": {
+        "login": "web-flow",
+        "id": 19864447,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+        "html_url": "https://github.com/web-flow",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "a000000000000000000000000000000000000000"
+        }
+      ]
+    }
+  ]
+}

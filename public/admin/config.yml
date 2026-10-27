@@ -8,9 +8,13 @@ backend:
   base_url: https://bobalab-cms-auth.bobalabx-034.workers.dev
   auth_endpoint: auth
   auth_scope: public_repo
-  squash_merges: true
-  cms_label_prefix: decap/
-publish_mode: editorial_workflow
+  commit_messages:
+    create: Add {{collection}} “{{slug}}” (by @{{author-login}})
+    update: Edit {{collection}} “{{slug}}” (by @{{author-login}})
+    delete: Delete {{collection}} “{{slug}}” (by @{{author-login}})
+    uploadMedia: Upload “{{path}}” (by @{{author-login}})
+    deleteMedia: Delete file “{{path}}” (by @{{author-login}})
+publish_mode: simple
 site_url: https://bobalabx.github.io/bobalab-web
 display_url: https://bobalabx.github.io/bobalab-web
 logo:
@@ -226,7 +230,7 @@ collections:
         widget: boolean
         required: false
         default: false
-        hint: "On: shown only in preview builds, with a “Draft · pending lab review” badge; the live site leaves it out. Turn it off once the lab has approved the text. This is separate from the CMS’s own Draft → In review → Ready board."
+        hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
       - label: Body
         name: body
         widget: richtext
@@ -665,7 +669,7 @@ collections:
         widget: boolean
         required: false
         default: false
-        hint: Show on the home page.
+        hint: Not used on the site yet.
       - label: Study-design figure checked by the authors
         name: plate_verified
         widget: boolean
@@ -682,7 +686,7 @@ collections:
         widget: boolean
         required: false
         default: false
-        hint: "On: shown only in preview builds, with a “Draft · pending lab review” badge; the live site leaves it out. Turn it off once the lab has approved the text. This is separate from the CMS’s own Draft → In review → Ready board."
+        hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
       - label: Body
         name: body
         widget: richtext
@@ -829,7 +833,7 @@ collections:
         name: photo
         widget: image
         required: false
-        hint: "Upload only after the person has agreed in writing: uploaded files are public as soon as they are published, even while “Photo consent” is off, so the CMS does not save a photo without that consent. Square headshot, JPG or WebP, at most 2 MB."
+        hint: "Upload only after the person has agreed in writing: uploaded files are public as soon as they are saved, even while “Photo consent” is off, so the CMS does not save a photo without that consent. Square headshot, JPG or WebP, at most 2 MB. Removing a photo later hides it from the website only: anyone can read every save on github.com."
         choose_url: false
         media_library:
           config:
@@ -944,7 +948,7 @@ collections:
         widget: boolean
         required: false
         default: false
-        hint: "Off: the person is never shown or linked anywhere on the site, even in preview."
+        hint: "Off: the person is never shown or linked anywhere on the site, even in preview. Listed hides the person from the website only: anyone can read every save on github.com."
       - label: Profile page
         name: profile_page
         widget: boolean
@@ -956,7 +960,7 @@ collections:
         widget: boolean
         required: false
         default: false
-        hint: "On: shown only in preview builds, with a “Draft · pending lab review” badge; the live site leaves it out. Turn it off once the lab has approved the text. This is separate from the CMS’s own Draft → In review → Ready board."
+        hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
       - label: Bio
         name: body
         widget: richtext
@@ -1202,7 +1206,7 @@ collections:
         widget: boolean
         required: false
         default: false
-        hint: "On: shown only in preview builds, with a “Draft · pending lab review” badge; the live site leaves it out. Turn it off once the lab has approved the text. This is separate from the CMS’s own Draft → In review → Ready board."
+        hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
       - label: Body
         name: body
         widget: richtext
@@ -1499,7 +1503,7 @@ collections:
         widget: boolean
         required: false
         default: false
-        hint: "On: shown only in preview builds, with a “Draft · pending lab review” badge; the live site leaves it out. Turn it off once the lab has approved the text. This is separate from the CMS’s own Draft → In review → Ready board."
+        hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
       - label: Body
         name: body
         widget: richtext
@@ -1640,7 +1644,7 @@ collections:
         widget: boolean
         required: false
         default: false
-        hint: "On: shown only in preview builds, with a “Draft · pending lab review” badge; the live site leaves it out. Turn it off once the lab has approved the text. This is separate from the CMS’s own Draft → In review → Ready board."
+        hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
       - label: Body
         name: body
         widget: richtext
@@ -1753,7 +1757,7 @@ collections:
             widget: boolean
             required: false
             default: false
-            hint: "On: shown only in preview builds, with a “Draft · pending lab review” badge; the live site leaves it out. Turn it off once the lab has approved the text. This is separate from the CMS’s own Draft → In review → Ready board."
+            hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
       - name: join
         label: Join the lab
         file: content/pages/join.yml
@@ -1838,7 +1842,7 @@ collections:
             widget: boolean
             required: false
             default: false
-            hint: "On: shown only in preview builds, with a “Draft · pending lab review” badge; the live site leaves it out. Turn it off once the lab has approved the text. This is separate from the CMS’s own Draft → In review → Ready board."
+            hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
       - name: about
         label: About
         file: content/pages/about.yml
@@ -1887,7 +1891,7 @@ collections:
             widget: boolean
             required: false
             default: false
-            hint: "On: shown only in preview builds, with a “Draft · pending lab review” badge; the live site leaves it out. Turn it off once the lab has approved the text. This is separate from the CMS’s own Draft → In review → Ready board."
+            hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
       - name: accessibility
         label: Accessibility statement
         file: content/pages/accessibility.yml
@@ -1937,7 +1941,7 @@ collections:
             widget: boolean
             required: false
             default: false
-            hint: "On: shown only in preview builds, with a “Draft · pending lab review” badge; the live site leaves it out. Turn it off once the lab has approved the text. This is separate from the CMS’s own Draft → In review → Ready board."
+            hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
       - name: privacy
         label: Privacy statement
         file: content/pages/privacy.yml
@@ -1987,13 +1991,11 @@ collections:
             widget: boolean
             required: false
             default: false
-            hint: "On: shown only in preview builds, with a “Draft · pending lab review” badge; the live site leaves it out. Turn it off once the lab has approved the text. This is separate from the CMS’s own Draft → In review → Ready board."
+            hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
   - name: settings
     label: Settings
     description: Site-wide settings. Changes affect every page.
     delete: false
-    editor:
-      preview: false
     files:
       - name: site
         label: Site
@@ -2134,7 +2136,7 @@ collections:
             allow_add: true
             required: false
             default: []
-            hint: "The order of the pearls in Fig. 1. Each item shows the direction’s address (e.g. ai-at-work). Drag an item by its handle, or focus the handle and use Space, the arrow keys and Space again. Each live direction once; remove archived directions (×). An item that opens as an empty choice is an archived direction: remove it."
+            hint: "The order of the pearls in Fig. 1. Each item shows the direction’s address (e.g. ai-at-work). Drag an item by its handle, or focus the handle and press the Up/Down arrows. Each live direction once; remove archived directions (×). An item that opens as an empty choice is an archived direction: remove it."
             label_singular: direction
             summary: "{{fields.direction}}"
           - label: Links for lab members

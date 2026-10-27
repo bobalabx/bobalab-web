@@ -1,0 +1,252 @@
+{
+  "request": "GET /repos/bobalabx/bobalab-web/commits?sha=main&path=content/people",
+  "recorded": "2026-10-26T07:40:49Z",
+  "status": 200,
+  "headers": {
+    "etag": "W/\"6b588163d5e4998d2353601ad3173f5aaca0be2d552a5d89bdad19ef68185cad\"",
+    "last-modified": "Mon, 26 Oct 2026 06:43:11 GMT",
+    "x-ratelimit-limit": "60",
+    "x-ratelimit-remaining": "43",
+    "x-ratelimit-reset": "1793001569"
+  },
+  "body": [
+    {
+      "sha": "715bd47b7c54d015af9a906ef41fddd45b10cff6",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/715bd47b7c54d015af9a906ef41fddd45b10cff6",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T06:43:11Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-26T06:43:11Z"
+        },
+        "message": "People: new members and photos; \"Graduate students\" group\n\n- Photos for Park Sinchaisri and William Deng; new members Zhiwei Wang\n  (PhD, Economics), Isabelle Cho and Jazz Beecham (lab managers), and\n  Nike Naiyarat, JJ Srimakut and Tom Jiramate (Chulalongkorn, '28).\n- PhD and master's students share one People group, \"Graduate students\";\n  cards keep the exact role.\n\nDECISIONS D-16.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "587ed7eb08c08dd4cbc93e9a68e5937e5c2fd4ae"
+        }
+      ]
+    },
+    {
+      "sha": "4288c0c742478ed9e328a65706e14854505e81ef",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/4288c0c742478ed9e328a65706e14854505e81ef",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-25T10:51:03Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-25T10:51:03Z"
+        },
+        "message": "content(people): add majors confirmed from the alumni's own public pages\n\nJacky Kwok (jackyk02.github.io), Jerry Zhu (Northwestern MLDS alumni page),\nMatthew Lee (matthewlee.xyz), Stephen Yang (GitHub profile), Thomas Yeoh\n(tyeoh9.github.io). Unconfirmed or 'likely' matches were not added.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "0081b594b27dfd3572ad016bdce0ef9e74f75415"
+        }
+      ]
+    },
+    {
+      "sha": "4740e107935fa45d397d9ecbe2e9f6d1e23ef61d",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/4740e107935fa45d397d9ecbe2e9f6d1e23ef61d",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-25T00:19:57Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-25T00:19:57Z"
+        },
+        "message": "people: October 2026 roster with member headshots; link the lab scheduler\n\n- 19 new member records from the owner's roster list (D-12); 21 consented\n  headshots from the 'Submit a headshot' form, cropped to 480x480 with all\n  metadata stripped; placeholders for Aaron Tu (submitted an ID card),\n  Vinayak Sarkar (silhouette) and William Deng (none).\n- Eddie Zhang, Hannah Yu, Marcus Koh, Ryan Xu -> alumni 2026 (not on the\n  October roster; to confirm). Display name William Deng per the roster.\n- New site.yml member_links (schema + CMS 'Links for lab members'): Lab\n  scheduler -> https://scheduler.bobalab.org/, shown in the footer and on\n  /people/. Link only; the scheduler forbids framing.\n- D-11: content/ is now the source of truth; the dataset importer is retired.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "7a6545d4b693f939cbb0aecd11279854f63c111f"
+        }
+      ]
+    },
+    {
+      "sha": "4efbb0e59b45bde6b5e9eb81ac7efc7c1bb1ec14",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/4efbb0e59b45bde6b5e9eb81ac7efc7c1bb1ec14",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-21T06:24:57Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-21T06:24:57Z"
+        },
+        "message": "content: publish all imported entries (owner decision D-10)\n\nOwner chose 'Publish everything' for the live site. The importer now\nwrites draft: false for every entry (PUBLISH_ALL), except the one project\nwith no research direction (cancer-recognition), which stays a draft so no\ndirection is invented. Consent gates are unchanged: listed:false people,\nphotos, emails and 'now at' remain hidden. site.yml launched stays false\nuntil CMS sign-in is configured.\n\nTests: CON-02 hold skipped while PUBLISH_ALL is on; hidden-names scan gets\na 60 s timeout (OneDrive I/O). validate 72/72, unit 670 pass, export check ok.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "cc9afcddf0cbbbd048d7ad4470b8535eab699e04"
+        }
+      ]
+    },
+    {
+      "sha": "1ff5b0c866314c93019b516fb5886d60552f1fbc",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/1ff5b0c866314c93019b516fb5886d60552f1fbc",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-21T03:44:55Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-21T03:44:55Z"
+        },
+        "message": "verify(content): idempotent importer, drafted PI-reported news, program labels, citation names, wording\n\n- CON-01: every integration fix lives in scripts/import; --check is clean (115 files)\n- CON-02: news about PI-reported journal decisions are drafts until the papers are public\n- CON-04 / VIS-06: program labels in display casing, no invented expansions\n- CON-07 / CON-08 / CON-09 / CON-13 / CON-14 / VIS-13: one PI citation name, no \"the PI\",\n  Tuck and MSOM news corrected, event names spelled out, copy fixes, one \"Archived\"\n- CNT-01: site.yml notes moved from YAML comments to editors_note\n- publications-2: four PI-reported awards carry source: self-reported (D11 updated)\n- CON-16 deferred: archived_on is the import month until the lab decides (C3)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "7659921981e5cdddc4a08ba7f483487cbc158f76"
+        }
+      ]
+    },
+    {
+      "sha": "6d697218b8878b0f06fb20e1f261dbdb45573a1d",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/6d697218b8878b0f06fb20e1f261dbdb45573a1d",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-21T01:37:50Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-21T01:37:50Z"
+        },
+        "message": "integration: apply change requests\n\nApplies the WP1-WP8 change requests to WP0-owned files (and the few cross-package ones), marks each request with its status, and regenerates the wordmark, golden citations, media manifest and CMS admin files.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "dc634b63f800d25bdce85eba48d4943ab8f5678a"
+        }
+      ]
+    },
+    {
+      "sha": "f85a26b306f2e5f88ae1cfaf12c1fa5e00b6ada9",
+      "html_url": "https://github.com/bobalabx/bobalab-web/commit/f85a26b306f2e5f88ae1cfaf12c1fa5e00b6ada9",
+      "commit": {
+        "author": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-20T22:58:15Z"
+        },
+        "committer": {
+          "name": "Jiaming Guan",
+          "date": "2026-10-20T22:58:15Z"
+        },
+        "message": "WP7: content import, media pipeline, content audit and PI questions\n\n- scripts/import: re-runnable importer from the research dataset (kept\n  outside the repo) to content/** per docs/CONTENT-MAPPING.md and D-03..D-06;\n  dry-run / --write / --check, Prettier-formatted output, known-fix asserts\n- content/: 6 directions, 25 publications, 18 projects, 35 people,\n  19 news, 5 opportunities, site.yml and 5 pages (drafts per D-03)\n- scripts/media/build-images.mjs: sharp 480/960 WebP variants + manifest,\n  10 MB limit, prune, --check; handles an empty uploads folder\n- tests: salted-hash guard for hidden-only roster names, importer helpers,\n  media pipeline, production vs preview content modes\n- docs: CONTENT-AUDIT.md (sanitized), CONTENT-QUESTIONS.md, WP7 change request\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+      },
+      "author": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "committer": {
+        "login": "J12aGuan",
+        "id": 96441175,
+        "avatar_url": "https://avatars.githubusercontent.com/u/96441175?v=4",
+        "html_url": "https://github.com/J12aGuan",
+        "type": "User"
+      },
+      "parents": [
+        {
+          "sha": "e21ac7b8ba601def6b3f040387349419c985a2c4"
+        }
+      ]
+    }
+  ]
+}

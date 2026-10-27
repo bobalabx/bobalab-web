@@ -1,6 +1,7 @@
 /**
  * Production CMS configuration, the admin page and the vendored bundle
- * (brief §I WP6 #1, #3, #5; §F2–F4; §G4; DECISIONS D-03…D-06).
+ * (brief §I WP6 #1, #3, #5; §F2–F4; §G4; DECISIONS D-03…D-06), and the editor-v2
+ * "Save goes live" configuration (WP5; spec §3.1, Interfaces §1–§3).
  */
 import { spawnSync } from "node:child_process";
 import crypto from "node:crypto";
@@ -9,9 +10,14 @@ import path from "node:path";
 import { parse } from "yaml";
 import { describe, expect, it } from "vitest";
 import { SWATCH_IDS } from "@/lib/content/palette";
+import * as schema from "@/lib/content/schema";
 import { backendProblems, verdict } from "../../../scripts/cms/check-backend.mjs";
-import { URL_OR_PATH_RE } from "../../../scripts/cms/lib/decap-config.mjs";
-import { ROOT } from "./helpers";
+import { generate, localDemoOptions } from "../../../scripts/cms/build-config.mjs";
+import { buildDecapConfig, URL_OR_PATH_RE } from "../../../scripts/cms/lib/decap-config.mjs";
+import { contentModels } from "../../../scripts/cms/lib/zod-model.mjs";
+import { LIMITS, UPLOAD_EXTENSIONS } from "../../../scripts/perf/asset-budget.mjs";
+import * as source from "../../../cms/source.mjs";
+import { ROOT, runAdminScripts } from "./helpers";
 
 type Cfg = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -24,11 +30,13 @@ const siteFields = () =>
   collection("settings").files.find((f: Cfg) => f.name === "site").fields as Cfg[];
 
 describe("production config.yml", () => {
-  it("uses the GitHub backend with the editorial workflow and the verified settings", () => {
+  it("uses the GitHub backend in simple mode (Save goes live) with the verified settings", () => {
     expect(config.backend.name).toBe("github");
-    expect(config.publish_mode).toBe("editorial_workflow");
+    expect(config.publish_mode).toBe("simple");
     expect(config.backend.auth_scope).toBe("public_repo");
-    expect(config.backend.squash_merges).toBe(true);
+    // No pull requests any more: Decap's editorial-workflow options are gone.
+    expect(config.backend.squash_merges).toBeUndefined();
+    expect(config.backend.cms_label_prefix).toBeUndefined();
     expect(config.backend.branch).toBe("main");
     // An https origin: the REPLACE-ME placeholder until the lab deploys its OAuth
     // Worker (R4 §8 C, docs/SETUP-PRODUCTION.md §5), then the Worker's own origin.
@@ -43,6 +51,82 @@ describe("production config.yml", () => {
   it("stores media in public/uploads, served from /uploads", () => {
     expect(config.media_folder).toBe("public/uploads");
     expect(config.public_folder).toBe("/uploads");
+  });
+
+  it("writes the commit messages History parses (Interfaces §3), naming the editor", () => {
+    expect(config.backend.commit_messages).toEqual({
+      create: "Add {{collection}} “{{slug}}” (by @{{author-login}})",
+      update: "Edit {{collection}} “{{slug}}” (by @{{author-login}})",
+      delete: "Delete {{collection}} “{{slug}}” (by @{{author-login}})",
+      uploadMedia: "Upload “{{path}}” (by @{{author-login}})",
+      deleteMedia: "Delete file “{{path}}” (by @{{author-login}})",
+    });
+    // The parse patterns of Interfaces §3 recognise every message as rendered.
+    const m = config.backend.commit_messages as Record<string, string>;
+    const render = (t: string) =>
+      t
+        .replace("{{collection}}", "News item")
+        .replace("{{slug}}", "2026-10-26-x")
+        .replace("{{path}}", "public/uploads/x.jpg")
+        .replace("{{author-login}}", "ada-editor");
+    const upload = /^(Upload|Delete file) “([^”]+)” \(by @([A-Za-z0-9-]+)\)$/;
+    const entry = /^(Add|Edit|Delete) (.+) “([^”]+)” \(by @([A-Za-z0-9-]+)\)$/;
+    for (const k of ["uploadMedia", "deleteMedia"]) expect(render(m[k]!)).toMatch(upload);
+    for (const k of ["create", "update", "delete"]) {
+      expect(render(m[k]!)).not.toMatch(upload);
+      expect(render(m[k]!)).toMatch(entry);
+    }
+  });
+
+  it("is simple mode in the local demo too (one Save path everywhere)", () => {
+    const models = contentModels(schema) as unknown as Record<string, object>;
+    expect(buildDecapConfig(models, source, { mode: "local" }).publish_mode).toBe("simple");
+    expect(buildDecapConfig(models, source, { mode: "production" }).publish_mode).toBe("simple");
+  });
+
+  it("previews every collection, Settings included (the live column, spec §2.9)", () => {
+    for (const c of config.collections as Cfg[]) expect(c.editor?.preview).not.toBe(false);
+    expect(config.editor).toEqual({ preview: true });
+  });
+
+  it("upload limits in the editor equal the deploy's (asset-budget LIMITS)", () => {
+    const sizes: Record<string, number[]> = { image: [], file: [] };
+    const walk = (fields: Cfg[]) => {
+      for (const f of fields ?? []) {
+        if (f.widget === "image" || f.widget === "file")
+          sizes[f.widget]!.push(f.media_library.config.max_file_size);
+        walk(f.fields);
+        if (f.field) walk([f.field]);
+      }
+    };
+    for (const c of config.collections as Cfg[]) {
+      walk(c.fields);
+      for (const f of (c.files ?? []) as Cfg[]) walk(f.fields);
+    }
+    expect(sizes.image!.length).toBeGreaterThan(3);
+    expect(sizes.file!.length).toBeGreaterThan(2);
+    expect(new Set(sizes.image)).toEqual(new Set([LIMITS.rasterBytes]));
+    expect(new Set(sizes.file)).toEqual(new Set([LIMITS.uploadBytes]));
+  });
+
+  it("hints: Draft, Listed and Photo say every save is public on github.com; no workflow board", () => {
+    const text = JSON.stringify(config);
+    expect(text).not.toMatch(/Draft → In review → Ready|board/);
+    const people = collection("people").fields as Cfg[];
+    for (const f of [
+      field(collection("news").fields, "draft"),
+      field(people, "draft"),
+      field(people, "listed"),
+      field(people, "photo"),
+    ])
+      expect(f.hint).toContain("anyone can read every save on github.com");
+    expect(field(collection("news").fields, "draft").hint).toMatch(
+      /^Hides this from the website\./,
+    );
+    expect(field(collection("publications").fields, "featured").hint).toBe(
+      "Not used on the site yet.",
+    );
+    expect(field(siteFields(), "direction_order").hint).toContain("Up/Down arrows");
   });
 
   it("uses richtext for every Markdown body and never offers deletion (archive instead)", () => {
@@ -184,22 +268,139 @@ describe("/admin/ page", () => {
     }
   });
 
-  it("registers hooks and previews before Decap starts (manual init), and loads the production config", () => {
+  it("loads every script in the order of Interfaces §1, Decap started last (manual init)", () => {
     const order = [...html.matchAll(/<script src="([^"]+)"/g)].map((m) => m[1]);
     expect(order).toEqual([
       "cms-data.js",
       "decap-cms.js",
       "cms-widgets.js",
       "cms-hooks.js",
+      "cms-locale.js",
       "cms-a11y.js",
-      "preview-templates.js",
+      "cms-ui.js",
+      "cms-github.js",
+      "cms-history.js",
+      "cms-deploy.js",
+      "cms-dock.js",
+      "cms-live.js",
+      "cms-guards.js",
+      "cms-save.js",
+      "cms-layout.js",
       "cms-start.js",
     ]);
+    // widgets.test.ts: cms-widgets.js directly after decap-cms.js.
+    expect(order.indexOf("cms-widgets.js")).toBe(order.indexOf("decap-cms.js") + 1);
     expect(fs.readFileSync(admin("cms-data.js"), "utf8")).toContain(
       "window.CMS_MANUAL_INIT = true;",
     );
     expect(html).toMatch(/<link rel="cms-config-url" type="text\/yaml" href="config.yml"/);
+    const sheets = [...html.matchAll(/<link rel="stylesheet" href="([^"]+)"/g)].map((m) => m[1]);
+    expect(sheets).toEqual(["admin.css", "cms-ui.css"]);
+    // Every script and stylesheet the page loads is in public/admin/, except the
+    // live column (cms-live.js), which WP4 adds in parallel.
+    for (const f of [...order, ...sheets])
+      if (f !== "cms-live.js") expect(fs.existsSync(admin(f!)), f).toBe(true);
   });
+});
+
+describe("cms-data.js (Interfaces §2)", () => {
+  const cms = runAdminScripts(["cms-data.js"]).window.BOBALAB_CMS as Cfg;
+
+  it("has the repository, branch and deploy workflow", () => {
+    expect(cms.repo).toBe(config.backend.repo);
+    expect(cms.branch).toBe(config.backend.branch);
+    expect(cms.deployWorkflow).toBe("deploy.yml");
+    expect(fs.existsSync(path.join(ROOT, ".github", "workflows", cms.deployWorkflow))).toBe(true);
+    expect(Object.keys(cms)).toEqual([
+      "labels",
+      "rules",
+      "repo",
+      "branch",
+      "deployWorkflow",
+      "media",
+      "hiddenNames",
+      "features",
+      "collections",
+    ]);
+  });
+
+  it("media: the upload folder and the deploy's own upload rules (asset-budget.mjs)", () => {
+    expect(cms.media).toEqual({
+      folder: "public/uploads",
+      publicFolder: "/uploads",
+      uploadExtensions: [...UPLOAD_EXTENSIONS],
+      rasterExtensions: [...UPLOAD_EXTENSIONS].filter((x) => x !== ".pdf"),
+      limits: { uploadBytes: LIMITS.uploadBytes, rasterBytes: LIMITS.rasterBytes },
+    });
+    expect(cms.media.uploadExtensions).toEqual([".jpg", ".jpeg", ".png", ".webp", ".gif", ".pdf"]);
+    expect(cms.media.limits).toEqual({ uploadBytes: 10485760, rasterBytes: 2097152 });
+    expect(cms.media.folder).toBe(config.media_folder);
+    expect(cms.media.publicFolder).toBe(config.public_folder);
+  });
+
+  it("hiddenNames equals the repo's hash file (no names, only salted hashes)", () => {
+    const file = JSON.parse(
+      fs.readFileSync(path.join(ROOT, "tests", "content", "wp7-hidden-name-hashes.json"), "utf8"),
+    );
+    expect(cms.hiddenNames).toEqual({ salt: file.salt, hashes: file.hashes });
+    for (const h of cms.hiddenNames.hashes) expect(h).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it("features: the site check blocks a Save that would break the deploy", () => {
+    expect(cms.features).toEqual({ previewCheckBlocksSave: true });
+    expect(source.features.previewCheckBlocksSave).toBe(true);
+  });
+
+  it("collections: names, labels, folders and files of every collection in config.yml", () => {
+    const expected = (config.collections as Cfg[]).map((c) =>
+      c.folder
+        ? {
+            name: c.name,
+            label: c.label,
+            labelSingular: c.label_singular,
+            folder: c.folder,
+            extension: "md",
+          }
+        : {
+            name: c.name,
+            label: c.label,
+            files: (c.files as Cfg[]).map((f) => ({ name: f.name, label: f.label, file: f.file })),
+          },
+    );
+    expect(cms.collections).toEqual(expected);
+    expect(cms.collections.find((c: Cfg) => c.name === "news").labelSingular).toBe("News item");
+  });
+
+  it("the old preview stylesheet and font copies are no longer generated or shipped", async () => {
+    const files = Object.keys(await generate());
+    expect(files.sort()).toEqual(
+      ["config.yml", "index.html", "cms-data.js", "logo.svg"]
+        .map((f) => `public/admin/${f}`)
+        .sort(),
+    );
+    for (const f of ["public/admin/preview.css", "public/admin/fonts", "cms/preview.css"])
+      expect(fs.existsSync(path.join(ROOT, f)), f).toBe(false);
+  }, 60_000);
+});
+
+describe("the local demo (scripts/cms/local.mjs)", () => {
+  it("names the proxy's own port (CMS_PROXY_PORT) in the config and lets it through the CSP", async () => {
+    expect(localDemoOptions()).toEqual({
+      local: true,
+      localSiteUrl: "http://localhost:3100",
+      proxyUrl: "http://localhost:8081/api/v1",
+    });
+    const files = (await generate(localDemoOptions({ proxyPort: 8097 }))) as Record<string, string>;
+    const loc: Cfg = parse(files["public/admin/config.local.yml"]!);
+    expect(loc.local_backend).toEqual({ url: "http://localhost:8097/api/v1" });
+    const csp = /http-equiv="Content-Security-Policy"\s+content="([^"]+)"/.exec(
+      files["public/admin/local.html"]!,
+    )?.[1];
+    expect(csp).toMatch(/connect-src [^;]*http:\/\/localhost:8097/);
+    // local.mjs passes the port it starts decap-server on.
+    const script = fs.readFileSync(path.join(ROOT, "scripts", "cms", "local.mjs"), "utf8");
+    expect(script).toMatch(/generate\(localDemoOptions\(\{ proxyPort: PROXY_PORT/);
+  }, 60_000);
 });
 
 describe("vendored Decap bundle", () => {

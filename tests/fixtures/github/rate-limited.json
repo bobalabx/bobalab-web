@@ -1,0 +1,13 @@
+{
+  "request": "any GET once the hourly limit is used up (synthetic, shape from docs.github.com)",
+  "status": 403,
+  "headers": {
+    "x-ratelimit-limit": "5000",
+    "x-ratelimit-remaining": "0",
+    "x-ratelimit-reset": "1793001569"
+  },
+  "body": {
+    "message": "API rate limit exceeded for user ID 1.",
+    "documentation_url": "https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting"
+  }
+}

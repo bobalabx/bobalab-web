@@ -275,8 +275,9 @@ export function buildDecapConfig(models, source, opts = {}) {
       description: c.description,
       folder: c.folder,
       create: true,
-      // Archive instead of deleting; deleting a published file would also have
-      // to bypass the protected main branch (docs/EDITING.md).
+      // Archive instead of deleting: page addresses are permanent (D-05), and a
+      // Save goes live at once, so a deleted entry could not be brought back
+      // from History (docs/EDITING.md).
       delete: false,
       extension: "md",
       format: "frontmatter",
@@ -323,7 +324,11 @@ export function buildDecapConfig(models, source, opts = {}) {
   const config = {
     backend: { ...source.backend },
     ...(local ? { local_backend: opts.proxyUrl ? { url: opts.proxyUrl } : true } : {}),
-    publish_mode: local ? "simple" : "editorial_workflow",
+    // "Save goes live" (editor v2, D-17): simple mode in production too. Every Save
+    // is one commit on main, which the deploy workflow puts on the site; there is
+    // no drafts board and no pull request. public/admin/cms-save.js makes Save one
+    // click and runs the checks before the commit.
+    publish_mode: "simple",
     site_url: siteUrl,
     display_url: siteUrl,
     // Relative to /admin/, so it also works under a base path (github.io/<repo>/admin/).

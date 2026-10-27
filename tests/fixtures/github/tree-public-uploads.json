@@ -1,0 +1,220 @@
+{
+  "request": "GET /repos/bobalabx/bobalab-web/git/trees/main:public/uploads?recursive=1",
+  "status": 200,
+  "headers": {},
+  "body": {
+    "sha": "0000000000000000000000000000000000000000",
+    "tree": [
+      {
+        "path": "people",
+        "mode": "040000",
+        "type": "tree",
+        "sha": "0000000000000000000000000000000000000000"
+      },
+      {
+        "path": "people/alex-chen.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "576e4440345baf0e0b0e2af0922f6273819fc5e0",
+        "size": 20070
+      },
+      {
+        "path": "people/andrew-li.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "070d423917d96ee68c316abb80daff7ba5c80559",
+        "size": 41530
+      },
+      {
+        "path": "people/brian-hwang.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "8a21540094161765b0fbc4e7548eaba93ddc1f28",
+        "size": 15260
+      },
+      {
+        "path": "people/chloe-xiao.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "a2ce3825cfc04f86ab4c127d203df500846456a0",
+        "size": 32600
+      },
+      {
+        "path": "people/clinton-nguyen.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "1bd626579f2662013f98ade1c2c6f1be4dac7ed4",
+        "size": 35423
+      },
+      {
+        "path": "people/daniil-kardava.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "51223ce48314b3d97ef271e49077f338ff718a45",
+        "size": 16509
+      },
+      {
+        "path": "people/felicia-ye.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "47cf6521b0c287524ce31a8c4bddbeaa159e707f",
+        "size": 35834
+      },
+      {
+        "path": "people/haonan-william-deng.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "1f930931627a8b2d217cd46cbd4aa06df98e6de1",
+        "size": 38072
+      },
+      {
+        "path": "people/isabelle-cho.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "a3622b0f02542ac4a4ef3f7abd923c6a453ea2ce",
+        "size": 33322
+      },
+      {
+        "path": "people/jazz-beecham.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "efa8b7b52a8e69edc6b3f49b17055e0e7b230c5c",
+        "size": 37032
+      },
+      {
+        "path": "people/jiaming-guan.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "89123855c3961bb32e749eabee6e5f15b5586465",
+        "size": 38896
+      },
+      {
+        "path": "people/jian-kweon.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c69cbd045506155a097ecde2eb83c49b45f81ee9",
+        "size": 27149
+      },
+      {
+        "path": "people/jj-srimakut.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "5bcb072baa9957ace1fe417da1698533c0698898",
+        "size": 20671
+      },
+      {
+        "path": "people/mete-ehliz.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "ed890c68786f3f648f55cece17f76469a3e830c6",
+        "size": 43517
+      },
+      {
+        "path": "people/milosz-platek.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "f6f5ad1244e88f1c75b8b7ff32ef3321c0791ae0",
+        "size": 38711
+      },
+      {
+        "path": "people/nathaniel-kung.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "11c6d53b400098c4e32ddb1fbb561683446308c6",
+        "size": 28248
+      },
+      {
+        "path": "people/nicholas-chen.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c595bf61699a9b3cd25f056882b28ee0e65bbee7",
+        "size": 17377
+      },
+      {
+        "path": "people/nike-naiyarat.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "84c1c089d2f46e2f4066f57e282352a1f9c5d471",
+        "size": 27872
+      },
+      {
+        "path": "people/park-sinchaisri.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "32a1d7f458c5870a6a6a95fa1af4e27a068c6b10",
+        "size": 28559
+      },
+      {
+        "path": "people/ryan-chan.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "a4f5f2c4397ad37d76d5e348f2fd133d1e02db65",
+        "size": 21140
+      },
+      {
+        "path": "people/ryan-jesubalan.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "051fa2aac6fe0a280829c4a8d23ea1d51f1f0215",
+        "size": 31594
+      },
+      {
+        "path": "people/ryan-lam.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "2340abf95c686e0af00a55c44d93cbf5eae7dace",
+        "size": 39800
+      },
+      {
+        "path": "people/siddhartha-chatterjee.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "09db02a89b945cbd3e3f224de474959d69006297",
+        "size": 18617
+      },
+      {
+        "path": "people/suyang-ma.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e805ee0a1476a263fcb9e294f3cbb3e49f3eb275",
+        "size": 28228
+      },
+      {
+        "path": "people/tanish-kher.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "a61c31825677ae51e9c318c35e53b1c99c18a6a7",
+        "size": 20479
+      },
+      {
+        "path": "people/thomas-morelli.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "23c87afda0b17bbacbc919fcf2afb96b01573d29",
+        "size": 32618
+      },
+      {
+        "path": "people/tom-jiramate.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "71e612644dab53ec07557ffcf3c40276e8402d3a",
+        "size": 40172
+      },
+      {
+        "path": "people/zhiwei-wang.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "4b0beadfd2cb28f02f704f44fdb7abef55a22174",
+        "size": 31035
+      },
+      {
+        "path": "people/zixian-li.jpg",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "bd19af320a27caaa0ca90c9f63a4759feca27f7b",
+        "size": 20156
+      }
+    ],
+    "truncated": false
+  }
+}

@@ -1,59 +1,105 @@
 /**
- * WP6: the local no-account CMS demo, end to end (brief §I WP6 #4, #5; §F4).
+ * WP6: the local no-account CMS demo, end to end (brief §I WP6 #4, #5; §F4),
+ * updated for editor v2 ("Save goes live", the live column; spec §9 "WP6").
  *
  * Needs a `next dev` server serving public/ (BASE_URL, default the shared dev
  * server on :3100). The spec itself:
- *  1. writes the git-ignored local files (public/admin/config.local.yml, local.html)
- *     and starts decap-server on :8081 (MODE=fs, writing into this checkout);
+ *  1. copies content/ and public/uploads/ into a SCRATCH folder in test-results/
+ *     and starts decap-server on :8081 (MODE=fs) writing into that copy, so no
+ *     save ever reaches this checkout; the local admin page and its config are
+ *     generated in memory and served through Playwright routes, so nothing is
+ *     written into public/admin/ either (the content guard checks both at the end);
  *  2. measures the admin CSP: without 'unsafe-eval' Decap cannot start;
- *  3. creates a news item "CMS smoke test (delete me)" in the CMS UI, checks the
- *     Markdown file in content/news/, that it passes the content schema, that
- *     /news/ and its detail page show it, and that a production build would
- *     include it (the news route's generateStaticParams input in production
- *     mode; `next build` itself is run by CI); then deletes the file;
+ *  3. creates a news item "CMS smoke test (delete me)" with one click on Save,
+ *     checks the Markdown file, that it passes the content schema, that the live
+ *     column's real News list shows it, that the page did not reload, and that a
+ *     production build would include it (the news route's generateStaticParams
+ *     input in production mode; `next build` itself is run by CI);
  *  4. checks the rich-text body fix (cms-widgets.js): opening an entry does not
- *     mark it changed, a real edit does, undoing it does not;
+ *     mark it changed, a real edit does (and reaches the real page in the live
+ *     column), undoing it does not;
  *  5. checks the file-name guard (cms-hooks.js): a publication whose first
  *     author's name is too long for the 60-character address is not saved, the
  *     PI's name with a long title is, within 60 characters;
- *  6. checks the editor at phone widths (no sideways scrolling, account menu reachable);
- *  7. takes screenshots (1366×768, 390×844; light and dark) and runs axe;
- *  8. checks the verification fixes (Direction order remove/reorder/names, the
+ *  6. checks the editor at phone widths (no sideways scrolling, account menu and
+ *     Save reachable, the Edit / Preview & history switch);
+ *  7. takes screenshots (1366×768, 390×844; light and dark) and runs axe, the
+ *     media library opened from an image field (the header Media button is hidden);
+ *  8. measures the base load, edit-to-render and the site check for TESTING-REPORT;
+ *  9. checks the verification fixes (Direction order remove/reorder/names, the
  *     stale-editor reload, "required when …" and colour checks, focus rings,
- *     conditional labels, no framing) against a SCRATCH COPY of content/ served
- *     by a second decap-server on :8088, so these saves never touch this checkout;
- * and ALWAYS cleans up (smoke files, local files, probe page, decap-server), also on failure.
+ *     conditional labels, no framing) against a second SCRATCH COPY served by a
+ *     second decap-server on :8088;
+ * and ALWAYS cleans up (scratch folders, decap-servers), also on failure.
  *
- *   npx playwright test tests/e2e/cms-local.spec.ts
- * Screenshots and axe results: test-results/WP6/.
+ *   BASE_URL=http://localhost:3100 npx playwright test tests/e2e/cms-local.spec.ts --project=chromium
+ * Screenshots, axe results and measurements: test-results/WP6/.
  */
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import fs from "node:fs";
 import net from "node:net";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import {
+  expect,
+  test,
+  type BrowserContext,
+  type Dialog,
+  type FrameLocator,
+  type Page,
+} from "@playwright/test";
 import { parseContentFiles } from "../../src/lib/content/read";
 import { getContent } from "../../src/lib/content/load";
 import { staticParams, staticSlugs } from "../../src/lib/content/queries";
 import { SLUG_PATTERNS } from "../../src/lib/content/schema";
+import {
+  guardFiles,
+  guardFolder,
+  REPO_ROOT,
+  type ContentGuard,
+  type FolderGuard,
+} from "./helpers/content-guard";
 
 test.describe.configure({ mode: "serial" });
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const NEWS_DIR = path.join(ROOT, "content", "news");
-const PUBS_DIR = path.join(ROOT, "content", "publications");
+const ROOT = REPO_ROOT;
+const BASE = process.env.BASE_URL || "http://localhost:3100";
 const ADMIN_DIR = path.join(ROOT, "public", "admin");
 const OUT = path.join(ROOT, "test-results", "WP6");
 const PROXY_PORT = 8081;
+// The main scratch copy: every save of the tests outside the describe below lands here.
+const MAIN = path.join(ROOT, "test-results", "cms-local-scratch-main");
+const NEWS_DIR = path.join(MAIN, "content", "news");
+const PUBS_DIR = path.join(MAIN, "content", "publications");
 const TITLE = "CMS smoke test (delete me)";
 const SLUG_PART = "cms-smoke-test";
+// Served from memory by page routes; never written to public/admin/.
+const LOCAL = "local.html";
+const LOCAL_CONFIG = "config.local.yml";
 const PROBE = "_csp-probe.html";
 const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"];
+const SAVE = { name: "Save", exact: true } as const;
+// Decap's own same-name question; it would delete the saved file at once (spec §3.10).
+const REPLACE = /already exists\. Do you want to replace it\?$/;
 
 let proxy: ChildProcess | null = null;
 let proxyLog = "";
+let localHtml = "";
+let localYml = "";
+let realGuards: FolderGuard[] = [];
+let realContent: ContentGuard | null = null;
+// The local page names this spec serves from memory: none of them may appear in public/admin/.
+const SERVED = [LOCAL, LOCAL_CONFIG, PROBE, "local-scratch.html", "config.local-scratch.yml"];
+const servedOnDisk = () => SERVED.filter((f) => fs.existsSync(path.join(ADMIN_DIR, f)));
+let adminBefore: string[] = [];
+
+const listFiles = (dir: string, rel = ""): string[] =>
+  fs.existsSync(path.join(dir, rel))
+    ? fs.readdirSync(path.join(dir, rel), { withFileTypes: true }).flatMap((d) => {
+        const r = rel ? `${rel}/${d.name}` : d.name;
+        return d.isDirectory() ? listFiles(dir, r) : [r];
+      })
+    : [];
 
 const smokeFiles = (dir = NEWS_DIR) =>
   fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.includes(SLUG_PART)) : [];
@@ -61,6 +107,15 @@ const smokeFiles = (dir = NEWS_DIR) =>
 function removeSmokeFiles() {
   for (const dir of [NEWS_DIR, PUBS_DIR])
     for (const f of smokeFiles(dir)) fs.rmSync(path.join(dir, f), { force: true });
+}
+
+function copyContent(to: string) {
+  fs.rmSync(to, { recursive: true, force: true });
+  fs.mkdirSync(path.join(to, "public"), { recursive: true });
+  fs.cpSync(path.join(ROOT, "content"), path.join(to, "content"), { recursive: true });
+  fs.cpSync(path.join(ROOT, "public", "uploads"), path.join(to, "public", "uploads"), {
+    recursive: true,
+  });
 }
 
 function killTree(child: ChildProcess | null) {
@@ -89,90 +144,197 @@ async function waitForPort(port: number, ms: number) {
   throw new Error(`decap-server did not open port ${port}:\n${proxyLog}`);
 }
 
-function node(args: string[]) {
-  const r = spawnSync(process.execPath, args, { cwd: ROOT, encoding: "utf8" });
-  if (r.status !== 0) throw new Error(`node ${args.join(" ")} failed:\n${r.stderr}`);
+function startProxy(port: number, dir: string) {
+  const child = spawn(
+    process.execPath,
+    [path.join(ROOT, "node_modules", "decap-server", "dist", "index.js")],
+    {
+      cwd: ROOT,
+      env: { ...process.env, PORT: String(port), MODE: "fs", GIT_REPO_DIRECTORY: dir },
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+  child.stdout?.on("data", (d) => (proxyLog += d));
+  child.stderr?.on("data", (d) => (proxyLog += d));
+  return child;
 }
 
-async function login(page: Page) {
-  await page.goto("/admin/local.html");
+/** The local admin page and config for a decap-server on `port`, generated in memory. */
+async function localFiles(port: number, config: string) {
+  const { generate } = await import("../../scripts/cms/build-config.mjs");
+  const files = (await generate({
+    local: true,
+    localSiteUrl: BASE,
+    proxyUrl: `http://localhost:${port}/api/v1`,
+  })) as Record<string, string>;
+  return {
+    html: files["public/admin/local.html"]!.replace('href="config.local.yml"', `href="${config}"`),
+    yml: files["public/admin/config.local.yml"]!,
+  };
+}
+
+async function serve(context: BrowserContext, file: string, body: string, type: string) {
+  await context.route(`**/admin/${file}*`, (r) =>
+    r.fulfill({ status: 200, contentType: `${type}; charset=utf-8`, body }),
+  );
+}
+
+/** Accept Decap's questions (leave page, local backup), but never "replace the saved file?". */
+function answerDialogs(d: Dialog) {
+  const answer = REPLACE.test(d.message()) ? d.dismiss() : d.accept();
+  answer.catch(() => {});
+}
+
+async function login(page: Page, file = LOCAL) {
+  page.on("dialog", answerDialogs);
+  await page.goto(`/admin/${file}`);
   await page.getByRole("button", { name: "Login" }).click();
   await expect(page.getByRole("heading", { name: "Collections" })).toBeVisible({ timeout: 30_000 });
 }
 
+/** Editor v2: one click on Save (no "Publish now" menu). */
 async function publish(page: Page) {
-  await page.getByRole("button", { name: "Publish" }).first().click();
-  await page.getByText("Publish now", { exact: true }).click();
+  await page.getByRole("button", SAVE).click();
+}
+
+const live = (page: Page): FrameLocator => page.frameLocator("#preview-pane");
+const site = (page: Page): FrameLocator => live(page).frameLocator("iframe.bl-live__site");
+
+/** The live column has the saved site (BobalabLive.whenReady). */
+async function ready(page: Page, ms = 60_000) {
+  // A direct address change from one entry to another reloads the page
+  // (cms-start.js): wait for our scripts, and retry once if a reload replaces
+  // the document meanwhile.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await page.waitForFunction(() => "BobalabLive" in window, null, { timeout: 30_000 });
+      const ok = await page.evaluate(
+        (t) =>
+          (
+            window as unknown as { BobalabLive: { whenReady(ms: number): Promise<boolean> } }
+          ).BobalabLive.whenReady(t),
+        ms,
+      );
+      expect(ok).toBe(true);
+      return;
+    } catch (e) {
+      if (attempt > 0 || !/context was destroyed|navigation/i.test(String(e))) throw e;
+      await page.waitForLoadState("load");
+    }
+  }
 }
 
 /** Open one entry in a fresh tab (the session lives in the context's storage). */
-async function openEntry(page: Page, collection: string, slug: string) {
+async function openEntry(page: Page, collection: string, slug: string, file = LOCAL) {
   const tab = await page.context().newPage();
   const size = page.viewportSize();
   if (size) await tab.setViewportSize(size);
-  tab.on("dialog", (d) => d.accept().catch(() => {}));
-  await tab.goto(`/admin/local.html#/collections/${collection}/entries/${slug}`);
+  tab.on("dialog", answerDialogs);
+  await tab.goto(`/admin/${file}#/collections/${collection}/entries/${slug}`);
   await expect(tab.getByText(/Writing in .* collection/)).toBeVisible({ timeout: 30_000 });
   return tab;
 }
 
+/** Open the media library from an object's image field ("Image" › "Choose an image"). */
+async function openLibrary(page: Page, object: string, button: RegExp) {
+  const top = page
+    .locator('[class*="TopBarContainer"]')
+    .filter({ hasText: new RegExp(`^${object}`) });
+  const chooser = page.locator("button", { hasText: button }).first();
+  if (!(await chooser.isVisible()))
+    await top.locator('button[class*="ExpandButton"]').first().click();
+  await chooser.scrollIntoViewIfNeeded();
+  await chooser.click();
+  // From an image field the library is titled "Images" (the header's was "Media assets").
+  await expect(page.getByRole("dialog").getByRole("heading", { name: "Images" })).toBeVisible({
+    timeout: 30_000,
+  });
+}
+
 async function axe(page: Page, name: string) {
-  const r = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
+  // The site's own pages inside the live column are checked by the site's specs
+  // (a11y-sitewide, editor-preview); here: Decap's UI, our scripts and the live bar.
+  const r = await new AxeBuilder({ page })
+    .withTags(AXE_TAGS)
+    .exclude(["#preview-pane", "iframe.bl-live__site"])
+    .analyze();
   const rows = r.violations.map((v) => ({
     id: v.id,
     impact: v.impact,
     nodes: v.nodes.length,
-    // Violations inside the preview iframe come from our templates; the rest from Decap's UI.
-    where: v.nodes.some((n) => n.target.length > 1) ? "preview-iframe" : "decap-ui",
+    // Violations inside Decap's preview frame come from the live bar (cms-live.js).
+    where: v.nodes.some((n) => n.target.length > 1) ? "live-column" : "decap-ui",
     first: v.nodes[0]?.target.join(" ⟶ "),
   }));
   fs.writeFileSync(path.join(OUT, `axe-${name}.json`), JSON.stringify(rows, null, 2));
   return rows;
 }
 
+function measured(name: string, data: unknown) {
+  fs.writeFileSync(path.join(OUT, `measure-${name}.json`), JSON.stringify(data, null, 2));
+  test
+    .info()
+    .annotations.push({ type: "measured", description: `${name}: ${JSON.stringify(data)}` });
+}
+
 test.beforeAll(async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  removeSmokeFiles(); // leftovers from an interrupted earlier run
-  node(["scripts/cms/build-config.mjs", "--local"]);
+  // Nothing may ever be saved into this checkout or written into public/admin/.
+  realGuards = [
+    guardFolder("content/news", new RegExp(SLUG_PART)),
+    guardFolder("content/publications", new RegExp(SLUG_PART)),
+  ];
+  realContent = guardFiles(listFiles(path.join(ROOT, "content")).map((f) => `content/${f}`));
+  adminBefore = servedOnDisk(); // another tool's local demo may have its own copies
+  copyContent(MAIN);
+  ({ html: localHtml, yml: localYml } = await localFiles(PROXY_PORT, LOCAL_CONFIG));
   if (await portOpen(PROXY_PORT))
     throw new Error(`port ${PROXY_PORT} is busy (another decap-server?)`);
-  proxy = spawn(
-    process.execPath,
-    [path.join(ROOT, "node_modules", "decap-server", "dist", "index.js")],
-    {
-      cwd: ROOT,
-      env: { ...process.env, PORT: String(PROXY_PORT), MODE: "fs", GIT_REPO_DIRECTORY: ROOT },
-      stdio: ["ignore", "pipe", "pipe"],
-    },
-  );
-  proxy.stdout?.on("data", (d) => (proxyLog += d));
-  proxy.stderr?.on("data", (d) => (proxyLog += d));
+  proxy = startProxy(PROXY_PORT, MAIN);
   await waitForPort(PROXY_PORT, 30_000);
 });
 
 test.afterAll(() => {
-  removeSmokeFiles();
-  fs.rmSync(path.join(ADMIN_DIR, PROBE), { force: true });
   killTree(proxy);
   proxy = null;
-  try {
-    node(["scripts/cms/build-config.mjs", "--clean-local"]);
-  } catch {
-    /* best effort */
-  }
+  fs.rmSync(MAIN, { recursive: true, force: true });
+  const left = realGuards.flatMap((g) => g.removeAdded());
+  if (left.length) throw new Error(`smoke files were saved into this checkout: ${left.join(", ")}`);
+  realContent?.assertUnchanged();
+  expect(servedOnDisk()).toEqual(adminBefore);
 });
 
-test.beforeEach(async ({ request }) => {
-  const res = await request.get("/admin/local.html");
+test.beforeEach(async ({ context, request, browserName }) => {
+  const res = await request.get("/admin/cms-live.js");
   test.skip(res.status() === 404, "needs a dev server that serves public/ (not a static export)");
+  // MEASURED (WP5): the page comes from a route, so Chromium treats the proxy on
+  // another localhost port as a local-network request unless allowed.
+  if (browserName === "chromium")
+    await context.grantPermissions(["local-network-access"]).catch(() => {});
+  await serve(context, LOCAL, localHtml, "text/html");
+  await serve(context, LOCAL_CONFIG, localYml, "text/yaml");
+  // History and Recent changes read GitHub; no test here needs it, and nothing
+  // may leave the machine. The CSP test checks that the flows make no such call.
+  await context.route("https://api.github.com/**", (r) =>
+    r.fulfill({ status: 404, contentType: "application/json", body: '{"message":"Not Found"}' }),
+  );
+  // The first-use tip (cms-save.js) would sit over the bottom of the form.
+  await context.addInitScript(() => {
+    try {
+      localStorage.setItem("bobalab.saveTip.v1", "1");
+    } catch {
+      // ignore
+    }
+  });
 });
 
 test("CSP: Decap 3.17.1 needs 'unsafe-eval'; the generated policy lets it start", async ({
   page,
+  context,
 }) => {
-  const local = fs.readFileSync(path.join(ADMIN_DIR, "local.html"), "utf8");
-  expect(local).toContain("'unsafe-eval'");
-  fs.writeFileSync(path.join(ADMIN_DIR, PROBE), local.replace(" 'unsafe-eval'", ""));
+  test.setTimeout(180_000);
+  expect(localHtml).toContain("'unsafe-eval'");
+  await serve(context, PROBE, localHtml.replace(" 'unsafe-eval'", ""), "text/html");
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(String(e?.message ?? e)));
   await page.goto(`/admin/${PROBE}`);
@@ -180,24 +342,20 @@ test("CSP: Decap 3.17.1 needs 'unsafe-eval'; the generated policy lets it start"
     timeout: 30_000,
   });
   expect(errors.join("\n")).toMatch(/unsafe-eval/);
-  fs.rmSync(path.join(ADMIN_DIR, PROBE), { force: true });
 
-  const page2 = await page.context().newPage();
-  page2.on("dialog", (d) => d.accept().catch(() => {}));
+  const page2 = await context.newPage();
   const cspErrors: string[] = [];
   page2.on("console", (m) => {
     if (m.type() === "error" && /Content Security Policy/i.test(m.text())) cspErrors.push(m.text());
   });
   const offOrigin: string[] = [];
+  const host = new URL(BASE).host;
   page2.on("request", (r) => {
     const u = new URL(r.url());
-    if (
-      !["localhost:3100", `localhost:${PROXY_PORT}`].includes(u.host) &&
-      !/^(data|blob):/.test(r.url())
-    )
+    if (![host, `localhost:${PROXY_PORT}`].includes(u.host) && !/^(data|blob):/.test(r.url()))
       offOrigin.push(r.url());
   });
-  // Every violation, also inside the preview iframe (it inherits the page's policy).
+  // Every violation, also inside the preview frames (they inherit the page's policy).
   await page2.addInitScript(() => {
     const w = window as unknown as { __csp?: string[] };
     w.__csp = [];
@@ -206,24 +364,24 @@ test("CSP: Decap 3.17.1 needs 'unsafe-eval'; the generated policy lets it start"
     );
   });
   await login(page2);
-  // The flows an editor uses: a new entry, entries with their previews, the media library.
-  await page2.goto("/admin/local.html#/collections/news/new");
+  // The flows an editor uses: a new entry, entries with the live column, the media library.
+  await page2.goto(`/admin/${LOCAL}#/collections/news/new`);
   await expect(page2.getByLabel("Title", { exact: true })).toBeVisible({ timeout: 30_000 });
   for (const hash of [
     "#/collections/news/entries/2026-05-11-learning-to-gig-revision",
     "#/collections/people/entries/park-sinchaisri",
     "#/collections/directions/entries/algorithmic-advice",
   ]) {
-    await page2.goto(`/admin/local.html${hash}`);
-    await expect(page2.frameLocator("iframe").first().locator(".cms-preview")).toBeVisible({
-      timeout: 30_000,
-    });
+    await page2.goto(`/admin/${LOCAL}${hash}`);
+    await expect(live(page2).locator(".bl-live")).toBeVisible({ timeout: 30_000 });
   }
-  await page2.goto("/admin/local.html#/collections/news");
-  await page2.getByRole("button", { name: "Media", exact: true }).click();
-  await expect(page2.getByText("Media assets", { exact: false }).first()).toBeVisible({
-    timeout: 30_000,
-  });
+  await ready(page2);
+  await expect(site(page2).locator("main")).toBeVisible({ timeout: 30_000 });
+  // The header Media button is hidden (spec §3.10): the library opens from an image field.
+  await page2.goto(`/admin/${LOCAL}#/collections/news/new`);
+  await expect(page2.getByLabel("Title", { exact: true })).toBeVisible({ timeout: 30_000 });
+  await expect(page2.getByRole("button", { name: "Media", exact: true })).toHaveCount(0);
+  await openLibrary(page2, "Image", /^Choose an image$/);
   await page2.screenshot({ path: path.join(OUT, "e2e-media-library.png") });
   await page2.waitForTimeout(1000);
   const violations = await page2.evaluate(
@@ -235,7 +393,7 @@ test("CSP: Decap 3.17.1 needs 'unsafe-eval'; the generated policy lets it start"
   await page2.close();
 });
 
-test("create a news item in the CMS → file in content/news/ → shown on /news/ → in the production build's routes → deleted", async ({
+test("create a news item in the CMS → one click on Save → file → shown in the live column's News list → in the production build's routes", async ({
   page,
 }) => {
   test.setTimeout(240_000);
@@ -254,11 +412,17 @@ test("create a news item in the CMS → file in content/news/ → shown on /news
     // The rich-text body (cms-widgets.js passes real typing on).
     await page.locator(".slate-editor[role=textbox]").first().click();
     await page.keyboard.type("Body written in the rich-text editor.");
+    // The live column shows the new article on the real page, before any save.
+    await ready(page);
+    await expect(site(page).locator("main")).toContainText(TITLE, { timeout: 10_000 });
+    await expect(page.locator("#bl-save-note")).toHaveText("Save puts this on the live site");
     await page.screenshot({ path: path.join(OUT, "e2e-news-editor.png") });
 
-    await page.getByRole("button", { name: "Publish" }).first().click();
-    await page.getByText("Publish now", { exact: true }).click();
+    const loadedAt = await page.evaluate(() => performance.timeOrigin);
+    const t0 = Date.now();
+    await publish(page);
     await expect.poll(() => smokeFiles().length, { timeout: 30_000 }).toBe(1);
+    const writtenMs = Date.now() - t0;
 
     // The file Decap wrote: name yyyy-mm-dd-<slug>.md, valid against the content schema.
     const [file] = smokeFiles();
@@ -274,54 +438,28 @@ test("create a news item in the CMS → file in content/news/ → shown on /news
     expect(file!.startsWith(String(item.date).slice(0, 10))).toBe(true); // E_NEWS_SLUG_DATE
     fs.writeFileSync(path.join(OUT, "e2e-news-file.md"), text);
 
-    // The site shows it (dev server reads content/ on each request).
+    // Saved: the dock says what happened in the local demo, and the page did not reload.
     const slug = file!.replace(/\.md$/, "");
-    await expect
-      .poll(
-        async () => {
-          await page.goto("/news/");
-          return page.getByText(TITLE).count();
-        },
-        { timeout: 90_000, intervals: [1000, 2000, 5000] },
-      )
-      .toBeGreaterThan(0);
-    await page.screenshot({ path: path.join(OUT, "e2e-news-list.png"), fullPage: false });
-    const detail = await page.goto(`/news/${slug}/`);
-    if (detail?.status() === 404) {
-      // MEASURED 2026-10-20 (Next 16.4 dev server): the detail route has
-      // dynamicParams = false, and a long-running `next dev` keeps the
-      // generateStaticParams result it computed earlier, so a page for a file
-      // added since then is "not found" until the route recompiles (a copied
-      // file without the CMS behaves the same). The production check below
-      // covers the static export; docs/EDITING.md §11 tells editors.
-      test.info().annotations.push({
-        type: "dev-server",
-        description: `/news/${slug}/ is 404 on this dev server (stale generateStaticParams)`,
-      });
-    } else {
-      expect(detail?.status()).toBe(200);
-      await expect(page.getByRole("heading", { level: 1, name: TITLE })).toBeVisible();
-    }
+    await expect(page).toHaveURL(new RegExp(`#/collections/news/entries/${slug}$`), {
+      timeout: 15_000,
+    });
+    await expect(page.locator("#bl-dock")).toContainText("Saved to this computer", {
+      timeout: 15_000,
+    });
+    expect(await page.evaluate(() => performance.timeOrigin)).toBe(loadedAt);
+    await expect(page.getByText("All changes saved", { exact: false })).toBeVisible();
+    // The real News list in the live column has it (the site's own view).
+    await live(page).getByRole("tab", { name: "News list" }).click();
+    await expect(site(page).locator("main")).toContainText(TITLE, { timeout: 15_000 });
+    await page.screenshot({ path: path.join(OUT, "e2e-news-saved.png") });
+    measured("new-entry-first-save", { saveToFileMs: writtenMs, reloaded: false });
 
     // A production build includes it: src/app/news/[slug]/page.tsx exports
     // generateStaticParams() = staticParams("slug", staticSlugs.news(getContent())),
     // and `next build` runs it with drafts excluded. (The build itself is CI's job.)
-    const prod = getContent({ preview: false, dir: path.join(ROOT, "content") });
+    const prod = getContent({ preview: false, dir: path.join(MAIN, "content") });
     expect(staticParams("slug", staticSlugs.news(prod))).toContainEqual({ slug });
     expect(prod.preview).toBe(false);
-
-    // Delete the file; the site no longer lists it.
-    fs.rmSync(path.join(NEWS_DIR, file!));
-    expect(smokeFiles()).toEqual([]);
-    await expect
-      .poll(
-        async () => {
-          await page.goto("/news/");
-          return page.getByText(TITLE).count();
-        },
-        { timeout: 60_000, intervals: [1000, 2000, 5000] },
-      )
-      .toBe(0);
   } finally {
     removeSmokeFiles();
   }
@@ -330,7 +468,7 @@ test("create a news item in the CMS → file in content/news/ → shown on /news
 test("rich-text bodies: opening an entry changes nothing; an edit does; undoing it does not", async ({
   page,
 }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
   await login(page);
   for (const [c, s] of [
     ["directions", "algorithmic-advice"],
@@ -339,12 +477,13 @@ test("rich-text bodies: opening an entry changes nothing; an edit does; undoing 
   ] as const) {
     const tab = await openEntry(page, c, s);
     await tab.waitForTimeout(2000); // the editor re-serialises the body after mounting
-    await expect(tab.getByText("Changes saved", { exact: false })).toBeVisible();
+    await expect(tab.getByText("All changes saved", { exact: false })).toBeVisible();
     await expect(tab.getByText("Unsaved changes", { exact: false })).toHaveCount(0);
     await tab.close({ runBeforeUnload: false });
   }
   const tab = await openEntry(page, "directions", "algorithmic-advice");
   await tab.waitForTimeout(1500);
+  await ready(tab);
   const editor = tab.locator(".slate-editor[role=textbox]").first();
   await editor.locator("p").last().click();
   await tab.keyboard.press("End");
@@ -359,26 +498,25 @@ test("rich-text bodies: opening an entry changes nothing; an edit does; undoing 
   await tab.keyboard.type("q");
   // The body's last four characters, from the file (the copy changes over time).
   const bodyEnd = fs
-    .readFileSync(path.join(ROOT, "content", "directions", "algorithmic-advice.md"), "utf8")
+    .readFileSync(path.join(MAIN, "content", "directions", "algorithmic-advice.md"), "utf8")
     .trimEnd()
     .slice(-4);
-  await expect(tab.frameLocator("iframe").first().locator(".cms-preview")).toContainText(
-    `${bodyEnd}Zq`,
-  );
+  // The edit reaches the real direction page in the live column.
+  await expect(site(tab).locator("main")).toContainText(`${bodyEnd}Zq`);
   for (let i = 0; i < 2; i++) await tab.keyboard.press("Backspace");
-  await expect(tab.getByText("Changes saved", { exact: false })).toBeVisible();
+  await expect(tab.getByText("All changes saved", { exact: false })).toBeVisible();
   await tab.close({ runBeforeUnload: false });
 });
 
 test("new publication: the address is checked before the first save (D-05, E_SLUG)", async ({
   page,
 }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(240_000);
   // Each attempt in a fresh tab: Decap keeps an unsaved new entry while the tab lives.
   const fill = async (author: string, title: string) => {
     const tab = await page.context().newPage();
-    tab.on("dialog", (d) => d.accept().catch(() => {}));
-    await tab.goto("/admin/local.html#/collections/publications/new");
+    tab.on("dialog", answerDialogs);
+    await tab.goto(`/admin/${LOCAL}#/collections/publications/new`);
     await expect(tab.getByLabel("Title", { exact: true })).toBeVisible({ timeout: 30_000 });
     await tab.getByLabel("Title", { exact: true }).fill(title);
     await tab.getByRole("button", { name: /Add authors/i }).click();
@@ -401,10 +539,12 @@ test("new publication: the address is checked before the first save (D-05, E_SLU
       "Maximiliana Alexandra von Hohenberg-Ostrowski",
       "CMS smoke test publication",
     );
-    await expect(t1.getByText(/Not saved: this publication’s address would be/)).toBeVisible({
+    // The refusal stays in the "Not saved" band at the top of the form (spec §3.8).
+    const band1 = t1.locator("#bl-refusal");
+    await expect(band1).toContainText(/Not saved: this publication’s address would be/, {
       timeout: 30_000,
     });
-    await expect(t1.getByText(/type only the first author’s last name/)).toBeVisible();
+    await expect(band1).toContainText(/type only the first author’s last name/);
     await t1.screenshot({ path: path.join(OUT, "e2e-publication-slug-guard.png") });
     expect(smokeFiles(PUBS_DIR)).toEqual([]);
     await t1.close({ runBeforeUnload: false });
@@ -415,10 +555,11 @@ test("new publication: the address is checked before the first save (D-05, E_SLU
       "CMS smoke test publication with a deliberately long title",
     );
     // The full name fits, but the lab's addresses use the last name: advice once (CMS-11)…
-    await expect(t2.getByText(/Not saved yet: check the address first/).first()).toBeVisible({
+    const band2 = t2.locator("#bl-refusal");
+    await expect(band2).toContainText(/Not saved yet: check the address first/, {
       timeout: 30_000,
     });
-    await expect(t2.getByText(/type only “Sinchaisri”/).first()).toBeVisible();
+    await expect(band2).toContainText(/type only “Sinchaisri”/);
     await t2.screenshot({ path: path.join(OUT, "e2e-publication-slug-advice.png") });
     expect(smokeFiles(PUBS_DIR)).toEqual([]);
     // …and saving again keeps the address as shown.
@@ -439,10 +580,10 @@ test("new publication: the address is checked before the first save (D-05, E_SLU
   }
 });
 
-test("phone widths: the editor fits the screen and the account menu is reachable", async ({
+test("phone widths: the editor fits the screen; the account menu, Save and the Edit / Preview switch are reachable", async ({
   page,
 }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
   await login(page);
   for (const [w, h] of [
     [390, 844],
@@ -451,16 +592,28 @@ test("phone widths: the editor fits the screen and the account menu is reachable
     await page.setViewportSize({ width: w, height: h });
     const tab = await openEntry(page, "news", "2026-05-11-learning-to-gig-revision");
     await tab.waitForTimeout(800);
-    const [scrollW, innerW] = await tab.evaluate(() => [
-      document.documentElement.scrollWidth,
-      window.innerWidth,
-    ]);
-    expect(scrollW).toBeLessThanOrEqual(innerW);
+    const fits = () =>
+      tab.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
+    expect(await fits()).toBe(true);
     const box = await tab.getByRole("button", { name: "Account options dropdown" }).boundingBox();
     expect(box).not.toBeNull();
     expect(box!.x + box!.width).toBeLessThanOrEqual(w);
-    await expect(tab.getByRole("button", { name: "Publish" }).first()).toBeInViewport();
+    // An unchanged entry shows "Saved"; a changed one "Save".
+    await expect(tab.getByRole("button", { name: /^Saved?$/ }).first()).toBeInViewport();
+    const bar = tab.locator("#bl-phonebar");
+    await expect(bar).toBeInViewport();
+    await expect(bar.locator('[data-view="edit"]')).toHaveAttribute("aria-pressed", "true");
     await tab.screenshot({ path: path.join(OUT, `e2e-editor-${w}.png`) });
+    // Preview & history: the live column at full width, the form hidden.
+    await bar.locator('[data-view="preview"]').click();
+    await expect(live(tab).locator(".bl-live")).toBeInViewport({ timeout: 30_000 });
+    await ready(tab);
+    await expect(site(tab).locator("main")).toBeVisible({ timeout: 30_000 });
+    expect(await fits()).toBe(true);
+    await tab.waitForTimeout(500);
+    await tab.screenshot({ path: path.join(OUT, `e2e-editor-${w}-preview.png`) });
+    await bar.locator('[data-view="edit"]').click();
+    await expect(tab.getByLabel("Title", { exact: true })).toBeInViewport();
     await tab.close({ runBeforeUnload: false });
   }
 });
@@ -473,7 +626,7 @@ const VIEWPORTS = [
 for (const vp of VIEWPORTS) {
   for (const scheme of ["light", "dark"] as const) {
     test(`visual QA and axe: admin screens at ${vp.name} (${scheme})`, async ({ page }) => {
-      test.setTimeout(240_000);
+      test.setTimeout(420_000);
       await page.setViewportSize({ width: vp.width, height: vp.height });
       await page.emulateMedia({ colorScheme: scheme });
       const tag = `${vp.name}-${scheme}`;
@@ -486,15 +639,21 @@ for (const vp of VIEWPORTS) {
       await page.screenshot({ path: path.join(OUT, `admin-login-${tag}.png`) });
       const loginAxe = await axe(page, `login-${tag}`);
 
-      // Local demo: collections, then one entry of every collection with its preview.
+      // Local demo: collections, then one entry of every collection with its live column.
       await login(page);
       await page.screenshot({ path: path.join(OUT, `admin-collections-${tag}.png`) });
       const listAxe = await axe(page, `collections-${tag}`);
-      // Media library (modal).
-      await page.getByRole("button", { name: "Media", exact: true }).click();
-      await expect(page.getByRole("heading", { name: "Media assets" })).toBeVisible({
-        timeout: 30_000,
-      });
+      // Media library (modal), from a new news item's image field.
+      await page.goto(`/admin/${LOCAL}#/collections/news/new`);
+      await expect(page.getByLabel("Title", { exact: true })).toBeVisible({ timeout: 30_000 });
+      // MEASURED (full parallel run): axe once caught the live bar before live.css
+      // had reached Decap's frame (an unstyled "Back to the form" button), so let
+      // the column finish first, as for the entries below.
+      if (vp.width >= 800) {
+        await expect(live(page).locator(".bl-live")).toBeVisible({ timeout: 30_000 });
+        await ready(page);
+      }
+      await openLibrary(page, "Image", /^Choose an image$/);
       await page.waitForTimeout(800);
       await page.screenshot({ path: path.join(OUT, `admin-media-${tag}.png`) });
       const mediaAxe = await axe(page, `media-${tag}`);
@@ -514,38 +673,168 @@ for (const vp of VIEWPORTS) {
         ["pages", "about"],
         ["pages", "join"], // links inside the rich-text editor (contrast fix in admin.css)
         ["pages", "home"],
+        ["settings", "site"],
       ] as const) {
-        const file = c === "pages" ? `content/pages/${s}.yml` : `content/${c}/${s}.md`;
-        if (!fs.existsSync(path.join(ROOT, file))) continue;
+        const file =
+          c === "settings"
+            ? "content/site.yml"
+            : c === "pages"
+              ? `content/pages/${s}.yml`
+              : `content/${c}/${s}.md`;
+        if (!fs.existsSync(path.join(MAIN, file))) continue;
         const tab = await page.context().newPage();
         await tab.setViewportSize({ width: vp.width, height: vp.height });
         await tab.emulateMedia({ colorScheme: scheme });
-        tab.on("dialog", (d) => d.accept().catch(() => {}));
-        await tab.goto(`/admin/local.html#/collections/${c}/entries/${s}`);
+        tab.on("dialog", answerDialogs);
+        await tab.goto(`/admin/${LOCAL}#/collections/${c}/entries/${s}`);
         await expect(tab.getByText(/Writing in .* collection/)).toBeVisible({ timeout: 30_000 });
-        const preview = tab.frameLocator("iframe").first().locator(".cms-preview");
-        // Our templates (brief §I WP6 #6 requires news, people, publications) on wide
-        // screens; below 800px the editor shows the form only (admin.css).
-        if (vp.width >= 800) await expect(preview).toBeVisible({ timeout: 30_000 });
-        else await expect(tab.locator("iframe")).toBeHidden();
+        // The live column on wide screens; below 800 px the phone switch starts on Edit,
+        // with the column kept off-screen (cms-layout.js, admin.css).
+        if (vp.width >= 800) {
+          await expect(live(tab).locator(".bl-live")).toBeVisible({ timeout: 30_000 });
+          await ready(tab);
+          await expect(site(tab).locator("main")).toBeVisible({ timeout: 30_000 });
+        } else {
+          await expect(tab.locator("#preview-pane")).toBeHidden();
+          await expect(tab.locator("#bl-phonebar")).toBeVisible();
+        }
         await tab.waitForTimeout(800);
         const name = c === "pages" ? `pages-${s}` : c;
         await tab.screenshot({ path: path.join(OUT, `admin-${name}-${tag}.png`) });
         results[name] = await axe(tab, `${name}-${tag}`);
         await tab.close({ runBeforeUnload: false });
       }
-      // Zero violations: our preview templates (inside the iframe) and Decap's own UI
-      // as patched by cms-a11y.js and admin.css. Details: test-results/WP6/axe-*.json.
+      // Zero violations: the live bar (inside Decap's frame) and Decap's own UI as
+      // patched by cms-a11y.js, admin.css and cms-ui.css. Details: test-results/WP6/axe-*.json.
       const all = Object.entries(results).flatMap(([screen, rows]) =>
-        rows.map((v) => `${screen}: ${v.id} (${v.where}) ${v.first}`),
+        rows.map((v) => `${screen}: ${v.id} [${v.impact}] (${v.where}) ${v.first}`),
       );
       expect(all).toEqual([]);
     });
   }
 }
 
+test("measurements for TESTING-REPORT: base load, edit to render, site check (local demo)", async ({
+  page,
+}) => {
+  test.setTimeout(240_000);
+  await login(page);
+  const proxyRequests = (p: Page) => {
+    let n = 0;
+    p.on("request", (r) => {
+      if (r.url().startsWith(`http://localhost:${PROXY_PORT}/`) && r.method() === "POST") n++;
+    });
+    return () => n;
+  };
+  const timeToReady = async (p: Page, go: () => Promise<unknown>) => {
+    const count = proxyRequests(p);
+    const t0 = Date.now();
+    await go();
+    await expect(p.getByText(/Writing in .* collection/)).toBeVisible({ timeout: 30_000 });
+    await ready(p, 120_000);
+    return { ms: Date.now() - t0, proxyRequests: count() };
+  };
+  const HASH = "#/collections/news/entries/2026-05-11-learning-to-gig-revision";
+  // First load in this browser context (a new tab: an empty module cache).
+  const tab = await page.context().newPage();
+  tab.on("dialog", answerDialogs);
+  const first = await timeToReady(tab, () => tab.goto(`/admin/${LOCAL}${HASH}`));
+  // Another entry in the same tab, the way an editor gets there (the collection
+  // list, then the entry; no page load): the cached base (spec §2.2, 5 minutes).
+  const hop = async (collection: string, entry: RegExp) => {
+    await tab.evaluate((c) => {
+      location.hash = `#/collections/${c}`;
+    }, collection);
+    const link = tab.getByRole("link", { name: entry }).first();
+    await expect(link).toBeVisible({ timeout: 30_000 });
+    return link;
+  };
+  const loadedAt = await tab.evaluate(() => performance.timeOrigin);
+  const personLink = await hop("people", /Park Sinchaisri/);
+  const other = await timeToReady(tab, () => personLink.click());
+  expect(await tab.evaluate(() => performance.timeOrigin)).toBe(loadedAt);
+  // A reload: a new page, Decap's own caches only.
+  const reload = await timeToReady(tab, () => tab.reload());
+
+  // Edit to render: one key in the Title, until the real page in the nested frame shows it.
+  const newsLink = await hop("news", /Learning to Gig gets a major revision/);
+  await newsLink.click();
+  await expect(tab.getByText(/Writing in News collection/)).toBeVisible({ timeout: 30_000 });
+  await ready(tab);
+  const titleBox = tab.getByLabel("Title", { exact: true });
+  await expect(site(tab).locator("main")).toBeVisible({ timeout: 30_000 });
+  const frame = tab.frame({ url: /editor-preview/ });
+  expect(frame).not.toBeNull();
+  const renders: number[] = [];
+  for (const ch of ["Q", "W", "E", "R", "T"]) {
+    await frame!.evaluate((c) => {
+      const w = window as unknown as { __seen?: number };
+      w.__seen = 0;
+      const want = new RegExp(`${c}$`);
+      const h1 = () => document.querySelector("main h1")?.textContent?.trim() ?? "";
+      const obs = new MutationObserver(() => {
+        if (!w.__seen && want.test(h1())) {
+          w.__seen = Date.now();
+          obs.disconnect();
+        }
+      });
+      obs.observe(document.body, { subtree: true, childList: true, characterData: true });
+    }, ch);
+    await titleBox.press("End");
+    const t0 = await tab.evaluate(() => Date.now());
+    await tab.keyboard.type(ch);
+    await expect
+      .poll(() => frame!.evaluate(() => (window as unknown as { __seen?: number }).__seen ?? 0))
+      .toBeGreaterThan(0);
+    const seen = await frame!.evaluate(() => (window as unknown as { __seen?: number }).__seen!);
+    renders.push(seen - t0);
+  }
+  // The site check on the current form data (what Save runs, spec §3.6e).
+  const checks = await tab.evaluate(async () => {
+    const w = window as unknown as {
+      CMS: { editor: { getCurrentEntry(): { data: unknown; slug?: string } } };
+      BobalabLive: {
+        checkSave(o: unknown): Promise<{ available: boolean; blocking: unknown[] }>;
+      };
+    };
+    const e = w.CMS.editor.getCurrentEntry() as {
+      data: { toJS?: () => unknown } | Record<string, unknown>;
+    };
+    const data =
+      e.data && typeof (e.data as { toJS?: () => unknown }).toJS === "function"
+        ? (e.data as { toJS: () => unknown }).toJS()
+        : e.data;
+    const out: Array<{ ms: number; available: boolean; blocking: number }> = [];
+    for (let i = 0; i < 5; i++) {
+      const t = performance.now();
+      const r = await w.BobalabLive.checkSave({
+        entry: { collection: "news", slug: "2026-05-11-learning-to-gig-revision" },
+        isNew: false,
+        data,
+        timeoutMs: 4000,
+      });
+      out.push({
+        ms: Math.round(performance.now() - t),
+        available: r.available,
+        blocking: r.blocking.length,
+      });
+    }
+    return out;
+  });
+  for (const c of checks) expect(c.available).toBe(true);
+  measured("live-column", {
+    baseLoadFirst: first,
+    baseLoadOtherEntrySameTab: other,
+    baseLoadAfterReload: reload,
+    editToRenderMs: renders,
+    siteCheckMs: checks.map((c) => c.ms),
+    siteCheckBlocking: checks.map((c) => c.blocking),
+  });
+  await tab.close({ runBeforeUnload: false });
+});
+
 // ---------------------------------------------------------------------------
-// Verification fixes (CMS-01…CMS-13, A11Y-02), against a SCRATCH COPY of
+// Verification fixes (CMS-01…CMS-13, A11Y-02), against a second SCRATCH COPY of
 // content/: a second decap-server writes into test-results/, never into this
 // checkout, so saving site.yml or a direction cannot touch real content.
 
@@ -555,55 +844,43 @@ test.describe("verification fixes, on a scratch copy of content/", () => {
   const PAGE = "local-scratch.html";
   const CONFIG = "config.local-scratch.yml";
   let scratchProxy: ChildProcess | null = null;
+  let scratchHtml = "";
+  let scratchYml = "";
   const scratchFile = (rel: string) => fs.readFileSync(path.join(SCRATCH, rel), "utf8");
   const reset = (rel: string) => fs.copyFileSync(path.join(ROOT, rel), path.join(SCRATCH, rel));
 
   test.beforeAll(async () => {
-    fs.rmSync(SCRATCH, { recursive: true, force: true });
-    fs.mkdirSync(path.join(SCRATCH, "public", "uploads"), { recursive: true });
-    fs.cpSync(path.join(ROOT, "content"), path.join(SCRATCH, "content"), { recursive: true });
-    const { generate } = await import("../../scripts/cms/build-config.mjs");
-    const files = (await generate({
-      local: true,
-      localSiteUrl: "http://localhost:3100",
-      proxyUrl: `http://localhost:${SCRATCH_PORT}/api/v1`,
-    })) as Record<string, string>;
-    fs.writeFileSync(path.join(ADMIN_DIR, CONFIG), files["public/admin/config.local.yml"]!);
-    fs.writeFileSync(
-      path.join(ADMIN_DIR, PAGE),
-      files["public/admin/local.html"]!.replace('href="config.local.yml"', `href="${CONFIG}"`),
-    );
+    copyContent(SCRATCH);
+    ({ html: scratchHtml, yml: scratchYml } = await localFiles(SCRATCH_PORT, CONFIG));
     if (await portOpen(SCRATCH_PORT)) throw new Error(`port ${SCRATCH_PORT} is busy`);
-    scratchProxy = spawn(
-      process.execPath,
-      [path.join(ROOT, "node_modules", "decap-server", "dist", "index.js")],
-      {
-        cwd: ROOT,
-        env: {
-          ...process.env,
-          PORT: String(SCRATCH_PORT),
-          MODE: "fs",
-          GIT_REPO_DIRECTORY: SCRATCH,
-        },
-        stdio: ["ignore", "pipe", "pipe"],
-      },
-    );
-    scratchProxy.stdout?.on("data", (d) => (proxyLog += d));
-    scratchProxy.stderr?.on("data", (d) => (proxyLog += d));
+    scratchProxy = startProxy(SCRATCH_PORT, SCRATCH);
     await waitForPort(SCRATCH_PORT, 30_000);
   });
 
   test.afterAll(() => {
     killTree(scratchProxy);
     scratchProxy = null;
-    for (const f of [PAGE, CONFIG]) fs.rmSync(path.join(ADMIN_DIR, f), { force: true });
     fs.rmSync(SCRATCH, { recursive: true, force: true });
+  });
+
+  test.beforeEach(async ({ context }) => {
+    await serve(context, PAGE, scratchHtml, "text/html");
+    await serve(context, CONFIG, scratchYml, "text/yaml");
   });
 
   async function enter(page: Page, hash = "") {
     const errors: string[] = [];
-    page.on("pageerror", (e) => errors.push(String(e?.message ?? e)));
-    page.on("dialog", (d) => d.accept().catch(() => {}));
+    page.on("pageerror", (e) => {
+      // Decap 3.17.1 leaves its persist promise's rejection unhandled after any
+      // refused save (MEASURED, WP5): "undefined" / "Object" in Chromium.
+      const first = String(e.stack || e.message)
+        .split(/\r?\n/)[0]!
+        .trim();
+      if (/^(Unhandled Promise Rejection: )?(undefined|Object|\[object Object\])$/.test(first))
+        return;
+      errors.push(String(e?.message ?? e));
+    });
+    page.on("dialog", answerDialogs);
     await page.goto(`/admin/${PAGE}`);
     await page.getByRole("button", { name: "Login" }).click();
     await expect(page.getByRole("heading", { name: "Collections" })).toBeVisible({
@@ -669,7 +946,7 @@ test.describe("verification fixes, on a scratch copy of content/", () => {
     reset("content/site.yml");
   });
 
-  test("an address change after a save opens the named entry, and Publish writes that file (CMS-02)", async ({
+  test("an address change after a save opens the named entry, and Save writes that file (CMS-02)", async ({
     page,
   }) => {
     test.setTimeout(180_000);
@@ -730,17 +1007,15 @@ test.describe("verification fixes, on a scratch copy of content/", () => {
       await page.getByLabel("Status", { exact: true }).click();
       await page.getByRole("option", { name: "Working paper", exact: true }).click();
       await publish(page);
-      await expect(page.getByText(/Not saved: “As of” is needed/).first()).toBeVisible({
-        timeout: 30_000,
-      });
-      await expect(page.getByText(/“Status source” is needed/).first()).toBeVisible();
-      await expect(
-        page.getByText(/choose at least one “Research direction”/).first(),
-      ).toBeVisible();
+      // The refusal stays in the "Not saved" band at the top of the form (spec §3.8).
+      const band = page.locator("#bl-refusal");
+      await expect(band).toContainText(/Not saved: “As of” is needed/, { timeout: 30_000 });
+      await expect(band).toContainText(/“Status source” is needed/);
+      await expect(band).toContainText(/choose at least one “Research direction”/);
       await page.screenshot({ path: path.join(OUT, "e2e-required-when.png") });
       expect(mine()).toEqual([]);
 
-      // A colour another live direction uses: the preview says so, the save is refused.
+      // A colour another live direction uses: the live column says so, the save is refused.
       const DIR = "content/directions/platform-work.md";
       test.skip(!fs.existsSync(path.join(SCRATCH, DIR)), "needs platform-work");
       const others = fs
@@ -759,13 +1034,11 @@ test.describe("verification fixes, on a scratch copy of content/", () => {
       await page
         .getByRole("option", { name: new RegExp(`^${taken.replace(/-/g, " ")}\\b`, "i") })
         .click();
-      const preview = page.frameLocator("iframe").first().locator(".cms-preview");
-      await expect(preview).toContainText("Colour taken.", { timeout: 15_000 });
-      await expect(preview).toContainText(`“${takenBy}”`);
+      const info = live(page).locator(".bl-band--info");
+      await expect(info).toContainText("Colour taken.", { timeout: 15_000 });
+      await expect(info).toContainText(`“${takenBy}”`);
       await publish(page);
-      await expect(page.getByText(/is already the colour of/).first()).toBeVisible({
-        timeout: 30_000,
-      });
+      await expect(band).toContainText(/is already the colour of/, { timeout: 30_000 });
       await page.screenshot({ path: path.join(OUT, "e2e-colour-taken.png") });
       expect(scratchFile(DIR)).toBe(before);
     } finally {

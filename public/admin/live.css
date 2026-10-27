@@ -1,0 +1,546 @@
+/*
+ * BOBALAB CMS: the live column (cms-live.js), inside Decap's preview frame
+ * (editor v2, WP4; spec §2.6, §4.2, §7). Decap loads this file into its frame
+ * with CMS.registerPreviewStyle; the site itself is drawn by a second frame
+ * (iframe.bl-live__site, /editor-preview/) with the site's own styles.
+ *
+ * The frame's own document never scrolls: the column is a fixed box that
+ * fills it, the site sits in a clipping box, and only the History list and
+ * the bands scroll inside. Decap's scroll sync, which follows the form's
+ * scrolling, therefore has nothing to move (spec §2.6).
+ *
+ * Contrast (WCAG 1.4.3 / 1.4.11, MEASURED with the WCAG formula): text
+ * #1f2329 on white 15.8:1, secondary #4f5765 7.3:1; white on #0f6e7d 5.9:1;
+ * problems #b80029 on #fdecef 6.8:1; the older-version band #5c4300 on
+ * #fff4d6 8.5:1; button borders #767b85 4.3:1; focus ring #3a69c7 5.2:1.
+ * Targets are at least 32 px, and 44 px in a column narrower than 560 px.
+ */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+body {
+  background: #ffffff;
+  color: #1f2329;
+  font:
+    14px/1.4 system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
+.bl-live {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  color: #1f2329;
+}
+.bl-live *,
+.bl-live *::before,
+.bl-live *::after {
+  box-sizing: border-box;
+}
+.bl-live [hidden] {
+  display: none !important;
+}
+
+/* ---- Buttons --------------------------------------------------------------- */
+
+.bl-live .bl-btn {
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid #767b85;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1f2329;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.bl-live .bl-btn:hover {
+  background: #f4f5f7;
+}
+.bl-live .bl-btn--primary {
+  border-color: #0f6e7d;
+  background: #0f6e7d;
+  color: #ffffff;
+}
+.bl-live .bl-btn--primary:hover {
+  background: #0b5966;
+}
+.bl-live .bl-btn--quiet {
+  border-color: transparent;
+  background: transparent;
+  color: #1f2329;
+  text-decoration: underline;
+}
+.bl-live .bl-btn--small {
+  min-height: 32px;
+  padding: 2px 8px;
+  font-size: 13px;
+}
+.bl-live .bl-btn[aria-pressed="true"] {
+  border-color: #3a69c7;
+  background: #e8eefb;
+  color: #1f2329;
+}
+.bl-live .bl-btn:disabled {
+  border-color: #c4c8cf;
+  background: #f4f5f7;
+  color: #4f5765;
+  cursor: not-allowed;
+}
+.bl-live button:focus-visible,
+.bl-live select:focus-visible,
+.bl-live input:focus-visible {
+  outline: 2px solid #3a69c7;
+  outline-offset: 2px;
+}
+
+/* ---- The bar ----------------------------------------------------------------- */
+
+.bl-live__bar {
+  position: relative;
+  flex: none;
+  border-bottom: 1px solid #d9dcd6;
+  background: #f6f7f5;
+}
+.bl-live__skip.bl-btn {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  z-index: 5;
+  transform: translateY(-200%);
+}
+.bl-live__skip.bl-btn:focus {
+  transform: none;
+}
+/* Decap draws its eye and scroll-sync buttons over the frame's top right corner. */
+.bl-live__row1 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  min-height: 44px;
+  padding: 4px 56px 4px 8px;
+}
+.bl-live__tabs {
+  display: flex;
+  gap: 2px;
+}
+.bl-live__tab,
+.bl-live__page {
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #1f2329;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.bl-live__tab[aria-selected="true"],
+.bl-live__page[aria-selected="true"] {
+  border-bottom-color: #0f6e7d;
+  color: #0b5966;
+}
+.bl-live__tab:hover,
+.bl-live__page:hover {
+  background: #eceeea;
+}
+.bl-live__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.bl-live__device {
+  display: inline-flex;
+  gap: 2px;
+}
+.bl-live__status {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  margin: -4px 8px 2px;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: #4f5765;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* ---- The live panel ----------------------------------------------------------- */
+
+.bl-live__main {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.bl-live__panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+.bl-live__row2 {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  min-height: 36px;
+  padding: 2px 56px 2px 8px;
+  border-bottom: 1px solid #e3e5e1;
+}
+.bl-live__pages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+.bl-live__page {
+  font-weight: 500;
+}
+.bl-live__pagesel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.bl-live__pagesel select {
+  min-height: 32px;
+  max-width: 220px;
+  font: inherit;
+}
+.bl-live__address {
+  flex: 1 1 220px;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: #4f5765;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bl-live__address--problem {
+  color: #b80029;
+  font-family: inherit;
+  white-space: normal;
+}
+.bl-live__visitor {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.bl-live__visitor input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+/* ---- Bands ------------------------------------------------------------------------ */
+
+.bl-live__bands {
+  flex: none;
+  max-height: 45%;
+  overflow: auto;
+}
+.bl-band {
+  padding: 6px 12px;
+  border-bottom: 1px solid #d9dcd6;
+  font-size: 13px;
+}
+.bl-band--problem {
+  border-color: #f0b6c2;
+  background: #fdecef;
+  color: #b80029;
+}
+.bl-band--needed {
+  background: #f3f4f2;
+  color: #1f2329;
+}
+.bl-band--info {
+  background: #eef3fc;
+  color: #1f2329;
+}
+.bl-band--older {
+  border-color: #e6cf8a;
+  background: #fff4d6;
+  color: #5c4300;
+}
+.bl-band__text {
+  margin: 2px 0;
+}
+.bl-band__list {
+  margin: 2px 0;
+  padding-left: 20px;
+}
+.bl-band__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+.bl-band__row > .bl-band__text,
+.bl-band__row > .bl-band__list {
+  flex: 1 1 220px;
+}
+.bl-band__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 2px;
+}
+.bl-band__actions:empty {
+  display: none;
+}
+.bl-band__block + .bl-band__row,
+.bl-band__row + .bl-band__row,
+.bl-band__row + .bl-band__block,
+.bl-band__text + .bl-band__row {
+  margin-top: 4px;
+}
+.bl-band__conflict {
+  margin: 6px 0;
+  padding: 6px 8px;
+  border-left: 3px solid #3a69c7;
+  background: #ffffff;
+}
+.bl-band__mine {
+  max-height: 120px;
+  margin: 4px 0;
+  padding: 6px 8px;
+  overflow: auto;
+  border: 1px solid #d9dcd6;
+  background: #f6f7f5;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ---- The site ------------------------------------------------------------------- */
+
+.bl-live__clip {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  background: #ffffff;
+}
+.bl-live__clip[data-device="phone"] {
+  background: #f6f7f5;
+}
+.bl-live__site {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #ffffff;
+  transform-origin: 0 0;
+}
+.bl-live__site[data-device="phone"] {
+  outline: 1px solid #d9dcd6;
+}
+
+/* ---- History ---------------------------------------------------------------------- */
+
+.bl-live__history {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: auto;
+  padding: 8px 56px 32px 12px; /* the right: Decap's eye and scroll-sync buttons */
+  background: #ffffff;
+}
+.bl-history__note,
+.bl-history__empty {
+  margin: 6px 0;
+  color: #4f5765;
+}
+.bl-history__error {
+  margin: 8px 0;
+  padding: 8px 10px;
+  border-left: 3px solid #b80029;
+  background: #fdecef;
+  color: #b80029;
+}
+.bl-history__error p {
+  margin: 0 0 6px;
+}
+.bl-history__list {
+  margin: 4px 0;
+  padding: 0;
+  list-style: none;
+}
+.bl-history__unsaved {
+  margin: 0 0 4px;
+  padding: 8px 10px;
+  border: 1px dashed #767b85;
+  border-radius: 6px;
+  color: #4f5765;
+  font-style: italic;
+}
+.bl-history__item {
+  border-bottom: 1px solid #e3e5e1;
+}
+.bl-history__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 6px;
+  border: 0;
+  background: transparent;
+  color: #1f2329;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.bl-history__row:hover {
+  background: #f4f5f7;
+}
+.bl-history__row[aria-expanded="true"] {
+  background: #eef3fc;
+}
+.bl-history__avatar {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.bl-history__avatar--initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #d9dcd6;
+  color: #1f2329;
+  font-size: 12px;
+  font-weight: 700;
+}
+.bl-history__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.bl-history__line {
+  overflow-wrap: anywhere;
+}
+.bl-history__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: #4f5765;
+  font-size: 13px;
+}
+.bl-pill,
+.bl-chip {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+.bl-pill {
+  border: 1px solid #0f6e7d;
+  color: #0b5966;
+}
+.bl-chip {
+  background: #fff4d6;
+  color: #5c4300;
+}
+.bl-history__detail {
+  padding: 0 6px 10px 48px;
+}
+.bl-history__changes {
+  margin: 2px 0 6px;
+  padding-left: 18px;
+}
+.bl-history__subject {
+  margin: 2px 0 6px;
+  color: #4f5765;
+  overflow-wrap: anywhere;
+}
+.bl-history__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.bl-history__more.bl-btn {
+  margin-top: 10px;
+}
+
+/* ---- Narrow columns and phones -------------------------------------------------- */
+
+/* Phones: Decap's eye and scroll-sync buttons are hidden there (admin.css). */
+@media (max-width: 479px) {
+  .bl-live__row1,
+  .bl-live__row2 {
+    padding-right: 8px;
+  }
+  .bl-live__history {
+    padding-right: 12px;
+  }
+}
+
+@media (max-width: 559px) {
+  .bl-live .bl-btn,
+  .bl-live .bl-btn--small,
+  .bl-live__tab,
+  .bl-live__page,
+  .bl-live__pagesel select,
+  .bl-live__visitor,
+  .bl-live__status {
+    min-height: 44px;
+  }
+  .bl-live__tools {
+    margin-left: 0;
+  }
+  .bl-live__address {
+    order: 2; /* after the Page menu and the visitor box, on its own line */
+    flex-basis: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .bl-history__detail {
+    padding-left: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bl-live * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

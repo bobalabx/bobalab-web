@@ -7,7 +7,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="referrer" content="same-origin" />
     <meta http-equiv="Content-Security-Policy" content="%CSP%" />
@@ -15,6 +15,7 @@
     <link rel="icon" href="../icon.svg" type="image/svg+xml" />
     <link rel="cms-config-url" type="text/yaml" href="%CONFIG%" />
     <link rel="stylesheet" href="admin.css" />
+    <link rel="stylesheet" href="cms-ui.css" />
   </head>
   <body>
     <noscript>
@@ -22,13 +23,27 @@
         The BOBALAB content manager needs JavaScript. See docs/EDITING.md in the website repository.
       </p>
     </noscript>
-    <!-- cms-data.js first: it also sets CMS_MANUAL_INIT; cms-start.js starts Decap last. -->
+    <!--
+      Order matters (Interfaces §1). cms-data.js first: it also sets CMS_MANUAL_INIT.
+      cms-widgets.js directly after decap-cms.js; cms-hooks.js before cms-save.js, so
+      its preSave checks run first; cms-locale.js before Decap starts; cms-start.js
+      starts Decap last.
+    -->
     <script src="cms-data.js"></script>
     <script src="decap-cms.js"></script>
     <script src="cms-widgets.js"></script>
     <script src="cms-hooks.js"></script>
+    <script src="cms-locale.js"></script>
     <script src="cms-a11y.js"></script>
-    <script src="preview-templates.js"></script>
+    <script src="cms-ui.js"></script>
+    <script src="cms-github.js"></script>
+    <script src="cms-history.js"></script>
+    <script src="cms-deploy.js"></script>
+    <script src="cms-dock.js"></script>
+    <script src="cms-live.js"></script>
+    <script src="cms-guards.js"></script>
+    <script src="cms-save.js"></script>
+    <script src="cms-layout.js"></script>
     <script src="cms-start.js"></script>
   </body>
 </html>

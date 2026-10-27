@@ -138,7 +138,7 @@
   // Decap makes the file name from the collection's `slug` template when an
   // entry is first saved, and cannot rename it later. The validator rejects
   // names that break the schema's SLUG_PATTERNS (E_SLUG), so a bad name would
-  // only surface as a red check on the pull request. This re-computes the name
+  // only surface as a failed deploy after the Save. This re-computes the name
   // the way decap-cms 3.17.1 does (stringTemplate.ts + urlHelper.ts sanitizeSlug
   // with encoding "ascii", clean_accents, replacement "-") and blocks the save
   // with a message instead. Anything it cannot evaluate is let through.
@@ -344,7 +344,7 @@
     if (!str(data.get("photo")) || data.get("photo_consent") === true) return null;
     return (
       "Not saved: a photo is set but “Photo consent” is off. Files you upload are public as soon as they are published, even when the site does not show them. " +
-      "Remove the photo, or turn on “Photo consent” once the person has agreed in writing (docs/EDITING.md, “Consent rules”)."
+      "Remove the photo, or turn on “Photo consent” once the person has agreed in writing."
     );
   }
 
@@ -546,7 +546,7 @@
               return "“" + d.name + "”";
             })
             .join(", ") +
-          ". Each direction needs its own colour; the preview lists the colours in use (docs/EDITING.md, “Choose a colour”).",
+          ". Each direction needs its own colour; the preview lists the colours in use.",
       );
     });
   }
@@ -572,7 +572,7 @@
             })
             .join(", ") +
           (missing.length > 1 ? " have" : " has") +
-          " an image but no alt text. Describe in a sentence what the image shows (docs/EDITING.md, “Images and alt text”).",
+          " an image but no alt text. Describe in a sentence what the image shows.",
       );
     }
     var cfg = root.BOBALAB_CMS || {};
@@ -618,6 +618,8 @@
     colourConflicts: colourConflicts,
     preSave: preSave,
     preSaveColour: preSaveColour,
+    // For cms-save.js: the band's [Go to …] for an image without alt text.
+    IMAGE_OBJECTS: IMAGE_OBJECTS,
   };
   root.BobalabCmsHooks = api;
   if (root.CMS && typeof root.CMS.registerEventListener === "function") {

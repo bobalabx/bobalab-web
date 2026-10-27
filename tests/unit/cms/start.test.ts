@@ -15,8 +15,18 @@ const read = (f: string) => fs.readFileSync(path.join(ROOT, "public", "admin", f
 
 type Listener = (args: { entry: { get: (k: string) => unknown } }) => unknown;
 
-/** Run cms-hooks.js + cms-start.js against a fake page. */
+/** Run cms-hooks.js + cms-start.js against a fake page (with a clock the test can move). */
 function boot({ hash = "", framed = false } = {}) {
+  let now = Date.parse("2026-10-26T20:00:00Z");
+  class FakeDate extends Date {
+    constructor(...a: unknown[]) {
+      if (a.length) super(...(a as [string]));
+      else super(now);
+    }
+    static now() {
+      return now;
+    }
+  }
   const events: Record<string, Array<() => void>> = {};
   const cmsEvents: Array<{ name: string; handler: Listener }> = [];
   const timers: Array<() => void> = [];
@@ -56,7 +66,8 @@ function boot({ hash = "", framed = false } = {}) {
       return el;
     },
   };
-  const ctx = vm.createContext({ window: win, globalThis: win, document });
+  win.Date = FakeDate;
+  const ctx = vm.createContext({ window: win, globalThis: win, document, Date: FakeDate });
   vm.runInContext(read("cms-hooks.js"), ctx);
   vm.runInContext(read("cms-start.js"), ctx);
   const go = (next: string) => {
@@ -64,11 +75,13 @@ function boot({ hash = "", framed = false } = {}) {
     for (const fn of events.hashchange ?? []) fn();
     while (timers.length) timers.shift()!();
   };
-  const saved = (collection: string, slug: string) => {
+  const saved = (collection: string, slug: string, extra: Record<string, unknown> = {}) => {
+    const fields: Record<string, unknown> = { collection, slug, ...extra };
     for (const l of cmsEvents.filter((e) => e.name === "postSave"))
-      l.handler({ entry: { get: (k: string) => (k === "collection" ? collection : slug) } });
+      l.handler({ entry: { get: (k: string) => fields[k] } });
   };
-  return { win, location, go, saved, body, inits: () => inits, cmsEvents };
+  const wait = (ms: number) => (now += ms);
+  return { win, location, go, saved, wait, body, inits: () => inits, cmsEvents };
 }
 
 describe("cms-start.js", () => {
@@ -115,6 +128,20 @@ describe("cms-start.js", () => {
     expect(b.location.reloads).toBe(1);
   });
 
+  it("a new entry the address replaces with a new entry of ANOTHER collection is reloaded (Decap kept the old form)", () => {
+    const b = boot({ hash: "#/collections/news/new" });
+    b.go("#/collections/publications/new");
+    expect(b.location.reloads).toBe(1);
+    // …but not an existing entry → new (Decap starts an empty form itself), nor new → the same new.
+    const c = boot({ hash: "#/collections/news/entries/2026-05-11-learning-to-gig-revision" });
+    c.go("#/collections/publications/new");
+    c.go("#/collections/publications/new?ref=x");
+    expect(c.location.reloads).toBe(0);
+    const api = b.win.BobalabCmsStart as { needsReload: (a: string, b: string) => boolean };
+    expect(api.needsReload("#/collections/news/new", "#/collections/news/new")).toBe(false);
+    expect(api.needsReload("#/collections/news/new", "#/collections/people/new")).toBe(true);
+  });
+
   it("does nothing when Decap's 'leave this page?' was cancelled (the old address is back)", () => {
     const b = boot({ hash: "#/collections/directions/entries/ai-at-work" });
     const before = b.location.hash;
@@ -126,6 +153,50 @@ describe("cms-start.js", () => {
     b.location.hash = before;
     while (timers.length) timers.shift()!();
     expect(b.location.reloads).toBe(0);
+  });
+
+  it("a NEW entry's first save (postSave has an empty slug, as Decap sends it) does not reload (spec §3.11)", () => {
+    const b = boot({ hash: "#/collections/news/new" });
+    // MEASURED: for a new entry Decap's postSave entry still has newRecord and slug "".
+    b.saved("news", "", { newRecord: true, path: "" });
+    b.wait(2000);
+    b.go("#/collections/news/entries/2026-10-26-informs-annual-meeting");
+    expect(b.location.reloads).toBe(0);
+  });
+
+  it("…but only for that collection, and only within 15 s of the save", () => {
+    const late = boot({ hash: "#/collections/news/new" });
+    late.saved("news", "", { newRecord: true });
+    late.wait(16_000);
+    late.go("#/collections/news/entries/2026-10-26-informs-annual-meeting");
+    expect(late.location.reloads).toBe(1);
+    const other = boot({ hash: "#/collections/projects/new" });
+    other.saved("news", "", { newRecord: true });
+    other.go("#/collections/projects/entries/learning-on-the-go");
+    expect(other.location.reloads).toBe(1);
+    const unsaved = boot({ hash: "#/collections/news/new" });
+    unsaved.go("#/collections/news/entries/2026-10-26-informs-annual-meeting");
+    expect(unsaved.location.reloads).toBe(1);
+  });
+
+  it("needsReload(): the old string form of `saved` still works", () => {
+    const b = boot();
+    const api = b.win.BobalabCmsStart as {
+      needsReload: (from: string, to: string, saved?: unknown, now?: number) => boolean;
+    };
+    expect(
+      api.needsReload("#/collections/news/new", "#/collections/news/entries/x", "news/x"),
+    ).toBe(false);
+    expect(
+      api.needsReload("#/collections/news/new", "#/collections/news/entries/y", "news/x"),
+    ).toBe(true);
+    const s = { key: "news/", collection: "news", at: 1000 };
+    expect(
+      api.needsReload("#/collections/news/new", "#/collections/news/entries/y", s, 15_000),
+    ).toBe(false);
+    expect(
+      api.needsReload("#/collections/news/new", "#/collections/news/entries/y", s, 16_001),
+    ).toBe(true);
   });
 
   it("registers a postSave listener that changes nothing", () => {

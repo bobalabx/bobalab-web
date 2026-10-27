@@ -125,8 +125,9 @@
         list[i].setAttribute("hidden", "");
     }
 
+    // Decap's preview frame holds the live column: the site preview and History (cms-live.js).
     list = document.querySelectorAll("iframe#preview-pane:not([title])");
-    for (i = 0; i < list.length; i++) list[i].setAttribute("title", "Preview of this entry");
+    for (i = 0; i < list.length; i++) list[i].setAttribute("title", "Live preview and history");
 
     list = document.querySelectorAll('.slate-editor[role="textbox"]:not([aria-label])');
     for (i = 0; i < list.length; i++) {

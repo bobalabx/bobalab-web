@@ -1,0 +1,46 @@
+{
+  "request": "GET /repos/bobalabx/bobalab-web/git/trees/main:content/pages",
+  "status": 200,
+  "headers": {},
+  "body": {
+    "sha": "0000000000000000000000000000000000000000",
+    "tree": [
+      {
+        "path": "about.yml",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "f8ba17b412f215ce4515319b5e5c8d4fea597100",
+        "size": 729
+      },
+      {
+        "path": "accessibility.yml",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "f7248e8e37eb091bae85d00b375fc9f27dca6bf9",
+        "size": 1465
+      },
+      {
+        "path": "home.yml",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "501f02df45e01ab01c7808f1221a4f493699d82a",
+        "size": 488
+      },
+      {
+        "path": "join.yml",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "4c6a7eaec1ee68f62e616572f968e7e5bc4c36cc",
+        "size": 701
+      },
+      {
+        "path": "privacy.yml",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "ab7b4342fa935da6f9f5b5a1a4995485ccb7d7dd",
+        "size": 1420
+      }
+    ],
+    "truncated": false
+  }
+}

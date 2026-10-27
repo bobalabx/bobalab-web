@@ -1,0 +1,13 @@
+{
+  "request": "GET /repos/bobalabx/bobalab-web/contents/content/people/isabelle-cho.md?ref=715bd47b7c54d015af9a906ef41fddd45b10cff6 (Accept: application/vnd.github.raw+json)",
+  "recorded": "2026-10-26T07:41:35Z",
+  "status": 200,
+  "headers": {
+    "etag": "\"cc944cc39326b4c10b0f8abee9368d5faf2eabd1\"",
+    "last-modified": "Mon, 26 Oct 2026 06:43:11 GMT",
+    "x-ratelimit-limit": "60",
+    "x-ratelimit-remaining": "36",
+    "x-ratelimit-reset": "1793001569"
+  },
+  "body": "---\nname: Isabelle Cho\nrole: undergrad\ntitle: Lab manager\nrank: 1\ndirections: []\nphoto: /uploads/people/isabelle-cho.jpg\nphoto_alt: Headshot of Isabelle Cho\nphoto_consent: true\nemail_public: false\nnow_at_public: false\nlisted: true\nprofile_page: false\ndraft: false\n---\n"
+}

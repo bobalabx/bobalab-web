@@ -1,0 +1,144 @@
+{
+  "request": "GET /repos/bobalabx/bobalab-web/git/trees/main:content/news",
+  "status": 200,
+  "headers": {},
+  "body": {
+    "sha": "0000000000000000000000000000000000000000",
+    "tree": [
+      {
+        "path": "2023-07-20-fisher-grant.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c14ad813055c99fac5ce9bd90ddd9b15bd723f8e",
+        "size": 240
+      },
+      {
+        "path": "2023-08-30-nasa-symposium.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "90424b8b5812ac8ea82f49d583d9e24098c3c05a",
+        "size": 369
+      },
+      {
+        "path": "2023-10-07-mit-ide-seminar.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "612539ac9773f96cd45065885466590567003d53",
+        "size": 359
+      },
+      {
+        "path": "2023-12-31-stanford-seminar.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "736f8cf5796b83d2311a94293b205df725e21f79",
+        "size": 371
+      },
+      {
+        "path": "2024-05-18-cheit-award.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "ecdcfda4b80805c77f3fef1fced2865dd9a77c8c",
+        "size": 276
+      },
+      {
+        "path": "2024-09-20-chatgpt-cscw.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "5904b8029890866b8a5525f50d7294402872c104",
+        "size": 289
+      },
+      {
+        "path": "2024-10-21-multihoming-informs-times.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "69c2886a575f489a384519b42b432bfa94b14f36",
+        "size": 338
+      },
+      {
+        "path": "2024-11-13-tuck-seminar.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "a006d8572cbbc9b0bd6336204e4d926836b8fb50",
+        "size": 266
+      },
+      {
+        "path": "2025-05-10-multihoming-platform-symposium.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e574457150600ab7ffa4f88dd18fb85955ea9065",
+        "size": 340
+      },
+      {
+        "path": "2025-05-22-rl-tips-mansci.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "0debbff9c06d2a9901cdff8c95061becef12a373",
+        "size": 352
+      },
+      {
+        "path": "2025-07-31-learning-on-the-go-cscw.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "6b44bbf5ef3f81dcd53cb24d43ae1d9d324f1ad5",
+        "size": 364
+      },
+      {
+        "path": "2025-10-20-cscw-bergen.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "3dd91f21c84baf8c451dd5778ea43e0da05da4a2",
+        "size": 481
+      },
+      {
+        "path": "2026-03-02-strategic-advice-preprint.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "77d2cde1d7156544c2c796fd7f8e06a1b4771fbe",
+        "size": 362
+      },
+      {
+        "path": "2026-04-10-cheit-award.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "127272fde7d59ed9161fd56af3b2eef8864913fe",
+        "size": 278
+      },
+      {
+        "path": "2026-04-16-precise-or-broad-revision.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "dae46498dfc393d8d1e034e15b60505bd3172350",
+        "size": 378
+      },
+      {
+        "path": "2026-05-08-msom-three-papers.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "be4689091ae5f9a01f5d59b36db4ab88648e59dd",
+        "size": 594
+      },
+      {
+        "path": "2026-05-11-learning-to-gig-revision.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "15b1670efac6ffc9ea377fde5cb4cc9c9d5e5a4a",
+        "size": 393
+      },
+      {
+        "path": "2026-08-04-dispatching-to-develop-ssrn.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "dc11bbd21de48d9df467d8b68823f2c4f969bdcf",
+        "size": 342
+      },
+      {
+        "path": "2026-10-07-stale-misattributed-preprint.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "8b9b4feb581ae08f820b389af62d17160952d631",
+        "size": 377
+      }
+    ],
+    "truncated": false
+  }
+}
