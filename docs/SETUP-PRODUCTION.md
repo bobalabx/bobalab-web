@@ -112,7 +112,7 @@ Decap's GitHub backend needs a small OAuth server; GitHub Pages cannot run one (
    3. The entry's **History** shows the new row with your name and avatar; **Recent changes** shows it too.
    4. Click **Undo** in the "Saved" message (or **Undo this change** in History). The status box tracks the second deploy.
    5. On github.com (repository → Commits), both commits show **your account** as the author, with "(by @your-login)" in the message.
-   6. In the browser's DevTools (Network), a request to `api.github.com` answers with the header `X-OAuth-Scopes: public_repo`.
+   6. In the browser's DevTools (Network), a request to `api.github.com` answers with the header `X-OAuth-Scopes: public_repo`. Do this as an editor who has never pressed **Give permission** under Who can edit: after that, GitHub may keep the wider `repo` scope for that account's sign-ins (DECISIONS D-20).
    7. **Two editors:** in two browsers (or with a colleague), open the same entry, save in one, then save in the other. The second Save is refused and names the first editor; **Bring in their changes** puts their change into the form, and Save then works.
    8. Turn the test entry's content back (or leave it as a draft) and tell a maintainer the results. Steps 5 and 6 confirm that History can name each editor (DECISIONS D-19); until they pass, treat the names in History as unconfirmed.
 
@@ -152,7 +152,7 @@ Decap's GitHub backend needs a small OAuth server; GitHub Pages cannot run one (
 
 ## F. Editors
 
-Each RA creates a free GitHub account with 2FA; a maintainer adds them to `web-editors`; they open `https://<HOST>/admin/` → Login with GitHub → authorize. The per-term add/remove checklist is `docs/HANDOVER.md` §4; editing itself is `docs/EDITING.md` (WP6).
+Each RA creates a free GitHub account with 2FA and sends the owner their GitHub username. The owner invites them from the dashboard: **Who can edit** in the status box → Invite someone (`docs/EDITING.md` §17, DECISIONS D-20; after each page load it first asks for one extra GitHub permission). The RA accepts GitHub's invitation email, then opens `https://<HOST>/admin/` → Login with GitHub → authorize. Today the repository is on the personal account `bobalabx`, so only that account can invite and remove; in an organization its repository admins can too (`docs/HANDOVER.md` §4, where the per-term add/remove checklist also is). The sign-in Worker needs no change for this as long as `repo` alone is enough: its scope allow-list accepts `repo`, but not `read:org`, which GitHub documents for listing collaborators (section H step 8 checks it).
 
 ## G. Launch gate
 
@@ -176,6 +176,9 @@ Editor v2 ("Save goes live", the live column, History and Restore; DECISIONS D-1
 5. [ ] **Add the `protect-main` ruleset** of section B6: block force pushes and restrict deletions **only**. Never "Require a pull request" or required status checks: either would stop every Save.
 6. [ ] **One editor runs the live smoke test** of section C6, including the two-editor test, and checks that GitHub shows their own account on both commits (`author.login`) and that the token's scope is `public_repo` (`X-OAuth-Scopes`).
 7. [ ] **Only then tell the lab managers.** Point them to `docs/EDITING.md`: sections 2, 3 and 8 cover what changed.
+8. [ ] **Who can edit (D-20), after it is released:** signed in as `bobalabx`, open **Who can edit** → **Give permission**. Check that the GitHub window names `bobalabx` and asks for access to repositories (GitHub describes it as full access to public and private repositories). Then check the one thing nobody has seen yet: **does a token with only `repo` list the collaborators?** In DevTools → Network, the request to `api.github.com/user` answers `X-OAuth-Scopes: repo` (perhaps with `user` or `public_repo` as well, but no `read:org`), and the request to `/repos/bobalabx/bobalab-web/collaborators?…` answers **200**. The panel then lists today's editors (compare with github.com → repository → Settings → Collaborators) and the invitations waiting.
+   - **If the list is refused** (the panel says "GitHub didn't show who can edit", and the collaborators request answers 403 or 404): GitHub wants `read:org` as well, as its documentation says. Add `read:org` to the Worker's allow-list (`providerScopes.github.allowed` in the Worker fork's `src/index.js`) and redeploy the Worker; then set `access.scopes` to `["repo", "read:org"]` in `cms/source.mjs`, run `node scripts/cms/build-config.mjs`, release, and repeat this step. Do it in that order: a scope the Worker does not allow makes it ask GitHub for its default `repo,user` instead, and the panel then says "GitHub didn't give “read:org”". Do the same before any move to an organization (HANDOVER §4).
+   - Then invite one real new editor (or a lab member's second account) and check that they get GitHub's email, accept it, and can sign in and save; cancel or remove as needed. Note the results, including the `X-OAuth-Scopes` value and the collaborators answer, in `docs/TESTING-REPORT.md`, and update the HYPOTHESIS labels in DECISIONS D-20. Until this passes, keep managing editors on github.com as well.
 
 ## Appendix: what the workflows need
 

@@ -7,7 +7,10 @@
  *    in. It says whether the live site is up to date and, after a Save, follows
  *    that save: "Saved. The live site updates in about 2 minutes." → "Live on
  *    the site ✓ · View page" (or "Saved · not shown on the live site because …"
- *    for a hidden entry). [Recent changes] opens the sheet.
+ *    for a hidden entry). [Recent changes] opens the sheet; [Who can edit]
+ *    opens cms-access.js's panel (D-20), when that file is loaded. Below
+ *    800 px that button is at the top of the sheet instead, so the one-line
+ *    dock keeps its words.
  *  - saved({...}) is called by cms-save.js after every save. The dock finds the
  *    save's commit (BobalabHistory.mine: the editor's newest commit of that
  *    file that is not the version they started from; 5 retries 2 s apart),
@@ -335,9 +338,19 @@
     });
     action.hidden = true;
     var notes = u.el("span", { className: "bl-dock__notes" });
-    var recent = u.button("Recent changes", "bl-btn bl-dock__recent", function () {
-      openRecentChanges();
+    // The button itself gets the focus back (Safari does not focus a clicked button).
+    var recent = u.button("Recent changes", "bl-btn bl-dock__recent", function (e) {
+      openRecentChanges(e && e.currentTarget);
     });
+    // "Who can edit" (cms-access.js, D-20), for everyone signed in; it loads before this file.
+    // Below 800 px it is in the Recent changes sheet instead (cms-ui.css).
+    var access = root.BobalabAccess;
+    var who =
+      access && typeof access.open === "function"
+        ? u.button("Who can edit", "bl-btn bl-dock__recent bl-dock__access", function (e) {
+            access.open(e && e.currentTarget);
+          })
+        : null;
     var dockEl = u.el(
       "div",
       {
@@ -345,7 +358,7 @@
         className: "bl-dock",
         attrs: { role: "region", "aria-label": "Live site status", "data-tone": "idle" },
       },
-      [dot, u.el("div", { className: "bl-dock__body" }, [text, action, notes]), recent],
+      [dot, u.el("div", { className: "bl-dock__body" }, [text, action, notes]), recent, who],
     );
     box.appendChild(bannerEl);
     box.appendChild(dockEl);
@@ -355,6 +368,7 @@
       action: action,
       notes: notes,
       recent: recent,
+      access: who,
       banner: bannerEl,
       bannerText: bannerText,
       bannerOpen: bannerOpen,
@@ -1059,14 +1073,14 @@
     }
   }
 
-  /** Open the "Recent changes" sheet (a modal dialog). */
-  function openRecentChanges() {
+  /** Open the "Recent changes" sheet (a modal dialog); `from` (or the focused element) gets the focus back. */
+  function openRecentChanges(from) {
     if (!hasDom()) return;
     if (S.sheet) return;
     var u = ui();
     var h = hist();
     var d = root.document;
-    var opener = d.activeElement;
+    var opener = from && from.nodeType === 1 ? from : d.activeElement;
     var site = S.site || (deploy() && deploy().lastSite && deploy().lastSite()) || null;
     var list = u.el("div", { className: "bl-sheet__list" });
     var problem = u.el("div", { className: "bl-sheet__problem" });
@@ -1076,7 +1090,19 @@
     more.hidden = true;
     var card = statusCard(site);
     var behind = false;
-    var content = u.el("div", { className: "bl-sheet__content" }, [card, problem, list, more]);
+    // Below 800 px "Who can edit" (D-20) is here instead of in the dock's row, so
+    // the one-line dock keeps its words (cms-ui.css shows one or the other).
+    var access = root.BobalabAccess;
+    var who =
+      access && typeof access.open === "function"
+        ? u.el("div", { className: "bl-sheet__access" }, [
+            u.button("Who can edit", "bl-btn", function () {
+              closeSheet();
+              access.open(opener);
+            }),
+          ])
+        : null;
+    var content = u.el("div", { className: "bl-sheet__content" }, [who, card, problem, list, more]);
     var page = 0;
     var lastDay = "";
     var lastList = null;

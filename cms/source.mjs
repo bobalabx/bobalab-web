@@ -52,6 +52,20 @@ export const backend = {
   },
 };
 
+/**
+ * "Who can edit" (docs/DECISIONS.md D-20): the extra GitHub permission an admin
+ * gives in the dashboard, through the same sign-in Worker as `backend`.
+ * public/admin/cms-access.js asks the Worker for exactly these scopes and
+ * refuses a token that lacks one of them. GitHub documents "read:org" as well as
+ * "repo" for listing collaborators; whether "repo" alone is enough for the
+ * personal repository is a HYPOTHESIS until SETUP-PRODUCTION §H step 8 has been
+ * run. To add "read:org": first add it to the Worker's allow-list
+ * (providerScopes.github.allowed in its src/index.js; for any scope missing
+ * there the Worker silently asks GitHub for its default "repo,user"), then here,
+ * then run `node scripts/cms/build-config.mjs`.
+ */
+export const access = { scopes: ["repo"] };
+
 /** The GitHub Actions workflow that builds and deploys the site after every Save (.github/workflows/). */
 export const DEPLOY_WORKFLOW = "deploy.yml";
 

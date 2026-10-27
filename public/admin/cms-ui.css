@@ -93,7 +93,8 @@
   padding: 2px 10px;
   font-size: 13px;
 }
-.bl-btn[disabled] {
+.bl-btn[disabled],
+.bl-btn[aria-disabled="true"] {
   opacity: 0.6;
   cursor: default;
 }
@@ -337,6 +338,10 @@ dialog.bl-dialog.bl-sheet:not([open]) {
   border-top: 1px solid #d9dcd6;
   background: #ffffff;
 }
+/* "Who can edit" at the top of the sheet: phones only (below), where the dock has no room for it. */
+.bl-sheet__access {
+  display: none;
+}
 .bl-sheet__status {
   margin: 4px 0 12px;
   padding: 10px 12px;
@@ -434,6 +439,189 @@ dialog.bl-dialog.bl-sheet:not([open]) {
   font-weight: 600;
 }
 
+/* ---- Who can edit (cms-access.js, D-20) ---------------------------------------
+ * The same sheet as Recent changes. Rows reuse .bl-avatar; "you", "owner" and
+ * "admin" are neutral chips (#1f2329 on #eceef1, 13.6:1), "Expired" the amber one.
+ * The status line is a polite live region that is always in the page (empty =
+ * no box) and sticks to the top of the scrolling list, so the answer to a
+ * look-up or a change is in view wherever the button was. cms-access.js gives
+ * the list a scroll-padding-top of the box's height and scrolls a focused
+ * control out from under it (WCAG 2.4.11 Focus Not Obscured). Problems: #7a2a00 on
+ * #fdece4 (8.5:1); done: #1d4f2c on #eaf5ee (8.5:1); busy/info: #1f2329 on
+ * #f4f5f7 (14.5:1). The words always say what happened; colour only repeats it.
+ */
+
+.bl-access__status {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 4px 0 12px;
+  padding: 10px 12px;
+  border: 1px solid #d9dcd6;
+  border-radius: 8px;
+  background: #f4f5f7;
+  font-weight: 600;
+  /* a white band above it hides the rows that scroll under it */
+  box-shadow:
+    0 -6px 0 #ffffff,
+    0 2px 6px rgba(31, 35, 41, 0.12);
+}
+.bl-access__status:empty {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+.bl-access__status[data-tone="problem"] {
+  border-color: #e3b29a;
+  background: #fdece4;
+  color: #7a2a00;
+}
+.bl-access__status[data-tone="ok"] {
+  border-color: #9cc7a9;
+  background: #eaf5ee;
+  color: #1d4f2c;
+}
+.bl-access__chip {
+  background: #eceef1;
+  color: #1f2329;
+}
+.bl-access__chip--warn {
+  background: #fff4d6;
+  color: #5c4300;
+}
+.bl-access__view a {
+  color: #0f6e7d;
+  text-decoration: underline;
+}
+.bl-access__view p {
+  margin: 0 0 10px;
+}
+.bl-access__heading {
+  margin: 16px 0 6px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.bl-access__heading:focus {
+  outline: none;
+}
+.bl-access__heading:focus-visible {
+  outline: 2px solid #3a69c7;
+  outline-offset: 2px;
+}
+.bl-access__view > .bl-access__heading:first-child,
+.bl-access__section-head:first-child .bl-access__heading {
+  margin-top: 4px;
+}
+.bl-access__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.bl-access__section-head .bl-access__heading {
+  margin-bottom: 4px;
+}
+.bl-access__list {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+}
+.bl-access__row,
+.bl-access__card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid #eceeea;
+}
+.bl-access__card {
+  margin: 8px 0;
+  padding: 10px 12px;
+  border: 1px solid #8b9099;
+  border-radius: 8px;
+}
+.bl-access__card:focus {
+  outline: 2px solid #3a69c7;
+  outline-offset: 2px;
+}
+.bl-access__main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.bl-access__view .bl-access__name,
+.bl-access__view .bl-access__meta {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.bl-access__login {
+  color: #4f5765;
+}
+.bl-access__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  color: #4f5765;
+  font-size: 13px;
+}
+.bl-access__side {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.bl-access__field label {
+  display: block;
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+.bl-access__field-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.bl-access__input {
+  box-sizing: border-box;
+  flex: 1 1 200px;
+  min-width: 0;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid #767b85; /* 4.3:1 */
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1f2329;
+  font: inherit;
+}
+.bl-access__input[disabled] {
+  background: #f4f5f7;
+}
+.bl-access__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+.bl-access__view .bl-access__waiting {
+  margin: 0;
+  flex: 1 1 100%;
+  font-weight: 600;
+}
+.bl-access__view .bl-access__note {
+  color: #4f5765;
+  font-size: 13px;
+}
+.bl-access__footer {
+  margin: 16px 0 8px;
+  padding-top: 10px;
+  border-top: 1px solid #d9dcd6;
+}
+.bl-access__footer .bl-access__note {
+  margin: 0 0 8px;
+}
+
 /* ---- Phones and narrow windows (spec §8) -------------------------------------- */
 
 @media (max-width: 799px) {
@@ -470,6 +658,24 @@ dialog.bl-dialog.bl-sheet:not([open]) {
   }
   .bl-check {
     min-height: 44px;
+  }
+  .bl-access__input {
+    min-height: 44px;
+    font-size: 16px; /* iOS zooms into smaller text fields */
+  }
+  .bl-access__view a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  /* The one-line dock keeps its words: "Who can edit" moves into Recent changes (D-20). */
+  .bl-dock__access {
+    display: none;
+  }
+  .bl-sheet__access {
+    display: flex;
+    justify-content: flex-end;
+    margin: 4px 0 0;
   }
   .bl-toast {
     width: 100%;

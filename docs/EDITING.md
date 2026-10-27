@@ -2,7 +2,7 @@
 
 This guide is for lab members who edit the website through the content manager (Decap CMS) at **`/admin/`** on the live site, today `https://bobalabx.github.io/bobalab-web/admin/`. You do not need to know Git or code. Maintainers set up the system once (`docs/SETUP-PRODUCTION.md`) and look after it (`docs/HANDOVER.md`).
 
-Contents: [1. Sign in](#1-sign-in) · [2. Save and the Draft switch](#2-save-and-the-draft-switch) · [3. Save goes live](#3-save-goes-live-what-not-live-yet-and-hidden-mean) (the status box, [the live preview column](#32-the-live-preview-column), [what Save refuses](#33-what-save-refuses-and-what-the-site-check-is), [someone else saved this entry](#34-someone-else-saved-this-entry)) · [4. Consent rules](#4-consent-rules-people-photos-emails) · [5. Images and alt text](#5-images-and-alt-text) · [6. Research directions: order, colours, archiving](#6-research-directions-order-colours-archiving) · [7. Archive instead of deleting](#7-archive-instead-of-deleting) · [8. History: who changed what; restore a version](#8-history-who-changed-what-restore-a-version) · [9. Per-term checklist](#9-per-term-checklist) · [10. PDF accessibility checklist](#10-pdf-accessibility-checklist) · [11. Practice on your own computer](#11-practice-on-your-own-computer-no-account) · [12. Tips, phones and known quirks](#12-tips-phones-and-known-quirks) · [13. How Fig. 1 is made from your entries](#13-how-fig-1-is-made-from-your-entries) · [14. Study-design figures](#14-study-design-figures-plate_verified) · [15. Links for lab members](#15-links-for-lab-members) · [16. Writing for the site](#16-writing-for-the-site)
+Contents: [1. Sign in](#1-sign-in) · [2. Save and the Draft switch](#2-save-and-the-draft-switch) · [3. Save goes live](#3-save-goes-live-what-not-live-yet-and-hidden-mean) (the status box, [the live preview column](#32-the-live-preview-column), [what Save refuses](#33-what-save-refuses-and-what-the-site-check-is), [someone else saved this entry](#34-someone-else-saved-this-entry)) · [4. Consent rules](#4-consent-rules-people-photos-emails) · [5. Images and alt text](#5-images-and-alt-text) · [6. Research directions: order, colours, archiving](#6-research-directions-order-colours-archiving) · [7. Archive instead of deleting](#7-archive-instead-of-deleting) · [8. History: who changed what; restore a version](#8-history-who-changed-what-restore-a-version) · [9. Per-term checklist](#9-per-term-checklist) · [10. PDF accessibility checklist](#10-pdf-accessibility-checklist) · [11. Practice on your own computer](#11-practice-on-your-own-computer-no-account) · [12. Tips, phones and known quirks](#12-tips-phones-and-known-quirks) · [13. How Fig. 1 is made from your entries](#13-how-fig-1-is-made-from-your-entries) · [14. Study-design figures](#14-study-design-figures-plate_verified) · [15. Links for lab members](#15-links-for-lab-members) · [16. Writing for the site](#16-writing-for-the-site) · [17. Who can edit (owner and admins)](#17-who-can-edit-owner-and-admins)
 
 > **New editor, October 2026 (DECISIONS D-17 to D-19).** What changed for editors:
 >
@@ -13,6 +13,7 @@ Contents: [1. Sign in](#1-sign-in) · [2. Save and the Draft switch](#2-save-and
 > - A status box at the bottom right says when your change is live, and **Recent changes** lists every save to the website (section 3.1).
 > - The header **Media** page and the **Delete** button in the image library are gone (section 5).
 > - You can edit and save from a phone (section 12).
+> - **Who can edit**, next to Recent changes, shows who has access; the owner adds and removes editors there (section 17, DECISIONS D-20).
 
 > **Redesign, October 2026 (DECISIONS D-13).** The site looks different from before, but what you edit is almost the same. Type and status show as plain words, lists are ruled rows, a person without a consented photo gets a square with their initials, Fig. 1 draws one line per research direction (section 13), publications have the checkbox **Study-design figure checked by the authors** (section 14), and status provenance is printed once per page as a footnote, so never type it into a field (section 16).
 
@@ -20,10 +21,10 @@ Contents: [1. Sign in](#1-sign-in) · [2. Save and the Draft switch](#2-save-and
 
 ## 1. Sign in
 
-1. You need a free GitHub account with **two-factor authentication** turned on, and a maintainer must give your account edit access to the lab's website repository. Ask the PI or a maintainer.
+1. You need a free GitHub account with **two-factor authentication** turned on, and the owner must give your account edit access to the lab's website repository: send the PI or a maintainer your GitHub **username** (not your email), accept the invitation email GitHub then sends you, and sign in. **Who can edit** in the status box shows who has access (section 17).
 2. Open `/admin/` on the site and click **Login with GitHub**. A GitHub window asks you to authorise "BOBALAB website CMS" the first time. Approve it.
 3. The CMS keeps your sign-in in this browser. On a shared or public computer, use the account menu (top right) → **Log out** when you finish.
-4. If sign-in fails ("Not found" or a blank pop-up), you probably have no access yet, or the pop-up was blocked. Allow pop-ups for the site and try again.
+4. If sign-in fails ("Not found" or a blank pop-up), you probably have no access yet (or have not accepted GitHub's invitation email), or the pop-up was blocked. Allow pop-ups for the site and try again.
 
 What you can change: News, Publications, People, Research directions, Projects, Opportunities, the fixed Pages (Home texts, Join, About, Accessibility, Privacy) and site Settings (including the links for lab members, section 15).
 
@@ -273,8 +274,8 @@ The repository is public, so **every saved version stays readable on github.com*
 
 At the **start of each term** (PI or a maintainer):
 
-- [ ] **Onboard new editors:** each has a GitHub account with 2FA and edit access to the repository; they sign in once, read this guide and try the local practice mode (section 11).
-- [ ] **Offboard leavers:** remove departed members' access on GitHub.
+- [ ] **Onboard new editors:** each has a GitHub account with 2FA; the owner invites them under **Who can edit** (section 17); they accept GitHub's email, sign in once, read this guide and try the local practice mode (section 11).
+- [ ] **Offboard leavers:** the owner removes them under **Who can edit**, and cancels invitations nobody accepted.
 - [ ] **People:** add new members only with consent (section 4); set **End** dates for people who left; ask leavers about "Now at" and email consent; check photos still have consent.
 - [ ] **Opportunities and Join page:** update each opportunity's **Status** and **As of** date (URAP rounds open and close every term); make sure nothing says "open" without a dated source.
 - [ ] **Publications:** refresh statuses (revisions, acceptances) and their **As of** dates; add new papers and preprints; check that working papers have **Status source**; turn on **Study-design figure checked by the authors** only for figures an author has approved (section 14).
@@ -377,3 +378,30 @@ The redesign follows one rule for words: say what the lab does, plainly, and let
 - **Name the lab sparingly.** The home page and the header already name BOBALAB. In the mission, the About text and the Join texts, write "we" or "the lab".
 - **No arrows, emoji or all-caps labels** in titles or summaries. The site adds its own link styling.
 - **Only facts with a source.** Do not round a talk that was "announced" into one that was "given", or a "submitted" paper into an "accepted" one. If you are unsure, ask the PI and leave the cautious wording.
+
+## 17. Who can edit (owner and admins)
+
+**Who can edit**, the button in the status box at the bottom right (next to **Recent changes**; on a phone, open **Recent changes** and it is at the top), lists everyone who can sign in to the dashboard and save, and the invitations nobody has accepted yet. Everyone can open it. Only the owner account **bobalabx** can change the list (or, if the lab ever moves the website to a GitHub organization, the repository's admins; `docs/HANDOVER.md` §4). Everyone else sees whom to ask. In the local practice mode (section 11) the button only explains that access is managed on the live dashboard.
+
+**The extra permission.** Your everyday sign-in only lets the dashboard save the website. To manage editors, the panel first says **"Managing editors needs one extra GitHub permission"**:
+
+1. Press **Give permission**. A GitHub window opens. Check that it shows the owner account, then approve. GitHub describes this permission as full control of all the account's repositories, public and private; the dashboard uses it only to list, invite and remove the website's editors. If nothing opens, allow pop-ups for the site and press it again.
+2. The lists appear. The dashboard page forgets the permission when you reload or close it, when you press **Turn it off now** at the bottom of the panel, and after at most 8 hours. Next time, press **Give permission** again (the GitHub window may then open and close by itself).
+3. If GitHub was signed in with another account, the panel says so ("GitHub gave the permission for @…, but you are signed in to this dashboard as @…"). Switch accounts on github.com, then press **Try again**. That other account has now given the permission on GitHub too; withdraw it there as described below.
+
+**GitHub itself keeps the permission** for the account until you withdraw it: on github.com, **Settings → Applications → Authorized OAuth Apps → BOBALAB website CMS → Revoke**. Forgetting it in the dashboard does not withdraw it. Withdrawing also signs that account out of the dashboard at once (its everyday sign-in goes with it); the next sign-in asks for approval again. GitHub may also add the wider permission to the owner account's later everyday sign-ins to the dashboard.
+
+If the panel says **"GitHub didn't show who can edit"**, GitHub wants one more permission than the dashboard can ask for today: tell a maintainer (DECISIONS D-20) and, until it is fixed, add and remove editors on github.com (repository → **Settings → Collaborators**; the panel links there).
+
+**Add an editor:**
+
+1. Ask the new editor for their **GitHub username**, not their email address. No account yet? They make a free one at `github.com/signup`, turn on two-factor authentication (section 1) and send you the username.
+2. **Who can edit → Invite someone:** type the username and press **Look up** (or Enter). Check that the photo and name are the right person (**See their GitHub profile** opens it), then press **Send invitation**.
+3. The panel says **"Invitation sent. <name> must accept the email from GitHub before they can sign in."** They open the invitation email from GitHub and accept it.
+4. They sign in at `/admin/` (section 1). Until they accept, they are listed under **Invited, not accepted yet**; **Cancel invitation** withdraws it. An invitation marked **Expired** must be cancelled and sent again.
+
+GitHub allows at most 50 invitations a day for the repository.
+
+**Remove an editor** (someone who left the lab): **Who can edit → Remove** next to their name. The confirmation reads "<name> will no longer be able to sign in to the dashboard or save. Their past changes stay in History." Press **Remove <name>**. The owner account itself is never offered for removal. An admin of an organization can remove their own access; the confirmation then warns that it happens at once and that only another admin can add them back.
+
+Removing someone ends their access to the repository; a sign-in left in their browser can no longer save (DECISIONS D-20).

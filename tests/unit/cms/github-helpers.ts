@@ -220,6 +220,7 @@ type Listener = (e: FakeEvent) => void;
 export class FakeEvent {
   defaultPrevented = false;
   propagationStopped = false;
+  immediateStopped = false;
   target: FakeElement | null = null;
   currentTarget: FakeElement | null = null;
   constructor(
@@ -243,6 +244,7 @@ export class FakeEvent {
   }
   stopImmediatePropagation() {
     this.propagationStopped = true;
+    this.immediateStopped = true;
   }
 }
 
@@ -641,7 +643,11 @@ export function boot(o: BootOptions) {
   }
   const calls: Call[] = [];
   const handler = o.fetch ?? (() => ({ status: 404, body: { message: "Not Found" } }));
-  const winListeners = new Map<string, Listener[]>();
+  // Window listeners with their capture flag (addEventListener's third argument).
+  const winListeners = new Map<string, Array<{ fn: Listener; capture: boolean }>>();
+  const capture = (opt: unknown) =>
+    opt === true ||
+    (typeof opt === "object" && opt !== null && !!(opt as { capture?: boolean }).capture);
   const location = {
     hash: o.hash ?? "",
     get href() {
@@ -665,12 +671,15 @@ export function boot(o: BootOptions) {
     setInterval: clock.setInterval,
     clearInterval: clock.clearInterval,
     open: (url: string, target: string, features: string) => opened.push({ url, target, features }),
-    addEventListener: (t: string, fn: Listener) =>
-      winListeners.set(t, [...(winListeners.get(t) ?? []), fn]),
-    removeEventListener: (t: string, fn: Listener) =>
+    addEventListener: (t: string, fn: Listener, opt?: unknown) => {
+      const list = winListeners.get(t) ?? [];
+      if (!list.some((l) => l.fn === fn && l.capture === capture(opt)))
+        winListeners.set(t, [...list, { fn, capture: capture(opt) }]);
+    },
+    removeEventListener: (t: string, fn: Listener, opt?: unknown) =>
       winListeners.set(
         t,
-        (winListeners.get(t) ?? []).filter((f) => f !== fn),
+        (winListeners.get(t) ?? []).filter((l) => !(l.fn === fn && l.capture === capture(opt))),
       ),
     fetch: async (url: string, init: Record<string, unknown> = {}) => {
       const headers = { ...((init.headers as Record<string, string>) ?? {}) };
@@ -690,10 +699,19 @@ export function boot(o: BootOptions) {
       filename: f,
     });
   }
-  /** Fire a window event (hashchange, storage, …). */
+  /**
+   * Fire a window event (hashchange, storage, message, …). As in browsers at the
+   * event's target: capturing listeners first, then the others, each group in
+   * the order added; stopImmediatePropagation() ends it.
+   */
   const fire = (type: string, init: Record<string, unknown> = {}) => {
     const e = Object.assign(new FakeEvent(type), init);
-    for (const fn of [...(winListeners.get(type) ?? [])]) fn(e);
+    const all = winListeners.get(type) ?? [];
+    for (const l of [...all.filter((x) => x.capture), ...all.filter((x) => !x.capture)]) {
+      l.fn(e);
+      if (e.immediateStopped) break;
+    }
+    return e;
   };
   /** Change the address hash and fire hashchange. */
   const go = (hash: string) => {

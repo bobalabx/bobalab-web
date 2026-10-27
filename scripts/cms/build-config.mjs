@@ -59,6 +59,9 @@ const YAML_HEADER = (src) =>
  *    the zod schema; see allOrNothingRules), file names of new entries,
  *    cross-field order, "required when …" and distinct-list rules (cms/source.mjs);
  *  - repo, branch, deployWorkflow: what History and the deploy status read on GitHub;
+ *  - auth: the sign-in service (backend.base_url, auth_endpoint), the live
+ *    dashboard's address and the scopes of the extra permission (access.scopes),
+ *    for "Who can edit" (cms-access.js, D-20);
  *  - media: the upload folder and the deploy's upload rules (asset-budget.mjs);
  *  - hiddenNames: the salted hashes cms-guards.js checks a Save against;
  *  - features: cms/source.mjs switches (previewCheckBlocksSave);
@@ -95,6 +98,7 @@ export async function buildCmsData(models, source) {
     repo: source.backend.repo,
     branch: source.backend.branch,
     deployWorkflow: deployWorkflow(source),
+    auth: authService(source),
     media: mediaRules(source),
     hiddenNames: hiddenNames(),
     features: { ...source.features },
@@ -117,6 +121,28 @@ export function deployWorkflow(source) {
   if (!name || !fs.existsSync(path.join(ROOT, ".github", "workflows", name)))
     throw new Error(`DEPLOY_WORKFLOW: no .github/workflows/${name}`);
   return name;
+}
+
+/**
+ * The sign-in service Decap uses (cms/source.mjs backend), for the extra
+ * permission of "Who can edit" (cms-access.js opens it with scope=<scopes>, from
+ * cms/source.mjs access.scopes), and the live dashboard's address (the local
+ * demo's panel links to it). Decap trims the trailing slash of base_url and the
+ * slashes around auth_endpoint; so do we.
+ */
+export function authService(source) {
+  const scopes = [...(source.access?.scopes ?? ["repo"])].map(String);
+  if (!scopes.includes("repo") || scopes.some((s) => !/^[a-z_]+(?::[a-z_]+)?$/.test(s))) {
+    throw new Error(
+      `cms/source.mjs access.scopes must include "repo" and only GitHub scope names: ${JSON.stringify(scopes)}`,
+    );
+  }
+  return {
+    baseUrl: String(source.backend.base_url).replace(/\/+$/, ""),
+    endpoint: String(source.backend.auth_endpoint ?? "auth").replace(/^\/+|\/+$/g, ""),
+    adminUrl: `${String(source.SITE_URL).replace(/\/+$/, "")}/admin/`,
+    scopes,
+  };
 }
 
 /**

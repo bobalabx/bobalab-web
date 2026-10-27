@@ -270,6 +270,12 @@ window.BOBALAB_CMS = {
   repo: "bobalabx/bobalab-web",
   branch: "main",
   deployWorkflow: "deploy.yml",
+  auth: {
+    baseUrl: "https://bobalab-cms-auth.bobalabx-034.workers.dev",
+    endpoint: "auth",
+    adminUrl: "https://bobalabx.github.io/bobalab-web/admin/",
+    scopes: ["repo"],
+  },
   media: {
     folder: "public/uploads",
     publicFolder: "/uploads",

@@ -29,8 +29,8 @@
     <!--
       Order matters (Interfaces §1). cms-data.js first: it also sets CMS_MANUAL_INIT.
       cms-widgets.js directly after decap-cms.js; cms-hooks.js before cms-save.js, so
-      its preSave checks run first; cms-locale.js before Decap starts; cms-start.js
-      starts Decap last.
+      its preSave checks run first; cms-locale.js before Decap starts; cms-access.js
+      before cms-dock.js (the dock's "Who can edit" button); cms-start.js starts Decap last.
     -->
     <script src="cms-data.js"></script>
     <script src="decap-cms.js"></script>
@@ -42,6 +42,7 @@
     <script src="cms-github.js"></script>
     <script src="cms-history.js"></script>
     <script src="cms-deploy.js"></script>
+    <script src="cms-access.js"></script>
     <script src="cms-dock.js"></script>
     <script src="cms-live.js"></script>
     <script src="cms-guards.js"></script>

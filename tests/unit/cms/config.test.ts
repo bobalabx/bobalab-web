@@ -12,7 +12,7 @@ import { describe, expect, it } from "vitest";
 import { SWATCH_IDS } from "@/lib/content/palette";
 import * as schema from "@/lib/content/schema";
 import { backendProblems, verdict } from "../../../scripts/cms/check-backend.mjs";
-import { generate, localDemoOptions } from "../../../scripts/cms/build-config.mjs";
+import { authService, generate, localDemoOptions } from "../../../scripts/cms/build-config.mjs";
 import { buildDecapConfig, URL_OR_PATH_RE } from "../../../scripts/cms/lib/decap-config.mjs";
 import { contentModels } from "../../../scripts/cms/lib/zod-model.mjs";
 import { LIMITS, UPLOAD_EXTENSIONS } from "../../../scripts/perf/asset-budget.mjs";
@@ -281,6 +281,7 @@ describe("/admin/ page", () => {
       "cms-github.js",
       "cms-history.js",
       "cms-deploy.js",
+      "cms-access.js",
       "cms-dock.js",
       "cms-live.js",
       "cms-guards.js",
@@ -290,6 +291,8 @@ describe("/admin/ page", () => {
     ]);
     // widgets.test.ts: cms-widgets.js directly after decap-cms.js.
     expect(order.indexOf("cms-widgets.js")).toBe(order.indexOf("decap-cms.js") + 1);
+    // The dock draws "Who can edit" only when cms-access.js has loaded before it (D-20).
+    expect(order.indexOf("cms-access.js")).toBe(order.indexOf("cms-dock.js") - 1);
     expect(fs.readFileSync(admin("cms-data.js"), "utf8")).toContain(
       "window.CMS_MANUAL_INIT = true;",
     );
@@ -317,11 +320,38 @@ describe("cms-data.js (Interfaces §2)", () => {
       "repo",
       "branch",
       "deployWorkflow",
+      "auth",
       "media",
       "hiddenNames",
       "features",
       "collections",
     ]);
+  });
+
+  it("auth: Decap's own sign-in service, the live dashboard and the extra permission's scopes, for Who can edit (D-20)", () => {
+    expect(cms.auth).toEqual({
+      baseUrl: String(config.backend.base_url).replace(/\/+$/, ""),
+      endpoint: config.backend.auth_endpoint,
+      adminUrl: `${source.SITE_URL}/admin/`,
+      scopes: [...source.access.scopes],
+    });
+    expect(new URL(cms.auth.baseUrl).protocol).toBe("https:");
+    // Every scope must be on the Worker's allow-list, or it silently asks for "repo,user"
+    // instead (bobalab-cms-auth src/index.js providerScopes.github.allowed, read 2026-10-26).
+    const workerAllows = ["repo", "public_repo", "user", "read:user", "user:email"];
+    expect(cms.auth.scopes).toContain("repo");
+    for (const s of cms.auth.scopes) expect(workerAllows, s).toContain(s);
+  });
+
+  it("auth.scopes must include repo and be GitHub scope names", () => {
+    const base = { backend: source.backend, SITE_URL: source.SITE_URL };
+    expect(authService({ ...base, access: { scopes: ["repo", "read:org"] } }).scopes).toEqual([
+      "repo",
+      "read:org",
+    ]);
+    expect(authService(base).scopes).toEqual(["repo"]);
+    expect(() => authService({ ...base, access: { scopes: ["read:org"] } })).toThrow(/"repo"/);
+    expect(() => authService({ ...base, access: { scopes: ["repo", "repo user"] } })).toThrow();
   });
 
   it("media: the upload folder and the deploy's own upload rules (asset-budget.mjs)", () => {
