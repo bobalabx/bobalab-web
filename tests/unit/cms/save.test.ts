@@ -1047,10 +1047,12 @@ describe("the note next to Save (spec §3.5)", () => {
   it("says what Save will do", () => {
     expect(N("news", { draft: false })).toBe("Save puts this on the live site");
     expect(N("publications", {})).toBe("Save puts this on the live site");
-    expect(N("news", { draft: true })).toBe("Save keeps it hidden: Draft is on");
+    expect(N("news", { draft: true })).toBe("Save keeps it hidden: Visible is No");
     expect(N("people", { listed: false })).toBe("Not listed: Save won't show this person");
-    expect(N("people", { listed: true, draft: true })).toBe("Save keeps it hidden: Draft is on");
-    expect(N("people", { listed: true, role: "phd" })).toBe("Save updates the People page");
+    expect(N("people", { listed: true, draft: true })).toBe("Save keeps it hidden: Visible is No");
+    expect(N("people", { listed: true, role: "phd" })).toBe(
+      "Save updates the People section of the home page",
+    );
     expect(N("people", { listed: true, role: "phd", profile_page: true })).toBe(
       "Save puts this on the live site",
     );
@@ -1071,7 +1073,7 @@ describe("the note next to Save (spec §3.5)", () => {
     expect(note.textContent).toBe("Save puts this on the live site");
     b.setEntry({ data: { ...b.entry()!.data, draft: true } });
     await b.run(50);
-    expect(note.textContent).toBe("Save keeps it hidden: Draft is on");
+    expect(note.textContent).toBe("Save keeps it hidden: Visible is No");
   });
 
   it("says when the live column is hidden, with [Show it]", async () => {
@@ -1167,8 +1169,8 @@ describe("after the commit: the dock and listeners (spec §3.9)", () => {
     expect(V("people", "x", { listed: false })).toEqual({ state: "hidden", reason: "unlisted" });
     expect(V("people", "x", { listed: true, role: "phd" })).toEqual({
       state: "elsewhere",
-      path: "/people/",
-      label: "People page",
+      path: "/#people",
+      label: "People section",
     });
     expect(V("people", "x", { listed: true, role: "pi" })).toEqual({
       state: "live",

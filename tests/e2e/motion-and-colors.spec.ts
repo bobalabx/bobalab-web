@@ -21,7 +21,8 @@ import { test, expect, type APIRequestContext, type Page } from "@playwright/tes
 import AxeBuilder from "@axe-core/playwright";
 
 const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
-const ROUTES = ["/", "/research/", "/publications/", "/people/", "/news/", "/join/"];
+// "/" also covers the People section (the People list moved there, D-21).
+const ROUTES = ["/", "/research/", "/publications/", "/news/", "/join/"];
 const MAX_MS = 120;
 
 test.describe.configure({ mode: "parallel" });

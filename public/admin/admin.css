@@ -369,3 +369,81 @@ body.ReactModal__Body--open #bl-corner:has([data-bl-rename]) {
     color: #ffffff;
   }
 }
+
+/*
+ * "Visible on the website: Yes / No" (cms-widgets.js, DECISIONS D-21): the stored
+ * `draft` switch shown the other way round. The word says the state, so colour
+ * is never the only cue (WCAG 1.4.1). Track on #0f6e7d (5.9:1) / off #6b7280
+ * (4.8:1 on white); the knob has a #4f5765 ring (7.3:1). At least 32 px tall.
+ */
+.bl-visible {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+  margin: 0;
+  padding: 2px 8px 2px 2px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #1f2329;
+  font:
+    600 14px/1.2 system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+  cursor: pointer;
+}
+.bl-visible:focus-visible {
+  outline: 2px solid #3a69c7;
+  outline-offset: 2px;
+}
+.bl-visible__track {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  background: #6b7280;
+  transition: background-color 0.15s;
+}
+.bl-visible--yes .bl-visible__track {
+  background: #0f6e7d;
+}
+.bl-visible__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: 1px solid #4f5765;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: transform 0.15s;
+}
+.bl-visible--yes .bl-visible__knob {
+  transform: translateX(18px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .bl-visible__track,
+  .bl-visible__knob {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  .bl-visible__track {
+    border: 1px solid ButtonText;
+    background: Canvas;
+  }
+  .bl-visible--yes .bl-visible__track {
+    background: Highlight;
+  }
+  .bl-visible__knob {
+    border-color: ButtonText;
+    background: ButtonText;
+  }
+}

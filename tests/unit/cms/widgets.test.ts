@@ -106,8 +106,9 @@ describe("cms-widgets.js rich-text gate", () => {
     };
     const ctx = vm.createContext({ window: win, globalThis: win });
     vm.runInContext(fs.readFileSync(path.join(ROOT, "public/admin/cms-widgets.js"), "utf8"), ctx);
-    expect(registered).toHaveLength(1);
-    const [name, control, preview, schema] = registered[0]!;
+    // Our own "visible" switch is registered too (below).
+    expect(registered.map((r) => r[0])).toEqual(["visible", "richtext"]);
+    const [name, control, preview, schema] = registered.find((r) => r[0] === "richtext")!;
     expect(name).toBe("richtext");
     expect(preview).toBe(base.preview);
     expect(schema).toBe(base.schema);
@@ -230,5 +231,116 @@ describe("cms-widgets.js list patch (CMS-01: removing a Direction order item)", 
     );
     expect(preview).toBe(list.preview);
     expect(schema).toBe(list.schema);
+  });
+});
+
+describe("cms-widgets.js “Visible on the website” switch (D-21)", () => {
+  type El = { type: string; props: Record<string, unknown>; children: unknown[] };
+  type Props = Record<string, unknown> & { value?: unknown; onChange: (v: unknown) => void };
+  type Spec = Record<string, unknown> & { render: () => El; props: Props };
+  const w = window.BobalabCmsWidgets as {
+    isHidden: (v: unknown) => boolean;
+    toggled: (v: unknown) => boolean;
+    visibleWord: (v: unknown) => string;
+    visibleControl: (h: unknown, createClass: unknown) => (p: Props) => Spec;
+  };
+  const h = (type: string, props: Record<string, unknown> | null, ...children: unknown[]): El => ({
+    type,
+    props: props ?? {},
+    children,
+  });
+  // A stand-in for create-react-class: an instance with its methods bound (autobinding).
+  const createClass = (spec: Record<string, unknown>) => (props: Props) => {
+    const inst: Record<string, unknown> = { props };
+    for (const [k, v] of Object.entries(spec))
+      inst[k] = typeof v === "function" ? (v as (...a: unknown[]) => unknown).bind(inst) : v;
+    return inst as Spec;
+  };
+  const text = (el: unknown): string =>
+    typeof el === "string"
+      ? el
+      : el && typeof el === "object"
+        ? ((el as El).children ?? []).map(text).join("")
+        : "";
+  const buttonOf = (root: El) => root.children[0] as El;
+
+  function mount(value: unknown) {
+    const changes: unknown[] = [];
+    const Control = w.visibleControl(h, createClass);
+    const inst = Control({
+      value,
+      forID: "draft-field-1",
+      classNameWrapper: "wrap",
+      setActiveStyle: () => {},
+      setInactiveStyle: () => {},
+      onChange: (v) => changes.push(v),
+    });
+    return { inst, changes, root: inst.render() };
+  }
+
+  it("shows the stored draft boolean the other way round: Yes = draft false, No = draft true", () => {
+    expect([false, undefined, null, true].map(w.visibleWord)).toEqual(["Yes", "Yes", "Yes", "No"]);
+    expect([false, undefined, true].map(w.isHidden)).toEqual([false, false, true]);
+    // One press always writes a boolean, never a string.
+    expect([false, undefined, true].map(w.toggled)).toEqual([true, true, false]);
+  });
+
+  it("is a named switch with a visible Yes/No word, and opening an entry changes nothing", () => {
+    for (const [value, checked, word] of [
+      [false, "true", "Yes"],
+      [undefined, "true", "Yes"],
+      [true, "false", "No"],
+    ] as const) {
+      const { root, changes } = mount(value);
+      const b = buttonOf(root);
+      expect(root.props.className).toBe("wrap");
+      expect(b.type).toBe("button");
+      expect(b.props.type).toBe("button");
+      expect(b.props.role).toBe("switch");
+      // Decap's label points at forID, so the label "Visible on the website" names the switch.
+      expect(b.props.id).toBe("draft-field-1");
+      expect(b.props["aria-checked"]).toBe(checked);
+      expect(text(b)).toBe(word);
+      expect((b.children[0] as El).props["aria-hidden"]).toBe("true");
+      expect(changes).toEqual([]); // no onChange while mounting: no "Unsaved changes"
+    }
+  });
+
+  it("a press writes the opposite boolean to draft (Enter and Space press a button)", () => {
+    const shown = mount(false);
+    (buttonOf(shown.root).props.onClick as () => void)();
+    expect(shown.changes).toEqual([true]);
+    const hidden = mount(true);
+    (buttonOf(hidden.root).props.onClick as () => void)();
+    expect(hidden.changes).toEqual([false]);
+    const unset = mount(undefined);
+    (buttonOf(unset.root).props.onClick as () => void)();
+    expect(unset.changes).toEqual([true]);
+  });
+
+  it("follows a value set from outside (Restore, Undo, Bring in their changes)", () => {
+    const { inst } = mount(false);
+    expect(buttonOf(inst.render()).props["aria-checked"]).toBe("true");
+    inst.props = { ...inst.props, value: true };
+    expect(buttonOf(inst.render()).props["aria-checked"]).toBe("false");
+    expect(text(buttonOf(inst.render()))).toBe("No");
+  });
+
+  it("is registered as “visible” before Decap starts, with a Yes/No preview", () => {
+    const registered: unknown[][] = [];
+    const win: Record<string, unknown> = {
+      h,
+      createClass,
+      CMS: {
+        getWidget: () => undefined,
+        registerWidget: (...a: unknown[]) => registered.push(a),
+      },
+    };
+    const ctx = vm.createContext({ window: win, globalThis: win });
+    vm.runInContext(fs.readFileSync(path.join(ROOT, "public/admin/cms-widgets.js"), "utf8"), ctx);
+    expect(registered.map((r) => r[0])).toEqual(["visible"]);
+    const preview = registered[0]![2] as (p: { value: unknown }) => El;
+    expect(text(preview({ value: true }))).toBe("No");
+    expect(text(preview({ value: false }))).toBe("Yes");
   });
 });

@@ -5,7 +5,7 @@
  * links, email only when public), then — each only when it has content — bio,
  * the newest publications (as a linked author, D-05 counted) with a link to the
  * full filtered list, work in progress (collapsed), projects (compact rows),
- * news.
+ * news. The breadcrumb and "All people" lead to the home page's People section.
  * The PI's page carries ProfilePage + Person JSON-LD (brief §G3).
  */
 import Link from "next/link";
@@ -21,6 +21,7 @@ import { CompactProjectList } from "@/components/projects/CompactProjectList";
 import { PersonAvatar } from "./PersonAvatar";
 import { PersonLinks } from "./PersonLinks";
 import { Breadcrumb } from "./Breadcrumb";
+import { PEOPLE_HREF } from "./anchor";
 import type { PersonProfileModel } from "./model";
 import "@/components/projects/projects.css";
 import "@/components/pages/pages.css";
@@ -54,7 +55,7 @@ export function PersonProfile({ content, model }: { content: Content; model: Per
 
   return (
     <div className="bl-container pg pp-page pp-profile">
-      <Breadcrumb trail={[{ href: "/people/", label: "People" }]} current={p.name} />
+      <Breadcrumb trail={[{ href: PEOPLE_HREF, label: "People" }]} current={p.name} />
 
       <header className="pp-profile__head">
         <PersonAvatar
@@ -208,7 +209,7 @@ export function PersonProfile({ content, model }: { content: Content; model: Per
       </div>
 
       <p className="pp-back pg-track">
-        <Link href="/people/" className="bl-cta bl-cta--quiet">
+        <Link href={PEOPLE_HREF} className="bl-cta bl-cta--quiet">
           All people
         </Link>
       </p>

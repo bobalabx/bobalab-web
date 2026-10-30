@@ -12,7 +12,6 @@ import {
   avatarSwatch,
   buildPeopleIndex,
   buildPersonProfile,
-  countLabel,
   personLinks,
   roleLine,
   tenureLine,
@@ -83,39 +82,19 @@ describe("buildPeopleIndex — order and grouping (§D9)", () => {
     }
   });
 
-  it("builds role and direction chip options only from people present", () => {
-    expect(m.roleOptions.map((o) => [o.value, o.count])).toEqual([
-      ["pi", 1],
-      ["postdoc", 1],
-      ["graduate", 2], // a PhD student + gray-alum (master's, alumni); emery-hidden is unlisted
-      ["undergrad", 2],
-      ["affiliate", 1],
-    ]);
-    expect(m.directionOptions.map((o) => [o.value, o.label, o.count])).toEqual([
-      ["advice", "Fixture Advice", 1],
-      ["platforms", "Fixture Platforms", 1],
-    ]);
-    expect(m.showFilters).toBe(true);
+  it("lists every rendered person once, current members first, in DOM order", () => {
+    expect(slugsOf(m.all)).toEqual([...slugsOf(m.current), ...slugsOf(m.alumniItems)]);
+    expect(new Set(slugsOf(m.all)).size).toBe(m.all.length);
+    expect(slugsOf(m.current)).toEqual(m.groups.flatMap((g) => slugsOf(g.items)));
+    expect(slugsOf(m.alumniItems)).toEqual(m.alumni.flatMap((y) => slugsOf(y.items)));
   });
 
-  it("summarises the roster with singular/plural labels", () => {
-    expect(m.summary).toEqual([
-      { count: 1, label: "Principal investigator" },
-      { count: 1, label: "Postdoctoral scholar" },
-      { count: 1, label: "Graduate student" },
-      { count: 1, label: "Undergraduate RA" },
-      { count: 1, label: "Affiliate" },
-      { count: 2, label: "Alumni" },
+  it("gives every group and year a stable heading id", () => {
+    expect(m.groups.map((g) => g.id)).toEqual(m.groups.map((g) => `people-${g.role}`));
+    expect(m.alumni.map((y) => [y.id, y.label])).toEqual([
+      ["alumni-2025", "2025"],
+      ["alumni-2024", "2024"],
     ]);
-    expect(countLabel("undergrad", 8)).toBe("Undergraduate RAs");
-  });
-
-  it("hides the filter island when there is nothing to filter", () => {
-    const one = buildPeopleIndex(load("n1"));
-    expect(one.all.length).toBeGreaterThan(0);
-    if (one.roleOptions.length < 2 && one.directionOptions.length === 0) {
-      expect(one.showFilters).toBe(false);
-    }
   });
 });
 

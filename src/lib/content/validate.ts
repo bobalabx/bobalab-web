@@ -264,6 +264,7 @@ export function validateContent(raw: RawContent, opts: ValidateOptions = {}): Is
     if (prevT) err("E_DUP_TITLE", `title duplicates ${prevT}`, p.file, "title");
     else titles.set(t, p.file);
 
+    // Work in progress, Under review and Under revision are dated and sourced.
     if (p.status !== "published") {
       if (!p.as_of)
         err("E_AS_OF_MISSING", `status "${p.status}" needs an as_of date`, p.file, "as_of");

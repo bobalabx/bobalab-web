@@ -53,17 +53,17 @@ describe("related papers: status as a plain label (copy sweep)", () => {
     renderToStaticMarkup(createElement(NewsRelated, { item: news(refs) }));
   it("prints a review status with no 'as of' date and no provenance note", () => {
     const rr = pub({
-      status: "major-revision" as PublicationView["status"],
+      status: "under-revision" as PublicationView["status"],
       status_note: "at Manufacturing & Service Operations Management",
       as_of: "2026-05",
     });
     const out = render([rr]);
-    expect(out).toContain("Major revision at Manufacturing &amp; Service Operations Management");
+    expect(out).toContain("Under revision at Manufacturing &amp; Service Operations Management");
     expect(out).not.toMatch(/as of|reported by the lab/i);
   });
   it("leaves out a version-only status after an arXiv preprint venue", () => {
     const pre = pub({
-      status: "preprint" as PublicationView["status"],
+      status: "in-progress" as PublicationView["status"],
       status_note: "v2",
       venue: "arXiv preprint",
       as_of: "2026-09",
@@ -71,7 +71,7 @@ describe("related papers: status as a plain label (copy sweep)", () => {
     });
     const out = render([pre]);
     expect(out).toContain("<cite>arXiv preprint</cite>");
-    expect(out).not.toMatch(/Preprint v2|as of/);
+    expect(out).not.toMatch(/v2|as of/);
   });
   it("prints nothing for a published paper or a bare in-progress status", () => {
     const wip = pub({
@@ -79,6 +79,6 @@ describe("related papers: status as a plain label (copy sweep)", () => {
       type: "work-in-progress" as PublicationView["type"],
     });
     expect(render([pub({}), wip])).not.toContain('class="nw-related__sub">Published');
-    expect(render([wip])).not.toContain("In progress");
+    expect(render([wip])).not.toMatch(/in progress/i);
   });
 });

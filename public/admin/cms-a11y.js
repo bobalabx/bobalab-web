@@ -117,11 +117,18 @@
 
     // Labels of fields that are required only in some cases say so themselves,
     // e.g. "Alt text (required with an image)"; Decap would still append
-    // "(optional)" (CMS-09). The suffix is hidden, also from screen readers.
+    // "(optional)" (CMS-09). The suffix is hidden, also from screen readers. So it
+    // is on "Visible on the website" (cms-widgets.js), a Yes/No switch that always
+    // has a value.
     list = document.querySelectorAll("label > span:not([hidden])");
     for (i = 0; i < list.length; i++) {
-      var own = list[i].parentElement.firstChild;
-      if (own && own.nodeType === 3 && /\(required\b/i.test(own.textContent || ""))
+      var lab = list[i].parentElement;
+      var own = lab.firstChild;
+      var target = lab.htmlFor ? document.getElementById(lab.htmlFor) : null;
+      if (
+        (own && own.nodeType === 3 && /\(required\b/i.test(own.textContent || "")) ||
+        (target && target.classList && target.classList.contains("bl-visible"))
+      )
         list[i].setAttribute("hidden", "");
     }
 

@@ -1005,7 +1005,7 @@ test.describe("verification fixes, on a scratch copy of content/", () => {
       await page.getByLabel("Type", { exact: true }).click();
       await page.getByRole("option", { name: "Working paper", exact: true }).click();
       await page.getByLabel("Status", { exact: true }).click();
-      await page.getByRole("option", { name: "Working paper", exact: true }).click();
+      await page.getByRole("option", { name: "Work in progress", exact: true }).click();
       await publish(page);
       // The refusal stays in the "Not saved" band at the top of the form (spec §3.8).
       const band = page.locator("#bl-refusal");

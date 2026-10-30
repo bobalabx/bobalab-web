@@ -14,8 +14,7 @@ import type { PublicationView } from "@/lib/content/load";
 import { scholarMeta } from "@/lib/seo/scholar";
 import { toCsl, typeWord } from "./csl";
 
-type ScholarInput = Parameters<typeof scholarMeta>[0] &
-  Pick<PublicationView, "slug" | "links" | "status">;
+type ScholarInput = Parameters<typeof scholarMeta>[0] & Pick<PublicationView, "slug" | "links">;
 
 export function paperScholarMeta(p: ScholarInput): Record<string, string | string[]> {
   const meta = scholarMeta(p);

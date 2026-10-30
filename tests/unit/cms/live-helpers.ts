@@ -683,7 +683,7 @@ export const PEOPLE_FIELDS = [
   { name: "now_at_public", label: "Now at public", widget: "boolean", default: false },
   { name: "listed", label: "Listed (consented to appear)", widget: "boolean", default: false },
   { name: "profile_page", label: "Profile page", widget: "boolean", default: false },
-  { name: "draft", label: "Draft · pending lab review", widget: "boolean", default: false },
+  { name: "draft", label: "Visible on the website", widget: "visible", default: false },
   { name: "body", label: "Bio", widget: "richtext" },
 ];
 
@@ -711,7 +711,7 @@ export const NEWS_FIELDS = [
       { name: "alt", label: "Alt text (required with an image)", widget: "string" },
     ],
   },
-  { name: "draft", label: "Draft · pending lab review", widget: "boolean", default: false },
+  { name: "draft", label: "Visible on the website", widget: "visible", default: false },
   { name: "body", label: "Body", widget: "richtext" },
 ];
 
@@ -736,7 +736,7 @@ export const PROJECT_FIELDS = [
       { name: "public", label: "Public", widget: "boolean" },
     ],
   },
-  { name: "draft", label: "Draft · pending lab review", widget: "boolean", default: false },
+  { name: "draft", label: "Visible on the website", widget: "visible", default: false },
   { name: "body", label: "Body", widget: "richtext" },
 ];
 

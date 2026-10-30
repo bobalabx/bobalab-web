@@ -86,7 +86,9 @@
   var DEVICE_KEY = "bobalab.live.device";
   var VISITOR_KEY = "bobalab.live.visitor";
   var INTENT_KEY = "bobalab.live.intent";
-  var DRAFT = "“Draft · pending lab review”";
+  // The visibility switch: stored as `draft` (true = hidden), shown as
+  // "Visible on the website: Yes / No" (cms-widgets.js, DECISIONS D-21).
+  var VISIBLE = "“Visible on the website”";
   var RASTER_DEFAULT = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
 
   // ---------------------------------------------------------------------------
@@ -105,10 +107,12 @@
       { page: "home", label: "Home page" },
       { page: "research", label: "Research page" },
     ],
+    // "people" is the home page's People section (the list page moved there,
+    // 2026-10-29): it draws that section alone, so the person shows highlighted
+    // at the top of the column.
     people: [
       { page: "person", label: "Profile page", own: true },
-      { page: "people", label: "People page" },
-      { page: "home", label: "Home page" },
+      { page: "people", label: "People (home page)" },
     ],
     directions: [
       { page: "direction", label: "Direction page", own: true },
@@ -134,7 +138,6 @@
     "pages/privacy": [{ page: "privacy", label: "Privacy page" }],
     settings: [
       { page: "home", label: "Home page" },
-      { page: "people", label: "People page" },
       { page: "research", label: "Research page" },
       { page: "about", label: "About page" },
     ],
@@ -215,7 +218,7 @@
       "a publication with a public version (a DOI, PDF, SSRN, arXiv, publisher or presentation link) needs a year",
     E_DIRECTIONS_EMPTY: "choose at least one research direction",
     E_DIR_COUNT_ZERO:
-      "once the site has launched, at least one research direction must be on it (not a draft, not archived)",
+      "once the site has launched, at least one research direction must be on it (visible on the website, not archived)",
     E_DIR_COUNT_MAX: "the site shows at most 8 research directions, and this would make {n}",
     E_DIR_ORDER_DUP: "“Direction order” lists the same direction twice",
     E_DIR_ORDER_UNKNOWN: "“Direction order” lists a direction that doesn't exist",
@@ -418,8 +421,12 @@
   // ---------------------------------------------------------------------------
   // Site addresses (Interfaces §1)
 
+  /** The home page's People section (src/lib/preview/targets.ts PEOPLE_PATH). */
+  var PEOPLE_PATH = "/#people";
+
   function targetPath(t) {
     if (!t || t.page === "home") return "/";
+    if (t.page === "people") return PEOPLE_PATH;
     var section = SECTION[t.page] || t.page;
     return SLUG_PAGES[t.page] ? "/" + section + "/" + (t.slug || "") + "/" : "/" + section + "/";
   }
@@ -435,9 +442,11 @@
     }, "/");
   }
 
-  /** A page's published address, past the 10-minute page cache. */
+  /** A page's published address, past the 10-minute page cache (a #section stays last). */
   function publishedUrl(path) {
-    return siteRoot() + String(path || "/").replace(/^\//, "") + "?v=" + Date.now();
+    var p = String(path || "/").replace(/^\//, "");
+    var hash = p.indexOf("#") === -1 ? "" : p.slice(p.indexOf("#"));
+    return siteRoot() + p.slice(0, p.length - hash.length) + "?v=" + Date.now() + hash;
   }
 
   /** The preview page beside /admin/. */
@@ -608,15 +617,15 @@
   /**
    * Where Save puts this entry on the live site (mirrors hasLivePage,
    * src/lib/content/links.ts): its own page ("live"), another page
-   * ("elsewhere": the People page, the Join page, the Home page) or none
-   * ("hidden", because Draft is on or Listed is off).
+   * ("elsewhere": the home page's People section, the Join page, the Home page)
+   * or none ("hidden", because Visible on the website is No or Listed is off).
    */
   function viewTarget(collection, slug, data) {
     var d = isObj(data) ? data : {};
     if (d.draft === true) return { state: "hidden", reason: "draft" };
     if (collection === "people") {
       if (d.listed !== true) return { state: "hidden", reason: "unlisted" };
-      if (!hasProfile(d)) return { state: "elsewhere", path: "/people/", label: "People page" };
+      if (!hasProfile(d)) return { state: "elsewhere", path: PEOPLE_PATH, label: "People section" };
       return { state: "live", path: "/people/" + slug + "/" };
     }
     if (collection === "opportunities")
@@ -1031,8 +1040,17 @@
     if (w === "list") return [];
     if ((w === "relation" || w === "select") && f.multiple) return [];
     if (w === "object") return {};
-    if (w === "boolean") return f.default !== undefined ? !!f.default : false;
+    // "visible" shows the boolean `draft` the other way round (cms-widgets.js).
+    if (w === "boolean" || w === "visible") return f.default !== undefined ? !!f.default : false;
     return "";
+  }
+
+  /** The editor's word for a select value ("Under revision"), or the value itself. */
+  function optionLabel(f, value) {
+    var opts = (f && Array.isArray(f.options) ? f.options : []).filter(function (o) {
+      return isObj(o) ? o.value === value : o === value;
+    });
+    return opts.length && isObj(opts[0]) && opts[0].label ? String(opts[0].label) : String(value);
   }
 
   function inferCollection(fields) {
@@ -1131,7 +1149,10 @@
    *    a collaborator's consent and a partner's "Public", matched by name).
    *  - PERSONAL_FIELDS that are empty now stay empty unless `personal` is set.
    *  - Without photo consent, the photo and its alt text are cleared.
-   *  - A draft stays a draft unless `unhide` is set.
+   *  - A retired value (cms-data.js `legacy`: a publication status from before
+   *    2026-10-29) comes back as the value it means now.
+   *  - A hidden entry ("Visible on the website: No", stored as draft: true)
+   *    stays hidden unless `unhide` is set.
    *  - Upload addresses missing from `uploads` (a Set of "/uploads/…") are cleared.
    */
   function buildRestorePatch(current, old, fields, opts) {
@@ -1152,6 +1173,26 @@
       var has = Object.prototype.hasOwnProperty.call(prev, f.name) && prev[f.name] !== undefined;
       if (has) result[f.name] = clone(prev[f.name]);
       else if (cur[f.name] !== undefined) result[f.name] = emptyFor(f);
+    });
+
+    // A value the site no longer has (a publication status saved before
+    // 2026-10-29) comes back as the value it means now (cms-data.js `legacy`).
+    var legacy = (cfg().legacy || {})[collection] || {};
+    Object.keys(legacy).forEach(function (name) {
+      var f = fieldDef(list, name);
+      var map = legacy[name] || {};
+      var v = result[name];
+      if (!f || typeof v !== "string" || !Object.prototype.hasOwnProperty.call(map, v)) return;
+      result[name] = map[v];
+      notes.push(
+        "“" +
+          shortLabel(f.label || name) +
+          "”: that version says “" +
+          v +
+          "”, which the site no longer uses, so it comes back as “" +
+          optionLabel(f, map[v]) +
+          "”.",
+      );
     });
 
     // Consent and visibility: on → off only.
@@ -1233,16 +1274,16 @@
       }
     }
 
-    // A draft stays hidden unless asked otherwise.
+    // A hidden entry (Visible on the website: No) stays hidden unless asked otherwise.
     if (cur.draft === true && result.draft !== true && fieldDef(list, "draft") && !opts.unhide) {
       result.draft = true;
       held.draft = true;
       notes.push(
         "It stays hidden: " +
-          DRAFT +
-          " stays on." +
+          VISIBLE +
+          " stays No." +
           (undo
-            ? " Turn it off in the form and Save to show it."
+            ? " Set it to Yes in the form and Save to show it."
             : " Tick “Also make it visible on the live site” to show it."),
       );
     }
@@ -3255,8 +3296,8 @@
           "p",
           { key: "draft", className: "bl-band__text" },
           "Hidden from the live site: " +
-            DRAFT +
-            " is on." +
+            VISIBLE +
+            " is No." +
             (V.visitor ? "" : " Shown here so you can check it."),
         ),
       );
@@ -3266,7 +3307,7 @@
           h(
             "p",
             { key: "listed", className: "bl-band__text" },
-            "Not listed: the site never shows or links this person, not even on the People page.",
+            "Not listed: the site never shows or links this person, not even in the People section of the home page.",
           ),
         );
       else {
@@ -3937,7 +3978,7 @@
             { key: "adv", className: "bl-history__note" },
             collection === "people"
               ? "To take it off the site, turn off “Listed” and Save."
-              : "To take it off the site, turn on " + DRAFT + " and Save.",
+              : "To take it off the site, set " + VISIBLE + " to No and Save.",
           ),
         );
       else if (row.parentSha)

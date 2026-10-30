@@ -526,6 +526,30 @@ describe("cms-history.js: what changed, in words", () => {
     ).toBe("Year: 2024 → 2025");
   });
 
+  it("“Visible on the website” reads the stored draft the other way round: Yes → No (D-21)", () => {
+    const vis = [{ name: "draft", label: "Visible on the website", widget: "visible" }];
+    const hid = h.diff({ draft: false }, { draft: true }, vis);
+    expect(hid).toEqual([
+      {
+        name: "draft",
+        label: "Visible on the website",
+        change: "changed",
+        before: "Yes",
+        after: "No",
+      },
+    ]);
+    expect(h.display(hid[0]!)).toBe("Visible on the website: Yes → No");
+    expect(h.display(h.diff({ draft: true }, {}, vis)[0]!)).toBe(
+      "Visible on the website: No → Yes",
+    );
+    // Not set is Yes, as the schema's default; a new hidden entry reads from that default.
+    expect(h.diff({}, { draft: false }, vis)).toEqual([]);
+    expect(h.diff(null, { draft: false }, vis)).toEqual([]);
+    expect(h.display(h.diff(null, { draft: true }, vis)[0]!)).toBe(
+      "Visible on the website: Yes → No",
+    );
+  });
+
   it("sameData(): equal parsed data despite Decap's rewriting (restore detection)", () => {
     const old = {
       title: "Talk",

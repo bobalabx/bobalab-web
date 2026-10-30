@@ -238,6 +238,12 @@ const cleanAffiliation = (a) =>
  * `documented`: the four items whose state anyone can check on a public
  * posting (SSRN / arXiv), as CONTENT-MAPPING §3.2 says (WP3 request 4 item 2,
  * which reversed the earlier WP7 rule "every non-published item is self-reported").
+ *
+ * HISTORICAL (2026-10-29): these are the status values of the first import. The
+ * schema now has four (in-progress, under-review, under-revision, published), so
+ * output written with these values would fail validation. The importer is
+ * retired (DECISIONS D-11) and must not be re-run; if it ever is, pass every
+ * value through STATUS_MAP in scripts/content/migrate-status.mjs (D-21).
  */
 const STATUS = {
   "precise-or-broad": {

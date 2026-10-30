@@ -274,19 +274,19 @@ describe("cms-hooks.js: rules the validator enforces as errors (CMS-04)", () => 
   const cases: Array<[string, string, string, (d: Record<string, unknown>) => void]> = [
     ["publication as it is", "publications", PUB, () => {}],
     [
-      "working paper without As of and Status source",
+      "work in progress without As of and Status source",
       "publications",
       PUB,
       (d) => {
-        d.status = "working-paper";
+        d.status = "in-progress";
       },
     ],
     [
-      "working paper with As of and Status source",
+      "work in progress with As of and Status source",
       "publications",
       PUB,
       (d) => {
-        d.status = "working-paper";
+        d.status = "in-progress";
         d.as_of = "2026-10";
         d.status_source = "self-reported";
       },
@@ -414,7 +414,7 @@ describe("cms-hooks.js: rules the validator enforces as errors (CMS-04)", () => 
 
   it("names every problem in one message", () => {
     expect(() =>
-      save("publications", { title: "T", type: "working-paper", status: "working-paper" }),
+      save("publications", { title: "T", type: "working-paper", status: "in-progress" }),
     ).toThrow(/^Not saved: “As of” is needed.*; “Status source” is needed.*; choose at least one/);
   });
 });

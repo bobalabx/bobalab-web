@@ -310,7 +310,7 @@ function baseSet(set, n, paperCounts, extra = {}) {
     });
     if (!extra.exactSeeds)
       paper(set, slugs.slice(0, 2), {
-        status: "major-revision",
+        status: "under-revision",
         status_note: "at Fixture Science",
         type: "working-paper",
       });

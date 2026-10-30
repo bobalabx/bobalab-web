@@ -63,7 +63,6 @@ async function load() {
     ...(await import("@/components/views/NewsListView")),
     ...(await import("@/components/views/JoinView")),
     ...(await import("@/components/views/AboutView")),
-    ...(await import("@/components/people/PeopleIndex")),
   };
   return { mark, renderToStaticMarkup, buildContent, loadRawContent, v };
 }
@@ -81,7 +80,6 @@ function renderAll(l: Loaded, dir: string, preview: boolean): Record<string, str
     news: r(<v.NewsListView c={c} />),
     join: r(<v.JoinView c={c} />),
     about: r(<v.AboutView c={c} />),
-    people: r(<v.PeopleIndex content={c} />),
   };
 }
 const marksIn = (html: string) => [...html.matchAll(/data-entry="([^"]+)"/g)].map((m) => m[1]!);
@@ -138,7 +136,8 @@ describe("entry marks", () => {
     expect(set("publications", "publications")).toEqual(slugs(c.publications));
     expect(set("news", "news")).toEqual(slugs(c.news));
     expect(set("join", "opportunities")).toEqual(slugs(c.opportunities));
-    expect(set("people", "people")).toEqual(slugs(c.people));
+    // The People list is the home page's last section (2026-10-29): everyone listed, alumni too.
+    expect(set("home", "people")).toEqual(slugs(c.people));
     // Every mark names a real entry of its collection.
     for (const m of Object.values(html).flatMap(marksIn))
       expect(m, m).toMatch(

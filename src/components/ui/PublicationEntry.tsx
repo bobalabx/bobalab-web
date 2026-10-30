@@ -16,7 +16,7 @@ import { pageRange, typeWord } from "@/lib/publications/csl";
 import { Badge, DraftBadge } from "./Badge";
 import { PearlTagList } from "./PearlTag";
 import { MaterialsRow, materialsFromPublication } from "./MaterialsRow";
-import { PUBLICATION_STATUS_LABELS } from "./labels";
+import { rowStatus } from "@/lib/publications/status";
 import { entryMark } from "@/lib/preview/mark";
 
 type Heading = "h2" | "h3" | "h4";
@@ -60,21 +60,18 @@ function Authors({ authors, currentPerson }: { authors: AuthorView[]; currentPer
 }
 
 /**
- * "Major revision at Manufacturing & Service Operations Management": the status
- * as a plain label. Pass the publication `type` so a bare "Working paper" status
- * on a working paper (which only repeats the type word and claims nothing) is
- * dropped (WP3 request 3). Pass the `venue` too: after "arXiv preprint" the
- * status "Preprint v2" only adds the version, so it is left out.
+ * "Under revision at Manufacturing & Service Operations Management": the status
+ * as a plain label. Pass the publication `type` so a bare Work in progress on a
+ * working paper or a work in progress (which only repeats the type word and
+ * claims nothing) is dropped (WP3 request 3). Pass the `venue` too: after
+ * "arXiv preprint" a version-only note ("v2") is left out. Wording rules:
+ * src/lib/publications/status.ts.
  */
 export function statusLine(
   p: Pick<PublicationView, "status" | "status_note"> & { venue?: string },
   type?: PublicationView["type"],
 ): string | null {
-  if (p.status === "published") return null;
-  if (p.status === "working-paper" && type === "working-paper" && !p.status_note) return null;
-  if (p.status === "in-progress" && type === "work-in-progress" && !p.status_note) return null;
-  if (p.status === "preprint" && /preprint/i.test(p.venue ?? "")) return null;
-  return `${PUBLICATION_STATUS_LABELS[p.status]}${p.status_note ? ` ${p.status_note}` : ""}`;
+  return rowStatus({ status: p.status, status_note: p.status_note, venue: p.venue, type });
 }
 
 export function PublicationEntry({

@@ -37,14 +37,16 @@ describe("WP2 request 2 / WP4 request 2: PearlTag small dot", () => {
   });
 });
 
-describe("WP3 request 3: no bare working-paper status echo", () => {
-  const base = { status: "working-paper", as_of: "2026-08", status_source: "documented" } as const;
-  it("drops a bare working-paper status on a working paper", () => {
+describe("WP3 request 3: no bare Work in progress echo on a working paper", () => {
+  const base = { status: "in-progress", as_of: "2026-08", status_source: "documented" } as const;
+  it("drops a bare Work in progress on a working paper", () => {
     expect(statusLine(base, "working-paper")).toBeNull();
   });
   it("keeps it when there is a note, or on another type", () => {
-    expect(statusLine({ ...base, status_note: "v2" }, "working-paper")).toMatch(/v2/);
-    expect(statusLine(base, "journal")).toBe("Working paper");
+    expect(statusLine({ ...base, status_note: "v2" }, "working-paper")).toBe(
+      "Work in progress, v2",
+    );
+    expect(statusLine(base, "journal")).toBe("Work in progress");
   });
 });
 

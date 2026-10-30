@@ -7,7 +7,7 @@ authors:
     person: park-sinchaisri
 type: working-paper
 year: 2026
-status: major-revision
+status: under-revision
 status_note: at Manufacturing & Service Operations Management
 status_source: self-reported
 as_of: "2026-04"

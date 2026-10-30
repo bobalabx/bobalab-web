@@ -94,9 +94,14 @@ function hiddenMatcher(paths: Map<string, string>, origins: string[]): RegExp | 
   return new RegExp(`${before}(${targets})(?=$|[/#?"')\\]>\\s])`, "g");
 }
 
-/** Where to send readers instead: the collection's index page ("/people/"). */
+/**
+ * Where to send readers instead: the collection's index page ("/news/"). People
+ * have no list page of their own since 2026-10-29: they are listed in the home
+ * page's People section (D-21).
+ */
 function indexOf(path: string): string {
-  return `/${path.split("/")[1]}/`;
+  const seg = path.split("/")[1];
+  return seg === "people" ? "/#people (the home page's People section)" : `/${seg}/`;
 }
 
 /**

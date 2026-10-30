@@ -7,9 +7,10 @@
  *  - each section's way on is one factual line at the foot of its list;
  *  - the hero: one h1, the who line from content (University of California kept
  *    together), the why line, exactly two links (one primary);
- *  - people (R18): only consented photos, round, alt = full name, first names
- *    (duplicates disambiguated), no initials discs, the team in words with no
- *    numbers (D-15: the count sentence is gone).
+ *  - people (#people; owner 2026-10-29: the People page moved onto the home
+ *    page): the section is the lab's whole list (the groups, the PI first,
+ *    alumni collapsed), last on the page, with the way to join at its foot and
+ *    no counts (D-15). The list itself is tested in tests/unit/people-page.
  */
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,7 +18,7 @@ import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { buildContent, loadRawContent, type Content } from "@/lib/content/load";
-import { currentPeople, homeHeroCopy } from "@/lib/content/queries";
+import { homeHeroCopy } from "@/lib/content/queries";
 import { dateSortKey } from "@/lib/content/dates";
 
 vi.mock("next/link", () => ({
@@ -37,17 +38,11 @@ vi.mock("next/link", () => ({
 }));
 
 const { recentPublications, recencyKeys } = await import("@/components/home/recent");
-const {
-  PapersSection,
-  PeopleSection,
-  NewsSection,
-  PUBLICATIONS_LINK,
-  PEOPLE_LINK,
-  NEWS_LINK,
-  firstNames,
-  paperMeta,
-} = await import("@/components/home/HomeSections");
+const { PapersSection, PeopleSection, NewsSection, PUBLICATIONS_LINK, NEWS_LINK, paperMeta } =
+  await import("@/components/home/HomeSections");
 const { affiliationText, HomeHero, HOME_STATEMENT } = await import("@/components/home/HomeHero");
+const { buildPeopleIndex } = await import("@/components/people/model");
+const { HomeView } = await import("@/components/views/HomeView");
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const TODAY = "2026-10-25";
@@ -123,27 +118,36 @@ describe("section foot lines", () => {
   it("wording: plain links, no stats (copy sweep)", () => {
     expect(PUBLICATIONS_LINK).toBe("All publications");
     expect(NEWS_LINK).toBe("All news");
-    expect(PEOPLE_LINK).toBe("Meet the lab");
-    for (const l of [PUBLICATIONS_LINK, NEWS_LINK, PEOPLE_LINK]) expect(l).not.toMatch(/\d|:/);
+    for (const l of [PUBLICATIONS_LINK, NEWS_LINK]) expect(l).not.toMatch(/\d|:/);
   });
 
   it("the link sits after the list, never in the section head; news is 4 one-liners", () => {
     const c = content();
     const html = [
       renderToStaticMarkup(<PapersSection items={recentPublications(c, 3)} />),
-      renderToStaticMarkup(<PeopleSection people={currentPeople(c)} email="lab@example.edu" />),
       renderToStaticMarkup(<NewsSection items={c.news.slice(0, 4)} />),
     ];
     for (const h of html) {
       const head = h.match(/<div class="bl-sec-h hm-sec-h">(.*?)<\/div>/)![1]!;
       expect(head).toMatch(/^<h2 id="h-[a-z]+">[^<]+<\/h2>$/);
       expect(h).toMatch(
-        /<p class="hm-more"><a href="\/(publications|people|news)\/">[^<]+<\/a><\/p><\/section>$/,
+        /<p class="hm-more"><a href="\/(publications|news)\/">[^<]+<\/a><\/p><\/section>$/,
       );
       expect(h).not.toMatch(/>All \d+/);
     }
-    expect(html[2]!.match(/<li>/g)).toHaveLength(Math.min(4, c.news.length));
-    expect(html[2]).not.toContain("bl-tags"); // one-liners: no direction tags
+    expect(html[1]!.match(/<li>/g)).toHaveLength(Math.min(4, c.news.length));
+    expect(html[1]).not.toContain("bl-tags"); // one-liners: no direction tags
+    // People: the same plain head; its foot is the way to join (no "Meet the lab" link).
+    const people = renderToStaticMarkup(
+      <PeopleSection people={buildPeopleIndex(c)} site={c.site} />,
+    );
+    expect(people.match(/<div class="bl-sec-h hm-sec-h">(.*?)<\/div>/)![1]).toBe(
+      '<h2 id="h-people">People</h2>',
+    );
+    expect(people).not.toContain("hm-more");
+    expect(people).toMatch(
+      /<div class="hm-people-foot"><p class="hm-join">[^]*<\/div><\/section>$/,
+    );
   });
 });
 
@@ -173,36 +177,50 @@ describe("hero", () => {
 
 describe("people", () => {
   const c = content();
-  const people = currentPeople(c);
-  const html = renderToStaticMarkup(<PeopleSection people={people} email="a@b.edu" />);
+  const model = buildPeopleIndex(c);
+  const site = { ...c.site, email: "a@b.edu" };
+  const html = renderToStaticMarkup(<PeopleSection people={model} site={site} />);
 
-  it("only photo_consent people are drawn; alt = full name; no initials discs", () => {
-    const imgs = [...html.matchAll(/<img [^>]*alt="([^"]*)"[^>]*>/g)].map((m) => m[1]);
-    const consented = people.filter((p) => p.photo_consent && p.photo);
-    expect(imgs).toHaveLength(consented.length);
-    for (const p of consented) expect(imgs).toContain(p.name.replace(/"/g, "&quot;"));
-    for (const p of people.filter((x) => !x.photo_consent)) expect(imgs).not.toContain(p.name);
-    expect(html).not.toContain("hm-ini");
+  it("is the home page's last section, at #people, with everyone the build keeps", () => {
+    expect(html).toMatch(
+      /^<section id="people" class="hm-sec hm-people-sec" aria-labelledby="h-people">/,
+    );
+    const home = renderToStaticMarkup(<HomeView c={c} />);
+    expect(home.match(/ id="people"/g)).toHaveLength(1);
+    const at = home.indexOf('<section id="people"');
+    expect(at).toBeGreaterThan(home.indexOf('aria-labelledby="h-news"'));
+    // Nothing follows it but the end of the page body.
+    expect(home.slice(home.indexOf("</section>", home.lastIndexOf('class="hm-people-foot"')))).toBe(
+      "</section></div>",
+    );
+    for (const p of c.people) expect(html, p.slug).toContain(`id="person-${p.slug}"`);
+    // The People page's group headings, the PI first, alumni last.
+    const groups = [
+      ...html.matchAll(/<h3 id="people-[a-z-]+" class="pp-group__title">([^<]+)<\/h3>/g),
+    ].map((m) => m[1]);
+    expect(groups).toEqual([
+      ...model.groups.map((g) => g.label),
+      ...(model.alumni.length ? ["Alumni"] : []),
+    ]);
+    expect(groups[0]).toBe("Principal investigator");
   });
 
   it("no team sentence, no former-members sentence and no counts (owner, copy sweep)", () => {
     expect(html).not.toContain("hm-team");
-    expect(html).not.toMatch(/leads the lab|former members|people page/i);
-    const text = html.replace(/<[^>]+>/g, " ");
-    expect(text).not.toMatch(/\b\d+\b/);
+    expect(html).not.toMatch(/leads the lab|former members|people page|Meet the lab/i);
+    const foot = html.slice(html.indexOf('<div class="hm-people-foot">'));
+    expect(foot.replace(/<[^>]+>/g, " ")).not.toMatch(/\b\d+\b/);
+    expect(html).not.toMatch(/>\d+ (members?|people|students?|RAs?|alumni)\b/i);
     expect(html).toContain('<a href="/join/">Join the lab</a>');
     expect(html).toContain('<a href="mailto:a@b.edu">a@b.edu</a>');
     expect(html).toMatch(/>Want to join or work with us\? See /);
   });
 
-  it("first names: preferred name in quotes, duplicates get a last initial", () => {
-    const m = firstNames([
-      { slug: "a", name: 'Zixian "Amy" Li' },
-      { slug: "b", name: "Ryan Sing Chan" },
-      { slug: "c", name: "Ryan Jesubalan" },
-      { slug: "d", name: "Mingyuan (Jeremy) Ma" },
-      { slug: "e", name: "Chloe Xiao" },
-    ]);
-    expect([...m.values()]).toEqual(["Amy", "Ryan C.", "Ryan J.", "Jeremy", "Chloe"]);
+  it("draws no round faces strip any more: square photos or initials in ruled rows", () => {
+    expect(html).not.toMatch(/hm-face|hm-ini/);
+    const imgs = [...html.matchAll(/<img [^>]*class="([^"]*)"/g)].map((m) => m[1]);
+    for (const cls of imgs) expect(cls).toMatch(/^pp-avatar pp-avatar--(card|lead)$/);
+    // Alumni rows carry no photo (D-13 item 5); current members show a consented one.
+    expect(imgs).toHaveLength(c.people.filter((p) => p.photo && !p.isAlumni).length);
   });
 });

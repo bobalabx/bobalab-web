@@ -12,7 +12,12 @@ import { describe, expect, it } from "vitest";
 import { SWATCH_IDS } from "@/lib/content/palette";
 import * as schema from "@/lib/content/schema";
 import { backendProblems, verdict } from "../../../scripts/cms/check-backend.mjs";
-import { authService, generate, localDemoOptions } from "../../../scripts/cms/build-config.mjs";
+import {
+  authService,
+  generate,
+  localDemoOptions,
+  localOptionsOf,
+} from "../../../scripts/cms/build-config.mjs";
 import { buildDecapConfig, URL_OR_PATH_RE } from "../../../scripts/cms/lib/decap-config.mjs";
 import { contentModels } from "../../../scripts/cms/lib/zod-model.mjs";
 import { LIMITS, UPLOAD_EXTENSIONS } from "../../../scripts/perf/asset-budget.mjs";
@@ -109,7 +114,7 @@ describe("production config.yml", () => {
     expect(new Set(sizes.file)).toEqual(new Set([LIMITS.uploadBytes]));
   });
 
-  it("hints: Draft, Listed and Photo say every save is public on github.com; no workflow board", () => {
+  it("hints: Visible, Listed and Photo say every save is public on github.com; no workflow board", () => {
     const text = JSON.stringify(config);
     expect(text).not.toMatch(/Draft → In review → Ready|board/);
     const people = collection("people").fields as Cfg[];
@@ -121,12 +126,81 @@ describe("production config.yml", () => {
     ])
       expect(f.hint).toContain("anyone can read every save on github.com");
     expect(field(collection("news").fields, "draft").hint).toMatch(
-      /^Hides this from the website\./,
+      /^No hides this from the live site\. You still see it in this editor's preview\./,
+    );
+    expect(field(people, "draft").hint).toMatch(
+      /^No hides this person from the home page's People section \(Alumni too\).*“Listed” \(consent\) still has to be on for them to appear at all\./,
+    );
+    // It never promises more than the site does: a hidden author's name stays on
+    // their papers and on the team of a project with one of them (projectTeamRows).
+    expect(field(people, "draft").hint).not.toMatch(/every other page|everywhere/);
+    expect(field(people, "draft").hint).toContain(
+      "Their name still shows where other entries name them: on papers they wrote (and then on that project's team list) and in news text.",
     );
     expect(field(collection("publications").fields, "featured").hint).toBe(
       "Not used on the site yet.",
     );
     expect(field(siteFields(), "direction_order").hint).toContain("Up/Down arrows");
+  });
+
+  it("every draft field is the “Visible on the website” switch, new entries visible (D-21)", () => {
+    const drafts: Array<[string, Cfg]> = [];
+    for (const c of config.collections as Cfg[]) {
+      if (c.folder) drafts.push([c.name, field(c.fields, "draft")]);
+      for (const f of (c.files ?? []) as Cfg[]) {
+        const d = field(f.fields, "draft");
+        if (d) drafts.push([`${c.name}/${f.name}`, d]);
+      }
+    }
+    // 6 folder collections + the 5 pages (Settings has no draft flag).
+    expect(drafts.map(([n]) => n).sort()).toEqual(
+      [
+        "directions",
+        "news",
+        "opportunities",
+        "people",
+        "projects",
+        "publications",
+        "pages/about",
+        "pages/accessibility",
+        "pages/home",
+        "pages/join",
+        "pages/privacy",
+      ].sort(),
+    );
+    for (const [n, d] of drafts) {
+      expect(d.widget, n).toBe("visible");
+      expect(d.label, n).toBe("Visible on the website");
+      expect(d.default, n).toBe(false);
+      expect(d.required, n).toBe(false);
+    }
+    // The old wording is gone from the editor, its lists and its filters.
+    const text = JSON.stringify(config);
+    expect(text).not.toMatch(/pending lab review|' · draft'|"Drafts"/);
+    for (const c of (config.collections as Cfg[]).filter((x) => x.folder)) {
+      expect(c.summary).toContain("{{fields.draft | ternary(' · hidden', '')}}");
+      expect(c.view_filters).toContainEqual({
+        label: "Hidden from the website",
+        field: "draft",
+        pattern: true,
+      });
+    }
+    // Only draft fields may use it, and a boolean takes no other widget.
+    const models = contentModels(schema) as unknown as Record<string, object>;
+    const withWidget = (collectionName: string, name: string, widget: string) => ({
+      ...source,
+      collections: (source.collections as Cfg[]).map((c) =>
+        c.name === collectionName
+          ? { ...c, fields: { ...c.fields, [name]: { ...c.fields[name], widget } } }
+          : c,
+      ),
+    });
+    expect(() => buildDecapConfig(models, withWidget("news", "draft", "string"))).toThrow(
+      /cannot hold a boolean/,
+    );
+    expect(() =>
+      buildDecapConfig(models, withWidget("publications", "featured", "visible")),
+    ).toThrow(/only for draft fields/);
   });
 
   it("uses richtext for every Markdown body and never offers deletion (archive instead)", () => {
@@ -325,7 +399,27 @@ describe("cms-data.js (Interfaces §2)", () => {
       "hiddenNames",
       "features",
       "collections",
+      "legacy",
     ]);
+  });
+
+  it("legacy: the retired publication statuses and what they mean now (migrate-status.mjs)", () => {
+    expect(cms.legacy).toEqual({
+      publications: {
+        status: {
+          "working-paper": "in-progress",
+          preprint: "in-progress",
+          submitted: "under-review",
+          "major-revision": "under-revision",
+          "revise-resubmit": "under-revision",
+          accepted: "published",
+          forthcoming: "published",
+        },
+      },
+    });
+    const now = field(collection("publications").fields, "status").options.map((o: Cfg) => o.value);
+    for (const to of Object.values(cms.legacy.publications.status)) expect(now).toContain(to);
+    for (const from of Object.keys(cms.legacy.publications.status)) expect(now).not.toContain(from);
   });
 
   it("auth: Decap's own sign-in service, the live dashboard and the extra permission's scopes, for Who can edit (D-20)", () => {
@@ -430,6 +524,27 @@ describe("the local demo (scripts/cms/local.mjs)", () => {
     // local.mjs passes the port it starts decap-server on.
     const script = fs.readFileSync(path.join(ROOT, "scripts", "cms", "local.mjs"), "utf8");
     expect(script).toMatch(/generate\(localDemoOptions\(\{ proxyPort: PROXY_PORT/);
+  }, 60_000);
+
+  it("leftover local demo files are regenerated for their own site and proxy, never left stale (D-21 fixer)", async () => {
+    // public/admin/config.local.yml and local.html stay in public/admin/ while the
+    // demo runs (or after it was killed), and the dev server serves them as they
+    // are: build-config.mjs reads back the addresses they were made for.
+    const opts = localDemoOptions({ proxyPort: 8123, sitePort: 3999 });
+    const files = (await generate(opts)) as Record<string, string>;
+    const text = files["public/admin/config.local.yml"]!;
+    expect(localOptionsOf(text)).toEqual(opts);
+    // An old file (an old label, say) gives the same addresses, so the new files replace it.
+    const old = text.replace("Visible on the website", "Draft · pending lab review");
+    expect(localOptionsOf(old)).toEqual(opts);
+    const again = (await generate(localOptionsOf(old)!)) as Record<string, string>;
+    expect(again["public/admin/config.local.yml"]).toBe(text);
+    expect(again["public/admin/local.html"]).toBe(files["public/admin/local.html"]);
+    // Not a local demo config: nothing to regenerate.
+    expect(localOptionsOf(fs.readFileSync(admin("config.yml"), "utf8"))).toBeNull();
+    expect(localOptionsOf(": not yaml : [")).toBeNull();
+    const script = fs.readFileSync(path.join(ROOT, "scripts", "cms", "build-config.mjs"), "utf8");
+    expect(script).toMatch(/localOptionsOf\(fs\.readFileSync\(leftLocalConfig/);
   }, 60_000);
 });
 

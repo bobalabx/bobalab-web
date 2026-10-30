@@ -136,7 +136,7 @@ describe("other publication types", () => {
     const p = {
       ...base,
       type: "working-paper",
-      status: "revise-resubmit",
+      status: "under-revision",
       venue: "SSRN working paper 4502968",
       year: 2026,
       doi: "10.2139/ssrn.4502968",
@@ -180,7 +180,7 @@ describe("other publication types", () => {
     const p = {
       ...base,
       type: "working-paper",
-      status: "preprint",
+      status: "in-progress",
       venue: "arXiv preprint",
       year: 2026,
       doi: "10.48550/arXiv.2603.02055",
@@ -201,7 +201,7 @@ describe("other publication types", () => {
     const p = {
       ...base,
       type: "working-paper",
-      status: "major-revision",
+      status: "under-revision",
       year: 2026,
       links: { pdf: "https://example.org/paper.pdf" },
     } as PublicationEntry;
@@ -218,7 +218,7 @@ describe("other publication types", () => {
       ...base,
       authors: [{ name: "Rim Hariss" }, { name: "Yanchong (Karen) Zheng" }],
       type: "working-paper",
-      status: "major-revision",
+      status: "under-revision",
       venue: "SSRN working paper 3634129",
       year: 2020,
       doi: "10.2139/ssrn.3634129",

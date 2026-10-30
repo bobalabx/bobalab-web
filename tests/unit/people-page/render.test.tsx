@@ -1,24 +1,33 @@
 /**
- * WP4 render tests: the People index and person page rendered to static HTML
- * from the fictional "consent-edge-cases" fixture (brief WP4 acceptance 1–6).
- * The HTML is also written to test-results/WP4/fixtures/ so the e2e visual
- * pass can screenshot fixture-only states (photos, directions, emails).
+ * WP4 render tests, now for the home page's People section (the separate
+ * People page moved onto the home page, owner 2026-10-29) and the person page,
+ * rendered to static HTML from the fictional "consent-edge-cases" fixture
+ * (brief WP4 acceptance 1–6). The HTML is also written to
+ * test-results/WP4/fixtures/ so the e2e visual pass can screenshot
+ * fixture-only states (photos, directions, emails).
  */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { buildContent, loadRawContent } from "@/lib/content/load";
+import { buildContent, loadRawContent, type Content } from "@/lib/content/load";
+import { DraftBadge } from "@/components/ui/Badge";
+import { PeopleSection } from "@/components/home/HomeSections";
 import { PeopleIndex } from "@/components/people/PeopleIndex";
 import { PersonProfile } from "@/components/people/PersonProfile";
-import { buildPersonProfile } from "@/components/people/model";
+import { buildPeopleIndex, buildPersonProfile } from "@/components/people/model";
 
 const FIX = fileURLToPath(new URL("../../fixtures/content/", import.meta.url));
 const OUT = fileURLToPath(new URL("../../../test-results/WP4/fixtures/", import.meta.url));
 const TODAY = "2026-10-20";
 const load = (set: string, preview = false) =>
   buildContent(loadRawContent(path.join(FIX, set)), { preview, today: TODAY });
+/** The home page's People section for a content set. */
+const section = (c: Content) =>
+  renderToStaticMarkup(<PeopleSection people={buildPeopleIndex(c)} site={c.site} />);
+/** What the Draft (hidden) marker renders as, whatever its words are. */
+const BADGE = renderToStaticMarkup(<DraftBadge />);
 
 /** next/link drops the trailing slash outside a Next build (trailingSlash is a build option). */
 const linksTo = (html: string, slug: string) => new RegExp(`href="/people/${slug}/?"`).test(html);
@@ -34,19 +43,21 @@ const between = (html: string, start: string, end: string) => {
   return i < 0 ? "" : html.slice(i, j < 0 ? undefined : j);
 };
 
-describe("People index (consent-edge-cases, production)", () => {
+describe("People section of the home page (consent-edge-cases, production)", () => {
   const c = load("consent-edge-cases");
-  const html = renderToStaticMarkup(<PeopleIndex content={c} />);
+  const html = section(c);
   save("index.html", html);
-  save(
-    "index-preview.html",
-    renderToStaticMarkup(<PeopleIndex content={load("consent-edge-cases", true)} />),
-  );
+  save("index-preview.html", section(load("consent-edge-cases", true)));
 
-  it("renders exactly one h1 and group headings in §D9 order", () => {
-    expect(html.match(/<h1\b/g)?.length).toBe(1);
-    const h2 = [...html.matchAll(/<h2 id="(people-[a-z-]+)"/g)].map((m) => m[1]);
-    expect(h2).toEqual([
+  it("is one <section id=people> under an h2; groups are h3 in §D9 order, names h4", () => {
+    expect(html).toMatch(
+      /^<section id="people" class="hm-sec hm-people-sec" aria-labelledby="h-people">/,
+    );
+    expect(html).not.toContain("<h1");
+    expect(html.match(/<h2\b/g)).toHaveLength(1);
+    expect(html).toContain('<h2 id="h-people">People</h2>');
+    const h3 = [...html.matchAll(/<h3 id="(people-[a-z-]+)"/g)].map((m) => m[1]);
+    expect(h3).toEqual([
       "people-pi",
       "people-postdoc",
       "people-graduate",
@@ -54,6 +65,11 @@ describe("People index (consent-edge-cases, production)", () => {
       "people-affiliate",
       "people-alumni",
     ]);
+    // Names sit one level below their group; alumni names below their year (h4).
+    expect(html).toMatch(/<h4 class="pp-card__name" id="person-avery-example">/);
+    expect(html).toMatch(/<h4 id="alumni-2025" class="pp-year__title">/);
+    expect(html).toMatch(/<h5 class="pp-alum__name" id="person-gray-alum">/);
+    expect(html).not.toMatch(/<h[36] class="pp-(card|alum)__name"/);
   });
 
   it("gives the principal investigator the wide lead card (well-formed class names)", () => {
@@ -64,6 +80,10 @@ describe("People index (consent-edge-cases, production)", () => {
     expect(html).toMatch(/<article class="pp-card" aria-labelledby="person-blair-sample"/);
     // Guard against class concatenation without a space (e.g. "pp-cardpp-card--lead").
     expect(html).not.toMatch(/class="[^"]*pp-[a-z]+pp-/);
+    // The lab's affiliation (site.yml) sits under the PI's title only.
+    const lead = between(html, 'class="pp-card pp-card--lead"', "</article>");
+    expect(lead).toContain(`<p class="pp-card__affil">${c.site.affiliation_text}</p>`);
+    expect(html.match(/pp-card__affil/g)).toHaveLength(1);
   });
 
   it("labels alumni year groups as role=group (aria-labelledby is prohibited on a bare div)", () => {
@@ -72,9 +92,9 @@ describe("People index (consent-edge-cases, production)", () => {
     for (const attrs of years) expect(attrs).toMatch(/role="group" aria-labelledby="alumni-/);
   });
 
-  it("shows no headcount under any group heading (copy sweep, D-15)", () => {
+  it("shows no headcount anywhere (copy sweep, D-15)", () => {
     expect(html).not.toContain("pp-group__count");
-    expect(html).not.toMatch(/>\d+ (person|people)</);
+    expect(html).not.toMatch(/>\d+ (person|people|members?|alumni)</i);
   });
 
   it("never renders or links an unlisted person (D-06, §F3)", () => {
@@ -134,7 +154,7 @@ describe("People index (consent-edge-cases, production)", () => {
   it("puts alumni in a collapsed <details>, grouped by end year (newest first)", () => {
     expect(html).toMatch(/<details class="pp-alumni__details">/);
     expect(html).not.toMatch(/<details[^>]*\bopen\b/);
-    const years = [...html.matchAll(/<h3 id="alumni-(\d{4})"/g)].map((m) => m[1]);
+    const years = [...html.matchAll(/<h4 id="alumni-(\d{4})"/g)].map((m) => m[1]);
     expect(years).toEqual(["2025", "2024"]);
     const alumni = between(html, '<details class="pp-alumni__details">', "</details>");
     expect(alumni).toContain("Finley Alum");
@@ -142,53 +162,69 @@ describe("People index (consent-edge-cases, production)", () => {
     expect(alumni).not.toContain("Harper Future");
   });
 
-  it("renders the filter chips as real buttons with aria-pressed, hidden without JS", () => {
-    const buttons = [
-      ...html.matchAll(/<button type="button" class="bl-chip press" aria-pressed="false">/g),
-    ];
-    // 5 group options (PhD and master's share "Graduate students") + 2 direction options.
-    expect(buttons.length).toBe(7);
-    expect(html).toContain("<legend");
-    expect(html).toContain(
-      "<noscript><style>.pp-filters{display:none!important}</style></noscript>",
-    );
-    expect(html).toMatch(/role="status" aria-live="polite"/);
-    // Nothing is hidden in the server render: everything is visible without JS.
+  it("has no filter chips and no client island: everything is a plain list", () => {
+    expect(html).not.toMatch(/pp-filters|aria-pressed|<button|<noscript|role="status"/);
     expect(html).not.toMatch(/<(li|section|div)[^>]*\bhidden=""/);
   });
 
-  it("shows no draft badge in production, and one per draft person in preview", () => {
-    expect(html).not.toContain("Draft · pending lab review");
-    const pv = renderToStaticMarkup(<PeopleIndex content={load("consent-edge-cases", true)} />);
+  it("ends with the way to join and the links for lab members, after the lists", () => {
+    const foot = between(html, '<div class="hm-people-foot">', "</section>");
+    expect(html.indexOf('<div class="hm-people-foot">')).toBeGreaterThan(
+      html.indexOf("</details>"),
+    );
+    expect(foot).toMatch(
+      />Want to join or work with us\? See <a href="\/join\/?">Join the lab<\/a>/,
+    );
+    expect(foot).toContain(`<a href="mailto:${c.site.email}">${c.site.email}</a>`);
+    if (c.site.member_links.length) {
+      expect(foot).toContain('<p class="hm-members">For lab members: ');
+      for (const l of c.site.member_links) expect(foot).toContain(`href="${l.url}"`);
+    } else expect(foot).not.toContain("hm-members");
+    // No "Meet the lab" foot link any more: the section is the lab's list.
+    expect(html).not.toMatch(/Meet the lab|href="\/people\/"/);
+  });
+
+  it("shows no Draft marker in production, and one per draft person in preview", () => {
+    expect(html).not.toContain(BADGE);
+    const pv = section(load("consent-edge-cases", true));
     const indigo = between(pv, 'id="person-indigo-draft"', "</article>");
-    expect(indigo).toContain("Draft · pending lab review");
-    expect(pv.match(/Draft · pending lab review/g)?.length).toBe(1);
+    expect(indigo).toContain(BADGE);
+    expect(pv.split(BADGE).length - 1).toBe(1);
   });
 });
 
-describe("People index for the real ./content in a production build (D-06)", () => {
+describe("People section for the real ./content in a production build (D-06)", () => {
   const dir = fileURLToPath(new URL("../../../content/", import.meta.url));
   const exists = fs.existsSync(path.join(dir, "people"));
   it.skipIf(!exists)(
-    "renders exactly the non-draft listed people, never drafts or unlisted",
+    "renders exactly the listed people the build keeps, never hidden or unlisted ones",
     () => {
       const raw = loadRawContent(dir);
       const c = buildContent(raw, { preview: false, today: TODAY });
-      const html = renderToStaticMarkup(<PeopleIndex content={c} />);
+      const html = section(c);
       // What the public site shows today (for the visual pass in tests/e2e/people.spec.ts).
       save("real-index-production.html", html);
+      const kept = new Set(c.people.map((p) => p.slug));
       for (const p of raw.entries.people) {
         const shown = html.includes(`id="person-${p.slug}"`);
-        expect(shown, p.slug).toBe(p.listed && !p.draft);
+        expect(shown, p.slug).toBe(kept.has(p.slug));
+        if (shown) expect(p.listed && !p.draft, p.slug).toBe(true);
         if (!p.listed) expect(html, p.slug).not.toContain(p.name);
       }
-      expect(html).not.toContain("Draft · pending lab review");
+      expect(html).not.toContain(BADGE);
+      // Lab managers (rank 1) lead the undergraduates.
+      const undergrads = between(html, 'id="people-undergrad"', "</section>");
+      const managers = c.people.filter(
+        (p) => p.role === "undergrad" && !p.isAlumni && p.rank === 1,
+      );
+      const order = [...undergrads.matchAll(/id="person-([a-z0-9-]+)"/g)].map((m) => m[1]);
+      expect(order.slice(0, managers.length).sort()).toEqual(managers.map((p) => p.slug).sort());
       const pi = c.people.find((p) => p.role === "pi");
       const model = pi ? buildPersonProfile(c, pi.slug) : undefined;
       if (model) {
         const page = renderToStaticMarkup(<PersonProfile content={c} model={model} />);
         save("real-pi-production.html", page);
-        expect(page).not.toContain("Draft · pending lab review");
+        expect(page).not.toContain(BADGE);
         for (const p of raw.entries.people.filter((x) => !x.listed))
           expect(page, p.slug).not.toContain(p.name);
       }
@@ -196,26 +232,28 @@ describe("People index for the real ./content in a production build (D-06)", () 
   );
 });
 
-describe("People index without anything to filter", () => {
-  it("omits the filter island", () => {
+describe("People section edge cases", () => {
+  it("renders nothing when no one is listed", () => {
     const c = load("n1");
-    const html = renderToStaticMarkup(<PeopleIndex content={c} />);
-    if (c.people.length <= 1) {
-      expect(html).not.toContain("pp-filters");
-      expect(html).not.toContain("aria-pressed");
-    }
+    expect(section({ ...c, people: [] })).toBe("");
   });
 
-  // D-15 (change request pearls-2): no count sentence at any group count; only
-  // the empty state ("No one is listed yet.") keeps the .pp-summary class.
+  // D-15 (change request pearls-2): no count sentence at any group count.
   it.each([
     ["n1", false],
     ["consent-edge-cases", false],
     ["consent-edge-cases", true],
   ] as const)("never prints a count summary line (%s, preview %s)", (set, preview) => {
-    const html = renderToStaticMarkup(<PeopleIndex content={load(set, preview)} />);
-    expect(html).not.toMatch(/class="pp-summary">\d/);
-    expect(html).not.toMatch(/class="pp-summary">(?!No one is listed yet\.)/);
+    const html = section(load(set, preview));
+    expect(html).not.toContain("pp-summary");
+    expect(html).not.toMatch(/\b\d+ (principal investigators?|master|undergraduate|alumni|PhD)/i);
+  });
+
+  it("the editor preview's People view (PeopleIndex) is exactly the home page's section", () => {
+    const c = load("consent-edge-cases");
+    expect(renderToStaticMarkup(<PeopleIndex content={c} />)).toBe(
+      `<div class="bl-container hm hm--people">${section(c)}</div>`,
+    );
   });
 });
 
@@ -231,6 +269,11 @@ describe("Person page (consent-edge-cases)", () => {
   it("has one h1, a breadcrumb back to People, and the bio", () => {
     expect(html.match(/<h1\b/g)?.length).toBe(1);
     expect(html).toContain('aria-label="Breadcrumb"');
+    // People live in the home page's People section now (no /people/ list page).
+    const crumbs = between(html, 'aria-label="Breadcrumb"', "</nav>");
+    expect(crumbs).toMatch(/<a href="\/#people">People<\/a>/);
+    expect(html).toMatch(/<a class="bl-cta bl-cta--quiet" href="\/#people">All people<\/a>/);
+    expect(html).not.toMatch(/href="\/people\/?"/);
     expect(html).toContain("Fixture biography for the principal investigator.");
   });
 

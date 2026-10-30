@@ -11,7 +11,7 @@ type: working-paper
 venue: SSRN working paper 4924786
 year: 2026
 doi: 10.2139/ssrn.4924786
-status: working-paper
+status: in-progress
 status_source: documented
 as_of: "2026-10-20"
 links:

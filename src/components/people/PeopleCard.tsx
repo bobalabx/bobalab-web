@@ -1,7 +1,9 @@
 /**
- * People index entries (brief §D9; D-13 item 5: people are lists with square
- * photos, no cards or circles). The `pp-card` / `pp-alum` class names stay for
- * the selector-based tests; what they draw is a ruled row.
+ * The entries of the home page's People section (brief §D9; D-13 item 5: people
+ * are lists with square photos, no cards or circles). The `pp-card` / `pp-alum`
+ * class names stay for the selector-based tests; what they draw is a ruled row.
+ * Headings sit under the section's h2 ("People") and a group's h3: names are h4,
+ * alumni names h5 (under their year's h4).
  *   PeopleCard (lead): the PI, a 160 px square (photo or initials), name,
  *     title, the lab affiliation, direction segments and links.
  *   PeopleCard: a 64 px square, name (linked only when the person has a
@@ -49,9 +51,9 @@ export function PeopleCard({
         size={lead ? "lead" : "card"}
       />
       <div className="pp-card__body">
-        <h3 className="pp-card__name" id={id}>
+        <h4 className="pp-card__name" id={id}>
           <Name item={item} />
-        </h3>
+        </h4>
         {item.roleLine && <p className="pp-card__role">{item.roleLine}</p>}
         {lead && affiliation ? <p className="pp-card__affil">{affiliation}</p> : null}
         {p.draft && (
@@ -77,9 +79,9 @@ export function AlumniEntry({ item }: { item: PersonItem }) {
   const id = `person-${p.slug}`;
   return (
     <article className="pp-alum" aria-labelledby={id} {...entryMark("people", p.slug)}>
-      <h4 className="pp-alum__name" id={id}>
+      <h5 className="pp-alum__name" id={id}>
         <Name item={item} />
-      </h4>
+      </h5>
       {item.roleLine && <p className="pp-alum__role">{item.roleLine}</p>}
       {p.now_at && <p className="pp-alum__now">Now at {p.now_at}</p>}
       {p.draft && (

@@ -64,7 +64,7 @@ export function generateStaticParams() {
 
 ### Redirect stubs (D-05)
 
-`scripts/content/write-redirects.mjs` runs inside `npm run build` / `build:preview` after `next build`: for each `site.yml → redirects[] {from, to}` it writes `out/<from>/index.html` (meta refresh, `rel=canonical`, `noindex`, plain link), base-path aware, never overwriting an exported page. `content/.published-slugs.json` is **not** updated by the build (a build should not modify tracked content); run `npm run slugs:record` when publishing.
+`scripts/content/write-redirects.mjs` runs inside `npm run build` / `build:preview` after `next build`: for each `site.yml → redirects[] {from, to}` it writes `out/<from>/index.html` (meta refresh, `rel=canonical`, `noindex`, plain link), base-path aware, never overwriting an exported page. `next dev` has no stubs, so `next.config.ts` gives it the same list as dev-only `redirects()` (307, read from site.yml at start; absent from builds). `content/.published-slugs.json` is **not** updated by the build (a build should not modify tracked content); run `npm run slugs:record` when publishing.
 
 ### Modes (D-03)
 
@@ -74,7 +74,7 @@ export function generateStaticParams() {
 | `npm run build:preview` (`INCLUDE_DRAFTS=1`) | included                             | yes    |
 | `npm run build`                              | **excluded**                         | no     |
 
-Draft items render `<DraftBadge>` ("Draft · pending lab review"); components do this automatically from `item.draft`.
+Draft items render `<DraftBadge>` ("Not visible on the live site"); components do this automatically from `item.draft`. The editor shows `draft` the other way round, as **Visible on the website: Yes / No** (Yes = `draft: false`), with the `visible` widget of `public/admin/cms-widgets.js` (D-21); the stored field, the build and the validator are unchanged.
 
 ### Derived data (all computed at build)
 
@@ -308,7 +308,7 @@ The content manager at `/admin/` is Decap CMS 3.17.1 (vendored) plus our plain-J
 | #   | File                                             | Global           | Role                                                                                                                                                                                                     |
 | --- | ------------------------------------------------ | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | `cms-data.js` (generated)                        | `BOBALAB_CMS`    | Labels, rules, repo, branch, deploy workflow, media limits (from `scripts/perf/asset-budget.mjs`), hidden-name hashes, `features.previewCheckBlocksSave`, collections, `auth` (the sign-in Worker, D-20) |
-| 2–4 | `decap-cms.js`, `cms-widgets.js`, `cms-hooks.js` | `CMS`, …         | Decap; widget fixes; the original preSave checks (unchanged)                                                                                                                                             |
+| 2–4 | `decap-cms.js`, `cms-widgets.js`, `cms-hooks.js` | `CMS`, …         | Decap; widget fixes and the `visible` switch (D-21); the original preSave checks (unchanged)                                                                                                             |
 | 5   | `cms-locale.js`                                  | `BobalabLocale`  | "Save" wording, registered before init                                                                                                                                                                   |
 | 6   | `cms-a11y.js`                                    |                  | Accessibility patches for Decap's UI; frame title "Live preview and history"                                                                                                                             |
 | 7   | `cms-ui.js` + `cms-ui.css`                       | `BobalabUi`      | Native `<dialog>` confirm and info, toasts, live regions, times in the viewer's time zone                                                                                                                |

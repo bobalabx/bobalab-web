@@ -13,7 +13,7 @@ type: working-paper
 venue: SSRN working paper 5387320
 year: 2025
 doi: 10.2139/ssrn.5387320
-status: major-revision
+status: under-revision
 status_note: at Manufacturing & Service Operations Management
 status_source: self-reported
 as_of: "2026-05"

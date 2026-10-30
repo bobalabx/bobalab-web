@@ -14,8 +14,10 @@
  *     the pearl-{slug} morph (one element per name) and focus lands on its h1;
  *   - motion: settle once per session (its own session key), transform and
  *     opacity only, nothing under reduced motion or the site's switch;
- *   - below the fold: new papers beside news, then people (round consented
- *     photos, first names, the team in one sentence with no numbers);
+ *   - below the fold: new papers beside news, then people (#people: the lab's
+ *     whole list, which had its own page until 2026-10-29; the way to join at
+ *     its foot; no team sentence and no numbers; tests/e2e/people.spec.ts has
+ *     the list itself);
  *   - the AI-tell probe (no gloss, numerals, pills, boxes, loops), no
  *     horizontal scroll at 390/320, no-JS links, zero off-origin requests, axe
  *     in light, dark, mobile and forced colours.
@@ -631,44 +633,36 @@ test.describe("motion", () => {
   });
 });
 
-test("people: round consented photos with first names, the way to join, no team sentence and no numbers", async ({
+test("people: the lab's list at #people, last on the page, the way to join at its foot, no team sentence and no numbers", async ({
   page,
 }) => {
   await home(page);
   const sec = page.locator('section[aria-labelledby="h-people"]');
   if (!(await sec.count())) test.skip(true, "no people");
+  await expect(sec).toHaveAttribute("id", "people");
   // Owner, copy sweep: no "… leads the lab with …" sentence and no "former members" line.
   await expect(sec.locator(".hm-team")).toHaveCount(0);
   expect(await sec.innerText()).not.toMatch(/leads the lab|former members|people page/i);
-  // D-15: no people count anywhere in the section, the foot link included.
+  // D-15: no people count anywhere in the section.
   expect(await sec.innerText()).not.toMatch(/\d+\s+(members?|alumni|former|students?|RAs?)\b/i);
-  const faces = sec.locator(".hm-face");
-  const n = await faces.count();
-  expect(n).toBeGreaterThan(0);
-  for (const f of (await faces.all()).slice(0, 6)) {
-    const img = f.locator("img");
-    await expect(img).toHaveAttribute("alt", /\S+ \S+/);
-    const r = await img.evaluate((e) => {
-      const b = e.getBoundingClientRect();
-      return { w: b.width, h: b.height, rad: getComputedStyle(e).borderTopLeftRadius };
-    });
-    expect(Math.abs(r.w - r.h)).toBeLessThanOrEqual(1);
-    expect(r.rad).toBe("50%");
-    const first = (await f.locator(".hm-face-name").innerText()).trim();
-    const alt = (await img.getAttribute("alt"))!;
-    expect(alt.replace(/["“”()]/g, " ")).toContain(first.replace(/ [A-Z]\.$/, ""));
-  }
-  await expect(sec.locator(".hm-ini")).toHaveCount(0);
-  await expect(sec.getByRole("link", { name: "Meet the lab", exact: true })).toHaveAttribute(
-    "href",
-    "/people/",
-  );
-  await expect(sec.locator(".hm-join")).toContainText("Want to join or work with us?");
-  await expect(sec.getByRole("link", { name: "Join the lab", exact: true })).toHaveAttribute(
+  // The People page's list (2026-10-29): groups, the PI first; no round faces strip.
+  await expect(sec.locator(".pp-group__title").first()).toHaveText("Principal investigator");
+  await expect(sec.locator(".pp-card--lead")).toHaveCount(1);
+  await expect(sec.locator(".hm-face, .hm-ini")).toHaveCount(0);
+  // No "Meet the lab" link: the section is the list.
+  await expect(sec.getByRole("link", { name: "Meet the lab" })).toHaveCount(0);
+  await expect(sec.locator('a[href="/people/"]')).toHaveCount(0);
+  const foot = sec.locator(".hm-people-foot");
+  await expect(foot.locator(".hm-join")).toContainText("Want to join or work with us?");
+  await expect(foot.getByRole("link", { name: "Join the lab", exact: true })).toHaveAttribute(
     "href",
     "/join/",
   );
-  await expect(sec.locator('a[href^="mailto:"]')).toHaveCount(1);
+  await expect(foot.locator('a[href^="mailto:"]')).toHaveCount(1);
+  // Last section: nothing of the page body after it.
+  expect(
+    await page.evaluate(() => [...document.querySelectorAll("main section.hm-sec")].at(-1)?.id),
+  ).toBe("people");
 });
 
 test("new papers beside news: 3 ruled rows and 4 dated one-liners, each with its foot line", async ({

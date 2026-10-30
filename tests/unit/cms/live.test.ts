@@ -143,11 +143,7 @@ describe("PAGE_MAP (spec §2.5)", () => {
       "home:Home page",
       "research:Research page",
     ]);
-    expect(pages("people")).toEqual([
-      "person:Profile page",
-      "people:People page",
-      "home:Home page",
-    ]);
+    expect(pages("people")).toEqual(["person:Profile page", "people:People (home page)"]);
     expect(pages("directions")).toEqual([
       "direction:Direction page",
       "home:Home page",
@@ -164,7 +160,6 @@ describe("PAGE_MAP (spec §2.5)", () => {
       expect(map[`pages/${p}`]!.map((t) => t.page)).toEqual([p]);
     expect(pages("settings")).toEqual([
       "home:Home page",
-      "people:People page",
       "research:Research page",
       "about:About page",
     ]);
@@ -179,9 +174,9 @@ describe("PAGE_MAP (spec §2.5)", () => {
           target: { page: string; slug?: string };
         }>
       ).map((t) => t.page);
-    expect(tabs({ role: "phd" })).toEqual(["people", "home"]);
-    expect(tabs({ role: "phd", profile_page: true })).toEqual(["person", "people", "home"]);
-    expect(tabs({ role: "pi" })).toEqual(["person", "people", "home"]);
+    expect(tabs({ role: "phd" })).toEqual(["people"]);
+    expect(tabs({ role: "phd", profile_page: true })).toEqual(["person", "people"]);
+    expect(tabs({ role: "pi" })).toEqual(["person", "people"]);
     const own = (
       live._tabsFor("news" as never, "x" as never, {} as never) as Array<{
         target: unknown;
@@ -190,7 +185,7 @@ describe("PAGE_MAP (spec §2.5)", () => {
     expect(own.target).toEqual({ page: "news-item", slug: "x" });
   });
 
-  it("recomputes the tabs on every change: turning Profile page off moves the preview to the People page", async () => {
+  it("recomputes the tabs on every change: turning Profile page off moves the preview to the People section", async () => {
     const env = boot();
     const fields = PEOPLE_FIELDS;
     env.state.editor = {
@@ -214,7 +209,7 @@ describe("PAGE_MAP (spec §2.5)", () => {
       col.inst.tree,
       (n) => n.props.role === "tab" && n.props.className === "bl-live__page",
     );
-    expect(tabs.map(textOf)).toEqual(["People page", "Home page"]);
+    expect(tabs.map(textOf)).toEqual(["People (home page)"]);
   });
 });
 
@@ -258,7 +253,7 @@ describe("viewTarget mirrors hasLivePage (validate.ts)", () => {
     if (c === "people" && !d.draft && d.listed === false)
       expect(v).toEqual({ state: "hidden", reason: "unlisted" });
     if (c === "people" && d.listed && !d.draft && d.role !== "pi" && !d.profile_page)
-      expect(v).toEqual({ state: "elsewhere", path: "/people/", label: "People page" });
+      expect(v).toEqual({ state: "elsewhere", path: "/#people", label: "People section" });
     if (c === "opportunities" && !d.draft)
       expect(v).toEqual({ state: "elsewhere", path: "/join/", label: "Join page" });
   });
@@ -896,10 +891,10 @@ describe("the site check's problems in plain words (spec §3.6e)", () => {
         file: "news/2026-10-07-informs-talk.md",
         field: "body",
         message:
-          "This links to /people/isabelle-cho/, which is not a page on the live site. Link to /people/ instead, or remove the link.",
+          "This links to /people/isabelle-cho/, which is not a page on the live site. Link to /#people (the home page's People section) instead, or remove the link.",
       }),
     ).toBe(
-      "News item “INFORMS talk” › Body: This links to /people/isabelle-cho/, which is not a page on the live site. Link to /people/ instead, or remove the link.",
+      "News item “INFORMS talk” › Body: This links to /people/isabelle-cho/, which is not a page on the live site. Link to /#people (the home page's People section) instead, or remove the link.",
     );
     expect(f({ code: "E_COLOR_DUP", file: "site.yml", field: "launched", message: "…" })).toMatch(
       /^Settings › Launched: Another research direction already has this colour/,
@@ -918,7 +913,7 @@ describe("the bar's information bands", () => {
     ready(env);
     await flush(60);
     expect(textOf(col.inst.tree)).toContain(
-      "Not listed: the site never shows or links this person, not even on the People page.",
+      "Not listed: the site never shows or links this person, not even in the People section of the home page.",
     );
     col.update({
       entry: person({
@@ -933,7 +928,7 @@ describe("the bar's information bands", () => {
     });
     const text = textOf(col.inst.tree);
     expect(text).toContain(
-      "Hidden from the live site: “Draft · pending lab review” is on. Shown here so you can check it.",
+      "Hidden from the live site: “Visible on the website” is No. Shown here so you can check it.",
     );
     expect(text).toContain("Shown: photo, program. Hidden: email (Email public is off).");
     const rev = (env.last("bobalab:overlay") as { rev: number } | undefined)?.rev ?? 1;
@@ -942,7 +937,7 @@ describe("the bar's information bands", () => {
       v: 1,
       rev: rev + 10,
       target: { page: "people" },
-      path: "/people/",
+      path: "/#people",
       title: "People",
       found: "marker",
       problems: {
@@ -1149,7 +1144,7 @@ describe("Show as visitors see it", () => {
     expect(env.last("bobalab:mode")).toEqual({ type: "bobalab:mode", v: 1, visitor: true });
     expect(env.session.getItem("bobalab.live.visitor")).toBe("1");
     expect(textOf(col.inst.tree)).toContain(
-      "Hidden from the live site: “Draft · pending lab review” is on.",
+      "Hidden from the live site: “Visible on the website” is No.",
     );
     expect(textOf(col.inst.tree)).not.toContain("Shown here so you can check it.");
   });
@@ -1239,9 +1234,9 @@ describe("plain words and honest buttons (editor v2 verification fixes)", () => 
     const off = button(col.inst.tree, "Not on the live site yet")!;
     expect(off.props.disabled).toBe(true);
     expect(button(col.inst.tree, /Open the published page/)).toBeUndefined();
-    // The People page tab is on the live site: enabled.
-    button(col.inst.tree, "People page")!.props.onClick!.call(null);
-    expect(button(col.inst.tree, /Open the published page \(People page\)/)).toBeDefined();
+    // The People section tab is on the live site: enabled.
+    button(col.inst.tree, "People (home page)")!.props.onClick!.call(null);
+    expect(button(col.inst.tree, /Open the published page \(People \(home page\)\)/)).toBeDefined();
     // A saved profile page is enabled on its own tab.
     const env2 = boot({ mode: "local" });
     env2.state.editor = { collection: "people", slug: "dana-lee", data: {}, fields: PEOPLE_FIELDS };

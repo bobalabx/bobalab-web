@@ -207,16 +207,27 @@ export const PUBLICATION_TYPES = [
   "other",
 ] as const;
 
+/**
+ * Where a paper is in review (owner decision, 2026-10-29), in this order in
+ * the editor. The stored values are permanent; the words are in
+ * PUBLICATION_STATUS_LABELS (src/components/ui/labels.ts).
+ *
+ *   in-progress     "Work in progress"  not submitted yet (a working paper or
+ *                                       preprint can already be public)
+ *   under-review    "Under review"      submitted, waiting for a decision
+ *   under-revision  "Under revision"    asked to revise (major or minor
+ *                                       revision, revise and resubmit)
+ *   published       "Published"         accepted, forthcoming or in print
+ *
+ * Whether a paper is listed as a paper depends on its public version, never
+ * on its status (D-05, `countsAsPublication`). Older values were moved over by
+ * scripts/content/migrate-status.mjs.
+ */
 export const PUBLICATION_STATUS = [
-  "published",
-  "forthcoming",
-  "accepted",
-  "major-revision",
-  "revise-resubmit",
-  "submitted",
-  "working-paper",
-  "preprint",
   "in-progress",
+  "under-review",
+  "under-revision",
+  "published",
 ] as const;
 
 export const DOI_PATTERN = /^10\.\d{4,9}\/\S+$/;

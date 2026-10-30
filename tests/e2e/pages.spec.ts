@@ -138,7 +138,7 @@ test.describe("Join", () => {
     for (const o of c.opportunities.filter((x) => x.draft)) {
       await expect(
         page.locator(`article[aria-labelledby="opp-${o.slug}"] .bl-badge--draft`),
-      ).toHaveText("Draft · pending lab review");
+      ).toHaveText("Not visible on the live site");
     }
   });
 });

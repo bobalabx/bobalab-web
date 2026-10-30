@@ -1,4 +1,10 @@
 /*
+ * Widget fixes and our own widget for Decap 3.17.1, registered before Decap starts:
+ *  - rich-text body fields without false "Unsaved changes" (WP6, below);
+ *  - the list widget: removing a single-field item, Up/Down arrow keys (further down);
+ *  - "visible": the "Visible on the website: Yes / No" switch, which shows the
+ *    stored `draft` boolean the other way round (D-21, at the end).
+ *
  * Rich-text body fields without false "Unsaved changes" (WP6).
  *
  * MEASURED 2026-10-20 (decap-cms 3.17.1, tests/e2e/cms-local.spec.ts): the
@@ -308,6 +314,87 @@
     return BobalabListControl;
   }
 
+  // ---------------------------------------------------------------------------
+  // "Visible on the website: Yes / No" (owner decision 2026-10-29, DECISIONS D-21).
+  //
+  // Every entry keeps its stored `draft` boolean (the site, the validator and
+  // D-03 are unchanged); the editor shows it the other way round, as a switch:
+  //   Yes = draft: false (on the live site), No = draft: true (hidden).
+  // A missing value is Yes, as the schema's default (false) says. The control
+  // only ever writes true or false, and only when the editor presses it: it
+  // never calls onChange while mounting, so opening an entry does not mark it
+  // changed. It shows the value it is given (Restore, Undo and "Bring in their
+  // changes" set the field from outside), unlike Decap's own toggle, which keeps
+  // the value it had when it mounted.
+  //
+  // A <button role="switch"> like Decap's toggle: Decap's label (for=forID)
+  // names it, aria-checked carries the state, and the visible word Yes/No says
+  // it without colour. Enter and Space press it. Styles: admin.css (.bl-visible).
+
+  /** Is the entry hidden from the live site? Only `true` hides it (as on the site). */
+  function isHidden(value) {
+    return value === true;
+  }
+
+  /** The stored value after one press: always a boolean. */
+  function toggled(value) {
+    return !isHidden(value);
+  }
+
+  /** "Yes" (shown on the live site) or "No" (hidden). */
+  function visibleWord(value) {
+    return isHidden(value) ? "No" : "Yes";
+  }
+
+  function visibleControl(h, createClass) {
+    return createClass({
+      displayName: "BobalabVisibleControl",
+      press: function () {
+        this.props.onChange(toggled(this.props.value));
+      },
+      focus: function () {
+        if (this.button && typeof this.button.focus === "function") this.button.focus();
+      },
+      setButton: function (el) {
+        this.button = el;
+      },
+      render: function () {
+        var shown = !isHidden(this.props.value);
+        return h(
+          "div",
+          { className: this.props.classNameWrapper },
+          h(
+            "button",
+            {
+              type: "button",
+              id: this.props.forID,
+              role: "switch",
+              "aria-checked": shown ? "true" : "false",
+              className: shown ? "bl-visible bl-visible--yes" : "bl-visible bl-visible--no",
+              onClick: this.press,
+              onFocus: this.props.setActiveStyle,
+              onBlur: this.props.setInactiveStyle,
+              ref: this.setButton,
+            },
+            h(
+              "span",
+              { className: "bl-visible__track", "aria-hidden": "true" },
+              h("span", { className: "bl-visible__knob" }),
+            ),
+            h("span", { className: "bl-visible__word" }, visibleWord(this.props.value)),
+          ),
+        );
+      },
+    });
+  }
+
+  /** Decap's widget preview (not shown by our live column, which draws the real site). */
+  function visiblePreview(h) {
+    return function (props) {
+      return h("span", null, visibleWord(props && props.value));
+    };
+  }
+
   var api = {
     createGate: createGate,
     wrap: wrap,
@@ -316,6 +403,10 @@
     handleItem: handleItem,
     moveTarget: moveTarget,
     itemsOf: itemsOf,
+    isHidden: isHidden,
+    toggled: toggled,
+    visibleWord: visibleWord,
+    visibleControl: visibleControl,
   };
   root.BobalabCmsWidgets = api;
 
@@ -326,6 +417,8 @@
     CMS.registerWidget("list", patchList(list.control, root.h), list.preview, list.schema);
   }
   if (!root.h || !root.createClass) return;
+  // Before Decap starts (cms-start.js), so config.yml may name the widget.
+  CMS.registerWidget("visible", visibleControl(root.h, root.createClass), visiblePreview(root.h));
   var rt = CMS.getWidget("richtext");
   if (!rt || !rt.control) return;
   CMS.registerWidget("richtext", wrap(rt.control, root.h, root.createClass), rt.preview, rt.schema);

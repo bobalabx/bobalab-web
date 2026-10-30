@@ -320,6 +320,107 @@ test("Ctrl+S saves (twice in a row: one save); on an unchanged entry it says the
   expect(errors).toEqual([]);
 });
 
+test("“Visible on the website” is a Yes/No switch over draft: opening changes nothing, No saves draft: true (D-21)", async ({
+  page,
+}) => {
+  test.setTimeout(150_000);
+  const errors = pageErrors(page);
+  const FILE = "content/news/2023-08-30-nasa-symposium.md";
+  const draftLine = () => /^draft: .*$/m.exec(fs.readFileSync(scratch(FILE), "utf8"))?.[0];
+  expect(draftLine()).toBe("draft: false");
+  await login(page, "#/collections/news/entries/2023-08-30-nasa-symposium");
+  const sw = page.getByRole("switch", { name: "Visible on the website", exact: true });
+  await sw.scrollIntoViewIfNeeded();
+  await expect(sw).toHaveAttribute("aria-checked", "true");
+  await expect(sw).toHaveText("Yes");
+  await expect(page.getByText("No hides this from the live site.", { exact: false })).toBeVisible();
+  // Opening the entry marks nothing as changed.
+  await page.waitForTimeout(1500);
+  await expect(page.getByText("All changes saved", { exact: false })).toBeVisible();
+  await expect(page.getByText("Unsaved changes", { exact: true })).toHaveCount(0);
+  // Space (keyboard) turns it to No: the form changes and the note says what Save will do.
+  await sw.focus();
+  await page.keyboard.press("Space");
+  await expect(sw).toHaveAttribute("aria-checked", "false");
+  await expect(sw).toHaveText("No");
+  await expect(page.getByText("Unsaved changes", { exact: true })).toBeVisible();
+  await expect(page.locator("#bl-save-note")).toHaveText("Save keeps it hidden: Visible is No");
+  await expect(sw).toBeFocused();
+  const control = page.locator('[class*="ControlContainer"]:has(button.bl-visible)');
+  await control.screenshot({ path: test.info().outputPath("visible-switch-no-focused.png") });
+  // Enter turns it back: the form equals the saved entry again.
+  await page.keyboard.press("Enter");
+  await expect(sw).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByText("All changes saved", { exact: false })).toBeVisible();
+  // The switch and its label pass axe.
+  const r = await new AxeBuilder({ page })
+    .withTags(AXE_TAGS)
+    .include('[class*="ControlContainer"]:has(button.bl-visible)')
+    .analyze();
+  expect(r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(", ")}`)).toEqual(
+    [],
+  );
+  // No, then Save: the file stores the boolean draft: true (never a string).
+  await sw.click();
+  await expect(sw).toHaveText("No");
+  await page.getByRole("button", SAVE).click();
+  await expect.poll(draftLine, { timeout: 30_000 }).toBe("draft: true");
+  await expect(page.locator("#bl-dock")).toContainText("Saved to this computer", {
+    timeout: 15_000,
+  });
+  await expect(page.getByText("All changes saved", { exact: false })).toBeVisible({
+    timeout: 15_000,
+  });
+  // Reloaded, the saved entry reads No; Yes, then Save: draft: false. (Reloaded
+  // because Decap compares the form with the entries it loaded, which a save does
+  // not refresh: right after a save, going back to the old value looks unchanged.)
+  await page.waitForTimeout(3500); // the latch lets go after the save
+  await page.reload();
+  await expect(page.getByText(/Writing in .* collection/)).toBeVisible({ timeout: 30_000 });
+  await page.waitForTimeout(800);
+  await sw.scrollIntoViewIfNeeded();
+  await expect(sw).toHaveText("No");
+  await expect(sw).toHaveAttribute("aria-checked", "false");
+  await expect(page.getByText("Unsaved changes", { exact: true })).toHaveCount(0);
+  await sw.click();
+  await expect(sw).toHaveText("Yes");
+  await page.getByRole("button", SAVE).click();
+  await expect.poll(draftLine, { timeout: 30_000 }).toBe("draft: false");
+  expect(errors).toEqual([]);
+});
+
+test("a person's switch says what it hides; the column notes a hidden entry (D-21)", async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await login(page, "#/collections/people/entries/isabelle-cho");
+  const sw = page.getByRole("switch", { name: "Visible on the website", exact: true });
+  await sw.scrollIntoViewIfNeeded();
+  await expect(sw).toHaveText("Yes");
+  await page
+    .locator('[class*="ControlContainer"]:has(button.bl-visible)')
+    .screenshot({ path: test.info().outputPath("visible-switch-person-yes.png") });
+  await expect(
+    page.getByText(
+      "No hides this person from the home page's People section (Alumni too) and from the people lists on research and project pages; their profile page is not published either. Their name still shows where other entries name them: on papers they wrote (and then on that project's team list) and in news text. “Listed” (consent) still has to be on for them to appear at all.",
+      { exact: false },
+    ),
+  ).toBeVisible();
+  await sw.click();
+  await expect(sw).toHaveText("No");
+  await expect(page.locator("#bl-save-note")).toHaveText("Save keeps it hidden: Visible is No");
+  // The live column (cms-live.js) still draws the person, with a note.
+  const frame = page.frameLocator("iframe#preview-pane");
+  await expect(frame.locator(".bl-band")).toContainText(
+    "Hidden from the live site: “Visible on the website” is No. Shown here so you can check it.",
+    { timeout: 30_000 },
+  );
+  // Nothing was saved.
+  expect(
+    /^draft: .*$/m.exec(fs.readFileSync(scratch("content/people/isabelle-cho.md"), "utf8"))?.[0],
+  ).toBe("draft: false");
+});
+
 test("Enter on the focused Save button saves; pressed twice, it still saves once", async ({
   page,
 }) => {

@@ -13,7 +13,7 @@ type: working-paper
 venue: SSRN working paper 4502968
 year: 2026
 doi: 10.2139/ssrn.4502968
-status: revise-resubmit
+status: under-revision
 status_note: at Operations Research
 status_source: self-reported
 as_of: "2026-08"

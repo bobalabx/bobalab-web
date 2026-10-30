@@ -6,9 +6,13 @@
  *   home /                    research /research/       direction /research/{s}/
  *   projects /projects/       project /projects/{s}/
  *   publications /publications/                         publication /publications/{s}/
- *   people /people/           person /people/{s}/
+ *   people /#people           person /people/{s}/
  *   news /news/               news-item /news/{s}/
  *   join /join/   about /about/   accessibility /accessibility/   privacy /privacy/
+ *
+ * "people" is the home page's People section (the list had its own page until
+ * 2026-10-29): its address is /#people, and the old /people/ address, which
+ * the live site redirects there, still opens it.
  */
 import {
   PREVIEW_PAGES,
@@ -52,9 +56,13 @@ const BY_SECTION: Record<string, [PreviewPage, PreviewPage | null]> = {
   privacy: ["privacy", null],
 };
 
-/** The site path of a page, without the base path ("/news/x/"). */
+/** The People section's address on the home page (src/components/people/anchor.ts). */
+const PEOPLE_PATH = "/#people";
+
+/** The site path of a page, without the base path ("/news/x/"; the People section: "/#people"). */
 export function pathOf(target: PreviewTarget): string {
   if (target.page === "home") return "/";
+  if (target.page === "people") return PEOPLE_PATH;
   const section = SECTION[target.page];
   return (SLUG_PAGES as readonly string[]).includes(target.page)
     ? `/${section}/${target.slug ?? ""}/`

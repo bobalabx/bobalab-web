@@ -98,7 +98,8 @@ test("badges wrap instead of overflowing at 320 px with WCAG 1.4.12 text spacing
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 800 });
-  for (const path of ["/", "/research/", "/people/"]) {
+  // "/" also covers the People section (the People list moved there, D-21).
+  for (const path of ["/", "/research/"]) {
     await page.goto(path);
     await page.addStyleTag({
       content:

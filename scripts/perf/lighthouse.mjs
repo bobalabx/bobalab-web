@@ -88,7 +88,7 @@ const pages = [
   ["home", "/"],
   ["direction", directionPath(arg("--direction", null)) ?? (await firstDirection())],
   ["publications", "/publications/"],
-  ["people", "/people/"],
+  // No "/people/": the People list is the home page's #people section, audited with home (D-21).
 ];
 
 fs.mkdirSync(outDir, { recursive: true });

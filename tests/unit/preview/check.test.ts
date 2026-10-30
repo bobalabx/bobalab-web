@@ -90,7 +90,7 @@ describe("checkSave", () => {
     const p = pubs[0]!;
     const broken = withData(base, "publications", p.slug, (d) => ({
       ...d,
-      status: "submitted",
+      status: "under-review",
       as_of: undefined,
     }));
     expect(
@@ -230,7 +230,7 @@ describe("checkSave", () => {
         title: "A new paper",
         authors: [{ name: "Ada Lovelace" }],
         type: "working-paper",
-        status: "working-paper",
+        status: "in-progress",
         as_of: "2026-10",
         status_source: "documented",
         directions: [dirs[0]!.slug],

@@ -43,7 +43,7 @@ describe("plain-word meta (no pills, no dots)", () => {
     expect(html(<OpenToRAsBadge />)).toBe(
       '<span class="bl-badge bl-badge--accent">Open to RAs</span>',
     );
-    expect(html(<DraftBadge />)).toContain("Draft · pending lab review");
+    expect(html(<DraftBadge />)).toContain("Not visible on the live site");
   });
   it("the .bl-badge rule draws no border, radius, padding or background", () => {
     const block = /\.bl-badge\s*\{([^}]*)\}/.exec(read("src/styles/components.css"))?.[1] ?? "";
@@ -117,15 +117,15 @@ describe("publication row and status (D-13 item 7; copy sweep)", () => {
   const all = () => [...content().countedPublications, ...content().inProgress];
   it("statusLine is a plain label: no 'as of' date, no 'reported by the lab'", () => {
     const p = {
-      status: "major-revision",
+      status: "under-revision",
       status_note: "at M&SOM",
       as_of: "2026-04",
       status_source: "self-reported",
     } as const;
-    expect(statusLine(p)).toBe("Major revision at M&SOM");
-    // After an "arXiv preprint" venue the version-only status is left out.
+    expect(statusLine(p)).toBe("Under revision at M&SOM");
+    // After an "arXiv preprint" venue the version-only note is left out.
     expect(
-      statusLine({ status: "preprint", status_note: "v2", venue: "arXiv preprint" }),
+      statusLine({ status: "in-progress", status_note: "v2", venue: "arXiv preprint" }),
     ).toBeNull();
   });
   it("no row on the site prints a date stamp or provenance hedge", () => {

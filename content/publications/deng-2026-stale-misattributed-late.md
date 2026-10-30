@@ -9,7 +9,7 @@ type: working-paper
 venue: arXiv preprint
 year: 2026
 doi: 10.48550/arXiv.2610.10265
-status: preprint
+status: in-progress
 status_note: v1
 status_source: documented
 as_of: "2026-10"

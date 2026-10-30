@@ -1,7 +1,9 @@
 /**
- * View models for the People index and person pages (brief §D9, DECISIONS D-06).
- * Server-side and pure: everything comes from the loaded Content, which has
- * already dropped drafts (production), unlisted people and consent-gated fields.
+ * View models for the People section of the home page and the person pages
+ * (brief §D9, DECISIONS D-06; the separate /people/ list page moved onto the
+ * home page, owner 2026-10-29). Server-side and pure: everything comes from the
+ * loaded Content, which has already dropped hidden entries (production),
+ * unlisted people and consent-gated fields.
  */
 import type {
   Content,
@@ -11,12 +13,9 @@ import type {
   PublicationView,
 } from "@/lib/content/load";
 import {
-  GROUP_LABELS,
-  GROUP_ORDER,
   ROLE_LABELS,
   avatarSwatch,
   formerRole,
-  groupOf,
   groupPeople,
   initials,
   type PeopleGroup,
@@ -25,12 +24,11 @@ import {
 import { directionsOf, personDetail } from "@/lib/content/queries";
 import { formatDate } from "@/lib/content/dates";
 import type { SwatchId } from "@/lib/content/palette";
-import type { FilterMeta } from "./filter";
 
 // ---------------------------------------------------------------------------
 // Person-level helpers
 
-/** Shared with PersonCard and the home People strip (WP4 request 1). */
+/** Shared with PersonCard (WP4 request 1). */
 export { avatarSwatch };
 
 /**
@@ -95,13 +93,8 @@ export function personLinks(p: Pick<PublicPerson, "links" | "email">): PersonLin
   return out;
 }
 
-/** Singular / plural group label: "1 Graduate student", "8 Undergraduate RAs". */
-export function countLabel(group: PeopleGroup, n: number): string {
-  return n === 1 ? GROUP_LABELS[group].one : GROUP_LABELS[group].group;
-}
-
 // ---------------------------------------------------------------------------
-// People index
+// The People section (home page)
 
 export interface PersonItem {
   person: PublicPerson;
@@ -109,7 +102,6 @@ export interface PersonItem {
   swatch: SwatchId;
   initials: string;
   roleLine: string;
-  meta: FilterMeta;
 }
 
 export interface RoleGroup {
@@ -126,14 +118,6 @@ export interface AlumniYearGroup {
   items: PersonItem[];
 }
 
-export interface ChipOptionModel {
-  value: string;
-  label: string;
-  count: number;
-  /** Direction chips carry the direction colour (FilterChips dot; WP4 request 3). */
-  swatch?: SwatchId;
-}
-
 export interface PeopleIndexModel {
   groups: RoleGroup[];
   alumni: AlumniYearGroup[];
@@ -141,12 +125,6 @@ export interface PeopleIndexModel {
   alumniItems: PersonItem[];
   /** Every rendered person, current first, in DOM order. */
   all: PersonItem[];
-  roleOptions: ChipOptionModel[];
-  directionOptions: ChipOptionModel[];
-  /** Show the filter island only when it can actually narrow the list. */
-  showFilters: boolean;
-  /** "1 Principal investigator · 8 Undergraduate RAs · 21 Alumni" parts. */
-  summary: Array<{ count: number; label: string }>;
 }
 
 export function toItem(c: Content, person: PublicPerson): PersonItem {
@@ -157,14 +135,15 @@ export function toItem(c: Content, person: PublicPerson): PersonItem {
     swatch: avatarSwatch(person.slug, directions),
     initials: initials(person.name),
     roleLine: roleLine(person),
-    meta: {
-      role: groupOf(person.role),
-      directions: directions.map((d) => d.slug),
-      alumni: person.isAlumni,
-    },
   };
 }
 
+/**
+ * The groups of the home page's People section, in order: Principal
+ * investigator → Postdocs → Graduate students (PhD, then master's) → Pre-docs &
+ * research staff → Undergraduate RAs (lab managers first: rank) → Affiliates &
+ * collaborators; then alumni by end year, newest first. Empty groups are left out.
+ */
 export function buildPeopleIndex(c: Content): PeopleIndexModel {
   // c.people is already listed-only; filter again defensively (D-06).
   const people = c.people.filter((p) => p.listed);
@@ -183,40 +162,7 @@ export function buildPeopleIndex(c: Content): PeopleIndexModel {
   }));
   const current = groups.flatMap((g) => g.items);
   const alumniItems = alumni.flatMap((g) => g.items);
-  const all = [...current, ...alumniItems];
-
-  const roleOptions: ChipOptionModel[] = GROUP_ORDER.map((group) => ({
-    value: group,
-    label: GROUP_LABELS[group].group,
-    count: all.filter((i) => groupOf(i.person.role) === group).length,
-  })).filter((o) => o.count > 0);
-
-  const dirOrder = [...c.directions, ...c.archivedDirections];
-  const directionOptions: ChipOptionModel[] = dirOrder
-    .map((d) => ({
-      value: d.slug,
-      label: d.short_label,
-      swatch: d.color,
-      count: all.filter((i) => i.meta.directions.includes(d.slug)).length,
-    }))
-    .filter((o) => o.count > 0);
-
-  const summary = [
-    ...groups.map((g) => ({ count: g.items.length, label: countLabel(g.role, g.items.length) })),
-    ...(alumniItems.length ? [{ count: alumniItems.length, label: "Alumni" }] : []),
-  ];
-
-  return {
-    groups,
-    alumni,
-    current,
-    alumniItems,
-    all,
-    roleOptions,
-    directionOptions,
-    showFilters: all.length > 1 && (roleOptions.length > 1 || directionOptions.length > 0),
-    summary,
-  };
+  return { groups, alumni, current, alumniItems, all: [...current, ...alumniItems] };
 }
 
 // ---------------------------------------------------------------------------

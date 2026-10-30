@@ -149,7 +149,7 @@ const NEWS_FIELDS = [
   { name: "title", label: "Title", widget: "string" },
   { name: "summary", label: "Summary", widget: "text" },
   { name: "image", label: "Image", widget: "object" },
-  { name: "draft", label: "Draft · pending lab review", widget: "boolean" },
+  { name: "draft", label: "Visible on the website", widget: "visible" },
   { name: "body", label: "Body", widget: "richtext" },
 ];
 

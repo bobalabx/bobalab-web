@@ -211,10 +211,10 @@ describe("cms-dock.js: the words for each state", () => {
     expect(d(elsewhere, { stage: "live" }).action!.label).toBe("View the People page");
     const draft = { ...rec, view: { state: "hidden", reason: "Draft is on" } };
     expect(d(draft, { stage: "building" }).text).toBe(
-      "Saved · not shown on the live site because “Draft · pending lab review” is on",
+      "Saved · not shown on the live site because “Visible on the website” is No",
     );
     expect(d(draft, { stage: "live" })).toMatchObject({
-      text: "Saved · not shown on the live site because “Draft · pending lab review” is on",
+      text: "Saved · not shown on the live site because “Visible on the website” is No",
     });
     expect(d(draft, { stage: "live" }).action).toBeUndefined();
     const unlisted = {
@@ -434,12 +434,12 @@ describe("cms-dock.js: after a save", () => {
     b.dock.saved(saveInfo({ view: { state: "hidden", reason: "Draft is on" } }));
     await b.clock.advance(1000);
     expect(b.dockText()).toBe(
-      "Saved · not shown on the live site because “Draft · pending lab review” is on",
+      "Saved · not shown on the live site because “Visible on the website” is No",
     );
     await b.clock.advance(100000);
     expect(requested(b.calls).some((r) => r.includes("/runs?"))).toBe(true);
     expect(b.dockText()).toBe(
-      "Saved · not shown on the live site because “Draft · pending lab review” is on",
+      "Saved · not shown on the live site because “Visible on the website” is No",
     );
     expect(buttonNamed(b.$("#bl-dock"), /View/)).toBeNull();
   });
@@ -615,7 +615,7 @@ describe("cms-dock.js: the Undo toast", () => {
     });
     expect(buttonNamed(created.undoToast(), "Undo")).toBeNull();
     expect(created.toasts()).toEqual([
-      SAVED + " To take it off the site, turn on “Draft · pending lab review” and Save.",
+      SAVED + " To take it off the site, set “Visible on the website” to No and Save.",
     ]);
     const person = await saved(
       { mineAt: () => [commit({ message: "Add Person “jane-doe” (by @ada-editor)" })] },
@@ -785,6 +785,19 @@ describe("cms-dock.js: Recent changes", () => {
     expect(buttonNamed(dlg, "Try again")).not.toBeNull();
     buttonNamed(dlg, "Close")!.click();
     expect(b.$("dialog")).toBeNull();
+  });
+});
+
+describe("View page opens the published address past the page cache", () => {
+  it("keeps a #section last, so the People section of the home page scrolls into view", () => {
+    const b = boot({ files: FILES });
+    const url = (b.win.BobalabDock as { _publishedUrl(p: string): string })._publishedUrl;
+    expect(url("/#people")).toMatch(
+      /^https:\/\/bobalabx\.github\.io\/bobalab-web\/\?v=\d+#people$/,
+    );
+    expect(url("/news/x/")).toMatch(
+      /^https:\/\/bobalabx\.github\.io\/bobalab-web\/news\/x\/\?v=\d+$/,
+    );
   });
 });
 

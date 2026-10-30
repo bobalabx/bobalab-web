@@ -157,7 +157,7 @@ export const PLACEHOLDERS: Record<DecapCollection, (today: string) => Data> = {
     title: NOT_FILLED,
     authors: [{ name: "(Author not filled in yet)" }],
     type: "working-paper",
-    status: "working-paper",
+    status: "in-progress",
     year: Number(today.slice(0, 4)),
   }),
   people: () => ({ name: "(Name not filled in yet)", role: "phd" }),

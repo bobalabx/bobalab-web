@@ -276,24 +276,35 @@
   font-size: var(--t-meta);
 }
 
-/* ---- people: one sentence, the routes to join, round faces (R18) ------------ */
-.hm-people-in {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 26px;
-  padding-top: 18px;
-  border-top: 1px solid var(--ink);
+/* ---- people (#people): the lab's list, then the way to join ------------------ */
+/* The list itself (groups, rows, alumni) is styled in src/components/people/people.css.
+   The first group title keeps clear of the section's h2, so the two read as two levels. */
+.hm-people-sec .pp-groups {
+  margin-top: 28px;
 }
-@media (min-width: 64rem) {
-  .hm-people-in {
-    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
-    column-gap: 64px;
+.hm-people-sec .pp-group + .pp-group {
+  margin-top: 48px;
+}
+@media (max-width: 47.99rem) {
+  .hm-people-sec .pp-groups {
+    margin-top: 20px;
+  }
+}
+/* The foot sits in the track, under the lists (the label column stays empty). */
+.hm-people-foot {
+  display: grid;
+  gap: 10px;
+  margin-top: 48px;
+}
+@media (min-width: 48rem) {
+  .hm-people-foot {
+    margin-left: var(--lab);
   }
 }
 /* The section's one line of text: the way to join (no team sentence, copy sweep). */
 .hm-join {
   margin: 0;
-  max-width: 34ch;
+  max-width: 44ch;
   font-size: var(--t-title);
   font-weight: 500;
   line-height: 1.45;
@@ -302,45 +313,19 @@
 .hm-join a {
   color: var(--ink);
 }
-.hm-faces {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(4.25rem, 1fr));
-  gap: 18px 8px;
+.hm-members {
   margin: 0;
-  padding: 0 0 16px;
-  list-style: none;
-  border-bottom: 1px solid var(--hairline);
-}
-@media (min-width: 40rem) {
-  .hm-faces {
-    grid-template-columns: repeat(auto-fill, minmax(5.25rem, 1fr));
-    gap: 22px 10px;
-  }
-}
-.hm-face {
-  display: grid;
-  justify-items: center;
-  align-content: start;
-  gap: 8px;
-  min-width: 0;
-}
-.hm-face-img {
-  display: block;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-@media (min-width: 40rem) {
-  .hm-face-img {
-    width: 72px;
-    height: 72px;
-  }
-}
-.hm-face-name {
-  max-width: 100%;
   font-size: var(--t-meta);
-  line-height: 1.25;
-  text-align: center;
-  overflow-wrap: anywhere;
+  line-height: var(--lh-meta);
+  color: var(--muted);
+}
+.hm-members a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  color: var(--ink);
+}
+/* The editor preview's People view draws the section alone (PeopleIndex). */
+.hm--people > .hm-sec:first-child {
+  margin-top: 32px;
 }

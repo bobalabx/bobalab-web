@@ -241,28 +241,26 @@ test("statuses are plain labels: no 'as of' date and no 'reported by the lab' fo
 }) => {
   await open(page, "/publications/");
   const c = await contentFor(page);
-  // A real review claim (a bare "Working paper" status on a working paper, or
-  // "In progress" on work in progress, repeats the type word and is not shown).
+  // A real review claim: Under review or Under revision (a bare Work in
+  // progress on a working paper repeats the type word and is not shown).
   const p = c.countedPublications.find(
-    (x) =>
-      x.status !== "published" &&
-      x.status !== "working-paper" &&
-      x.status !== "in-progress" &&
-      x.status !== "preprint" &&
-      x.as_of,
+    (x) => (x.status === "under-review" || x.status === "under-revision") && x.as_of,
   );
   test.skip(!p, "no dated review status in this build");
   const entry = page.locator(`.pubs-results article[aria-labelledby="pub-${p!.slug}"]`).first();
-  await expect(entry.locator(".bl-pub__status")).toHaveText(/^\S.* (at|to) [^,]+$/);
+  await expect(entry.locator(".bl-pub__status")).toHaveText(/^Under (review|revision) at [^,]+$/);
   await expect(page.locator("main")).not.toContainText("as of ");
   await expect(page.locator("main")).not.toContainText("reported by the lab");
   await expect(page.locator(".pubs-fn")).toHaveCount(0);
 
-  // Work in progress says so once (the type word), not again as "In progress".
-  const wipRow = c.countedPublications.find(
-    (x) => x.type === "work-in-progress" && x.status === "in-progress" && !x.status_note,
-  );
-  if (wipRow) {
+  // A working paper or work in progress says so once (the type word), not
+  // again as "Work in progress".
+  for (const wipRow of c.countedPublications.filter(
+    (x) =>
+      (x.type === "work-in-progress" || x.type === "working-paper") &&
+      x.status === "in-progress" &&
+      !x.status_note,
+  )) {
     await expect(
       page.locator(`.pubs-results article[aria-labelledby="pub-${wipRow.slug}"] .bl-pub__status`),
     ).toHaveCount(0);
@@ -270,7 +268,7 @@ test("statuses are plain labels: no 'as of' date and no 'reported by the lab' fo
 
   // The paper page states its status as one plain line, with no date or source note.
   await open(page, `/publications/${p!.slug}/`);
-  await expect(page.locator(".pub-status")).toHaveText(/^\S.* (at|to) [^,]+$/);
+  await expect(page.locator(".pub-status")).toHaveText(/^Under (review|revision) at [^,]+$/);
   await expect(page.locator(".pub-status__meta")).toHaveCount(0);
   await expect(page.locator("main")).not.toContainText("As of ");
 });

@@ -669,6 +669,9 @@ function find(m: Model) {
   const mark = own ? undefined : editedMarks(root, entry)[0];
   const el = (mark as HTMLElement | undefined) ?? page.querySelector<HTMLElement>("h1") ?? page;
   const reduce = reducedMotion();
+  // An alumnus sits in the People section's closed "Show alumni" list: open every
+  // <details> around the entry first, or there is nothing to scroll to.
+  if (mark) openAround(mark);
   if (mark) el.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
   else window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
   if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
@@ -677,4 +680,10 @@ function find(m: Model) {
   void el.getBoundingClientRect(); // restart the animation
   el.classList.add("ep-flash");
   setTimeout(() => el.classList.remove("ep-flash"), reduce ? FLASH_REDUCED_MS : FLASH_MS);
+}
+
+/** Open the closed <details> the element sits in (innermost first). */
+function openAround(el: Element) {
+  for (let d = el.closest("details"); d; d = d.parentElement?.closest("details") ?? null)
+    d.open = true;
 }

@@ -70,15 +70,16 @@
   var SAVE_DROPDOWN = "ToolbarDropdown";
   var PUBLISH_BUTTON = "PublishButton";
   var SAME_NAME = /already exists\. Do you want to replace it\?$/;
-  var DRAFT = "“Draft · pending lab review”";
+  // The visibility switch (stored as `draft`; cms-widgets.js shows it the other way round).
+  var VISIBLE = "“Visible on the website”";
 
   var NOTE_NO_CHECK = "Saved without the site check (the preview wasn't ready)";
   var NOTE_NO_CONFLICT = "Saved without the conflict check (GitHub didn't answer)";
   var SAVE_DESC = "Saves and updates the live site in about 2 minutes";
   var TIP =
-    "Save puts your changes on the live site in about 2 minutes. Every save is listed in History, where you can undo it. Not ready for visitors? Turn on " +
-    DRAFT +
-    " first: it hides the entry from the website, but every save can still be read on github.com.";
+    "Save puts your changes on the live site in about 2 minutes. Every save is listed in History, where you can undo it. Not ready for visitors? Set " +
+    VISIBLE +
+    " to No first: it hides the entry from the website, but every save can still be read on github.com.";
   var RENAME =
     "A file with this name is already on the site. Rename your file (for example isabelle-cho-2026.jpg) and upload it again.";
 
@@ -318,9 +319,9 @@
     var d = data || {};
     if (collection === "people" && d.listed !== true)
       return "Not listed: Save won't show this person";
-    if (d.draft === true) return "Save keeps it hidden: Draft is on";
+    if (d.draft === true) return "Save keeps it hidden: Visible is No";
     if (collection === "people" && !(d.role === "pi" || d.profile_page === true))
-      return "Save updates the People page";
+      return "Save updates the People section of the home page";
     if (collection === "opportunities") return "Save updates the Join page";
     if (collection === "pages" || collection === "settings") return "Save updates the live site";
     return "Save puts this on the live site";
@@ -353,11 +354,12 @@
       projects: "/projects/",
       people: "/people/",
     };
+    // draft: true is "Visible on the website: No".
     if (d.draft === true) return { state: "hidden", reason: "draft" };
     if (collection === "people") {
       if (d.listed !== true) return { state: "hidden", reason: "unlisted" };
       if (!(d.role === "pi" || d.profile_page === true))
-        return { state: "elsewhere", path: "/people/", label: "People page" };
+        return { state: "elsewhere", path: "/#people", label: "People section" };
     }
     if (own[collection] && slug) return { state: "live", path: own[collection] + slug + "/" };
     if (collection === "opportunities")

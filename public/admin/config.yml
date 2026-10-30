@@ -41,13 +41,13 @@ collections:
     format: frontmatter
     slug: "{{fields.date | date('YYYY-MM-DD')}}-{{slug | truncate(60)}}"
     identifier_field: title
-    summary: "{{fields.date | date('YYYY-MM-DD')}} · {{title}}{{fields.draft | ternary(' · draft', '')}}"
+    summary: "{{fields.date | date('YYYY-MM-DD')}} · {{title}}{{fields.draft | ternary(' · hidden', '')}}"
     sortable_fields:
       - field: date
         default_sort: desc
       - title
     view_filters:
-      - label: Drafts
+      - label: Hidden from the website
         field: draft
         pattern: true
       - label: Talks and events
@@ -225,12 +225,12 @@ collections:
         required: false
         hint: Optional picture for the news page.
         collapsed: true
-      - label: Draft · pending lab review
+      - label: Visible on the website
         name: draft
-        widget: boolean
+        widget: visible
         required: false
         default: false
-        hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
+        hint: "No hides this from the live site. You still see it in this editor's preview. Hiding is not secret: anyone can read every save on github.com."
       - label: Body
         name: body
         widget: richtext
@@ -258,21 +258,24 @@ collections:
     format: frontmatter
     slug: "{{fields.authors.0.name}}-{{year}}-{{slug | truncate(28)}}"
     identifier_field: title
-    summary: "{{fields.year | default('in progress')}} · {{title}}{{fields.draft | ternary(' · draft', '')}}"
+    summary: "{{fields.year | default('in progress')}} · {{title}}{{fields.draft | ternary(' · hidden', '')}}"
     sortable_fields:
       - field: year
         default_sort: desc
       - title
     view_filters:
-      - label: Drafts
+      - label: Hidden from the website
         field: draft
         pattern: true
       - label: Featured
         field: featured
         pattern: true
       - label: Work in progress
-        field: type
-        pattern: work-in-progress
+        field: status
+        pattern: ^in-progress$
+      - label: Under review or revision
+        field: status
+        pattern: ^under-
     view_groups:
       - label: Year
         field: year
@@ -392,27 +395,17 @@ collections:
         name: status
         widget: select
         options:
+          - label: Work in progress
+            value: in-progress
+          - label: Under review
+            value: under-review
+          - label: Under revision
+            value: under-revision
           - label: Published
             value: published
-          - label: Forthcoming
-            value: forthcoming
-          - label: Accepted
-            value: accepted
-          - label: Major revision
-            value: major-revision
-          - label: Revise and resubmit
-            value: revise-resubmit
-          - label: Submitted
-            value: submitted
-          - label: Working paper
-            value: working-paper
-          - label: Preprint
-            value: preprint
-          - label: In progress
-            value: in-progress
         multiple: false
         required: true
-        hint: Anything other than Published also needs “As of” and “Status source”.
+        hint: "Work in progress: not submitted yet (it may have an SSRN or arXiv version). Under review: submitted. Under revision: asked to revise. Published: accepted or in print. All but Published need “As of” and “Status source”."
       - label: Status note
         name: status_note
         widget: string
@@ -420,7 +413,7 @@ collections:
           - (?=^[\s\S]{0,200}$)
           - At most 200 characters.
         required: false
-        hint: e.g. “at Manufacturing & Service Operations Management, 2nd round”.
+        hint: Shown after the status, e.g. “at Operations Research” (the site says “Under revision at Operations Research”).
       - label: Status source (required unless Published)
         name: status_source
         widget: select
@@ -431,7 +424,7 @@ collections:
             value: self-reported
         multiple: false
         required: false
-        hint: Self-reported statuses are labelled “reported by the lab” on the site.
+        hint: Not shown on the site; it tells the lab which statuses to check again.
       - label: As of (required unless Published)
         name: as_of
         widget: string
@@ -623,7 +616,7 @@ collections:
         multiple: true
         required: false
         default: []
-        hint: At least one, except for work in progress and while “Draft · pending lab review” is on.
+        hint: At least one, except for work in progress and while “Visible on the website” is No.
       - label: In brief
         name: in_brief
         widget: text
@@ -681,12 +674,12 @@ collections:
         widget: text
         required: false
         hint: "Leave empty: BibTeX is generated. Use only if the generated entry is wrong."
-      - label: Draft · pending lab review
+      - label: Visible on the website
         name: draft
-        widget: boolean
+        widget: visible
         required: false
         default: false
-        hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
+        hint: "No hides this from the live site. You still see it in this editor's preview. Hiding is not secret: anyone can read every save on github.com."
       - label: Body
         name: body
         widget: richtext
@@ -706,7 +699,7 @@ collections:
   - name: people
     label: People
     label_singular: Person
-    description: The PI, lab members and alumni. External coauthors are not people. Nobody appears on the site unless “Listed” is on, and photos, email and “now at” need their own consent switches.
+    description: "The PI, lab members and alumni. External coauthors are not people. Nobody appears on the site unless “Listed” is on; “Visible on the website: No” leaves someone out without deleting them. Photos, email and “now at” need their own consent switches."
     folder: content/people
     create: true
     delete: false
@@ -714,13 +707,13 @@ collections:
     format: frontmatter
     slug: "{{slug}}"
     identifier_field: name
-    summary: "{{name}}{{fields.listed | ternary('', ' · not listed')}}{{fields.draft | ternary(' · draft', '')}}"
+    summary: "{{name}}{{fields.listed | ternary('', ' · not listed')}}{{fields.draft | ternary(' · hidden', '')}}"
     sortable_fields:
       - name
       - role
       - end
     view_filters:
-      - label: Drafts
+      - label: Hidden from the website
         field: draft
         pattern: true
       - label: Not listed
@@ -955,12 +948,12 @@ collections:
         required: false
         default: false
         hint: Give this person their own page (the PI always has one).
-      - label: Draft · pending lab review
+      - label: Visible on the website
         name: draft
-        widget: boolean
+        widget: visible
         required: false
         default: false
-        hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
+        hint: "No hides this person from the home page's People section (Alumni too) and from the people lists on research and project pages; their profile page is not published either. Their name still shows where other entries name them: on papers they wrote (and then on that project's team list) and in news text. “Listed” (consent) still has to be on for them to appear at all. You still see them in this editor's preview. Hiding is not secret: anyone can read every save on github.com."
       - label: Bio
         name: body
         widget: richtext
@@ -988,7 +981,7 @@ collections:
     format: frontmatter
     slug: "{{fields.short_label}}"
     identifier_field: title
-    summary: "{{short_label}} · {{status}}{{fields.draft | ternary(' · draft', '')}}"
+    summary: "{{short_label}} · {{status}}{{fields.draft | ternary(' · hidden', '')}}"
     sortable_fields:
       - title
       - status
@@ -996,7 +989,7 @@ collections:
       - label: Archived
         field: status
         pattern: archived
-      - label: Drafts
+      - label: Hidden from the website
         field: draft
         pattern: true
     fields:
@@ -1201,12 +1194,12 @@ collections:
         required: false
         hint: Optional figure for the direction page.
         collapsed: true
-      - label: Draft · pending lab review
+      - label: Visible on the website
         name: draft
-        widget: boolean
+        widget: visible
         required: false
         default: false
-        hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
+        hint: "No hides this from the live site. You still see it in this editor's preview. Hiding is not secret: anyone can read every save on github.com."
       - label: Body
         name: body
         widget: richtext
@@ -1234,7 +1227,7 @@ collections:
     format: frontmatter
     slug: "{{slug | truncate(50)}}"
     identifier_field: title
-    summary: "{{title}} · {{status}}{{fields.draft | ternary(' · draft', '')}}"
+    summary: "{{title}} · {{status}}{{fields.draft | ternary(' · hidden', '')}}"
     sortable_fields:
       - title
       - status
@@ -1243,7 +1236,7 @@ collections:
       - label: Active
         field: status
         pattern: active
-      - label: Drafts
+      - label: Hidden from the website
         field: draft
         pattern: true
     fields:
@@ -1277,7 +1270,7 @@ collections:
         multiple: true
         required: false
         default: []
-        hint: At least one unless the project is archived or “Draft · pending lab review” is on; the first is the primary direction (breadcrumb).
+        hint: At least one unless the project is archived or “Visible on the website” is No; the first is the primary direction (breadcrumb).
       - label: Status
         name: status
         widget: select
@@ -1498,12 +1491,12 @@ collections:
         required: false
         hint: Optional image for the project page.
         collapsed: true
-      - label: Draft · pending lab review
+      - label: Visible on the website
         name: draft
-        widget: boolean
+        widget: visible
         required: false
         default: false
-        hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
+        hint: "No hides this from the live site. You still see it in this editor's preview. Hiding is not secret: anyone can read every save on github.com."
       - label: Body
         name: body
         widget: richtext
@@ -1531,12 +1524,12 @@ collections:
     format: frontmatter
     slug: "{{slug | truncate(50)}}"
     identifier_field: title
-    summary: "{{title}} · {{status}}{{fields.draft | ternary(' · draft', '')}}"
+    summary: "{{title}} · {{status}}{{fields.draft | ternary(' · hidden', '')}}"
     sortable_fields:
       - title
       - status
     view_filters:
-      - label: Drafts
+      - label: Hidden from the website
         field: draft
         pattern: true
     fields:
@@ -1639,12 +1632,12 @@ collections:
         required: false
         default: []
         hint: Directions this opportunity is for (drives “Open to RAs”).
-      - label: Draft · pending lab review
+      - label: Visible on the website
         name: draft
-        widget: boolean
+        widget: visible
         required: false
         default: false
-        hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
+        hint: "No hides this from the live site. You still see it in this editor's preview. Hiding is not secret: anyone can read every save on github.com."
       - label: Body
         name: body
         widget: richtext
@@ -1752,12 +1745,12 @@ collections:
             default: []
             hint: Up to 3, each tied to a paper and/or a direction.
             summary: "{{fields.text | truncate(60)}}"
-          - label: Draft · pending lab review
+          - label: Visible on the website
             name: draft
-            widget: boolean
+            widget: visible
             required: false
             default: false
-            hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
+            hint: "No hides this from the live site. You still see it in this editor's preview. Hiding is not secret: anyone can read every save on github.com."
       - name: join
         label: Join the lab
         file: content/pages/join.yml
@@ -1837,12 +1830,12 @@ collections:
               - quote
               - bulleted-list
               - numbered-list
-          - label: Draft · pending lab review
+          - label: Visible on the website
             name: draft
-            widget: boolean
+            widget: visible
             required: false
             default: false
-            hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
+            hint: "No hides this from the live site. You still see it in this editor's preview. Hiding is not secret: anyone can read every save on github.com."
       - name: about
         label: About
         file: content/pages/about.yml
@@ -1886,12 +1879,12 @@ collections:
             format: YYYY-MM-DD
             date_format: YYYY-MM-DD
             time_format: false
-          - label: Draft · pending lab review
+          - label: Visible on the website
             name: draft
-            widget: boolean
+            widget: visible
             required: false
             default: false
-            hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
+            hint: "No hides this from the live site. You still see it in this editor's preview. Hiding is not secret: anyone can read every save on github.com."
       - name: accessibility
         label: Accessibility statement
         file: content/pages/accessibility.yml
@@ -1936,12 +1929,12 @@ collections:
             format: YYYY-MM-DD
             date_format: YYYY-MM-DD
             time_format: false
-          - label: Draft · pending lab review
+          - label: Visible on the website
             name: draft
-            widget: boolean
+            widget: visible
             required: false
             default: false
-            hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
+            hint: "No hides this from the live site. You still see it in this editor's preview. Hiding is not secret: anyone can read every save on github.com."
       - name: privacy
         label: Privacy statement
         file: content/pages/privacy.yml
@@ -1986,12 +1979,12 @@ collections:
             format: YYYY-MM-DD
             date_format: YYYY-MM-DD
             time_format: false
-          - label: Draft · pending lab review
+          - label: Visible on the website
             name: draft
-            widget: boolean
+            widget: visible
             required: false
             default: false
-            hint: "Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: anyone can read every save on github.com."
+            hint: "No hides this from the live site. You still see it in this editor's preview. Hiding is not secret: anyone can read every save on github.com."
   - name: settings
     label: Settings
     description: Site-wide settings. Changes affect every page.
@@ -2171,7 +2164,7 @@ collections:
             allow_add: true
             required: false
             default: []
-            hint: Internal tools for lab members, such as the lab scheduler. They appear in the site footer and at the top of the People page.
+            hint: Internal tools for lab members, such as the lab scheduler. They appear in the site footer and at the foot of the home page's People section.
             label_singular: link
             summary: "{{fields.label}}"
           - label: Redirects

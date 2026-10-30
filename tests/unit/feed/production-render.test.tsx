@@ -73,7 +73,7 @@ describe.skipIf(!present)("WP5 pages in a production build (drafts excluded)", (
     const c = getContent();
     const html = renderToStaticMarkup(<JoinPage />);
     keep("join", html);
-    expect(html).not.toContain("Draft · pending lab review");
+    expect(html).not.toContain("Not visible on the live site");
     for (const o of c.opportunities) {
       expect(html).toContain(o.title.replace(/&/g, "&amp;"));
       if (o.route)
@@ -159,7 +159,7 @@ describe.skipIf(!present)("WP5 pages in a production build (drafts excluded)", (
   it("News: only published items, each with a full date", () => {
     const c = getContent();
     const html = renderToStaticMarkup(<NewsPage />);
-    expect(html).not.toContain("Draft · pending lab review");
+    expect(html).not.toContain("Not visible on the live site");
     for (const n of c.news) expect(html).toContain(`>${formatDate(n.date)}</time>`);
     const items = html.match(/<article class="bl-news"/g) ?? [];
     expect(items).toHaveLength(c.news.length);

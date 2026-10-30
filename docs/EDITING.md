@@ -2,7 +2,13 @@
 
 This guide is for lab members who edit the website through the content manager (Decap CMS) at **`/admin/`** on the live site, today `https://bobalabx.github.io/bobalab-web/admin/`. You do not need to know Git or code. Maintainers set up the system once (`docs/SETUP-PRODUCTION.md`) and look after it (`docs/HANDOVER.md`).
 
-Contents: [1. Sign in](#1-sign-in) · [2. Save and the Draft switch](#2-save-and-the-draft-switch) · [3. Save goes live](#3-save-goes-live-what-not-live-yet-and-hidden-mean) (the status box, [the live preview column](#32-the-live-preview-column), [what Save refuses](#33-what-save-refuses-and-what-the-site-check-is), [someone else saved this entry](#34-someone-else-saved-this-entry)) · [4. Consent rules](#4-consent-rules-people-photos-emails) · [5. Images and alt text](#5-images-and-alt-text) · [6. Research directions: order, colours, archiving](#6-research-directions-order-colours-archiving) · [7. Archive instead of deleting](#7-archive-instead-of-deleting) · [8. History: who changed what; restore a version](#8-history-who-changed-what-restore-a-version) · [9. Per-term checklist](#9-per-term-checklist) · [10. PDF accessibility checklist](#10-pdf-accessibility-checklist) · [11. Practice on your own computer](#11-practice-on-your-own-computer-no-account) · [12. Tips, phones and known quirks](#12-tips-phones-and-known-quirks) · [13. How Fig. 1 is made from your entries](#13-how-fig-1-is-made-from-your-entries) · [14. Study-design figures](#14-study-design-figures-plate_verified) · [15. Links for lab members](#15-links-for-lab-members) · [16. Writing for the site](#16-writing-for-the-site) · [17. Who can edit (owner and admins)](#17-who-can-edit-owner-and-admins)
+Contents: [1. Sign in](#1-sign-in) · [2. Save and the Visible switch](#2-save-and-the-visible-switch) · [3. Save goes live](#3-save-goes-live-what-not-live-yet-and-hidden-mean) (the status box, [the live preview column](#32-the-live-preview-column), [what Save refuses](#33-what-save-refuses-and-what-the-site-check-is), [someone else saved this entry](#34-someone-else-saved-this-entry)) · [4. Consent rules](#4-consent-rules-people-photos-emails) · [5. Images and alt text](#5-images-and-alt-text) · [6. Research directions: order, colours, archiving](#6-research-directions-order-colours-archiving) · [7. Archive instead of deleting](#7-archive-instead-of-deleting) · [8. History: who changed what; restore a version](#8-history-who-changed-what-restore-a-version) · [9. Per-term checklist](#9-per-term-checklist) · [10. PDF accessibility checklist](#10-pdf-accessibility-checklist) · [11. Practice on your own computer](#11-practice-on-your-own-computer-no-account) · [12. Tips, phones and known quirks](#12-tips-phones-and-known-quirks) · [13. How Fig. 1 is made from your entries](#13-how-fig-1-is-made-from-your-entries) · [14. Study-design figures](#14-study-design-figures-plate_verified) · [15. Links for lab members](#15-links-for-lab-members) · [16. Writing for the site](#16-writing-for-the-site) · [17. Who can edit (owner and admins)](#17-who-can-edit-owner-and-admins)
+
+> **People, visibility and statuses, October 29, 2026 (DECISIONS D-21).** What changed for editors:
+>
+> - **People are on the home page.** There is no separate People page any more: the home page's last section lists everyone, and old `/people/` links land there (section 4). Profile pages such as the PI's stay.
+> - **"Visible on the website: Yes / No"** replaces the "Draft · pending lab review" switch in every entry. **No** hides the entry from the live site; this is also how you choose which members and alumni are shown (sections 2 and 4). Nothing about existing entries changed: a former draft shows as No.
+> - **Publications have four statuses:** Work in progress, Under review, Under revision, Published (section 16).
 
 > **New editor, October 2026 (DECISIONS D-17 to D-19).** What changed for editors:
 >
@@ -28,26 +34,28 @@ Contents: [1. Sign in](#1-sign-in) · [2. Save and the Draft switch](#2-save-and
 
 What you can change: News, Publications, People, Research directions, Projects, Opportunities, the fixed Pages (Home texts, Join, About, Accessibility, Privacy) and site Settings (including the links for lab members, section 15).
 
-## 2. Save and the Draft switch
+## 2. Save and the Visible switch
 
 **Save means "put this on the website".** Each Save is recorded on GitHub under your name and the live site updates about 2 minutes later. There is one button, **Save**, at the top of the form. While it works it reads "Saving…"; a second click does nothing, so you cannot save twice by accident. **Ctrl+S** (Cmd+S on a Mac) saves too.
 
-**The "Draft · pending lab review" switch** is a field in every entry. When it is on, Save keeps the entry **off the website**: visitors who open its address get "Page not found", and lists leave it out. Use it for anything the lab has not approved yet.
+**The "Visible on the website" switch** is a field in every entry, near the end of the form. It says **Yes** or **No**; press it (or Tab to it and press Space) to change it. With **No**, Save keeps the entry **off the website**: visitors who open its address get "Page not found", and lists leave it out. You still see the entry in the live column while you edit it (section 3.2). Use **No** for anything the lab has not approved yet, and to leave a member or an alumnus out of the People section (section 4). Set it back to **Yes** and Save to show the entry again; nothing is deleted either way.
 
-> **Draft hides an entry from the website only.** The website's repository is public: anyone can read every save, drafts included, on github.com, now and later. Never put embargoed results, unpublished personal data, home addresses, phone numbers or anything a person has not agreed to share into any field, draft or not.
+> **"Visible: No" hides an entry from the website only.** The website's repository is public: anyone can read every save, hidden entries included, on github.com, now and later. Never put embargoed results, unpublished personal data, home addresses, phone numbers or anything a person has not agreed to share into any field, visible or not.
 
 **The note next to Save** always says what Save will do with the entry as it is in the form now:
 
-| The entry                                | The note says                           |
-| ---------------------------------------- | --------------------------------------- |
-| Draft off                                | Save puts this on the live site         |
-| Draft on                                 | Save keeps it hidden: Draft is on       |
-| A person with **Listed** off             | Not listed: Save won't show this person |
-| A listed person without a profile page   | Save updates the People page            |
-| An opportunity                           | Save updates the Join page              |
-| A page (Home texts, Join, …) or Settings | Save updates the live site              |
+| The entry                                | The note says                                    |
+| ---------------------------------------- | ------------------------------------------------ |
+| Visible on the website: Yes              | Save puts this on the live site                  |
+| Visible on the website: No               | Save keeps it hidden: Visible is No              |
+| A person with **Listed** off             | Not listed: Save won't show this person          |
+| A listed person without a profile page   | Save updates the People section of the home page |
+| An opportunity                           | Save updates the Join page                       |
+| A page (Home texts, Join, …) or Settings | Save updates the live site                       |
 
-New entries start with Draft **off** (DECISIONS D-17, default). If the text is not ready for visitors, turn Draft on **before** the first Save.
+New entries start with **Visible on the website: Yes** (DECISIONS D-17, default). If the text is not ready for visitors, set it to **No** **before** the first Save.
+
+In the collection lists, a hidden entry carries "· hidden" after its title, and the **Hidden from the website** filter above the list shows only those.
 
 The normal path:
 
@@ -68,17 +76,17 @@ The **file name** (the page address) is made when you first save: news use the d
 
 After each Save, a message at the bottom right says **"Saved. The live site updates in about 2 minutes. [Undo]"** (section 8.3), and the **status box** below it follows the update:
 
-| The status box says                                                           | What it means                                                                                                                                  |
-| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Saved. The live site updates in about 2 minutes.                              | GitHub has your change; the site is being rebuilt.                                                                                             |
-| Live on the site ✓ · View page                                                | Your change is live. **View page** opens it. If you still see the old page, reload it: browsers keep pages for up to 10 minutes.               |
-| Live on the site ✓ · View the People page (or the Join page, the Home page)   | The entry has no page of its own; it shows on that page.                                                                                       |
-| Saved · not shown on the live site because "Draft · pending lab review" is on | Saved and hidden on purpose (people: "because Listed is off"). There is no View link.                                                          |
-| Saved · the live site is taking longer than usual                             | More than 6 minutes. Wait a little; tell a maintainer if it stays.                                                                             |
-| Saved. The live site is stuck on an earlier problem (… saved by @…) …         | An earlier save broke the site update. Your change goes live once that is fixed. **No need to undo yours.**                                    |
-| Saved, but the live site did not update · What happened?                      | Your save is recorded, but the site could not be rebuilt. **What happened?** explains it in plain words. Undo your save, or tell a maintainer. |
-| Saved without the site check (the preview wasn't ready)                       | Added when the check could not run in time (section 3.3). The save went through.                                                               |
-| Saved without the conflict check (GitHub didn't answer)                       | Added when GitHub did not say in time whether someone else saved the entry (section 3.4). The save went through.                               |
+| The status box says                                                            | What it means                                                                                                                                  |
+| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Saved. The live site updates in about 2 minutes.                               | GitHub has your change; the site is being rebuilt.                                                                                             |
+| Live on the site ✓ · View page                                                 | Your change is live. **View page** opens it. If you still see the old page, reload it: browsers keep pages for up to 10 minutes.               |
+| Live on the site ✓ · View the People section (or the Join page, the Home page) | The entry has no page of its own; it shows there.                                                                                              |
+| Saved · not shown on the live site because "Visible on the website" is No      | Saved and hidden on purpose (people: "because Listed is off"). There is no View link.                                                          |
+| Saved · the live site is taking longer than usual                              | More than 6 minutes. Wait a little; tell a maintainer if it stays.                                                                             |
+| Saved. The live site is stuck on an earlier problem (… saved by @…) …          | An earlier save broke the site update. Your change goes live once that is fixed. **No need to undo yours.**                                    |
+| Saved, but the live site did not update · What happened?                       | Your save is recorded, but the site could not be rebuilt. **What happened?** explains it in plain words. Undo your save, or tell a maintainer. |
+| Saved without the site check (the preview wasn't ready)                        | Added when the check could not run in time (section 3.3). The save went through.                                                               |
+| Saved without the conflict check (GitHub didn't answer)                        | Added when GitHub did not say in time whether someone else saved the entry (section 3.4). The save went through.                               |
 
 When nothing is happening the box says **"Live site up to date"**. If the live site stopped updating, a band at the top of every screen names the save that caused it, with **[Open it]** and **[What happened?]**. If the daily rebuild failed, the band says it was not caused by a save. Saves are still recorded and go live once it is fixed.
 
@@ -95,10 +103,10 @@ The right-hand column is the real website, drawn from the saved site plus your u
 - **Desktop | Phone** show the page at desktop or phone width.
 - **Find my entry** scrolls to the entry on a list page and outlines it. On list pages the entry you edit is outlined with a dashed blue line and an "Editing" tag ("New · not saved yet" for a new entry).
 - **Open the published page ↗** opens the live page in a new tab ("Not on the live site yet" for a new or hidden entry).
-- **Show as visitors see it** shows the page exactly as visitors will see it after you save. Without it, an entry with Draft on is still drawn, so you can check it; the column then says "Hidden from the live site: “Draft · pending lab review” is on. Shown here so you can check it."
+- **Show as visitors see it** shows the page exactly as visitors will see it after you save. Without it, an entry with **Visible on the website: No** is still drawn, so you can check it; the column then says "Hidden from the live site: “Visible on the website” is No. Shown here so you can check it."
 - The **address line** shows the page's address and whether you see "your unsaved changes", the "saved version" or an older version.
 
-**Why other drafts are missing.** The column follows the live site's rules: other entries with Draft on, people with Listed off and profile pages that are switched off never show, exactly as on the live site.
+**Why other hidden entries are missing.** The column follows the live site's rules: other entries with Visible on the website: No, people with Listed off and profile pages that are switched off never show, exactly as on the live site.
 
 **Unfinished new entries.** A new entry shows at once, with stand-ins such as "(Title not filled in yet)" for the fields you have not filled in. Images you just uploaded show before you save.
 
@@ -124,17 +132,17 @@ The content manager refuses:
 
 - an image without alt text, a link with an address but no link text, web addresses that do not start with `https://`, dates in the wrong format, texts longer than the site can show;
 - a new entry whose address would not fit the site's rules (section 2);
-- fields that are required only in some cases. Their labels say when, for example **Alt text (required with an image)**, **As of (required unless Published)**, **Status source (required unless Published)**, **Year (required with a public version)** and **Research directions (required except for work in progress)**; a paper or project needs at least one research direction unless "Draft · pending lab review" is on;
+- fields that are required only in some cases. Their labels say when, for example **Alt text (required with an image)**, **As of (required unless Published)**, **Status source (required unless Published)**, **Year (required with a public version)** and **Research directions (required except for work in progress)**; a paper or project needs at least one research direction unless "Visible on the website" is No;
 - the same direction twice in **Direction order**, a colour that another direction already uses (section 6), and a person's photo without photo consent (section 4);
 - **a file the website cannot take:** only JPG, PNG, WebP or GIF images up to 2 MB and PDFs up to 10 MB (for example "Not saved: “cv.docx” can't go on the website. Upload a PDF (at most 10 MB) or a JPG, PNG, WebP or GIF image (at most 2 MB)."). A phone photo in HEIC format, a Word file or a 3 MB PNG are refused;
-- **a link to a page that is hidden on the live site,** for example a news item that links to `/people/isabelle-cho/` when Isabelle has no profile page: "This links to /people/isabelle-cho/, which is not a page on the live site. Link to /people/ instead, or remove the link.";
-- **hiding a page that other entries link to,** for example turning on Draft for a project that a news item links to. The band offers **[Open News item “…”]** so you can remove the link there first, then come back;
+- **a link to a page that is hidden on the live site,** for example a news item that links to `/people/isabelle-cho/` when Isabelle has no profile page: "This links to /people/isabelle-cho/, which is not a page on the live site. Link to /#people (the home page's People section) instead, or remove the link.";
+- **hiding a page that other entries link to,** for example setting Visible on the website to No for a project that a news item links to. The band offers **[Open News item “…”]** so you can remove the link there first, then come back;
 - **a name the lab has asked never to publish:** "Not saved: this entry contains a name the lab has asked never to publish. Ask the PI before adding it." The message never shows the name;
 - **a save over someone else's newer save** (section 3.4).
 
 **The site check.** Before every Save, the column runs the website's own check (the same one the site update runs) twice: on the saved site, and on the saved site with your change. It refuses only **problems your change adds**, in any entry. Problems that were already there never stop your save. For example, two publications with the same title, a colour that clashes once Settings "launched" is on, or a link that breaks because you hid the page it points to. The band names the entry and the field: "Not saved: the site check would reject this: News item “…” › Title: …". If the check is not ready (for example in the first seconds after opening an entry), Save goes through and the status box adds "Saved without the site check (the preview wasn't ready)".
 
-Hiding a page that was already public (turning Draft on, or Listed or Profile page off) is **allowed**: the column only warns that visitors who open its old address get "Page not found" (DECISIONS D-05 amendment, owner to confirm). This matters most when someone withdraws consent: hide first, ask questions later.
+Hiding a page that was already public (Visible on the website: No, or Listed or Profile page off) is **allowed**: the column only warns that visitors who open its old address get "Page not found" (DECISIONS D-05 amendment, owner to confirm). This matters most when someone withdraws consent: hide first, ask questions later.
 
 **Other "Not saved" messages:**
 
@@ -158,14 +166,20 @@ Check the column, fix anything you want, and press **Save**. If the message says
 
 ## 4. Consent rules (people, photos, emails)
 
+**Where people appear.** The lab's people are listed in the **People** section at the bottom of the home page. There is no separate People page any more (owner, October 2026): the header's "People" link goes to that section, and old links to `/people/` land there too. The order is the principal investigator (with photo, title, affiliation and links), then graduate students, then undergraduate RAs (lab managers first: give them a **Sort rank** of 1), then any other group, then alumni behind "Show alumni", by the year they left. A person with **Profile page** on (the PI always) also has a page of their own, linked from their name. In the content manager, the live column's **People (home page)** tab shows this section on its own, with the person you are editing marked "Editing"; a person with **Profile page** on also gets a **Profile page** tab, which opens first.
+
+**Choosing who is shown.** To leave a current member or an alumnus out of the People section, turn their **Visible on the website** switch to **No** and Save; turn it back to **Yes** to show them again. Nothing else changes, and nothing is deleted. Someone who never agreed to appear should have **Listed** off as well (below).
+
+**What "No" does not remove.** The person also leaves the people lists on research and project pages, and their profile page is not published. But their **name stays** where other entries name them: in the author list of papers they wrote (as plain text, without a link), on the team list of a project when they wrote one of its papers, and in news text. Their uploaded **photo file** also stays reachable at its address (`/uploads/people/…`, and the resized copies under `/media/people/`), although no page shows or links it. If someone asks to be taken off the site completely, ask the PI about the papers and news items that name them, clear **Photo** in their entry, and ask a maintainer to delete the file from `public/uploads/` (as for withdrawn photo consent, below).
+
 The site shows people only with their consent (lab decision D-06). The switches in each person entry control this, and the live column shows what each switch hides ("Shown: photo, program. Hidden: email (Email public is off)").
 
-| Switch                           | Off (the default)                                                             | On                                                                     |
-| -------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| **Listed (consented to appear)** | The person is **never shown or linked anywhere**.                             | The person may appear on People, as a linked author, in project teams. |
-| **Photo consent**                | The photo is not shown; a square with the person's initials is shown instead. | The uploaded photo is shown, cropped to a square.                      |
-| **Email public**                 | The email is not shown.                                                       | The email is shown as a link.                                          |
-| **Now at public**                | "Now at …" (alumni) is not shown.                                             | It is shown.                                                           |
+| Switch                           | Off (the default)                                                             | On                                                                                             |
+| -------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **Listed (consented to appear)** | The person is **never shown or linked anywhere**.                             | The person may appear in the home page's People section, as a linked author, in project teams. |
+| **Photo consent**                | The photo is not shown; a square with the person's initials is shown instead. | The uploaded photo is shown, cropped to a square.                                              |
+| **Email public**                 | The email is not shown.                                                       | The email is shown as a link.                                                                  |
+| **Now at public**                | "Now at …" (alumni) is not shown.                                             | It is shown.                                                                                   |
 
 Rules:
 
@@ -221,7 +235,7 @@ The CMS has no Delete button for entries, on purpose: every page has a permanent
 | Research direction             | Status **Archived** + Archived on date; remove from Direction order (section 6).                                         |
 | Project                        | Status **Archived** (or Completed).                                                                                      |
 | Person                         | Set the **End** date (alumni), or switch **Listed** off if they no longer want to appear.                                |
-| News, publication, opportunity | Switch **Draft · pending lab review** on to hide it; for opportunities, set Status **Closed** with a new **As of** date. |
+| News, publication, opportunity | Set **Visible on the website** to **No** to hide it; for opportunities, set Status **Closed** with a new **As of** date. |
 
 A hidden entry can come back at any time: switch it on again and Save. If other entries link to the page you hide, Save asks you to remove those links first (section 3.3).
 
@@ -253,7 +267,8 @@ Click a row. It opens to list its changes, and the column shows the page **as Re
 - **Consent and visibility switches** (Listed, Profile page, Photo consent, Email public, Now at public; a project collaborator's "Consent to be shown" and a partner's "Public") can go from on to off, **never from off to on**. Switch them on yourself, after checking the person still agrees.
 - **Removed personal details** (email, now at, photo, CV) stay removed unless you tick **Also bring back removed personal details (email, now at, photo, CV)** in History's dialog. Undo never brings them back.
 - If Photo consent stays off, the photo and its alt text are cleared.
-- **Draft:** an entry that is a draft now stays a draft unless you tick **Also make it visible on the live site**.
+- **Visible on the website:** an entry that is hidden now (No) stays hidden unless you tick **Also make it visible on the live site**.
+- **Old publication statuses:** a version saved before October 29, 2026 may have a status the site no longer uses (for example "major-revision"). Restore brings it back as today's status ("Under revision") and says so.
 - **Images:** Restore brings back the file name, not the picture. If the file has been deleted or replaced since, the field is cleared and the dialog says so; the column shows the file that is at that address **today**. Bringing back an old picture is a maintainer task.
 
 If a check refuses the restored version (for example because it links to a page that is now hidden), the old values stay in the form with the band "These are the values from Oct 24. Fix the marked problem, then press Save. [Cancel restore]".
@@ -262,7 +277,7 @@ If a check refuses the restored version (for example because it links to a page 
 
 - **Right after a save:** the "Saved" message offers **Undo** for 30 seconds (it waits while the mouse or keyboard is on it). Undo acts at once, without asking, and only on the entry you just saved: it saves the version from before your save, with every check and the same consent rules as Restore. The entry may close and reopen once (under a second) while Undo works; that is expected. If you have already moved on, typed something new or opened another entry, the message closes ("Undo is in this entry's History") and Undo is the **Undo this change** button on the top row of the entry's History instead.
 - **Later:** open the entry's History and click **Undo this change** on the top row, or pick an older row and **Restore this version**.
-- **A new entry** cannot be undone (there is no older version): to take it off the site, turn on "Draft · pending lab review" (people: turn off "Listed") and Save.
+- **A new entry** cannot be undone (there is no older version): to take it off the site, set "Visible on the website" to No (people: or turn off "Listed" if they withdrew consent) and Save.
 
 Undo and Restore never delete anything: the version you replaced stays in History.
 
@@ -278,7 +293,7 @@ At the **start of each term** (PI or a maintainer):
 - [ ] **Offboard leavers:** the owner removes them under **Who can edit**, and cancels invitations nobody accepted.
 - [ ] **People:** add new members only with consent (section 4); set **End** dates for people who left; ask leavers about "Now at" and email consent; check photos still have consent.
 - [ ] **Opportunities and Join page:** update each opportunity's **Status** and **As of** date (URAP rounds open and close every term); make sure nothing says "open" without a dated source.
-- [ ] **Publications:** refresh statuses (revisions, acceptances) and their **As of** dates; add new papers and preprints; check that working papers have **Status source**; turn on **Study-design figure checked by the authors** only for figures an author has approved (section 14).
+- [ ] **Publications:** move each paper's **Status** on where it changed (Work in progress → Under review → Under revision → Published, section 16) and update its **As of** date; add new papers and preprints; check that every paper that is not Published has **Status source**; turn on **Study-design figure checked by the authors** only for figures an author has approved (section 14).
 - [ ] **News:** add the term's talks and awards; past events stop showing "Upcoming" automatically after the next rebuild.
 - [ ] **Directions:** confirm the order and colours; archive directions the lab no longer pursues.
 - [ ] **Accessibility and Privacy pages:** review the text and update **Last reviewed**.
@@ -333,7 +348,7 @@ Nobody draws Fig. 1 by hand. Every build draws it again from the content, so it 
 
 | What you see in Fig. 1                                                                | Where it comes from                                                                                                                                                                                                                                              |
 | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| One horizontal line per research direction, top to bottom                             | The live directions in **Settings → Site → Direction order** (section 6). Archived directions are left out. Draft directions appear only in preview builds.                                                                                                      |
+| One horizontal line per research direction, top to bottom                             | The live directions in **Settings → Site → Direction order** (section 6). Archived directions are left out. Directions with Visible on the website: No appear only in preview builds.                                                                            |
 | The line's colour and its label                                                       | The direction's **Colour** and **Short label** (at most 28 characters).                                                                                                                                                                                          |
 | A filled dot on a line, at a year                                                     | A publication that lists the direction under **Research directions** and **counts as a paper**: it has a **DOI**, or an SSRN, arXiv, PDF or publisher link, or a **presentation** with a source link. Its **Year** places it. Order within a year means nothing. |
 | A short vertical link joining two dots                                                | A counted paper with two research directions appears on both lines, and the link joins them.                                                                                                                                                                     |
@@ -357,7 +372,7 @@ Each publication has a checkbox, **Study-design figure checked by the authors** 
 
 ## 15. Links for lab members
 
-**Settings → Site → Links for lab members** holds links to internal tools, such as the lab scheduler. They appear in the **Lab members** column of the site footer, next to the "Reduce motion" switch, and at the top of the People page.
+**Settings → Site → Links for lab members** holds links to internal tools, such as the lab scheduler. They appear in the **Lab members** column of the site footer, next to the "Reduce motion" switch, and at the foot of the home page's People section.
 
 - **Link text:** short, for example "Lab scheduler" (at most 40 characters).
 - **Address:** a full address starting with `https://`.
@@ -369,7 +384,7 @@ Each publication has a checkbox, **Study-design figure checked by the authors** 
 
 The redesign follows one rule for words: say what the lab does, plainly, and let the fields carry status and provenance.
 
-- **Status goes in fields, not in prose.** Use **Status**, **Status note**, **As of** and **Status source**. The site prints the status as plain words ("Major revision at Manufacturing & Service Operations Management") and adds **one footnote per page** when a status is the lab's own report. Never type "reported by the lab", "status not confirmed" or "as of the last check" into a body or summary.
+- **Status goes in fields, not in prose.** Use **Status**, **Status note**, **As of** and **Status source** (see "Publication status" below). The site prints the status as plain words ("Under revision at Manufacturing & Service Operations Management"), without the date or the source. Never type "reported by the lab", "status not confirmed" or "as of the last check" into a body or summary.
 - **Don't describe the site or the pipeline.** Avoid sentences such as "This direction collects…", "listed by title only", "filed here so that…" or "no abstract has been reviewed yet". If an item has no summary, leave the summary empty; the page lists its title and status.
 - **Direction bodies** (80–150 words) start with the research itself. The page already opens "Why it matters" with the direction's one-line summary, so don't repeat it. Describe what each paper studies. Leave findings to the Findings list, which needs an evidence label and a paper.
 - **Write sentences, not tags.** Say "a submitted paper asks when…", not "when… (a submitted paper)". The lists under the text already show each item's type and status.
@@ -377,7 +392,21 @@ The redesign follows one rule for words: say what the lab does, plainly, and let
 - **Credit co-authors.** Don't write "Park Sinchaisri carried out" a paper that has other authors; name the paper or the lab instead. Project collaborators whose "Consent to be shown" is off are hidden on project pages (section 4), so don't name them in running text either; the author lists on paper pages are citations and stay as published.
 - **Name the lab sparingly.** The home page and the header already name BOBALAB. In the mission, the About text and the Join texts, write "we" or "the lab".
 - **No arrows, emoji or all-caps labels** in titles or summaries. The site adds its own link styling.
-- **Only facts with a source.** Do not round a talk that was "announced" into one that was "given", or a "submitted" paper into an "accepted" one. If you are unsure, ask the PI and leave the cautious wording.
+- **Only facts with a source.** Do not round a talk that was "announced" into one that was "given", or a paper Under review into a Published one. If you are unsure, ask the PI and leave the cautious wording.
+
+**Publication status.** Every publication has one of four statuses (owner decision, October 2026; DECISIONS D-21):
+
+| Status           | Use it when                                                                                 | The site prints                                        |
+| ---------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Work in progress | Not submitted yet. A working paper or preprint with an SSRN or arXiv version is still this. | Nothing more for a working paper (its type says it)    |
+| Under review     | Submitted to a journal or conference, waiting for a decision.                               | "Under review at Production and Operations Management" |
+| Under revision   | The journal asked for a revision (major or minor revision, revise and resubmit).            | "Under revision at Operations Research"                |
+| Published        | Accepted, forthcoming or in print.                                                          | Nothing: the journal and year say it                   |
+
+- **Status note** is printed right after the status: write "at Operations Research" or "at Manufacturing & Service Operations Management (second round)". Anything else follows a comma ("Work in progress, v2").
+- Everything except Published also needs **As of** (when the status was last checked) and **Status source**; the content manager will not save without them.
+- **The status never decides whether a paper is listed.** A paper is listed with the papers and drawn as a dot in Fig. 1 when it has a public version (a DOI, or an SSRN, arXiv, PDF or publisher link) or a presentation with a source link (section 13), whatever its status. A Work in progress without any of these is listed under "Work in progress" instead.
+- A preprint's **Venue** says what it is ("arXiv preprint"): the citation and BibTeX read it from there.
 
 ## 17. Who can edit (owner and admins)
 

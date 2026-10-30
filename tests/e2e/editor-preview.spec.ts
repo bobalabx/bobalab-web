@@ -92,7 +92,11 @@ const NEWS = [...live("news")].sort((a, b) =>
   String(b.data.date).localeCompare(String(a.data.date)),
 )[0]!;
 
-const TARGETS: Array<{ target: { page: string; slug?: string }; path: string }> = [
+/**
+ * `root`: where the page's text is compared ("main" by default). "people" is the
+ * home page's People section on its own (the list page moved there, 2026-10-29).
+ */
+const TARGETS: Array<{ target: { page: string; slug?: string }; path: string; root?: string }> = [
   { target: { page: "home" }, path: "/" },
   { target: { page: "research" }, path: "/research/" },
   { target: { page: "direction", slug: DIRECTION.slug }, path: `/research/${DIRECTION.slug}/` },
@@ -103,7 +107,7 @@ const TARGETS: Array<{ target: { page: string; slug?: string }; path: string }> 
     target: { page: "publication", slug: PUBLICATION.slug },
     path: `/publications/${PUBLICATION.slug}/`,
   },
-  { target: { page: "people" }, path: "/people/" },
+  { target: { page: "people" }, path: "/#people", root: "#people" },
   { target: { page: "person", slug: PI.slug }, path: `/people/${PI.slug}/` },
   { target: { page: "news" }, path: "/news/" },
   { target: { page: "news-item", slug: NEWS.slug }, path: `/news/${NEWS.slug}/` },
@@ -345,24 +349,25 @@ test.describe("/editor-preview/", () => {
     await openPreview(page);
     await loadSite(page, { visitor: true, base: preview ? allPublished(SAVED.base) : undefined });
     const dropReal = [".bl-draft-line", ".bl-badge--draft", ".plate-draft", ".pub-cite"];
-    for (const { target, path: p } of TARGETS) {
+    for (const { target, path: p, root } of TARGETS) {
       await real.goto(url(p));
       await real.waitForLoadState("networkidle");
-      const expected = await siteText(real, "main", dropReal);
+      const expected = await siteText(real, root ?? "main", dropReal);
       expect(expected.length, `${p}: real page text`).toBeGreaterThan(200);
       const r = await go(page, target);
       expect(r.target).toEqual(target);
       await page.waitForTimeout(150);
-      const got = await siteText(page, ".ep-page", [".ep-cite"]);
+      const got = await siteText(page, root ? `.ep-page ${root}` : ".ep-page", [".ep-cite"]);
       expect(got, `${p}: preview text`).toBe(expected);
       expect(r.path).toBe(p);
-      expect(r.title).toBe((await real.locator("main h1").first().innerText()).trim());
+      // A section on its own has no h1 (the tab label names it in the content manager).
+      expect(r.title).toBe(root ? "" : (await real.locator("main h1").first().innerText()).trim());
     }
     expect(errors).toEqual([]);
     expect(realErrors).toEqual([]);
   });
 
-  test("computed styles match the real page on Home, People and a direction page", async ({
+  test("computed styles match the real page on Home (with its People section) and a direction page", async ({
     page,
     context,
   }) => {
@@ -371,8 +376,7 @@ test.describe("/editor-preview/", () => {
     await openPreview(page);
     await loadSite(page, { visitor: true, base: preview ? allPublished(SAVED.base) : undefined });
     const cases = [
-      { target: { page: "home" }, path: "/", card: ".hm-face", text: "main p" },
-      { target: { page: "people" }, path: "/people/", card: ".pp-card", text: "main p" },
+      { target: { page: "home" }, path: "/", card: ".pp-card", text: "main p" },
       {
         target: { page: "direction", slug: DIRECTION.slug },
         path: `/research/${DIRECTION.slug}/`,
@@ -593,7 +597,8 @@ test.describe("/editor-preview/", () => {
       isNew: false,
       data: strip(person),
     });
-    await page.locator(".ep-page h1").first().click();
+    // The People view is the home page's section alone: its heading is the h2.
+    await page.locator(".ep-page h2").first().click();
     const before = await count(page, "bobalab:key");
     await page.keyboard.press("Control+s");
     await page.waitForFunction(
@@ -607,6 +612,38 @@ test.describe("/editor-preview/", () => {
     await expect(mark).toHaveClass(/ep-flash/);
     await expect(mark).toBeFocused();
     await expect(mark).toBeInViewport();
+    expect(errors).toEqual([]);
+  });
+
+  test("Find opens the closed “Show alumni” list to show an alumnus (D-21)", async ({ page }) => {
+    const errors = await watchErrors(page);
+    await openPreview(page);
+    await loadSite(page, { visitor: false });
+    await go(page, { page: "people" });
+    // A year-only End keeps someone current until 31 December (D-11).
+    const year = new Date().getFullYear();
+    const alum = live("people").find(
+      (p) => p.data.listed === true && p.data.end && Number(String(p.data.end).slice(0, 4)) < year,
+    )!;
+    expect(alum, "a listed alumnus in content/people").toBeTruthy();
+    await sendAndWait(page, {
+      type: "bobalab:overlay",
+      rev: 1,
+      entry: { collection: "people", slug: alum.slug },
+      isNew: false,
+      data: strip(alum),
+    });
+    const mark = page.locator(`[data-entry="people/${alum.slug}"]`).first();
+    const list = page.locator(".ep-page details.pp-alumni__details");
+    await expect(mark).toHaveAttribute("data-ep-editing", "Editing");
+    await expect(list).not.toHaveAttribute("open");
+    await expect(mark).toBeHidden();
+    await send(page, { type: "bobalab:find" });
+    await expect(list).toHaveAttribute("open");
+    await expect(mark).toBeVisible();
+    await expect(mark).toBeFocused();
+    await expect(mark).toBeInViewport();
+    await expect(mark).toHaveClass(/ep-flash/);
     expect(errors).toEqual([]);
   });
 

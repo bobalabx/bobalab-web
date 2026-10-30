@@ -1,34 +1,39 @@
 /**
  * Home sections below the hero (DECISIONS D-14, D-15; JUDGE.md §5 "Below the
  * fold", R18, R19): "New papers" (3 ruled rows: title, authors, one meta line) beside
- * "News" (4 dated one-liners), then "People" (the way to join and the consented
- * photos cropped round with first names; no team sentence and no counts, copy
- * sweep). Featured findings render only when content has them (R19). Each section
- * renders only what content provides (no placeholders); its way on is one plain
- * link at the foot of the list ("All publications", no stats).
+ * "News" (4 dated one-liners), then "People": everything the separate People
+ * page showed until the owner moved it here (2026-10-29), at #people. Featured
+ * findings render only when content has them (R19). Each section renders only
+ * what content provides (no placeholders); its way on is one plain line at the
+ * foot of the list ("All publications", no stats; People: the way to join).
  */
 import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
 import type { AuthorView, NewsView, PublicationView } from "@/lib/content/load";
 import type { FindingView } from "@/lib/content/queries";
-import type { PublicPerson } from "@/lib/content/people";
+import type { SiteData } from "@/lib/content/schema";
 import { typeWord } from "@/lib/publications/csl";
 import { PearlTag } from "@/components/ui/PearlTag";
 import { EvidenceLabel } from "@/components/ui/EvidenceLabel";
 import { Badge, DraftBadge } from "@/components/ui/Badge";
 import { DateText } from "@/components/ui/DateText";
-import { Img } from "@/components/ui/Img";
+import { PeopleDirectory } from "@/components/people/PeopleDirectory";
+import type { PeopleIndexModel } from "@/components/people/model";
+import { PEOPLE_ANCHOR } from "@/components/people/anchor";
 import { entryMark } from "@/lib/preview/mark";
 import "./home.css";
 
 function Section({
   id,
+  anchor,
   title,
   more,
   children,
   className,
 }: {
   id: string;
+  /** The section's own id, when other pages link to it (`/#people`). */
+  anchor?: string;
   title: string;
   /** The foot line: where the full list lives. */
   more?: { href: string; label: string };
@@ -36,7 +41,11 @@ function Section({
   className?: string;
 }) {
   return (
-    <section className={["hm-sec", className].filter(Boolean).join(" ")} aria-labelledby={id}>
+    <section
+      id={anchor}
+      className={["hm-sec", className].filter(Boolean).join(" ")}
+      aria-labelledby={id}
+    >
       <div className="bl-sec-h hm-sec-h">
         <h2 id={id}>{title}</h2>
       </div>
@@ -53,7 +62,6 @@ function Section({
 /** The foot links: plain words, no stats (copy sweep). */
 export const PUBLICATIONS_LINK = "All publications";
 export const NEWS_LINK = "All news";
-export const PEOPLE_LINK = "Meet the lab";
 
 /**
  * The paper's one meta line: "Journal article, Management Science, 2026". When
@@ -66,27 +74,6 @@ export function paperMeta(p: Pick<PublicationView, "type" | "venue" | "year">): 
   const type = typeWord(p);
   const typeInVenue = venue && /preprint|working paper|thesis|dissertation/i.test(venue);
   return [typeInVenue ? null : type, venue, p.year].filter(Boolean).join(", ");
-}
-
-/**
- * Display first names for the photo row: the quoted or bracketed preferred name
- * when there is one ('Zixian "Amy" Li' → Amy), else the first word; a first name
- * shared by several people gets their last initial (Ryan C., Ryan J.).
- */
-export function firstNames(
-  people: Array<Pick<PublicPerson, "slug" | "name">>,
-): Map<string, string> {
-  const first = (name: string) =>
-    /["“(]([^"”)]+)["”)]/.exec(name)?.[1]?.trim() ?? name.trim().split(/\s+/)[0]!;
-  const last = (name: string) => name.trim().split(/\s+/).at(-1)!.charAt(0);
-  const count = new Map<string, number>();
-  for (const p of people) count.set(first(p.name), (count.get(first(p.name)) ?? 0) + 1);
-  return new Map(
-    people.map((p) => {
-      const f = first(p.name);
-      return [p.slug, (count.get(f) ?? 0) > 1 ? `${f} ${last(p.name)}.` : f];
-    }),
-  );
 }
 
 // ---------------------------------------------------------------------------
@@ -212,56 +199,51 @@ export function NewsSection({ items }: { items: NewsView[] }) {
 }
 
 /**
- * "People" (R18; D-15): the way to join, then the people with a consented photo,
- * cropped round, with their first names (alt = full name). Nobody without a photo
- * is drawn (no initials discs). No sentence about the team or former members
- * (owner, copy sweep): the photos and "Meet the lab" carry that.
+ * "People" (owner, 2026-10-29: the People page moved onto the home page): the
+ * PI with affiliation and links, then Graduate students, Undergraduate RAs (lab
+ * managers first) and any other group, then Alumni collapsed by year
+ * (PeopleDirectory). The foot carries the way to join and, when Settings has
+ * them, the links for lab members (also in the site footer). No sentence about
+ * the team and no counts (owner, copy sweep). Nothing renders when no one is
+ * listed.
  */
-export function PeopleSection({ people, email }: { people: PublicPerson[]; email?: string }) {
-  if (!people.length) return null;
-  const faces = people.filter((p) => p.photo);
-  const names = firstNames(faces);
+export function PeopleSection({
+  people,
+  site,
+}: {
+  people: PeopleIndexModel;
+  site: Pick<SiteData, "email" | "affiliation_text" | "member_links">;
+}) {
+  if (!people.all.length) return null;
+  const { email, member_links: memberLinks } = site;
   return (
-    <Section
-      id="h-people"
-      title="People"
-      className="hm-people-sec"
-      more={{ href: "/people/", label: PEOPLE_LINK }}
-    >
-      <div className="hm-people-in">
-        <div className="hm-people-txt">
-          <p className="hm-join">
-            Want to join or work with us? See <Link href="/join/">Join the lab</Link>
-            {email ? (
-              <>
-                , or email <a href={`mailto:${email}`}>{email}</a>.
-              </>
-            ) : (
-              "."
-            )}
-          </p>
-        </div>
-        {faces.length > 0 && (
-          <ul role="list" className="hm-faces">
-            {faces.map((p) => (
-              <li key={p.slug} className="hm-face" {...entryMark("people", p.slug)}>
-                {/* Consent-gated by the loader (D-06): photo is present only with photo_consent. */}
-                <Img
-                  src={p.photo!}
-                  alt={p.name}
-                  width={160}
-                  height={160}
-                  sizes="72px"
-                  className="hm-face-img"
-                />
-                <span className="hm-face-name" aria-hidden="true">
-                  {names.get(p.slug)}
-                </span>
-                {p.draft && <DraftBadge />}
-              </li>
+    <Section id="h-people" anchor={PEOPLE_ANCHOR} title="People" className="hm-people-sec">
+      <PeopleDirectory model={people} affiliation={site.affiliation_text} />
+      <div className="hm-people-foot">
+        <p className="hm-join">
+          Want to join or work with us? See <Link href="/join/">Join the lab</Link>
+          {email ? (
+            <>
+              , or email <a href={`mailto:${email}`}>{email}</a>.
+            </>
+          ) : (
+            "."
+          )}
+        </p>
+        {/* Internal tools for lab members (Settings → Links for lab members), e.g. the lab scheduler. */}
+        {memberLinks.length > 0 ? (
+          <p className="hm-members">
+            For lab members:{" "}
+            {memberLinks.map((l, i) => (
+              <Fragment key={l.url}>
+                {i > 0 ? ", " : null}
+                <a href={l.url} rel="noopener noreferrer">
+                  {l.label}
+                </a>
+              </Fragment>
             ))}
-          </ul>
-        )}
+          </p>
+        ) : null}
       </div>
     </Section>
   );

@@ -23,7 +23,8 @@
  *    this entry's History" shows for 5 s. Undo asks cms-live.js to restore the
  *    version before the save (BobalabLive.restoreVersion), which saves through
  *    the form like any other Save. A save that created the entry offers the
- *    Draft advice instead: there is no earlier version to go back to.
+ *    "set Visible on the website to No" advice instead: there is no earlier
+ *    version to go back to.
  *  - #bl-banner (role=status) shows on every screen while the live site is
  *    not updating, and names the save after which it stopped (BobalabDeploy
  *    site(): the oldest failing run) with [Open it] and [What happened?]. A
@@ -49,7 +50,8 @@
   var FIND_GAP = 2 * SEC;
   var CHECK_EVERY = 2 * SEC;
 
-  var DRAFT = "“Draft · pending lab review”";
+  // The visibility switch (stored as `draft`; cms-widgets.js shows it the other way round).
+  var VISIBLE = "“Visible on the website”";
   var SAVED = "Saved. The live site updates in about 2 minutes.";
   var LOCAL_SAVED = "Saved to this computer (local demo: there is no live site)";
   var STEP_OTHER = "GitHub could not update the site; tell a maintainer";
@@ -115,11 +117,11 @@
   // ---------------------------------------------------------------------------
   // Words (pure; exported for tests as _describe and _banner)
 
-  /** Why a saved entry is not on the live site: "because “Draft · pending lab review” is on". */
+  /** Why a saved entry is not on the live site: "because “Visible on the website” is No". */
   function hiddenReason(rec) {
     var r = String((rec && rec.view && rec.view.reason) || "");
     if (/list/i.test(r)) return "because Listed is off";
-    if (!r || /draft/i.test(r)) return "because " + DRAFT + " is on";
+    if (!r || /draft/i.test(r)) return "because " + VISIBLE + " is No";
     return "because " + r.charAt(0).toLowerCase() + r.slice(1);
   }
 
@@ -429,10 +431,16 @@
     else if (a === "why-site") explainSite(btn);
   }
 
-  /** The published page, past the 10-minute page cache (?v=<time>). */
+  /**
+   * The published page, past the 10-minute page cache (?v=<time>). A #section
+   * stays last ("/#people" → …/?v=123#people), or the page would not scroll to it.
+   */
   function publishedUrl(path) {
     var base = new URL("../", root.location.href).href;
-    return base + String(path || "/").replace(/^\//, "") + "?v=" + Date.now();
+    var p = String(path || "/").replace(/^\//, "");
+    var i = p.indexOf("#");
+    var hash = i < 0 ? "" : p.slice(i);
+    return base + p.slice(0, p.length - hash.length) + "?v=" + Date.now() + hash;
   }
 
   function viewPage() {
@@ -845,7 +853,7 @@
   function createAdvice(rec) {
     return rec.collection === "people"
       ? "To take it off the site, turn off “Listed” and Save."
-      : "To take it off the site, turn on " + DRAFT + " and Save.";
+      : "To take it off the site, set " + VISIBLE + " to No and Save.";
   }
 
   function offerUndo(rec, v) {
@@ -1188,6 +1196,7 @@
     _describe: describe,
     _banner: banner,
     _check: check,
+    _publishedUrl: publishedUrl,
     _state: function () {
       return S;
     },

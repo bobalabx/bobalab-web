@@ -22,7 +22,6 @@ const TABLE: Array<[PreviewTarget, string]> = [
   [{ page: "project", slug: "tips" }, "/projects/tips/"],
   [{ page: "publications" }, "/publications/"],
   [{ page: "publication", slug: "lee-2025-x" }, "/publications/lee-2025-x/"],
-  [{ page: "people" }, "/people/"],
   [{ page: "person", slug: "isabelle-cho" }, "/people/isabelle-cho/"],
   [{ page: "news" }, "/news/"],
   [{ page: "news-item", slug: "2026-10-26-x" }, "/news/2026-10-26-x/"],
@@ -34,7 +33,8 @@ const TABLE: Array<[PreviewTarget, string]> = [
 
 describe("targets", () => {
   it("covers all 15 pages", () => {
-    expect(TABLE.map(([t]) => t.page).sort()).toEqual([...PREVIEW_PAGES].sort());
+    // "people" is the home page's People section (below), not a page address of its own.
+    expect([...TABLE.map(([t]) => t.page), "people"].sort()).toEqual([...PREVIEW_PAGES].sort());
     expect([...SLUG_PAGES].sort()).toEqual(
       ["direction", "news-item", "person", "project", "publication"].sort(),
     );
@@ -46,6 +46,12 @@ describe("targets", () => {
     expect(targetFromPath(`/bobalab-web${path}`, "/bobalab-web")).toEqual(target);
     expect(targetFromPath(`/bobalab-web${path}`, "/bobalab-web/")).toEqual(target);
     expect(targetFromPath(`${path}?q=1#top`)).toEqual(target);
+  });
+
+  it("people: the home page's People section; the old /people/ address still opens it (D-21)", () => {
+    expect(pathOf({ page: "people" })).toBe("/#people");
+    expect(targetFromPath("/people/")).toEqual({ page: "people" });
+    expect(targetFromPath("/bobalab-web/people/", "/bobalab-web")).toEqual({ page: "people" });
   });
 
   it("accepts a path without its trailing slash and decodes it", () => {

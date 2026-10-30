@@ -13,7 +13,7 @@ type: working-paper
 venue: SSRN working paper 3634129
 year: 2020
 doi: 10.2139/ssrn.3634129
-status: major-revision
+status: under-revision
 status_note: at Manufacturing & Service Operations Management (second round)
 status_source: self-reported
 as_of: "2026-10-20"

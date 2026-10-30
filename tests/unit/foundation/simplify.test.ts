@@ -174,7 +174,7 @@ describe("homePearls (R7: question, then one finding or a first read)", () => {
       for (const pub of raw.entries.publications) {
         if (pub.slug === shared.slug) pub.directions = [a!.slug, b!.slug];
         else if (pub.directions[0] === b!.slug && pub.status === "published")
-          pub.status = "preprint";
+          pub.status = "in-progress";
       }
     });
     const ps = homePearls(c2);
@@ -189,7 +189,8 @@ describe("homePearls (R7: question, then one finding or a first read)", () => {
     // With no published paper at all, the newest counted paper stands in.
     const c3 = real((raw) => {
       for (const pub of raw.entries.publications)
-        if (pub.directions.includes(b!.slug) && pub.status === "published") pub.status = "preprint";
+        if (pub.directions.includes(b!.slug) && pub.status === "published")
+          pub.status = "in-progress";
     });
     const p3 = homePearls(c3)[1]!;
     expect(p3.firstRead?.slug).toBe(

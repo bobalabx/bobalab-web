@@ -120,6 +120,60 @@ describe("_buildRestorePatch: only what differs (spec §4.3 step 4)", () => {
     expect(paths(p)).not.toContain("untouched");
   });
 
+  it("“Visible on the website” (widget visible) empties to Yes: draft false, a boolean (D-21)", () => {
+    const fields = [{ name: "draft", label: "Visible on the website", widget: "visible" }];
+    expect(plan({ draft: true }, {}, fields, { unhide: true }).patches).toEqual([
+      { path: "draft", value: false },
+    ]);
+  });
+
+  it("a publication status the site no longer uses comes back as today's, and says so (D-21)", () => {
+    const fields = [
+      { name: "title", label: "Title", widget: "string" },
+      {
+        name: "status",
+        label: "Status",
+        widget: "select",
+        options: [
+          { label: "Work in progress", value: "in-progress" },
+          { label: "Under review", value: "under-review" },
+          { label: "Under revision", value: "under-revision" },
+          { label: "Published", value: "published" },
+        ],
+      },
+    ];
+    const cases: Array<[string, string, string]> = [
+      ["major-revision", "under-revision", "Under revision"],
+      ["revise-resubmit", "under-revision", "Under revision"],
+      ["submitted", "under-review", "Under review"],
+      ["working-paper", "in-progress", "Work in progress"],
+      ["preprint", "in-progress", "Work in progress"],
+      ["forthcoming", "published", "Published"],
+    ];
+    for (const [old, now, word] of cases) {
+      const p = plan({ title: "T", status: "published" }, { title: "T", status: old }, fields, {
+        collection: "publications",
+      });
+      expect(p.result.status, old).toBe(now);
+      expect(p.notes, old).toContain(
+        `“Status”: that version says “${old}”, which the site no longer uses, so it comes back as “${word}”.`,
+      );
+    }
+    // Today's values, and other collections, are left alone.
+    const same = plan(
+      { title: "T", status: "published" },
+      { title: "T", status: "under-review" },
+      fields,
+      { collection: "publications" },
+    );
+    expect(valueOf(same, "status")).toBe("under-review");
+    expect(same.notes).toEqual([]);
+    const other = plan({ status: "active" }, { status: "submitted" }, fields, {
+      collection: "projects",
+    });
+    expect(valueOf(other, "status")).toBe("submitted");
+  });
+
   it("never touches hidden widgets", () => {
     const fields = [
       { name: "title", label: "Title", widget: "string" },
@@ -293,7 +347,7 @@ describe("_buildRestorePatch: the guards (spec §4.3 step 5)", () => {
     expect(paths(p)).toEqual(["title"]);
     expect(p.held.draft).toBe(true);
     expect(p.notes[0]).toBe(
-      "It stays hidden: “Draft · pending lab review” stays on. Tick “Also make it visible on the live site” to show it.",
+      "It stays hidden: “Visible on the website” stays No. Tick “Also make it visible on the live site” to show it.",
     );
     const shown = plan({ title: "x", draft: true }, { title: "y", draft: false }, NEWS_FIELDS, {
       unhide: true,
@@ -551,7 +605,7 @@ describe("History (spec §4.2)", () => {
     expect(text).toContain("Images show the file that is at that address today.");
     const addr = findAll(col.inst.tree, (n) => n.props.className === "bl-live__address")[0];
     expect(textOf(addr)).toBe(
-      "localhost:3100/people/ · older version · FULL(2026-10-24T17:02:00Z)",
+      "localhost:3100/#people · older version · FULL(2026-10-24T17:02:00Z)",
     );
     // Back to the current version: the form's data again.
     button(col.inst.tree, "Back to the current version")!.props.onClick!.call(null);

@@ -134,7 +134,7 @@ export const orderRules = [
  *   scope    folder collection, or "<file collection>/<file>"
  *   field    the field that must have a value (`min`: a list with at least that many items)
  *   when     every condition must hold: { field, notIn: [values] } or { field, in: [values] }
- *            (a missing value is in no list, so `draft` off = { field: "draft", notIn: [true] })
+ *            (a missing value is in no list, so "Visible on the website: Yes" = { field: "draft", notIn: [true] })
  *   anySet   …and at least one of these paths has a value ("*" = any list item)
  */
 export const requiredRules = [
@@ -179,7 +179,7 @@ export const requiredRules = [
       { field: "draft", notIn: [true] },
     ],
     message:
-      "choose at least one “Research direction” (not needed for work in progress, or while “Draft · pending lab review” is on)",
+      "choose at least one “Research direction” (not needed for work in progress, or while “Visible on the website” is No)",
   },
   {
     code: "E_DIRECTIONS_EMPTY",
@@ -191,7 +191,7 @@ export const requiredRules = [
       { field: "draft", notIn: [true] },
     ],
     message:
-      "choose at least one “Research direction”; the first is the project’s home direction (not needed for archived projects, or while “Draft · pending lab review” is on)",
+      "choose at least one “Research direction”; the first is the project’s home direction (not needed for archived projects, or while “Visible on the website” is No)",
   },
 ];
 
@@ -231,14 +231,28 @@ const RICHTEXT = {
   ],
 };
 
-// Draft, Listed and Photo say it: the switches hide things from the website only.
+// Visible, Listed and Photo say it: the switches hide things from the website only.
 // The repository is public, so every saved version can be read on github.com.
 const ON_GITHUB = "anyone can read every save on github.com.";
 
-const DRAFT = {
-  label: "Draft · pending lab review",
-  hint: `Hides this from the website. Turn it off once the lab has approved the text. Draft hides it from the website only: ${ON_GITHUB}`,
+/**
+ * "Visible on the website: Yes / No" (owner decision 2026-10-29, DECISIONS D-21).
+ * The stored field stays `draft` (D-03: true = hidden from the live site); the
+ * "visible" widget (public/admin/cms-widgets.js) shows it the other way round,
+ * Yes = draft: false, No = draft: true. New entries start visible (draft: false).
+ */
+const VISIBLE_HINT = `No hides this from the live site. You still see it in this editor's preview. Hiding is not secret: ${ON_GITHUB}`;
+const VISIBLE = { label: "Visible on the website", widget: "visible", hint: VISIBLE_HINT };
+// It says where the name stays: a paper's byline keeps a hidden author as plain
+// text, and so does the team list of a project with one of their papers
+// (projectTeamRows, src/components/projects/model.ts; D-06, CON-11).
+const VISIBLE_PERSON = {
+  ...VISIBLE,
+  hint: `No hides this person from the home page's People section (Alumni too) and from the people lists on research and project pages; their profile page is not published either. Their name still shows where other entries name them: on papers they wrote (and then on that project's team list) and in news text. “Listed” (consent) still has to be on for them to appear at all. You still see them in this editor's preview. Hiding is not secret: ${ON_GITHUB}`,
 };
+/** The collection list's marker for a hidden entry ("… · hidden"). */
+const HIDDEN_MARK = "{{fields.draft | ternary(' · hidden', '')}}";
+const HIDDEN_FILTER = { label: "Hidden from the website", field: "draft", pattern: true };
 
 const body = (hint, label = "Body") => ({ label, hint, ...RICHTEXT });
 
@@ -345,13 +359,9 @@ export const collections = [
     folder: "content/news",
     slug: "{{fields.date | date('YYYY-MM-DD')}}-{{slug | truncate(60)}}",
     identifier_field: "title",
-    summary:
-      "{{fields.date | date('YYYY-MM-DD')}} · {{title}}{{fields.draft | ternary(' · draft', '')}}",
+    summary: `{{fields.date | date('YYYY-MM-DD')}} · {{title}}${HIDDEN_MARK}`,
     sortable_fields: [{ field: "date", default_sort: "desc" }, "title"],
-    view_filters: [
-      { label: "Drafts", field: "draft", pattern: true },
-      { label: "Talks and events", field: "type", pattern: "talk" },
-    ],
+    view_filters: [HIDDEN_FILTER, { label: "Talks and events", field: "type", pattern: "talk" }],
     view_groups: [{ label: "Year", field: "date", pattern: "\\d{4}" }],
     fields: {
       date: {
@@ -410,7 +420,7 @@ export const collections = [
         },
       },
       image: imageObject("Image", "Optional picture for the news page."),
-      draft: DRAFT,
+      draft: VISIBLE,
       body: body("Optional longer text for the news page."),
     },
   },
@@ -428,13 +438,14 @@ export const collections = [
     // cms-hooks.js blocks the first save when a longer name would not.
     slug: "{{fields.authors.0.name}}-{{year}}-{{slug | truncate(28)}}",
     identifier_field: "title",
-    summary:
-      "{{fields.year | default('in progress')}} · {{title}}{{fields.draft | ternary(' · draft', '')}}",
+    summary: `{{fields.year | default('in progress')}} · {{title}}${HIDDEN_MARK}`,
     sortable_fields: [{ field: "year", default_sort: "desc" }, "title"],
     view_filters: [
-      { label: "Drafts", field: "draft", pattern: true },
+      HIDDEN_FILTER,
       { label: "Featured", field: "featured", pattern: true },
-      { label: "Work in progress", field: "type", pattern: "work-in-progress" },
+      // By status (PUBLICATION_STATUS): "in-progress" also covers every entry of type Work in progress.
+      { label: "Work in progress", field: "status", pattern: "^in-progress$" },
+      { label: "Under review or revision", field: "status", pattern: "^under-" },
     ],
     view_groups: [{ label: "Year", field: "year", pattern: "\\d{4}" }],
     fields: {
@@ -483,22 +494,18 @@ export const collections = [
       },
       status: {
         label: "Status",
+        // Stored values (schema PUBLICATION_STATUS): in-progress, under-review, under-revision, published.
         options: {
+          "in-progress": "Work in progress",
+          "under-review": "Under review",
+          "under-revision": "Under revision",
           published: "Published",
-          forthcoming: "Forthcoming",
-          accepted: "Accepted",
-          "major-revision": "Major revision",
-          "revise-resubmit": "Revise and resubmit",
-          submitted: "Submitted",
-          "working-paper": "Working paper",
-          preprint: "Preprint",
-          "in-progress": "In progress",
         },
-        hint: "Anything other than Published also needs “As of” and “Status source”.",
+        hint: "Work in progress: not submitted yet (it may have an SSRN or arXiv version). Under review: submitted. Under revision: asked to revise. Published: accepted or in print. All but Published need “As of” and “Status source”.",
       },
       status_note: {
         label: "Status note",
-        hint: "e.g. “at Manufacturing & Service Operations Management, 2nd round”.",
+        hint: "Shown after the status, e.g. “at Operations Research” (the site says “Under revision at Operations Research”).",
       },
       status_source: {
         label: "Status source (required unless Published)",
@@ -506,7 +513,7 @@ export const collections = [
           documented: "Documented (a public record shows it)",
           "self-reported": "Self-reported (the lab or a CV says so)",
         },
-        hint: "Self-reported statuses are labelled “reported by the lab” on the site.",
+        hint: "Not shown on the site; it tells the lab which statuses to check again.",
       },
       as_of: {
         label: "As of (required unless Published)",
@@ -570,7 +577,7 @@ export const collections = [
         },
       },
       directions: directionsRel(
-        "At least one, except for work in progress and while “Draft · pending lab review” is on.",
+        "At least one, except for work in progress and while “Visible on the website” is No.",
         "Research directions (required except for work in progress)",
       ),
       in_brief: {
@@ -590,7 +597,7 @@ export const collections = [
         widget: "text",
         hint: "Leave empty: BibTeX is generated. Use only if the generated entry is wrong.",
       },
-      draft: DRAFT,
+      draft: VISIBLE,
       body: body("Optional notes for the paper page."),
     },
   },
@@ -599,17 +606,13 @@ export const collections = [
     label: "People",
     label_singular: "Person",
     description:
-      "The PI, lab members and alumni. External coauthors are not people. Nobody appears on the site unless “Listed” is on, and photos, email and “now at” need their own consent switches.",
+      "The PI, lab members and alumni. External coauthors are not people. Nobody appears on the site unless “Listed” is on; “Visible on the website: No” leaves someone out without deleting them. Photos, email and “now at” need their own consent switches.",
     folder: "content/people",
     slug: "{{slug}}",
     identifier_field: "name",
-    summary:
-      "{{name}}{{fields.listed | ternary('', ' · not listed')}}{{fields.draft | ternary(' · draft', '')}}",
+    summary: `{{name}}{{fields.listed | ternary('', ' · not listed')}}${HIDDEN_MARK}`,
     sortable_fields: ["name", "role", "end"],
-    view_filters: [
-      { label: "Drafts", field: "draft", pattern: true },
-      { label: "Not listed", field: "listed", pattern: false },
-    ],
+    view_filters: [HIDDEN_FILTER, { label: "Not listed", field: "listed", pattern: false }],
     view_groups: [{ label: "Role", field: "role" }],
     fields: {
       name: {
@@ -690,7 +693,7 @@ export const collections = [
         label: "Profile page",
         hint: "Give this person their own page (the PI always has one).",
       },
-      draft: DRAFT,
+      draft: VISIBLE_PERSON,
       body: body("Short bio, at most 150 words, written or approved by the person.", "Bio"),
     },
   },
@@ -703,12 +706,9 @@ export const collections = [
     folder: "content/directions",
     slug: "{{fields.short_label}}",
     identifier_field: "title",
-    summary: "{{short_label}} · {{status}}{{fields.draft | ternary(' · draft', '')}}",
+    summary: `{{short_label}} · {{status}}${HIDDEN_MARK}`,
     sortable_fields: ["title", "status"],
-    view_filters: [
-      { label: "Archived", field: "status", pattern: "archived" },
-      { label: "Drafts", field: "draft", pattern: true },
-    ],
+    view_filters: [{ label: "Archived", field: "status", pattern: "archived" }, HIDDEN_FILTER],
     fields: {
       title: { label: "Title", hint: "≤ 90 characters." },
       short_label: {
@@ -772,7 +772,7 @@ export const collections = [
           hint: "Optional plain-language reading of the figure (≤ 600 characters).",
         },
       }),
-      draft: DRAFT,
+      draft: VISIBLE,
       body: body("80–150 words introducing the direction."),
     },
   },
@@ -784,17 +784,14 @@ export const collections = [
     folder: "content/projects",
     slug: "{{slug | truncate(50)}}",
     identifier_field: "title",
-    summary: "{{title}} · {{status}}{{fields.draft | ternary(' · draft', '')}}",
+    summary: `{{title}} · {{status}}${HIDDEN_MARK}`,
     sortable_fields: ["title", "status", "start_year"],
-    view_filters: [
-      { label: "Active", field: "status", pattern: "active" },
-      { label: "Drafts", field: "draft", pattern: true },
-    ],
+    view_filters: [{ label: "Active", field: "status", pattern: "active" }, HIDDEN_FILTER],
     fields: {
       title: { label: "Title", hint: "≤ 120 characters." },
       summary: { label: "Summary", widget: "text", hint: "≤ 200 characters." },
       directions: directionsRel(
-        "At least one unless the project is archived or “Draft · pending lab review” is on; the first is the primary direction (breadcrumb).",
+        "At least one unless the project is archived or “Visible on the website” is No; the first is the primary direction (breadcrumb).",
         "Research directions (required unless archived)",
       ),
       status: {
@@ -858,7 +855,7 @@ export const collections = [
         fields: { name: { label: "Funder or grant" }, url: HTTPS("Web page") },
       },
       hero: imageObject("Hero image", "Optional image for the project page."),
-      draft: DRAFT,
+      draft: VISIBLE,
       body: body("The project page text."),
     },
   },
@@ -871,9 +868,9 @@ export const collections = [
     folder: "content/opportunities",
     slug: "{{slug | truncate(50)}}",
     identifier_field: "title",
-    summary: "{{title}} · {{status}}{{fields.draft | ternary(' · draft', '')}}",
+    summary: `{{title}} · {{status}}${HIDDEN_MARK}`,
     sortable_fields: ["title", "status"],
-    view_filters: [{ label: "Drafts", field: "draft", pattern: true }],
+    view_filters: [HIDDEN_FILTER],
     fields: {
       title: { label: "Title" },
       audience: {
@@ -911,7 +908,7 @@ export const collections = [
         time_format: false,
       },
       directions: directionsRel("Directions this opportunity is for (drives “Open to RAs”)."),
-      draft: DRAFT,
+      draft: VISIBLE,
       body: body("Optional details."),
     },
   },
@@ -938,7 +935,7 @@ const textPage = (label, file, hint) => ({
       time_format: false,
       hint: "Update whenever you review the page.",
     },
-    draft: DRAFT,
+    draft: VISIBLE,
   },
 });
 
@@ -979,7 +976,7 @@ export const fileCollections = [
               evidence: EVIDENCE,
             },
           },
-          draft: DRAFT,
+          draft: VISIBLE,
         },
       },
       {
@@ -996,7 +993,7 @@ export const fileCollections = [
           partners: body("For academic and industry partners.", "Partners"),
           press: body("For journalists.", "Press"),
           data_statement: body("How the lab handles research data.", "Data statement"),
-          draft: DRAFT,
+          draft: VISIBLE,
         },
       },
       textPage("About", "about"),
@@ -1076,7 +1073,7 @@ export const fileCollections = [
           member_links: {
             label: "Links for lab members",
             label_singular: "link",
-            hint: "Internal tools for lab members, such as the lab scheduler. They appear in the site footer and at the top of the People page.",
+            hint: "Internal tools for lab members, such as the lab scheduler. They appear in the site footer and at the foot of the home page's People section.",
             summary: "{{fields.label}}",
             fields: {
               label: {

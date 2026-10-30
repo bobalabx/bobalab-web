@@ -7,7 +7,7 @@ authors:
     person: park-sinchaisri
 type: working-paper
 year: 2025
-status: working-paper
+status: in-progress
 status_source: self-reported
 as_of: "2026-10-20"
 presentations:

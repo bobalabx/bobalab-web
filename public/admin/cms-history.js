@@ -680,6 +680,20 @@
         });
         return;
       }
+      if (f.widget === "visible") {
+        // "Visible on the website" shows `draft` the other way round (cms-widgets.js):
+        // draft true is "No"; false and "not set" are "Yes" (the schema's default),
+        // so a new hidden entry reads "Yes → No" from that default.
+        if (!!a === !!b) return;
+        out.push({
+          name: f.name,
+          label: label,
+          change: "changed",
+          before: a ? "No" : "Yes",
+          after: b ? "No" : "Yes",
+        });
+        return;
+      }
       if (f.widget === "boolean" || typeof a === "boolean" || typeof b === "boolean") {
         // A switch: off and "not set" are the same (the schema's default).
         if (!!a === !!b) return;
@@ -714,7 +728,12 @@
   }
 
   function quoted(s) {
-    return s === "on" || s === "off" || /^-?\d+(\.\d+)?$/.test(s) || / items?$/.test(s)
+    return s === "on" ||
+      s === "off" ||
+      s === "Yes" ||
+      s === "No" ||
+      /^-?\d+(\.\d+)?$/.test(s) ||
+      / items?$/.test(s)
       ? s
       : "“" + s + "”";
   }

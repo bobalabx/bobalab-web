@@ -6,7 +6,9 @@
  *                  original Fig. 1 pearl cluster, polished);
  *   featured findings (only when content has them, R19);
  *   new papers beside news;
- *   people.
+ *   people (#people): everything the separate People page showed until the
+ *                  owner moved it here (2026-10-29); old /people/ links
+ *                  redirect to it (content/site.yml → redirects).
  * The footer is the layout's. The research timeline (Fig. 1) lives on /research/
  * (#map) now; the pearl figure links to it once.
  * The body is the shared view (src/components/views/HomeView.tsx), which the

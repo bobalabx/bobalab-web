@@ -68,6 +68,9 @@ function relationProps(target, relations, path) {
   };
 }
 
+/** Widgets for a boolean: Decap's own switch, and our inverted "Visible on the website". */
+export const BOOLEAN_WIDGETS = new Set(["boolean", "visible"]);
+
 /** Widgets that never get a `pattern` (see buildField). */
 export const NO_PATTERN_WIDGETS = new Set(["richtext", "markdown", "file", "image"]);
 
@@ -154,7 +157,14 @@ export function buildField(name, node, ui, ctx) {
         if (node.int) f.step = 1;
         break;
       case "boolean":
-        f.widget = "boolean";
+        // "visible" (public/admin/cms-widgets.js) is the `draft` switch shown the
+        // other way round, "Visible on the website: Yes / No" (D-21); it stores
+        // the same boolean.
+        if (ui.widget && !BOOLEAN_WIDGETS.has(ui.widget))
+          throw new Error(`${path}: widget ${ui.widget} cannot hold a boolean`);
+        if (ui.widget === "visible" && name !== "draft")
+          throw new Error(`${path}: the "visible" widget is only for draft fields`);
+        f.widget = ui.widget ?? "boolean";
         break;
       case "enum":
         f.widget = "select";

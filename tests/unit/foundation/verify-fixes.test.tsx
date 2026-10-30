@@ -32,7 +32,7 @@ describe("VIS-01: the travelling pearl paints above the page-swap groups", () =>
 describe("VIS-15 / A11Y-05: draft badges", () => {
   it("DraftBadge `line` sets the badge on its own spaced line", () => {
     expect(renderToStaticMarkup(<DraftBadge line />)).toBe(
-      '<span class="bl-draft-line"><span class="bl-badge bl-badge--draft">Draft · pending lab review</span></span>',
+      '<span class="bl-draft-line"><span class="bl-badge bl-badge--draft">Not visible on the live site</span></span>',
     );
     expect(renderToStaticMarkup(<DraftBadge />)).toMatch(
       /^<span class="bl-badge bl-badge--draft">/,

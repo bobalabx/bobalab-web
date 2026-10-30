@@ -77,7 +77,7 @@ describe("paper SEO by publication type", () => {
     const meta = paperScholarMeta({
       ...base,
       type: "working-paper",
-      status: "revise-resubmit",
+      status: "under-revision",
       venue: "SSRN working paper 4502968",
       year: 2026,
     } as PublicationEntry);
@@ -99,7 +99,7 @@ describe("paper SEO by publication type", () => {
     const meta = paperScholarMeta({
       ...base,
       type: "working-paper",
-      status: "preprint",
+      status: "in-progress",
       venue: "arXiv preprint",
       year: 2026,
       links: { arxiv: "https://arxiv.org/abs/2603.02055" },

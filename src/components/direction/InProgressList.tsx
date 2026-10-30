@@ -18,8 +18,8 @@ import { entryMark } from "@/lib/preview/mark";
 
 /**
  * The status printed under an in-progress title, or null. Under an "In
- * progress" heading a bare in-progress status would repeat the heading on
- * every row; statuses that add something ("Submitted to …") stay.
+ * progress" heading a bare Work in progress would repeat the heading on
+ * every row; statuses that add something ("Under review at …") stay.
  */
 export function wipStatus(
   p: Pick<PublicationView, "status" | "status_note" | "type"> & { venue?: string },

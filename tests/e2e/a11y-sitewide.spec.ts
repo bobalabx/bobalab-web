@@ -34,7 +34,7 @@ const SECTIONS = [
   "/research/",
   "/projects/",
   "/publications/",
-  "/people/",
+  // No "/people/": the People list is the home page's #people section (D-21).
   "/news/",
   "/join/",
   "/about/",
@@ -45,7 +45,8 @@ const TEMPLATES = {
   direction: { index: "/research/", re: /^\/research\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/ },
   project: { index: "/projects/", re: /^\/projects\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/ },
   publication: { index: "/publications/", re: /^\/publications\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/ },
-  person: { index: "/people/", re: /^\/people\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/ },
+  // Profile pages are linked from the home page's People section.
+  person: { index: "/", re: /^\/people\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/ },
   news: { index: "/news/", re: /^\/news\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/ },
 } as const;
 type Template = keyof typeof TEMPLATES;

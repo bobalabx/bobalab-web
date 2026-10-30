@@ -1,7 +1,7 @@
 /**
  * WP1 (editor v2, spec §2.12): the route files under src/app are thin wrappers
  * around the shared, synchronous page views in src/components/views (and the
- * existing PeopleIndex / PersonProfile), which the editor live preview renders
+ * existing PersonProfile), which the editor live preview renders
  * too. For every fixture set in tests/fixtures/content, in production and in
  * preview mode, every route and every static param renders the same markup
  * through the route as through its view.
@@ -58,7 +58,6 @@ import PublicationsPage from "@/app/publications/page";
 import PublicationPage, {
   generateStaticParams as publicationParams,
 } from "@/app/publications/[slug]/page";
-import PeoplePage from "@/app/people/page";
 import PersonPage, { generateStaticParams as personParams } from "@/app/people/[slug]/page";
 import NewsPage from "@/app/news/page";
 import NewsItemPage, { generateStaticParams as newsParams } from "@/app/news/[slug]/page";
@@ -78,7 +77,6 @@ import { NewsArticleView } from "@/components/views/NewsArticleView";
 import { JoinView } from "@/components/views/JoinView";
 import { AboutView } from "@/components/views/AboutView";
 import { TextPageView } from "@/components/views/TextPageView";
-import { PeopleIndex } from "@/components/people/PeopleIndex";
 import { PersonProfile } from "@/components/people/PersonProfile";
 import { buildPersonProfile } from "@/components/people/model";
 import { CitationBlock } from "@/components/publications/CitationBlock";
@@ -127,7 +125,6 @@ describe("route files render exactly their shared view", () => {
         expect(await route(ResearchPage())).toBe(html(<ResearchView c={c} />));
         expect(await route(ProjectsPage())).toBe(html(<ProjectsView c={c} />));
         expect(await route(PublicationsPage())).toBe(html(<PublicationsView c={c} />));
-        expect(await route(PeoplePage())).toBe(html(<PeopleIndex content={c} />));
         expect(await route(NewsPage())).toBe(html(<NewsListView c={c} />));
         expect(await route(JoinPage())).toBe(html(<JoinView c={c} />));
         expect(await route(AboutPage())).toBe(html(<AboutView c={c} />));

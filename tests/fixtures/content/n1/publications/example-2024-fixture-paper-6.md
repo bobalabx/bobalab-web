@@ -8,7 +8,7 @@ authors:
 type: working-paper
 year: 2024
 doi: 10.5555/fixture.n1.6
-status: major-revision
+status: under-revision
 status_note: at Fixture Science
 status_source: self-reported
 as_of: 2026-09

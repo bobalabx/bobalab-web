@@ -205,7 +205,10 @@ function compareField(
       } else if (cfg.max !== node.max) p(`max ${cfg.max} ≠ ${node.max}`);
       break;
     case "boolean":
-      if (cfg.widget !== "boolean") p(`widget ${cfg.widget} for a boolean`);
+      // "visible" stores the same boolean, shown as "Visible on the website: Yes / No" (D-21).
+      if (cfg.name === "draft") {
+        if (cfg.widget !== "visible") p(`widget ${cfg.widget} for draft (expected visible)`);
+      } else if (cfg.widget !== "boolean") p(`widget ${cfg.widget} for a boolean`);
       break;
     case "enum": {
       if (cfg.widget !== "select" || cfg.multiple) p("enum must be a single select");

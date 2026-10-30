@@ -1,107 +1,15 @@
 /*
- * People index and person pages ("Lines", D-13 item 5; P1 masthead list,
- * P2 square photos, P3 label-column grid). Class prefix: pp-.
+ * The home page's People section and the person pages ("Lines", D-13 item 5;
+ * P1 masthead list, P2 square photos, P3 label-column grid). Class prefix: pp-.
  * Unlayered like kit.css; only pp- classes are targeted, so the WP0 primitives
- * (.bl-*) keep their own styles. Page header and rows: pages.css (pg-).
+ * (.bl-*) keep their own styles. Person page header and rows: pages.css (pg-).
+ * The section's own frame (heading, foot) is in src/components/home/home.css.
  *
  * People are ruled lists with SQUARE photos (initials squares where there is
  * no consented photo): no boxes, circles, halos or pills.
  */
 
-/* ---------- Page header ------------------------------------------------- */
-.pp-summary {
-  max-width: 62ch;
-  color: var(--muted);
-}
-.pp-members {
-  font-size: var(--t-meta);
-  line-height: var(--lh-meta);
-  color: var(--muted);
-}
-.pp-members a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  color: var(--ink);
-}
-
-/* Filtered-out items and empty groups (the island sets `hidden`). */
-.pp-grid__item[hidden],
-.pp-alumni__item[hidden],
-.pp-group[hidden],
-.pp-year[hidden] {
-  display: none !important;
-}
-
-/* ---------- Filter island (P3 .fset: label column + text toggles) ------- */
-.pp-filters {
-  margin-top: 26px;
-}
-.pp-filters .bl-chips {
-  display: block;
-}
-.pp-filters .bl-chips__legend {
-  margin: 0;
-  font-weight: 600;
-}
-@media (min-width: 48rem) {
-  /* A floated legend is laid out like any other box, so it can sit in the
-     label column while the toggles run in the track. */
-  .pp-filters .bl-chips__legend {
-    float: left;
-    width: var(--lab);
-    padding-right: var(--s-5);
-    line-height: 44px;
-  }
-  /* The row is a flex container, so it already sits beside the float without
-     overlapping it. No `overflow: hidden` here: it clipped the top and bottom of
-     the toggles' 2 px focus ring (WCAG 2.4.7). */
-  .pp-filters .bl-chips__row {
-    min-width: 0;
-  }
-  .pp-filters__foot {
-    margin-left: var(--lab);
-  }
-}
-@media (max-width: 47.99rem) {
-  .pp-filters .bl-chips + .bl-chips {
-    margin-top: 10px;
-  }
-}
-.pp-filters__foot {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  column-gap: var(--s-4);
-  min-height: 24px;
-}
-.pp-filters__status {
-  font-size: var(--t-meta);
-  line-height: var(--lh-meta);
-  color: var(--muted);
-}
-.pp-textbtn {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  font-size: var(--t-meta);
-  font-weight: 500;
-  color: var(--ink);
-  text-decoration: underline 1px var(--rule);
-  text-underline-offset: 0.22em;
-}
-.pp-textbtn:hover {
-  text-decoration: underline 2px var(--ink);
-}
-
 /* ---------- Groups: label column + track -------------------------------- */
-.pp-groups {
-  margin-top: 56px;
-}
 .pp-group {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -122,9 +30,10 @@
 .pp-group > * {
   min-width: 0;
 }
+/* An h3 under the section's h2 ("People"): one step below it. */
 .pp-group__title {
-  font-size: var(--t-h2);
-  line-height: 1.2;
+  font-size: var(--t-title);
+  line-height: var(--lh-title);
 }
 @media (max-width: 47.99rem) {
   .pp-group__head {
@@ -388,10 +297,6 @@ img.pp-avatar {
   color: var(--ink);
 }
 
-.pp-join {
-  margin-top: 64px;
-}
-
 /* ---------- Person page ------------------------------------------------- */
 .pp-crumbs {
   margin-bottom: 14px;
@@ -529,7 +434,7 @@ img.pp-avatar {
 }
 /* Work in progress: collapsed list under its (always visible) heading. Closed,
    the toggle sits under the track's 1 px ink rule like a list's first row (the
-   same treatment as Alumni on /people/), so every section opens the same way. */
+   same treatment as Alumni on the home page), so every section opens the same way. */
 .pp-disclosure {
   border-top: 1px solid var(--ink);
   padding-top: 4px;

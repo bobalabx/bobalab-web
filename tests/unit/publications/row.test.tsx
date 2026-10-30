@@ -13,12 +13,17 @@ import { hasContent, loadContent } from "./helpers";
 describe("reviewStatus", () => {
   const base = { status_source: "self-reported" as const, as_of: "2026-10-20" };
   it("says nothing that only repeats the type word", () => {
-    expect(reviewStatus({ ...base, type: "working-paper", status: "working-paper" })).toBeNull();
+    expect(reviewStatus({ ...base, type: "working-paper", status: "in-progress" })).toBeNull();
     expect(reviewStatus({ ...base, type: "work-in-progress", status: "in-progress" })).toBeNull();
     expect(reviewStatus({ ...base, type: "journal", status: "published" })).toBeNull();
   });
   it("keeps a status that adds something", () => {
-    expect(reviewStatus({ ...base, type: "working-paper", status: "submitted" })).toBe("Submitted");
+    expect(reviewStatus({ ...base, type: "working-paper", status: "under-review" })).toBe(
+      "Under review",
+    );
+    expect(reviewStatus({ ...base, type: "journal", status: "in-progress" })).toBe(
+      "Work in progress",
+    );
     expect(
       reviewStatus({
         ...base,
@@ -26,9 +31,25 @@ describe("reviewStatus", () => {
         status: "in-progress",
         status_note: "with a field partner",
       }),
-    ).toBe("In progress with a field partner");
-    expect(reviewStatus({ ...base, type: "working-paper", status: "in-progress" })).toBe(
-      "In progress",
+    ).toBe("Work in progress with a field partner");
+  });
+  it("joins the note as a phrase ('at …', '(…)') or after a comma", () => {
+    const wp = { ...base, type: "working-paper" as const };
+    expect(
+      reviewStatus({ ...wp, status: "under-revision", status_note: "at Operations Research" }),
+    ).toBe("Under revision at Operations Research");
+    expect(reviewStatus({ ...wp, status: "under-revision", status_note: "(second round)" })).toBe(
+      "Under revision (second round)",
+    );
+    // "to …" was written after the old "Submitted"; under review a paper is "at" a journal.
+    expect(
+      reviewStatus({ ...wp, status: "under-review", status_note: "to Management Science" }),
+    ).toBe("Under review at Management Science");
+    expect(reviewStatus({ ...wp, status: "in-progress", status_note: "v2" })).toBe(
+      "Work in progress, v2",
+    );
+    expect(reviewStatus({ ...wp, status: "under-revision", status_note: "2nd round" })).toBe(
+      "Under revision, 2nd round",
     );
   });
 });
@@ -67,22 +88,37 @@ describe.skipIf(!hasContent)("PublicationRow", () => {
 
   it("prints a review status as a plain label, with no 'as of' date or provenance (copy sweep)", () => {
     const p = c.countedPublications.find(
-      (x) => x.status === "major-revision" && x.status_source === "self-reported" && x.as_of,
+      (x) => x.status === "under-revision" && x.status_source === "self-reported" && x.as_of,
     );
     expect(p).toBeTruthy();
     const html = renderToStaticMarkup(<PublicationRow pub={p!} />);
-    expect(html).toMatch(/<span class="bl-pub__status">Major revision at [^<,]+<\/span>/);
+    expect(html).toMatch(/<span class="bl-pub__status">Under revision at [^<,]+<\/span>/);
     expect(html).not.toMatch(/as of|reported by the lab/i);
   });
 
-  it("does not repeat 'preprint' after an arXiv preprint venue", () => {
+  it("does not repeat the version after an arXiv preprint venue", () => {
     const p = c.countedPublications.find(
-      (x) => x.status === "preprint" && /preprint/i.test(x.venue ?? ""),
+      (x) => x.status === "in-progress" && x.status_note && /preprint/i.test(x.venue ?? ""),
     );
     if (!p) return;
-    // "arXiv preprint" already says it; the version alone is left out of the row.
+    // "arXiv preprint" already says it; the version alone is left out of the row,
+    // and the paper page still gives it.
     expect(statusText(p)).toBeNull();
+    expect(reviewStatus(p)).toBe(`Work in progress, ${p.status_note}`);
     expect(renderToStaticMarkup(<PublicationRow pub={p} />)).not.toContain("bl-pub__status");
+  });
+
+  it("lists working papers and preprints by their public version, whatever their status (D-05)", () => {
+    const wip = c.countedPublications.filter(
+      (x) => x.status === "in-progress" && x.type === "working-paper",
+    );
+    // The lab's working papers and preprints (owner decision 2026-10-29: Work in progress).
+    expect(wip.length).toBeGreaterThan(0);
+    for (const p of wip) {
+      expect(p.publicVersion, p.slug).toBe(true);
+      // The type word already says it: no "Work in progress" in the row.
+      if (!p.status_note) expect(statusText(p), p.slug).toBeNull();
+    }
   });
 
   it("shows awards as one count linking to the paper's award list", () => {

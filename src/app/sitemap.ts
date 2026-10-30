@@ -4,8 +4,9 @@
  * One root sitemap, prerendered at build (`force-static`; nested sitemaps are
  * mishandled under `output: "export"`, Next issue #98126). It lists only pages
  * that are public in a production build:
- *   - the fixed section pages (home, research, projects, publications, people,
- *     news, join, about, accessibility, privacy);
+ *   - the fixed section pages (home, research, projects, publications, news,
+ *     join, about, accessibility, privacy; the People list is a section of
+ *     the home page since 2026-10-29, and /people/ only redirects there);
  *   - every non-draft direction (live and archived), project, publication and
  *     news item;
  *   - people with a profile page who are listed (consented) and not drafts.
@@ -34,7 +35,6 @@ const SECTION_PAGES: ReadonlyArray<{ path: string; page?: "about" | "accessibili
     { path: "/research/" },
     { path: "/projects/" },
     { path: "/publications/" },
-    { path: "/people/" },
     { path: "/news/" },
     { path: "/join/" },
     { path: "/about/", page: "about" },

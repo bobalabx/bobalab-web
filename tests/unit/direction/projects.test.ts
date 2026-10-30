@@ -94,7 +94,7 @@ authors: [{ name: A. Doe }]
 type: working-paper
 year: 2025
 links: { ssrn: "https://ssrn.example/2" }
-status: working-paper
+status: in-progress
 status_source: documented
 as_of: "2025-05"
 directions: [alpha]
@@ -365,7 +365,7 @@ describe("project page facts (redesign D-13; copy sweep)", () => {
     const wp = {
       slug: "w",
       counted: true,
-      status: "major-revision",
+      status: "under-revision",
       type: "working-paper",
       year: 2020,
     };
@@ -485,11 +485,15 @@ describe("in-progress rows (D-13 item 7; copy sweep: no repeated hedges)", () =>
   it("a status that adds something stays, as a plain label with no date or provenance", () => {
     const submitted = {
       ...wip,
-      status: "submitted" as const,
-      status_note: "to Fixture Review",
+      status: "under-review" as const,
+      status_note: "at Fixture Review",
       as_of: "2026-08",
       status_source: "self-reported" as const,
     };
-    expect(wipStatus(submitted)).toBe("Submitted to Fixture Review");
+    expect(wipStatus(submitted)).toBe("Under review at Fixture Review");
+    // An old "to …" note (from "Submitted to …") reads "at …".
+    expect(wipStatus({ ...submitted, status_note: "to Fixture Review" })).toBe(
+      "Under review at Fixture Review",
+    );
   });
 });

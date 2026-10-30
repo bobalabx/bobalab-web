@@ -64,7 +64,8 @@ const SECTION = [
   "/research/",
   "/projects/",
   "/publications/",
-  "/people/",
+  // No "/people/": the People list is the home page's #people section, and the old
+  // address is a redirect stub (site.yml redirects, D-21).
   "/news/",
   "/join/",
   "/about/",

@@ -12,15 +12,10 @@ export const PUBLICATION_TYPE_LABELS: Record<PublicationType, string> = {
 };
 
 export const PUBLICATION_STATUS_LABELS: Record<PublicationStatus, string> = {
+  "in-progress": "Work in progress",
+  "under-review": "Under review",
+  "under-revision": "Under revision",
   published: "Published",
-  forthcoming: "Forthcoming",
-  accepted: "Accepted",
-  "major-revision": "Major revision",
-  "revise-resubmit": "Revise and resubmit",
-  submitted: "Submitted",
-  "working-paper": "Working paper",
-  preprint: "Preprint",
-  "in-progress": "In progress",
 };
 
 export const NEWS_TYPE_LABELS: Record<NewsType, string> = {

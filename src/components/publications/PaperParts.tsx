@@ -14,7 +14,7 @@ import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
 import type { AuthorView, PublicationView } from "@/lib/content/load";
 import { typeWord, venueLine } from "@/lib/publications/csl";
-import { PUBLICATION_STATUS_LABELS } from "@/components/ui/labels";
+import { reviewStatus, rowStatus } from "@/lib/publications/status";
 
 type AuthorVariant = "page" | "row";
 
@@ -98,37 +98,19 @@ export function VenueLineText({ pub }: { pub: PublicationView }) {
   );
 }
 
-type StatusFields = Pick<PublicationView, "type" | "status" | "status_note">;
-
 /**
- * The review status worth stating: null for published papers, and for a bare
- * "Working paper" status on a working paper or "In progress" on work in
- * progress (each only repeats the type word: "Work in progress … In progress,
- * as of …" said the same thing twice on every such row).
+ * The review status as a plain academic label (wording rules in
+ * src/lib/publications/status.ts): `reviewStatus` for the paper page (null for
+ * a published paper, and for a bare Work in progress that only repeats the
+ * type word); `statusText` for a ledger row ("Under revision at Manufacturing
+ * & Service Operations Management"), which also leaves out a version-only note
+ * after "arXiv preprint" (the paper page still gives it). No "as of" date and
+ * no provenance note (the site is the lab's own; copy sweep,
+ * docs/CONTENT-QUESTIONS.md).
  */
-export function reviewStatus(p: StatusFields): string | null {
-  if (p.status === "published") return null;
-  const repeatsType =
-    !p.status_note &&
-    ((p.status === "working-paper" && p.type === "working-paper") ||
-      (p.status === "in-progress" && p.type === "work-in-progress"));
-  if (repeatsType) return null;
-  return `${PUBLICATION_STATUS_LABELS[p.status]}${p.status_note ? ` ${p.status_note}` : ""}`;
-}
+export { reviewStatus, rowStatus as statusText };
 
-/**
- * Ledger form, a plain academic label: "Major revision at Manufacturing &
- * Service Operations Management". No "as of" date and no provenance note (the
- * site is the lab's own; copy sweep, docs/CONTENT-QUESTIONS.md). After
- * "arXiv preprint" the status "Preprint v2" adds only the version, so it is
- * left out of the row (the paper page still gives it).
- */
-export function statusText(p: StatusFields & { venue?: string }): string | null {
-  if (p.status === "preprint" && /preprint/i.test(p.venue ?? "")) return null;
-  return reviewStatus(p);
-}
-
-/** Paper page: the status as one plain line ("Preprint v2", "Submitted to …"). */
+/** Paper page: the status as one plain line ("Under review at …", "Work in progress, v2"). */
 export function StatusDetail({ pub }: { pub: PublicationView }) {
   const s = reviewStatus(pub);
   if (!s) return null;

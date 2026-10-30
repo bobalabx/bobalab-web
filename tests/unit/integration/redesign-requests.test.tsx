@@ -41,7 +41,7 @@ describe("home-1: the home statement is content", () => {
 });
 
 describe("publications-2: shared row uses the type word and drops a repeated status", () => {
-  it("drops a bare In progress status on work in progress", () => {
+  it("drops a bare Work in progress status on work in progress", () => {
     const base = { status: "in-progress", as_of: "2026-10-20", status_source: "self-reported" };
     expect(statusLine(base as never, "work-in-progress")).toBeNull();
     expect(statusLine({ ...base, status_note: "draft soon" } as never, "work-in-progress")).toMatch(

@@ -6,8 +6,8 @@ authors:
   - name: Wichinpong Park Sinchaisri
     person: park-sinchaisri
 type: working-paper
-status: submitted
-status_note: to Production and Operations Management
+status: under-review
+status_note: at Production and Operations Management
 status_source: self-reported
 as_of: "2026-08"
 presentations: []

@@ -24,14 +24,18 @@ export function Badge({
 }
 
 /**
- * Shown on draft items in preview builds only (DECISIONS D-03): a small muted
- * text marker. `line`: the marker sits on its own line under running text (in
- * block flow, not in a flex/grid row that already has a gap): it gets a block
- * wrapper with the standard stacked-metadata step above it (verify VIS-15).
+ * Shown on hidden items (`draft: true`, the editor's "Visible on the website: No",
+ * D-21) in preview builds only (DECISIONS D-03): a small muted text marker. The
+ * editor's live column never shows it: it draws the edited entry as visible
+ * (forceVisible, lib/preview/overlay.ts) and says it is hidden in its band, and
+ * leaves other hidden entries out, as the live site does. `line`: the marker
+ * sits on its own line under running text (in block flow, not in a flex/grid
+ * row that already has a gap): it gets a block wrapper with the standard
+ * stacked-metadata step above it (verify VIS-15).
  */
 export function DraftBadge({ show = true, line = false }: { show?: boolean; line?: boolean }) {
   if (!show) return null;
-  const badge = <Badge tone="draft">Draft · pending lab review</Badge>;
+  const badge = <Badge tone="draft">Not visible on the live site</Badge>;
   return line ? <span className="bl-draft-line">{badge}</span> : badge;
 }
 

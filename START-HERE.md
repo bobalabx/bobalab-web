@@ -15,7 +15,7 @@ Nothing has been deployed, pushed or registered. Everything below runs on this c
 npm run dev
 ```
 
-Open http://localhost:3100. This is **preview mode**: it shows content that is still waiting for lab review, marked with "Draft · pending lab review" badges and a dark ribbon at the top.
+Open http://localhost:3100. This is **preview mode**: it shows content that is still waiting for lab review, marked with "Not visible on the live site" badges (the editor's "Visible on the website: No") and a dark ribbon at the top.
 
 To see what the public would get today, run a production build (drafts excluded):
 

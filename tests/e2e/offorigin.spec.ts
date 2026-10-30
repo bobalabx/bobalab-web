@@ -22,7 +22,7 @@ const SECTIONS = [
   "/research/",
   "/projects/",
   "/publications/",
-  "/people/",
+  // No "/people/": the People list is the home page's #people section (D-21).
   "/news/",
   "/join/",
   "/about/",
@@ -33,7 +33,8 @@ const DETAIL: Array<{ index: string; re: RegExp }> = [
   { index: "/research/", re: /^\/research\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/ },
   { index: "/projects/", re: /^\/projects\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/ },
   { index: "/publications/", re: /^\/publications\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/ },
-  { index: "/people/", re: /^\/people\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/ },
+  // Profile pages are linked from the home page's People section.
+  { index: "/", re: /^\/people\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/ },
   { index: "/news/", re: /^\/news\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/ },
 ];
 const ALLOWED_LOCAL = new Set(["bobalab-motion"]);

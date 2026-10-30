@@ -150,7 +150,7 @@ describe("direction page markup", () => {
     const out = await html(
       page.default({ params: Promise.resolve({ direction: c.directions[0]!.slug }) }),
     );
-    expect(out).toContain("Draft · pending lab review");
+    expect(out).toContain("Not visible on the live site");
   });
 });
 

@@ -15,9 +15,9 @@ import { Files, TODAY } from "../../content/helpers";
 const NEWS = "news/2026-05-11-fixture-paper-accepted.md";
 const HIDDEN = "/people/isabelle-cho/";
 const MESSAGE =
-  "This links to /people/isabelle-cho/, which is not a page on the live site. Link to /people/ instead, or remove the link.";
+  "This links to /people/isabelle-cho/, which is not a page on the live site. Link to /#people (the home page's People section) instead, or remove the link.";
 
-/** n4 plus Isabelle Cho: listed on the People page, without a profile page of her own. */
+/** n4 plus Isabelle Cho: listed in the home page's People section, without a profile page of her own. */
 function base(): Files {
   return Files.of("n4").copy("people/avery-example.md", "people/isabelle-cho.md", (d) => {
     d.name = "Isabelle Cho";

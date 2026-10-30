@@ -26,7 +26,6 @@ export type CitablePublication = Pick<
   | "pages"
   | "doi"
   | "links"
-  | "status"
 >;
 
 export interface CslItem {
@@ -155,7 +154,9 @@ export function toCsl(p: CitablePublication): CslItem {
   };
   if (p.year) item.issued = { "date-parts": [[p.year]] };
   const venue = p.venue?.trim();
-  const preprint = p.status === "preprint" || /\barxiv\b/i.test(venue ?? "");
+  // The venue says it is a preprint ("arXiv preprint"), or the DOI is arXiv's.
+  // The status never does: a preprint is Work in progress like any working paper.
+  const preprint = /\b(?:arxiv|preprint)\b/i.test(venue ?? "") || /^10\.48550\//.test(p.doi ?? "");
 
   switch (p.type) {
     case "journal":

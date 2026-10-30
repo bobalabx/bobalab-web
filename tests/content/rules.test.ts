@@ -169,7 +169,7 @@ const CASES: Case[] = [
     name: "non-published status without as_of",
     make: (f) =>
       f.edit(firstPub(f), (d) => {
-        d.status = "submitted";
+        d.status = "under-review";
         d.status_source = "self-reported";
       }),
   },
@@ -179,7 +179,7 @@ const CASES: Case[] = [
     name: "non-published status without status_source",
     make: (f) =>
       f.edit(firstPub(f), (d) => {
-        d.status = "submitted";
+        d.status = "under-review";
         d.as_of = "2026-09";
       }),
   },
